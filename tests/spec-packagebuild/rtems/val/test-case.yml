@@ -1,0 +1,43 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+enabled-by: true
+links: []
+test-actions:
+- action-brief: |
+    Brief.
+  action-code: |
+    int i;
+  checks:
+  - brief: |
+      Check.
+    code: |
+      T_eq_int( blub( i ), i );
+    links:
+    - role: validation
+      uid: ../req/func
+    - role: requirement-refinement
+      uid: ../if/define-real
+    - role: validation
+      uid: ../if/define-disabled
+  links:
+  - role: validation
+    uid: ../req/group
+  - role: validation
+    uid: ../req/perf
+test-brief: |
+  Brief.
+test-context: []
+test-context-support: null
+test-description: |
+  Description.
+test-header: null
+test-includes:
+- blub.h
+test-local-includes: []
+test-setup: null
+test-stop: null
+test-support: null
+test-target: tests/tc-blub.c
+test-teardown: null
+type: test-case

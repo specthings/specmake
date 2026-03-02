@@ -1,0 +1,48 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/deployment-directory}
+directory-state-type: test-log
+enabled-by: true
+files:
+- file: test-log-perf.json
+  hash: null
+hash: null
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+- hash: null
+  name: target
+  role: input
+  uid: ../../rtems/target-a
+- hash: null
+  name: build-configuration
+  role: input
+  uid: ../build-config
+- role: test-procedure
+  uid: ../component
+- hash: null
+  name: test-log
+  role: input-to
+  uid: ../steps/aggregate-test-results
+- description: |
+    Description 1
+  hash: null
+  name: benchmark-variant
+  priority: '1'
+  role: input-to
+  uid: ../deployment/doc-package-manual
+  variant-name: Name 1
+- description: |
+    Description 2
+  hash: null
+  name: benchmark-variant
+  priority: '2'
+  role: input-to
+  uid: ../deployment/doc-package-manual
+  variant-name: Name 2
+pkg-type: directory-state
+type: pkg

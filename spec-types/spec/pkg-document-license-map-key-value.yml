@@ -1,0 +1,27 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020, 2024 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  str:
+    assert:
+    - eq: CC-BY-SA-4.0 OR BSD-2-Clause
+    - eq: CC-BY-SA-4.0 OR MIT
+    - eq: CC-BY-SA-4.0
+    - eq: BSD-2-Clause
+    - eq: MIT
+    - eq: ESA UNCLASSIFIED - For Official Use
+    - re: ^\s*Copyright\s+\(C\)\s+[0-9]+,\s*[0-9]+\s+.+\s*$
+    - re: ^\s*Copyright\s+\(C\)\s+[0-9]+\s+.+\s*$
+    - re: ^\s*Copyright\s+\(C\)\s+.+\s*$
+    description: |
+      It shall be an SPDX license identifier or a copyright statement.
+spec-name: Document License Map Key or Value
+spec-type: pkg-document-license-map-key-value
+type: spec
+

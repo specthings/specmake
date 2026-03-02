@@ -1,0 +1,13 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links: []
+name: ABCD-X-ST-01Y Rev. 42
+non-functional-type: standard
+rationale: null
+references: []
+requirement-type: non-functional
+text: |
+  The standard shall require something.
+type: requirement

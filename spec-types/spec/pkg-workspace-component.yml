@@ -1,0 +1,39 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: workspace-type
+  spec-value: component
+  uid: pkg-workspace
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      enabled-set:
+        description: |
+          It shall be the enabled set of the component.
+        spec-type: list-str
+      enabled-set-actions:
+        description: |
+          It shall be the list of enabled set actions.
+        spec-type: enabled-set-action-list
+      enabled-set-feedback-mapping:
+        description: |
+          It shall be the mapping of enabled set keys potentially present at
+          the component to the associated key for the upper-level component.
+        spec-type: str-to-str
+    description: |
+      This set of attributes specifies a workspace component.
+    mandatory-attributes: all
+    generic-attributes:
+      description: null
+      key-spec-type: name
+      value-spec-type: any
+spec-name: Workspace Component Item Type
+spec-type: pkg-workspace-component
+type: spec

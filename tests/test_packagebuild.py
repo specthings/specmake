@@ -1,0 +1,428 @@
+# SPDX-License-Identifier: BSD-2-Clause
+""" Tests for the pkgitems module. """
+
+# Copyright (C) 2023, 2026 embedded brains GmbH & Co. KG
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+import graphlib
+import logging
+import pytest
+from pathlib import Path
+
+import specitems
+from specitems import EmptyItem, Item, ItemGetValueContext
+
+import specmake
+from specmake import (BuildItem, BuildItemMapper, build_item_input,
+                      PackageBuildDirector, PackageComponent)
+
+from .util import create_package, get_and_clear_log
+
+
+class _TestItem(BuildItem):
+
+    def __init__(self, director: PackageBuildDirector, item: Item):
+        super().__init__(director, item, BuildItemMapper(item))
+        my_type = self.item.type
+        self.mapper.add_get_value(f"{my_type}:/input", self._get_input)
+        self.mapper.add_get_value(f"{my_type}:/inputs", self._get_inputs)
+        self.mapper.add_get_value(f"{my_type}:/input-links",
+                                  self._get_input_links)
+        self.mapper.add_get_value(f"{my_type}:/output", self._get_output)
+
+    def run(self):
+        try:
+            value = self.mapper.substitute("${.:/make-params/value}")
+        except ValueError:
+            pass
+        else:
+            logging.info("%s: substitute: %s", self.uid, value)
+            self.item.cache["/pkg/output/test-make"]["links"][1]["params"][
+                "result"] = self.mapper.substitute(value)
+
+    def _get_input(self, ctx: ItemGetValueContext):
+        name = ctx.mapper[".:/make-params/name"]
+        logging.info("%s: get input for: %s", self.uid, name)
+        return self.input(name).uid
+
+    def _get_inputs(self, ctx: ItemGetValueContext):
+        name = ctx.mapper[".:/make-params/name"]
+        logging.info("%s: get inputs for: %s", self.uid, name)
+        return " ".join(item.uid for item in self.inputs(name))
+
+    def _get_input_links(self, ctx: ItemGetValueContext):
+        name = ctx.mapper[".:/make-params/name"]
+        logging.info("%s: get input links for: %s", self.uid, name)
+        return " ".join(link.item.uid for link, _ in self.input_links(name))
+
+    def _get_output(self, ctx: ItemGetValueContext):
+        name = ctx.mapper.substitute("${.:/make-params/name}")
+        logging.info("%s: get output for: %s", self.uid, name)
+        return self.output(name).uid
+
+
+def test_package_build_cycle(caplog, tmpdir):
+    with pytest.raises(graphlib.CycleError, match="nodes are in a cycle"):
+        package = create_package(caplog, Path(tmpdir), Path("spec-cycle"), [])
+
+
+def test_packagebuild(caplog, tmpdir, monkeypatch):
+    command = []
+    staged_files = []
+
+    def _run_command(args, cwd, stdout=None):
+        command.append(cwd)
+        command.extend(args)
+        if "--name-only" in args:
+            stdout.extend(staged_files)
+        return 0
+
+    def _subprocess_run(args, check, input, cwd):
+        command.append(cwd)
+        command.extend(args)
+        return 0
+
+    monkeypatch.setattr(specmake.pkgitems, "run_command", _run_command)
+    monkeypatch.setattr(specmake.pkgitems.subprocess, "run", _subprocess_run)
+    tmp_dir = Path(tmpdir)
+    package = create_package(caplog, tmp_dir, Path("spec-packagebuild"), [])
+    director = package.director
+    director.factory.add_constructor("pkg/test-mapper", _TestItem)
+
+    mapper = BuildItemMapper(package.item)
+    with pytest.raises(NotImplementedError):
+        mapper.get_link(mapper.item)
+
+    director.build_package()
+    log = get_and_clear_log(caplog)
+    assert "INFO /pkg/steps/a: create build item" in log
+    assert "INFO /pkg/steps/b: create build item" not in log
+    assert "INFO /pkg/steps/c: input is disabled: /pkg/steps/b" in log
+    assert "INFO /pkg/steps/c: output is disabled: /pkg/output/b" in log
+
+    director.build_package(force=["/pkg/steps/a"])
+    log = get_and_clear_log(caplog)
+    assert "INFO /pkg/steps/a: build is forced" in log
+    assert "INFO /pkg/steps/c: input has not changed: /pkg/steps/a" in log
+
+    director.build_package(only=["/pkg/steps/a"])
+    log = get_and_clear_log(caplog)
+    assert "INFO /pkg/steps/c" not in log
+
+    director.build_package(skip=["/pkg/steps/a"])
+    log = get_and_clear_log(caplog)
+    assert "INFO /pkg/steps/a: build is skipped" in log
+
+    director.build_package()
+    log = get_and_clear_log(caplog)
+    assert "INFO /pkg/steps/a: build is unnecessary" in log
+    assert "INFO /pkg/steps/c: build is unnecessary" in log
+
+    # Test PackageComponent
+    subcomponent = director["/pkg/subcomponent"]
+    assert isinstance(subcomponent, PackageComponent)
+    assert subcomponent["arch"] == "sub-arch"
+    assert subcomponent["bsp"] == "gr712rc"
+    assert subcomponent.enabled_set == set()
+    assert subcomponent.selection.enabled_set == {"four", "five"}
+    with pytest.raises(KeyError):
+        subcomponent["does-not-exist"]
+    with pytest.raises(ValueError):
+        subcomponent.substitute("${.:/component/does-not-exist}")
+    assert package.substitute("${.:/component/arch}") == "sparc"
+    assert subcomponent.substitute("${.:/component/arch}") == "sub-arch"
+
+    # Test BuildItem methods
+    c = director["/pkg/steps/c"]
+    assert isinstance(c, _TestItem)
+    assert c.is_present()
+    data = director.factory.export_data(c.item, True, len(c.item.cache))
+    assert data == director.factory.export_data(c.item, False,
+                                                len(c.item.cache))
+    assert data == {
+        "SPDX-License-Identifier":
+        "CC-BY-SA-4.0 OR BSD-2-Clause",
+        "copyrights": [
+            "Copyright (C) 2023 embedded brains GmbH & Co. KG",
+        ],
+        "enabled-by":
+        True,
+        "links": [
+            {
+                "hash": c["links"][0]["hash"],
+                "name": "component",
+                "role": "input",
+                "uid": "../component",
+            },
+            {
+                "hash": c["links"][1]["hash"],
+                "name": "foo",
+                "role": "input",
+                "uid": "a",
+            },
+            {
+                "name": "blub",
+                "role": "output",
+                "uid": "../output/a",
+            },
+            {
+                "name": "moo",
+                "role": "output",
+                "uid": "../output/b",
+            },
+        ],
+        "pkg-type":
+        "test-mapper",
+        "type":
+        "pkg",
+        "values": {
+            "a":
+            "a",
+            "b": [
+                "b1",
+                "b2",
+            ],
+            "c":
+            "c",
+            "list": [
+                "${.:/values/a}",
+                "${.:/values/b}",
+                [
+                    "d",
+                    "e",
+                ],
+                "${.:/values/c}",
+            ],
+        },
+    }
+    data = director.factory.export_data(c.item, True, 0)
+    assert data == director.factory.export_data(c.item, False, 0)
+    assert data == {
+        "SPDX-License-Identifier":
+        "CC-BY-SA-4.0 OR BSD-2-Clause",
+        "copyrights": [
+            "Copyright (C) 2023 embedded brains GmbH & Co. KG",
+        ],
+        "enabled-by":
+        True,
+        "links": [
+            {
+                "hash": None,
+                "name": "component",
+                "role": "input",
+                "uid": "../component",
+            },
+            {
+                "hash": None,
+                "name": "foo",
+                "role": "input",
+                "uid": "a",
+            },
+            {
+                "name": "blub",
+                "role": "output",
+                "uid": "../output/a",
+            },
+            {
+                "name": "moo",
+                "role": "output",
+                "uid": "../output/b",
+            },
+        ],
+        "pkg-type":
+        "test-mapper",
+        "type":
+        "pkg",
+        "values": {
+            "a":
+            "a",
+            "b": [
+                "b1",
+                "b2",
+            ],
+            "c":
+            "c",
+            "list": [
+                "${.:/values/a}",
+                "${.:/values/b}",
+                [
+                    "d",
+                    "e",
+                ],
+                "${.:/values/c}",
+            ],
+        },
+    }
+    assert c.lazy_verify()
+    assert str(c.description) == ""
+    c.commit("no description")
+    assert c != 123
+    with pytest.raises(TypeError):
+        assert c < 123
+
+    # Test build item substitution
+    c["foo"] = "bar"
+    c["blub"] = "${.:/foo}"
+    assert c["foo"] == "bar"
+    assert "foo" in c
+    assert "nil" not in c
+    assert c["blub"] == "bar"
+    assert c.get("does-not-exist", "${.:/foo}") == "bar"
+    assert c.substitute(c.item["blub"], c.item) == "bar"
+    assert c.substitute(
+        "${.:/component/deployment-directory:relpath %(.:/component/prefix-directory)}"
+    ) == "pkg"
+    assert c.substitute("${/pkg/component:/spec}") == "spec:/pkg/component"
+    assert c.substitute(
+        "${/pkg/issue/rtems/2189:/name}"
+    ) == "`RTEMS Ticket #2189 <https://devel.rtems.org/ticket/2189>`__"
+    with c.component_scope(subcomponent):
+        assert c.component["arch"] == "sub-arch"
+        c.component = None
+        with pytest.raises(StopIteration):
+            c.component
+    assert c.component.uid == "/pkg/component"
+    variant_config = c.component["config"]
+    c.component["config"] = ""
+    assert c.component["name"] == "sparc-gr712rc-4"
+    assert c.component["ident"] == "sparc/gr712rc/4"
+    c.component["config"] = variant_config
+    assert c.component["name"] == "sparc-gr712rc-smp-4"
+    assert c.component["ident"] == "sparc/gr712rc/smp/4"
+    assert c.component["arch"] == "sparc"
+    assert c.enabled_set == set()
+    assert c.enabled
+    assert build_item_input(c.item, "foo").uid == "/pkg/steps/a"
+    assert build_item_input(c.item, "bar").uid == "/pkg/steps/a"
+    with pytest.raises(KeyError):
+        build_item_input(c.item, "blub")
+    assert c.input("foo").uid == "/pkg/steps/a"
+    assert list(item.uid
+                for _, item in c.input_links("foo")) == ["/pkg/steps/a"]
+    with pytest.raises(KeyError):
+        c.input("nix")
+    with pytest.raises(KeyError):
+        c.input_link("nix")
+    assert [item.uid for item in c.inputs()
+            ] == ["/pkg/component", "/pkg/steps/a", "/pkg/steps/a"]
+    assert [item.uid for item in c.inputs("foo")] == ["/pkg/steps/a"]
+    assert c.output("blub").uid == "/pkg/output/a"
+    with pytest.raises(KeyError):
+        c.output("nix")
+    with pytest.raises(KeyError):
+        c.output("moo")
+    assert c["values"]["list"] == ["a", "b1", "b2", ["d", "e"], "c"]
+    c.clear()
+
+    # Test Git support
+
+    director.use_git = False
+
+    command = []
+    c.git_commit("reason")
+    assert command == []
+
+    command = []
+    c.git_add(["modules/foobar"])
+    assert command == []
+
+    director.use_git = True
+    director.submodules = tuple()
+
+    staged_files = []
+    command = []
+    c.git_commit("reason")
+    assert command == [
+        str(tmp_dir / "pkg"), "git", "diff", "--name-only", "--cached"
+    ]
+
+    staged_files = ["x"]
+    command = []
+    c.git_commit("reason")
+    assert command == [
+        str(tmp_dir / "pkg"), "git", "diff", "--name-only", "--cached",
+        str(tmp_dir / "pkg"), "git", "commit", "-m", "/pkg/steps/c: reason"
+    ]
+
+    command = []
+    assert c.git_is_clean()
+    assert command == [str(tmp_dir / "pkg"), "git", "status", "--short"]
+
+    command = []
+    c.git_add("modules/foobar")
+    assert command == [
+        str(tmp_dir / "pkg"), "git", "add", "--force",
+        "--pathspec-from-file=-", "--pathspec-file-nul"
+    ]
+
+    command = []
+    c.git_add(["modules/foobar"])
+    assert command == [
+        str(tmp_dir / "pkg"), "git", "add", "--force",
+        "--pathspec-from-file=-", "--pathspec-file-nul"
+    ]
+
+    command = []
+    director.add_submodule("modules")
+    c.git_add(["modules/foobar"])
+    assert command == []
+
+
+def test_build_item_run(caplog, tmp_path):
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
+                             ["test-make"])
+    director = package.director
+    director.factory.add_constructor("pkg/test-mapper", _TestItem)
+    test_make = director["/pkg/output/test-make"]
+    make_link = test_make.item["links"][1]
+
+    make_link["params"]["name"] = "source"
+    make_link["params"]["value"] = "$${.:/inputs}"
+    make_link["hash"] = None
+    director.build_package()
+    assert make_link["params"]["result"] == "/pkg/source/a /pkg/source/e"
+
+    make_link["params"]["name"] = "source"
+    make_link["params"]["value"] = "$${.:/input-links}"
+    make_link["hash"] = None
+    director.build_package()
+    assert make_link["params"]["result"] == "/pkg/source/a /pkg/source/e"
+
+    make_link["params"]["name"] = None
+    make_link["params"]["value"] = "$${.:/input-links}"
+    make_link["hash"] = None
+    director.build_package()
+    assert make_link["params"][
+        "result"] == "/pkg/component /pkg/source/a /pkg/source/e"
+
+    make_link["params"]["name"] = "does-not-exist"
+    make_link["params"]["value"] = "$${.:/input}"
+    make_link["hash"] = None
+    with pytest.raises(ValueError):
+        director.build_package()
+
+    make_link["params"]["name"] = "does-not-exist"
+    make_link["params"]["value"] = "$${.:/output}"
+    make_link["hash"] = None
+    with pytest.raises(ValueError):
+        director.build_package()

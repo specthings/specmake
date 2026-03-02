@@ -1,0 +1,15 @@
+${.:/exclude-patterns}
+---
+${.:/include-path}
+---
+${.:/input}
+---
+${.:/generate-html}
+---
+${.:/generate-latex}
+---
+${.:/output-directory}
+---
+${.:/strip-from-path}
+---
+${.:/tagfile}

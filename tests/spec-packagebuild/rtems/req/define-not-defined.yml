@@ -1,0 +1,14 @@
+SPDX-License-Identifier: CC-BY-SA-4.0
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+functional-type: interface-define-not-defined
+links:
+- role: interface-function
+  uid: ../if/define-not-defined
+rationale: null
+references: []
+requirement-type: functional
+text: |
+  The define shall not be defined.
+type: requirement

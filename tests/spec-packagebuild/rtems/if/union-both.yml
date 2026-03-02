@@ -1,0 +1,29 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  The UnionBoth brief.
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+definition:
+- default:
+    brief: |
+      The UnionBoth member.
+    definition: int ${.:name}
+    description: |
+      Description.
+    kind: member
+    name: a
+  variants: []
+definition-kind: typedef-and-union
+description: |
+  Description.
+enabled-by: true
+index-entries: []
+interface-type: union
+links:
+- role: interface-placement
+  uid: header
+- role: interface-ingroup
+  uid: group
+name: UnionBoth
+notes: null
+type: interface

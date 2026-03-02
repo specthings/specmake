@@ -1,0 +1,42 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: pkg-type
+  spec-value: build-configuration
+  uid: pkg-root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      build-label:
+        description: |
+          It shall be the build label of the build configuration.
+        spec-type: str
+      description:
+        description: |
+          It shall be the description of the build configuration.
+        spec-type: str
+      config-key:
+        description: |
+          It shall be the configuration key.  The configuration key is visible
+          in the documentation, for example test reports.
+        spec-type: str
+      name:
+        description: |
+          It shall be the name of the build configuration.
+        spec-type: str
+      test-timeout-key:
+        description: null
+        spec-type: pkg-test-timeout-key-list
+    description: |
+      This set of attributes specifies a build configuration.
+    mandatory-attributes: all
+spec-name: Build Configuration Item Type
+spec-type: pkg-build-config
+type: spec

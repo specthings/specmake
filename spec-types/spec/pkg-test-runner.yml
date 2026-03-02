@@ -1,0 +1,51 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2022, 2024 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: pkg-type
+  spec-value: test-runner
+  uid: pkg-root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      description:
+        description: |
+          It shall be the test runner description.
+        spec-type: str
+      do-not-run:
+        description: |
+          It shall be the list of test executable names which should not be
+          run.
+        spec-type: list-str
+      max-retry-count-per-executable:
+        description: |
+          It shall be the maximum count of retries per executable.  With a
+          value of zero exactly one run per executable is performed.  An
+          executable run is retried if no report was produced, the gcov
+          information was corrupt, or the test suite report was corrupt.
+        spec-type: int
+      name:
+        description: |
+          It shall be the test runner name.
+        spec-type: str
+      params:
+        description: |
+          It shall be an optional set of parameters which may be used for
+          variable subsitution.
+        spec-type: any
+      test-runner-type:
+        description: |
+          It shall be the test runner type.
+        spec-type: name
+    description: |
+      This set of attributes specifies a test runner.
+    mandatory-attributes: all
+spec-name: Test Runner Item Type
+spec-type: pkg-test-runner
+type: spec

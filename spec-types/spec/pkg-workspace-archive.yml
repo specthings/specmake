@@ -1,0 +1,53 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: workspace-type
+  spec-value: archive
+  uid: pkg-workspace
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      archive-file:
+        description: |
+          It shall be the path to the archive file.
+        spec-type: str
+      archive-hash:
+        description: |
+          It shall be archive file hash.
+        spec-type: str
+      archive-patches:
+        description: |
+          It shall be the list of patches applied to the unpacked archive.
+        spec-type: pkg-patch-list
+      archive-url:
+        description: |
+          It shall be the archive origin URL.
+        spec-type: str
+      copyrights-by-license:
+        description: null
+        spec-type: pkg-copyrights-by-license
+      description:
+        description: |
+          It shall be the description of the archive.
+        spec-type: str
+      destination-directory:
+        description: |
+          It shall be the destination directory.
+        spec-type: str
+      symbolic-links:
+        description: |
+          It shall be the list of symbolic links added to the unpacked archive.
+        spec-type: pkg-symbolic-link-list
+    description: |
+      This set of attributes specifies a workspace archive.
+    mandatory-attributes: all
+spec-name: Workspace Archive Item Type
+spec-type: pkg-workspace-archive
+type: spec

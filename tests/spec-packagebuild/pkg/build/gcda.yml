@@ -1,0 +1,34 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/build-directory}/gcda
+directory-state-type: gcda-producer
+enabled-by: gcda-producer
+files: []
+gcov-tool: foo
+hash: null
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+- hash: null
+  name: build
+  role: input
+  uid: ../build/bsp
+- hash: null
+  name: log
+  role: input
+  uid: ../test-logs/coverage
+patterns:
+- exclude: []
+  include:
+  - '**/*.gc??'
+  - ../gcda-symbolic-link-name
+pkg-type: directory-state
+symbolic-links:
+- link-name: ${.:/component/build-directory}/gcda-symbolic-link-name
+  target: ${.:/component/build-directory}/gcda-symbolic-link-target
+type: pkg
+working-directory: ${../build/bsp:/directory}

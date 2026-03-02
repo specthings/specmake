@@ -1,0 +1,28 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: name
+  spec-value: run-actions-member
+  uid: pkg-input-role
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      params:
+        description: |
+          It shall be an optional set of parameters which may be used to run
+          the actions for the member.
+        spec-type: any
+    description: |
+      It defines the run actions member role of links and is used to run
+      actions for the member.
+    mandatory-attributes: all
+spec-name: Run Actions Member Link Role
+spec-type: pkg-run-actions-member-role
+type: spec

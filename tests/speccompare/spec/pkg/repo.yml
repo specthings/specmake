@@ -1,0 +1,25 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+archive-file: ${.:/component/workspace-directory}/repo.tar.xz
+archive-hash: 0h64FK31ru8TeUBrBEr_VJvQ_MKx7__C4A8AIECKZ3g3rq7wWr8c4OiLIAc1xSfOeYyTM48VNDob0WkXN7Jefg==
+archive-patches: []
+archive-url: https://foobar.org/repo.tar.xz
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+copyrights-by-license:
+  description: |
+    Copyright description.
+  files:
+  - README.md
+description: |
+  Description.
+destination-directory: ${.:/component/tmpdir}
+enabled-by: true
+links:
+- hash: null
+  name: component
+  role: input
+  uid: /pkg/component
+pkg-type: workspace
+symbolic-links: []
+type: pkg
+workspace-type: archive

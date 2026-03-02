@@ -1,0 +1,38 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      continue:
+        description: |
+          It shall be true, to continue with the file mapping process after at
+          least one replacement for the pattern, otherwise false.
+        spec-type: bool
+      count:
+        description: |
+          If shall be the maximum replacement count.  If the value is zero, all
+          occurrences will be replaced.
+        spec-type: int
+      pattern:
+        description: |
+          It shall be the Python regular expression pattern to replace.
+        spec-type: str
+      replacement:
+        description: |
+          If shall be the replacement.
+        spec-type: str
+    description: |
+      This set of attributes specifies a file mapping.
+    mandatory-attributes:
+    - pattern
+    - replacement
+spec-name: File Mapping
+spec-type: pkg-file-mapping
+type: spec

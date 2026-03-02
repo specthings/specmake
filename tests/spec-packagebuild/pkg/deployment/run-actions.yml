@@ -1,0 +1,75 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+actions:
+- action: directory-state-discard-excludes
+  enabled-by: true
+  output-name: .
+- action: directory-state-discard
+  enabled-by: true
+  output-name: .
+- action: mkdir
+  enabled-by: true
+  exist-ok: false
+  parents: true
+  path: ${.:/directory}
+- action: touch
+  enabled-by: true
+  exist-ok: false
+  path: ${.:/directory}/touch
+- action: directory-state-add-files
+  enabled-by: true
+  output-name: .
+  path: ${.:/directory}
+  pattern: '**/*'
+- action: directory-state-copy-file
+  enabled-by: true
+  input-name: .
+  output-name: .
+  source: touch
+  target: directory-state-copy-file
+- action: remove
+  enabled-by: true
+  missing-ok: false
+  path: ${.:/directory}/directory-state-copy-file
+- action: directory-state-copy-file
+  enabled-by: true
+  output-name: .
+  source: ${.:/directory}/touch
+  target: directory-state-copy-file
+- action: remove
+  enabled-by: true
+  missing-ok: false
+  path: ${.:/directory}/directory-state-copy-file
+- action: directory-state-copy-file
+  enabled-by: true
+  input-name: source
+  output-name: .
+  source: dir/a.txt
+  target: directory-state-copy-file
+- action: copy
+  enabled-by: true
+  input-name: .
+  output-name: .
+  source: touch
+  target: copy
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/deployment-directory}/run-actions
+directory-state-type: explicit
+enabled-by: run-actions
+files: []
+hash: null
+links:
+- role: directory-state-exclude
+  uid: ../source/empty
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+- hash: null
+  name: source
+  role: input
+  uid: ../source/a
+params: {}
+pkg-type: directory-state
+type: pkg

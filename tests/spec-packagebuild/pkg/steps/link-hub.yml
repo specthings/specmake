@@ -1,0 +1,69 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: link-hub
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+- role: link-hub
+  uid: ../component
+- hash: null
+  name: spec
+  role: input
+  uid: rtems-item-cache
+- hash: null
+  name: tagfile
+  role: input
+  uid: ../source/tagfile
+- hash: null
+  name: tagfile
+  role: input
+  uid: ../source/tagfile-files-without-group
+- hash: null
+  name: tagfile
+  role: input
+  uid: ../source/tagfile-groups-without-items
+- hash: null
+  name: tagfile
+  role: input
+  uid: ../source/tagfile-no-file
+- directory: html
+  name: icd
+  role: document
+  uid: ../deployment/doc-ts-icd
+- directory: html
+  name: icd
+  role: document
+  uid: ../deployment/doc-ts-icd-dummy
+- directory: html
+  name: sdd
+  role: document
+  uid: ../deployment/doc-ddf-sdd
+- directory: html
+  name: srs
+  role: document
+  uid: ../deployment/doc-ts-srs
+- directory: html
+  name: srs
+  role: document
+  uid: ../deployment/doc-ts-srs-dummy
+- directory: html
+  name: suitp
+  role: document
+  uid: ../deployment/doc-djf-suitp
+- directory: html
+  name: svs
+  role: document
+  uid: ../deployment/doc-djf-svs
+- directory: html
+  name: svs
+  role: document
+  uid: ../deployment/doc-djf-svs-dummy
+- directory: .
+  name: source
+  role: document
+  uid: ../source/repo
+pkg-type: link-hub
+type: pkg

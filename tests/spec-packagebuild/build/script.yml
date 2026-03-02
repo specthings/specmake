@@ -1,0 +1,19 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+build-type: script
+cflags: []
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+cppflags: []
+do-build: null
+do-configure: null
+enabled-by: true
+includes: []
+ldflags: []
+links: []
+prepare-build: null
+prepare-configure: null
+stlib: []
+target: tests/tc-script.c
+type: build
+use-after: []
+use-before: []

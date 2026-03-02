@@ -1,0 +1,38 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/deployment-directory}/test-make
+directory-state-type: explicit
+enabled-by: test-make
+files: []
+hash: null
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+- hash: null
+  output-name: output-name
+  params:
+    name: ''
+    result: ''
+    value: ''
+  role: make
+  uid: ../make/test-mapper
+- hash: null
+  name: source
+  role: input
+  uid: ../source/a
+- hash: null
+  name: source
+  role: input
+  uid: ../source/e
+- name: a
+  role: output
+  uid: a
+- name: b
+  role: output
+  uid: b
+pkg-type: directory-state
+type: pkg

@@ -1,0 +1,55 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: workspace-type
+  spec-value: directory
+  uid: pkg-workspace
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      copy-to-buildspace-actions:
+        description: |
+          It shall be the list of actions to run when the state is copied to
+          the buildspace.
+        spec-type: pkg-action-list
+      copyrights-by-license:
+        description: null
+        spec-type: pkg-copyrights-by-license
+      destination-directory:
+        description: |
+          It shall be the destination directory.
+        spec-type: str
+      directory:
+        description: |
+          It shall be the source directory in the workspace.
+        spec-type: str
+      file-mappings:
+        description: null
+        spec-type: pkg-file-mapping-list
+      files:
+        description: null
+        spec-type: pkg-file-state-list
+      params:
+        description: |
+          It shall be an optional set of parameters which may be used for
+          variable substitution.
+        spec-type: any
+      patterns:
+        description: null
+        spec-type: pkg-directory-state-pattern-list
+    description: |
+      This set of attributes specifies a workspace directory.
+    mandatory-attributes:
+    - copyrights-by-license
+    - destination-directory
+    - directory
+spec-name: Workspace Directory Item Type
+spec-type: pkg-workspace-directory
+type: spec

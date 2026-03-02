@@ -1,0 +1,44 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: name
+  spec-value: source-compare-current
+  uid: pkg-input-role
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      file-to-review:
+        description: |
+          If shall be the mapping of files to reviews.
+        spec-type: str-to-str-or-list-str
+      label:
+        description: |
+          If shall be the section label prefix.
+        spec-type: str
+      renamed:
+        description: |
+          If shall be the mapping of renamed files.
+        spec-type: str-to-str
+      reviews:
+        description: |
+          If shall be the set of reviews.
+        spec-type: pkg-source-compare-review-set
+      source-compare-key:
+        description: |
+          If shall be the key to associate the current and previous sources for
+          a comparison.
+        spec-type: str
+    description: |
+      The input link shall reference the current sources for the source
+      comparison associated with the source compare key.
+    mandatory-attributes: all
+spec-name: Current Sources Input Link Role
+spec-type: pkg-input-source-compare-current-role
+type: spec

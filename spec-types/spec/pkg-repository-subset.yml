@@ -1,0 +1,76 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020, 2023 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: directory-state-type
+  spec-value: repository-subset
+  uid: pkg-directory-state
+spec-description: |
+  Items of this type shall have the following links:
+
+  * There shall be exactly one link to a ${pkg-directory-state:/spec-name} item
+    with the ${pkg-input-role:/spec-name} and the name ``variant``.  This link
+    defines the package variant.
+
+  * There shall be exactly one link to a ${pkg-directory-state:/spec-name} item
+    with the ${pkg-input-role:/spec-name} and the name ``source``.  This link
+    defines the source repository.
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      arch:
+        description: |
+          It shall be the optional architecture name.
+        spec-type: optional-str
+      bsp:
+        description: |
+          It shall be the optional base BSP name.
+        spec-type: optional-str
+      base-directory-map:
+        description: |
+          It shall be the list of base directory maps.  It can be used to map
+          build specification item paths to build system paths.
+        spec-type: pkg-directory-map-list
+      build-spec-directories:
+        description: |
+          It shall be the list of build specification directories relative to
+          the source repository.  If the list is empty, then the package
+          specification will be used.
+        spec-type: list-str
+      build-uids:
+        description: |
+          It shall be the list of UIDs to build items.  The source files of
+          enabled build items are included in the source subset.
+        spec-type: list-str
+      enabled-set-extension:
+        description: |
+          It shall be the list of optionally enabled elements.  The additional
+          elements extend the current enabled set.  The resulting enabled set
+          is used to evaluate the ${enabled-by:/spec-name} of the visited build
+          items.
+        spec-type: pkg-enabled-set-extension-list
+      extra-files:
+        description: |
+          It shall be the list of extra files relative to the source repository
+          added to the source subset.
+        spec-type: list-str
+      include-test-header:
+        description: |
+          It shall be true, to enable the inclusion of test headers, otherwise
+          false.
+        spec-type: bool
+    description: |
+      This set of attributes specifies a subset of repository files.  It may be
+      used to create a subset of the RTEMS sources which contains only the
+      pre-qualified feature set.  These sources can be used to verify the build
+      of the pre-qualified libraries.  It can be also used to build the SDD
+      with Doxygen restricted to the pre-qualified feature set.
+    mandatory-attributes: all
+spec-name: Repository Subset Item Type
+spec-type: pkg-repository-subset
+type: spec

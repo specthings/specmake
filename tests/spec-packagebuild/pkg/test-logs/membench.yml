@@ -1,0 +1,31 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/build-directory}/src
+directory-state-type: membench-collector
+enabled-by: membench-collector
+files:
+- file: membench.json
+  hash: null
+gdb: ${.:/arch}-gdb
+hash: null
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+- hash: null
+  name: spec
+  role: input
+  uid: ../steps/rtems-item-cache
+- arch: arch
+  build-label: build-label
+  hash: null
+  name: membench-build
+  path: arch/bsp
+  role: input
+  uid: ../build/bsp
+objdump: ${.:/arch}-objdump
+pkg-type: directory-state
+type: pkg

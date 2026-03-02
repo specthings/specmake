@@ -1,0 +1,62 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  This structure defines the ${.:/register-block-group} register block memory
+  map.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+description: null
+enabled-by: true
+identifier: RegBlock2
+index-entries: []
+interface-type: register-block
+links:
+- role: interface-placement
+  uid: header
+- role: interface-ingroup
+  uid: group
+definition:
+- default:
+    count: 1
+    name: REG_BLOCK_2_A
+  offset: 0x0
+  variants: []
+- default:
+    count: 1
+    name: REG_BLOCK_2_B
+  offset: 0x4
+  variants: []
+register-prefix: RegBlock2
+register-block-group: Reg Block 2
+register-block-size: 16
+registers:
+- bits:
+  - default:
+    - properties: [r]
+      brief: null
+      description: null
+      name: BITS_A
+      start: 0
+      width: 32
+    variants: []
+  brief: |
+    REG_BLOCK_2_A bits.
+  description: null
+  name: REG_BLOCK_2_A
+  width: 32
+- bits:
+  - default:
+    - properties: [w]
+      brief: null
+      description: null
+      name: BITS_B
+      start: 27
+      width: 5
+    variants: []
+  brief: |
+    REG_BLOCK_2_B bits.
+  description: null
+  name: REG_BLOCK_2_B
+  width: 32
+name: reg_block_2
+notes: null
+type: interface

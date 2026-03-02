@@ -1,0 +1,438 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.12.0" xml:lang="en-US">
+  <compounddef id="header_8h" kind="file" language="C++">
+    <compoundname>header.h</compoundname>
+    <includedby refid="source_8c" local="yes">source.c</includedby>
+    <invincdepgraph>
+      <node id="1">
+        <label>header.h</label>
+        <link refid="header_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>source.c</label>
+        <link refid="source_8c"/>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="structgt__0" prot="public">gt_0</innerclass>
+    <innerclass refid="structgs__0" prot="public">gs_0</innerclass>
+    <innerclass refid="uniongu__0" prot="public">gu_0</innerclass>
+    <innerclass refid="uniongu__1" prot="public">gu_1</innerclass>
+    <innerclass refid="structt__0" prot="public">t_0</innerclass>
+    <innerclass refid="structs__0" prot="public">s_0</innerclass>
+    <innerclass refid="unionu__0" prot="public">u_0</innerclass>
+    <innerclass refid="unionu__1" prot="public">u_1</innerclass>
+    <sectiondef kind="define">
+      <member refid="group__FooGroup_1ga983f90c33690e3ad1647997231aafc7d" kind="define"><name>GM_0</name></member>
+      <member refid="group__FooGroup_1gacdd314c944182a477291569a0f5e632a" kind="define"><name>GD_1</name></member>
+      <memberdef kind="define" id="header_8h_1a435562b339e8cd3ed2275b5f6a8e41be" prot="public" static="no">
+        <name>M_0</name>
+        <param><defname>a</defname></param>
+        <param><defname>b</defname></param>
+        <initializer>((a) &lt; (b) ? (a) : (b))</initializer>
+        <briefdescription>
+<para>Brief <ref refid="header_8h_1a435562b339e8cd3ed2275b5f6a8e41be" kindref="member">M_0()</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Description <ref refid="header_8h_1a435562b339e8cd3ed2275b5f6a8e41be" kindref="member">M_0()</ref>.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">a</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="header_8h_1a435562b339e8cd3ed2275b5f6a8e41be" kindref="member">M_0()</ref> a description.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="header_8h_1a435562b339e8cd3ed2275b5f6a8e41be" kindref="member">M_0()</ref> b description.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><ref refid="header_8h_1a435562b339e8cd3ed2275b5f6a8e41be" kindref="member">M_0()</ref> return description. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="258" column="9" bodyfile="header.h" bodystart="258" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="header_8h_1ab31d832d82bef7f1c6df989c3040a216" prot="public" static="no">
+        <name>D_1</name>
+        <initializer>1024</initializer>
+        <briefdescription>
+<para>Brief D_1. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="263" column="9" bodyfile="header.h" bodystart="263" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="enum">
+      <member refid="group__FooGroup_1gad9450fd0bc1a7ba2ce704c69f0bbfb46" kind="enum"><name>ge_0</name></member>
+      <memberdef kind="enum" id="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9f" prot="public" static="no" strong="no">
+        <type></type>
+        <name>e_0</name>
+        <enumvalue id="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9fad67b160e0559ffcbea0f19ab5a997668" prot="public">
+          <name>E_0_A</name>
+          <briefdescription>
+<para>Brief E_0_A. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>Description E_0_A. </para>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Brief e_0. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Description e_0. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="310" column="1" bodyfile="header.h" bodystart="310" bodyend="317"/>
+      </memberdef>
+      <memberdef kind="enum" id="header_8h_1adbc74fb9d93477777c8774e9db9864a2" prot="public" static="no" strong="no">
+        <type></type>
+        <name>e_1</name>
+        <enumvalue id="header_8h_1adbc74fb9d93477777c8774e9db9864a2af8032135292d00116d68c5e58e3301e1" prot="public">
+          <name>E_1_A</name>
+          <briefdescription>
+<para>Brief E_1_A. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>Description E_1_A. </para>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Brief e_1. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Description e_1. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="324" column="1" bodyfile="header.h" bodystart="324" bodyend="331"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="typedef">
+      <memberdef kind="typedef" id="header_8h_1a01325395cf2af877fccf63801bcc2aeb" prot="public" static="no">
+        <type>enum <ref refid="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9f" kindref="member">e_0</ref></type>
+        <definition>typedef enum e_0 e_0</definition>
+        <argsstring></argsstring>
+        <name>e_0</name>
+        <briefdescription>
+<para>Brief e_0. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Description e_0. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="317" column="5"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="func">
+      <member refid="group__FooGroup_1ga670c7f2490aa4624e8b3ee3d04ce448b" kind="function"><name>gf_0</name></member>
+      <member refid="group__FooGroup_1ga4f62ceb5b79ec2e1e2ccc4f379ca2d5f" kind="function"><name>gf_1</name></member>
+      <member refid="group__FooGroup_1ga4ce2d0c839ba3140c1285e4a29fe71e4" kind="function"><name>gf_2</name></member>
+      <member refid="group__FooGroup_1ga0da7a13a733311498f208f6a08b6e918" kind="function"><name>gf_3</name></member>
+      <member refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" kind="function"><name>gf_4</name></member>
+      <memberdef kind="function" id="header_8h_1aa2f8caf29834418e60688b225e2413db" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int f_0</definition>
+        <argsstring>(const int *in, int *out, int *inout, int none, int *(*f)(int i, int *, int *(*f2)(void)))</argsstring>
+        <name>f_0</name>
+        <param>
+          <type>const int *</type>
+          <declname>in</declname>
+        </param>
+        <param>
+          <type>int *</type>
+          <declname>out</declname>
+        </param>
+        <param>
+          <type>int *</type>
+          <declname>inout</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>none</declname>
+        </param>
+        <param>
+          <type>int *(*)(int i, int *, int *(*f2)(void))</type>
+          <declname>f</declname>
+        </param>
+        <briefdescription>
+<para>Brief <ref refid="header_8h_1aa2f8caf29834418e60688b225e2413db" kindref="member">f_0()</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Description <ref refid="header_8h_1aa2f8caf29834418e60688b225e2413db" kindref="member">f_0()</ref>.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">in</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="header_8h_1aa2f8caf29834418e60688b225e2413db" kindref="member">f_0()</ref> in description.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="out">out</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="header_8h_1aa2f8caf29834418e60688b225e2413db" kindref="member">f_0()</ref> out description.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="inout">inout</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="header_8h_1aa2f8caf29834418e60688b225e2413db" kindref="member">f_0()</ref> inout description.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>none</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="header_8h_1aa2f8caf29834418e60688b225e2413db" kindref="member">f_0()</ref> none description.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>f</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="header_8h_1aa2f8caf29834418e60688b225e2413db" kindref="member">f_0()</ref> function pointer description.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><itemizedlist>
+<listitem><para><ref refid="header_8h_1aa2f8caf29834418e60688b225e2413db" kindref="member">f_0()</ref> return description list item 0</para>
+</listitem><listitem><para><ref refid="header_8h_1aa2f8caf29834418e60688b225e2413db" kindref="member">f_0()</ref> return description list item 1</para>
+</listitem></itemizedlist>
+</para>
+</simplesect>
+<parameterlist kind="retval"><parameteritem>
+<parameternamelist>
+<parametername>retval</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="header_8h_1aa2f8caf29834418e60688b225e2413db" kindref="member">f_0()</ref> retval description. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="220" column="5" bodyfile="source.c" bodystart="50" bodyend="53" declfile="header.h" declline="220" declcolumn="5"/>
+      </memberdef>
+      <memberdef kind="function" id="header_8h_1a17124d351aade94c069796b00a063b72" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void f_1</definition>
+        <argsstring>(void)</argsstring>
+        <name>f_1</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>Brief <ref refid="header_8h_1a17124d351aade94c069796b00a063b72" kindref="member">f_1()</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Description <ref refid="header_8h_1a17124d351aade94c069796b00a063b72" kindref="member">f_1()</ref>. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="227" column="6" bodyfile="source.c" bodystart="55" bodyend="58" declfile="header.h" declline="227" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="header_8h_1a25096a68ec7d02165d897d8cf59e3dce" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>int</type>
+        <definition>static int f_2</definition>
+        <argsstring>(int x, int y)</argsstring>
+        <name>f_2</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <briefdescription>
+<para>Brief f_2(). </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Description f_2().</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">x</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>f_2() x description.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">y</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>f_2() y description.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>f_2() return description.</para>
+</simplesect>
+<parameterlist kind="retval"><parameteritem>
+<parameternamelist>
+<parametername>retval</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>f_2() retval description. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="242" column="19" bodyfile="header.h" bodystart="242" bodyend="245"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>This header file declares various C constructs with Doxygen comments. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>This file contains examples of functions, macros, typedefs, defines, structs, unions, and enums with Doxygen comments. Some of these are group members, and some are not. </para>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">/*<sp/>SPDX-License-Identifier:<sp/>BSD-2-Clause<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight><highlight class="comment">/*</highlight></codeline>
+<codeline lineno="17"><highlight class="comment"><sp/>*<sp/>Copyright<sp/>(c)<sp/>2024,<sp/>2025<sp/>embedded<sp/>brains<sp/>GmbH<sp/>&amp;<sp/>Co.<sp/>KG</highlight></codeline>
+<codeline lineno="18"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="19"><highlight class="comment"><sp/>*<sp/>Redistribution<sp/>and<sp/>use<sp/>in<sp/>source<sp/>and<sp/>binary<sp/>forms,<sp/>with<sp/>or<sp/>without</highlight></codeline>
+<codeline lineno="20"><highlight class="comment"><sp/>*<sp/>modification,<sp/>are<sp/>permitted<sp/>provided<sp/>that<sp/>the<sp/>following<sp/>conditions</highlight></codeline>
+<codeline lineno="21"><highlight class="comment"><sp/>*<sp/>are<sp/>met:</highlight></codeline>
+<codeline lineno="22"><highlight class="comment"><sp/>*<sp/>1.<sp/>Redistributions<sp/>of<sp/>source<sp/>code<sp/>must<sp/>retain<sp/>the<sp/>above<sp/>copyright</highlight></codeline>
+<codeline lineno="23"><highlight class="comment"><sp/>*<sp/><sp/><sp/><sp/>notice,<sp/>this<sp/>list<sp/>of<sp/>conditions<sp/>and<sp/>the<sp/>following<sp/>disclaimer.</highlight></codeline>
+<codeline lineno="24"><highlight class="comment"><sp/>*<sp/>2.<sp/>Redistributions<sp/>in<sp/>binary<sp/>form<sp/>must<sp/>reproduce<sp/>the<sp/>above<sp/>copyright</highlight></codeline>
+<codeline lineno="25"><highlight class="comment"><sp/>*<sp/><sp/><sp/><sp/>notice,<sp/>this<sp/>list<sp/>of<sp/>conditions<sp/>and<sp/>the<sp/>following<sp/>disclaimer<sp/>in<sp/>the</highlight></codeline>
+<codeline lineno="26"><highlight class="comment"><sp/>*<sp/><sp/><sp/><sp/>documentation<sp/>and/or<sp/>other<sp/>materials<sp/>provided<sp/>with<sp/>the<sp/>distribution.</highlight></codeline>
+<codeline lineno="27"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="28"><highlight class="comment"><sp/>*<sp/>THIS<sp/>SOFTWARE<sp/>IS<sp/>PROVIDED<sp/>BY<sp/>THE<sp/>COPYRIGHT<sp/>HOLDERS<sp/>AND<sp/>CONTRIBUTORS<sp/>&quot;AS<sp/>IS&quot;</highlight></codeline>
+<codeline lineno="29"><highlight class="comment"><sp/>*<sp/>AND<sp/>ANY<sp/>EXPRESS<sp/>OR<sp/>IMPLIED<sp/>WARRANTIES,<sp/>INCLUDING,<sp/>BUT<sp/>NOT<sp/>LIMITED<sp/>TO,<sp/>THE</highlight></codeline>
+<codeline lineno="30"><highlight class="comment"><sp/>*<sp/>IMPLIED<sp/>WARRANTIES<sp/>OF<sp/>MERCHANTABILITY<sp/>AND<sp/>FITNESS<sp/>FOR<sp/>A<sp/>PARTICULAR<sp/>PURPOSE</highlight></codeline>
+<codeline lineno="31"><highlight class="comment"><sp/>*<sp/>ARE<sp/>DISCLAIMED.<sp/>IN<sp/>NO<sp/>EVENT<sp/>SHALL<sp/>THE<sp/>COPYRIGHT<sp/>OWNER<sp/>OR<sp/>CONTRIBUTORS<sp/>BE</highlight></codeline>
+<codeline lineno="32"><highlight class="comment"><sp/>*<sp/>LIABLE<sp/>FOR<sp/>ANY<sp/>DIRECT,<sp/>INDIRECT,<sp/>INCIDENTAL,<sp/>SPECIAL,<sp/>EXEMPLARY,<sp/>OR</highlight></codeline>
+<codeline lineno="33"><highlight class="comment"><sp/>*<sp/>CONSEQUENTIAL<sp/>DAMAGES<sp/>(INCLUDING,<sp/>BUT<sp/>NOT<sp/>LIMITED<sp/>TO,<sp/>PROCUREMENT<sp/>OF</highlight></codeline>
+<codeline lineno="34"><highlight class="comment"><sp/>*<sp/>SUBSTITUTE<sp/>GOODS<sp/>OR<sp/>SERVICES;<sp/>LOSS<sp/>OF<sp/>USE,<sp/>DATA,<sp/>OR<sp/>PROFITS;<sp/>OR<sp/>BUSINESS</highlight></codeline>
+<codeline lineno="35"><highlight class="comment"><sp/>*<sp/>INTERRUPTION)<sp/>HOWEVER<sp/>CAUSED<sp/>AND<sp/>ON<sp/>ANY<sp/>THEORY<sp/>OF<sp/>LIABILITY,<sp/>WHETHER<sp/>IN</highlight></codeline>
+<codeline lineno="36"><highlight class="comment"><sp/>*<sp/>CONTRACT,<sp/>STRICT<sp/>LIABILITY,<sp/>OR<sp/>TORT<sp/>(INCLUDING<sp/>NEGLIGENCE<sp/>OR<sp/>OTHERWISE)</highlight></codeline>
+<codeline lineno="37"><highlight class="comment"><sp/>*<sp/>ARISING<sp/>IN<sp/>ANY<sp/>WAY<sp/>OUT<sp/>OF<sp/>THE<sp/>USE<sp/>OF<sp/>THIS<sp/>SOFTWARE,<sp/>EVEN<sp/>IF<sp/>ADVISED<sp/>OF<sp/>THE</highlight></codeline>
+<codeline lineno="38"><highlight class="comment"><sp/>*<sp/>POSSIBILITY<sp/>OF<sp/>SUCH<sp/>DAMAGE.</highlight></codeline>
+<codeline lineno="39"><highlight class="comment"><sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="40"><highlight class="normal"></highlight></codeline>
+<codeline lineno="41"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>HEADER_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>HEADER_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="43"><highlight class="normal"></highlight></codeline>
+<codeline lineno="68"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group__FooGroup_1ga670c7f2490aa4624e8b3ee3d04ce448b" kindref="member">gf_0</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*in,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*out,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*inout,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>none);</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"></highlight></codeline>
+<codeline lineno="75"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="group__FooGroup_1ga4f62ceb5b79ec2e1e2ccc4f379ca2d5f" kindref="member">gf_1</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"></highlight></codeline>
+<codeline lineno="90"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>gf_2(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>x,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>y)</highlight></codeline>
+<codeline lineno="91"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>x<sp/>+<sp/>y;</highlight></codeline>
+<codeline lineno="93"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="94"><highlight class="normal"></highlight></codeline>
+<codeline lineno="95"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>No<sp/>doxygen<sp/>comment.<sp/><sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="96" refid="group__FooGroup_1ga0da7a13a733311498f208f6a08b6e918" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="group__FooGroup_1ga0da7a13a733311498f208f6a08b6e918" kindref="member">gf_3</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>x,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>y);</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"></highlight></codeline>
+<codeline lineno="109" refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" kindref="member">gf_4</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*in,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*out);</highlight></codeline>
+<codeline lineno="110"><highlight class="normal"></highlight></codeline>
+<codeline lineno="122" refid="group__FooGroup_1ga983f90c33690e3ad1647997231aafc7d" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>GM_0(a,<sp/>b)<sp/>((a)<sp/>&gt;<sp/>(b)<sp/>?<sp/>(a)<sp/>:<sp/>(b))</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="123"><highlight class="normal"></highlight></codeline>
+<codeline lineno="127" refid="group__FooGroup_1gacdd314c944182a477291569a0f5e632a" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>GD_1<sp/>4096</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="128"><highlight class="normal"></highlight></codeline>
+<codeline lineno="134" refid="structgt__0" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="135" refid="structgt__0_1a9aa1d8ed9d7e498e65f425aa4fbfe002" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structgt__0_1a9aa1d8ed9d7e498e65f425aa4fbfe002" kindref="member">x</ref>;</highlight></codeline>
+<codeline lineno="136" refid="structgt__0_1ae7e13b530de35e0b0265f70d40deacc3" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structgt__0_1ae7e13b530de35e0b0265f70d40deacc3" kindref="member">y</ref>;</highlight></codeline>
+<codeline lineno="137"><highlight class="normal">}<sp/><ref refid="structgt__0" kindref="compound">gt_0</ref>;</highlight></codeline>
+<codeline lineno="138"><highlight class="normal"></highlight></codeline>
+<codeline lineno="144" refid="structgs__0" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal"><ref refid="structgs__0" kindref="compound">gs_0</ref><sp/>{</highlight></codeline>
+<codeline lineno="145" refid="structgs__0_1a5226a883ac10623503af9aff0d08974f" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structgs__0_1a5226a883ac10623503af9aff0d08974f" kindref="member">a</ref>;</highlight></codeline>
+<codeline lineno="146" refid="structgs__0_1a685de05882780fc00a682548615f210c" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structgs__0_1a685de05882780fc00a682548615f210c" kindref="member">b</ref>;</highlight></codeline>
+<codeline lineno="147"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="148"><highlight class="normal"></highlight></codeline>
+<codeline lineno="154" refid="uniongu__0" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">union<sp/></highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="155" refid="uniongu__0_1ada50eac1a833cdc3ec0912c960afc5c9" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="uniongu__0_1ada50eac1a833cdc3ec0912c960afc5c9" kindref="member">i</ref>;</highlight></codeline>
+<codeline lineno="156" refid="uniongu__0_1a5b018f5d8da27b129a695da32fb76766" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="uniongu__0_1a5b018f5d8da27b129a695da32fb76766" kindref="member">f</ref>;</highlight></codeline>
+<codeline lineno="157"><highlight class="normal">}<sp/><ref refid="uniongu__0" kindref="compound">gu_0</ref>;</highlight></codeline>
+<codeline lineno="158"><highlight class="normal"></highlight></codeline>
+<codeline lineno="164" refid="uniongu__1" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">union<sp/></highlight><highlight class="normal"><ref refid="uniongu__1" kindref="compound">gu_1</ref><sp/>{</highlight></codeline>
+<codeline lineno="165" refid="uniongu__1_1ac89ff798820290332bdfbaf10e82d03a" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="uniongu__1_1ac89ff798820290332bdfbaf10e82d03a" kindref="member">i</ref>;</highlight></codeline>
+<codeline lineno="166" refid="uniongu__1_1ae457d8d965623a77a7a126f4799b2132" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="uniongu__1_1ae457d8d965623a77a7a126f4799b2132" kindref="member">f</ref>;</highlight></codeline>
+<codeline lineno="167"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="168"><highlight class="normal"></highlight></codeline>
+<codeline lineno="174" refid="group__FooGroup_1gad9450fd0bc1a7ba2ce704c69f0bbfb46" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="180" refid="group__FooGroup_1ggad9450fd0bc1a7ba2ce704c69f0bbfb46ab6b348f38612ea526613c0a9d40a0f4b" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="group__FooGroup_1ggad9450fd0bc1a7ba2ce704c69f0bbfb46ab6b348f38612ea526613c0a9d40a0f4b" kindref="member">GE_0_A</ref>,</highlight></codeline>
+<codeline lineno="181"><highlight class="normal"></highlight></codeline>
+<codeline lineno="187" refid="group__FooGroup_1ggad9450fd0bc1a7ba2ce704c69f0bbfb46abe38e392580fc344890940799adb8460" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="group__FooGroup_1ggad9450fd0bc1a7ba2ce704c69f0bbfb46abe38e392580fc344890940799adb8460" kindref="member">GE_0_B</ref>,</highlight></codeline>
+<codeline lineno="188"><highlight class="normal"></highlight></codeline>
+<codeline lineno="194"><highlight class="normal"><sp/><sp/><ref refid="group__FooGroup_1ggad9450fd0bc1a7ba2ce704c69f0bbfb46a6abf4f552630e9e8994c91aeadf9d9d0" kindref="member">GE_0_C</ref></highlight></codeline>
+<codeline lineno="195" refid="group__FooGroup_1ggad9450fd0bc1a7ba2ce704c69f0bbfb46a6abf4f552630e9e8994c91aeadf9d9d0" refkind="member"><highlight class="normal">}<sp/><ref refid="group__FooGroup_1gad9450fd0bc1a7ba2ce704c69f0bbfb46" kindref="member">ge_0</ref>;</highlight></codeline>
+<codeline lineno="196"><highlight class="normal"></highlight></codeline>
+<codeline lineno="220"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="header_8h_1aa2f8caf29834418e60688b225e2413db" kindref="member">f_0</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*in,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*out,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*inout,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>none,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*(*f)(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*(*f2)(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">)));</highlight></codeline>
+<codeline lineno="221"><highlight class="normal"></highlight></codeline>
+<codeline lineno="227"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="header_8h_1a17124d351aade94c069796b00a063b72" kindref="member">f_1</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="228"><highlight class="normal"></highlight></codeline>
+<codeline lineno="242"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>f_2(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>x,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>y)</highlight></codeline>
+<codeline lineno="243"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="244"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>x<sp/>+<sp/>y;</highlight></codeline>
+<codeline lineno="245"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="246"><highlight class="normal"></highlight></codeline>
+<codeline lineno="258" refid="header_8h_1a435562b339e8cd3ed2275b5f6a8e41be" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>M_0(a,<sp/>b)<sp/>((a)<sp/>&lt;<sp/>(b)<sp/>?<sp/>(a)<sp/>:<sp/>(b))</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="259"><highlight class="normal"></highlight></codeline>
+<codeline lineno="263" refid="header_8h_1ab31d832d82bef7f1c6df989c3040a216" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>D_1<sp/>1024</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="264"><highlight class="normal"></highlight></codeline>
+<codeline lineno="270" refid="structt__0" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="271" refid="structt__0_1af92e5d9afdf5bd2b6b22ba776396e8bd" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structt__0_1af92e5d9afdf5bd2b6b22ba776396e8bd" kindref="member">x</ref>;</highlight></codeline>
+<codeline lineno="272" refid="structt__0_1a1b608434dbda7079d334b0fe032ad4f5" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structt__0_1a1b608434dbda7079d334b0fe032ad4f5" kindref="member">y</ref>;</highlight></codeline>
+<codeline lineno="273"><highlight class="normal">}<sp/><ref refid="structt__0" kindref="compound">t_0</ref>;</highlight></codeline>
+<codeline lineno="274"><highlight class="normal"></highlight></codeline>
+<codeline lineno="280" refid="structs__0" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal"><ref refid="structs__0" kindref="compound">s_0</ref><sp/>{</highlight></codeline>
+<codeline lineno="281" refid="structs__0_1ad73531d55d1edbe65a44638f48650fa4" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structs__0_1ad73531d55d1edbe65a44638f48650fa4" kindref="member">a</ref>;</highlight></codeline>
+<codeline lineno="282" refid="structs__0_1a87787b0ceed5fde395b76a2a4ceaa409" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structs__0_1a87787b0ceed5fde395b76a2a4ceaa409" kindref="member">b</ref>;</highlight></codeline>
+<codeline lineno="283"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="284"><highlight class="normal"></highlight></codeline>
+<codeline lineno="290" refid="unionu__0" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">union<sp/></highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="291" refid="unionu__0_1a92d7a79506e2ee00ed0c4479fc1f4623" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/><ref refid="unionu__0_1a92d7a79506e2ee00ed0c4479fc1f4623" kindref="member">c</ref>;</highlight></codeline>
+<codeline lineno="292" refid="unionu__0_1a2d0cd97db97651ad770ca48d5049eacf" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="unionu__0_1a2d0cd97db97651ad770ca48d5049eacf" kindref="member">i</ref>;</highlight></codeline>
+<codeline lineno="293"><highlight class="normal">}<sp/><ref refid="unionu__0" kindref="compound">u_0</ref>;</highlight></codeline>
+<codeline lineno="294"><highlight class="normal"></highlight></codeline>
+<codeline lineno="300" refid="unionu__1" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">union<sp/></highlight><highlight class="normal"><ref refid="unionu__1" kindref="compound">u_1</ref><sp/>{</highlight></codeline>
+<codeline lineno="301" refid="unionu__1_1a2f0f43ae7543e722da1864ba60e5e48c" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/><ref refid="unionu__1_1a2f0f43ae7543e722da1864ba60e5e48c" kindref="member">c</ref>;</highlight></codeline>
+<codeline lineno="302" refid="unionu__1_1aef977ba9d71bb0c099a908d03302781d" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="unionu__1_1aef977ba9d71bb0c099a908d03302781d" kindref="member">i</ref>;</highlight></codeline>
+<codeline lineno="303"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="304"><highlight class="normal"></highlight></codeline>
+<codeline lineno="310" refid="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9f" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"><sp/><ref refid="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9f" kindref="member">e_0</ref><sp/>{</highlight></codeline>
+<codeline lineno="316"><highlight class="normal"><sp/><sp/><ref refid="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9fad67b160e0559ffcbea0f19ab5a997668" kindref="member">E_0_A</ref></highlight></codeline>
+<codeline lineno="317" refid="header_8h_1a01325395cf2af877fccf63801bcc2aeb" refkind="member"><highlight class="normal">}<sp/><ref refid="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9f" kindref="member">e_0</ref>;</highlight></codeline>
+<codeline lineno="318"><highlight class="normal"></highlight></codeline>
+<codeline lineno="324" refid="header_8h_1adbc74fb9d93477777c8774e9db9864a2" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">enum</highlight><highlight class="normal"><sp/><ref refid="header_8h_1adbc74fb9d93477777c8774e9db9864a2" kindref="member">e_1</ref><sp/>{</highlight></codeline>
+<codeline lineno="330"><highlight class="normal"><sp/><sp/><ref refid="header_8h_1adbc74fb9d93477777c8774e9db9864a2af8032135292d00116d68c5e58e3301e1" kindref="member">E_1_A</ref></highlight></codeline>
+<codeline lineno="331" refid="header_8h_1adbc74fb9d93477777c8774e9db9864a2af8032135292d00116d68c5e58e3301e1" refkind="member"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="332"><highlight class="normal"></highlight></codeline>
+<codeline lineno="333"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>HEADER_H<sp/>*/</highlight><highlight class="preprocessor"></highlight></codeline>
+    </programlisting>
+    <location file="header.h"/>
+  </compounddef>
+</doxygen>

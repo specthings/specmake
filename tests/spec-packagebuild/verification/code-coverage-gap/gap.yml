@@ -1,0 +1,41 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+areas:
+  Scope:
+    cpukit/score/src/threadqenqueue.c:
+      branches:
+      - branches:
+        - 0
+        - 1
+        line: 371
+        md5: 29755c156b7564024ca5f9434ea32681
+      - branches:
+        - 0
+        line: 375
+        md5: 0123456789abcdef0123456789abcdef
+      functions:
+      - _Thread_queue_Deadlock_status
+      lines:
+      - line: 394
+        md5: cbb184dd8e05c9709e5dcaedaa0495cf
+      - line: 396
+        md5: c9e5352e75e1bba93f0ffb375ca65286
+      - line: 398
+        md5: 0ec19daff54426f5cc8984857102f660
+      - line: 399
+        md5: 0123456789abcdef0123456789abcdef
+    cpukit/score/src/threadyield.c:
+      branches: []
+      functions: []
+      lines:
+      - line: 55
+        md5: cbb184dd8e05c9709e5dcaedaa0495cf
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: verification
+  uid: /rtems/target-a
+text: |
+  This explains the code coverage gap.
+type: verification
+verification-type: code-coverage-gap

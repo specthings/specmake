@@ -1,0 +1,35 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+arch: sparc
+bsp: gr712rc
+bsp-extra: extra
+bsp-family: leon3
+bsp-qual-only: qual-only
+build-directory: ${.:/deployment-directory}/build
+component-type: rtems
+config: smp
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-set: []
+deployment-directory: ${.:/prefix-directory}/${.:/package-directory}
+enabled-by: true
+enabled-set: []
+enabled-set-actions: []
+enabled-set-feedback-mapping: {}
+ident: ${.:/arch}/${.:/bsp}${.:/config:slash}/${.:/package-version}
+links:
+- role: glossary
+  uid: /glossary/group
+- role: design-target
+  uid: /rtems/target-a
+- role: test-runner
+  uid: test-runner/subprocess
+name: ${.:/arch}-${.:/bsp}${.:/config:dash}-${.:/package-version}
+membench-build-label: build-label
+package-directory: pkg
+package-version: '4'
+params: {}
+prefix-directory: ${.:/tmpdir}
+pkg-type: workspace
+rtems-version: '6'
+type: pkg
+workspace-type: component

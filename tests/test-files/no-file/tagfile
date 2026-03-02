@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<tagfile doxygen_version="1.15.0">
+  <compound kind="struct">
+    <name>NoItem</name>
+    <filename>structNoItem.html</filename>
+    <member kind="variable">
+      <type>int</type>
+      <name>a</name>
+      <anchorfile>structNoItem.html</anchorfile>
+      <anchor>a1eea5c7621960dc4684f4b44d5d628f5</anchor>
+      <arglist></arglist>
+    </member>
+  </compound>
+  <compound kind="group">
+    <name>Blub</name>
+    <title>Blub</title>
+    <filename>group__Blub.html</filename>
+  </compound>
+</tagfile>

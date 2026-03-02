@@ -1,0 +1,20 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/deployment-directory}/perf-images
+directory-state-type: performance-images
+enabled-by: performance-images
+files: []
+hash: null
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+- hash: null
+  name: test-aggregation
+  role: input
+  uid: ../steps/aggregate-test-results
+pkg-type: directory-state
+type: pkg

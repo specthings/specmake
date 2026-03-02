@@ -1,0 +1,61 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/deployment-directory}/doc
+directory-state-type: sphinx
+document-components: []
+document-contributors: []
+document-copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+document-html-footer: footer
+document-html-help-base-name: HBN
+document-key: document-key
+document-latex-footer-right: footer right
+document-latex-geometry: geometry
+document-latex-header-left: header left
+document-latex-sphinxsetup: sphinxsetup
+document-latex-theme: manual
+document-license: CC-BY-SA-4.0
+document-license-map: {}
+document-releases: []
+document-title: Title
+document-toctree-maxdepth: 4
+document-type: generic
+enabled-by: true
+files: []
+hash: null
+links:
+- hash: null
+  name: component
+  role: input
+  uid: component
+- file-to-review:
+    removed-one-review.txt: a
+    removed-two-reviews.txt:
+    - a
+    - b
+  hash: null
+  label: Label
+  name: source-compare-current
+  renamed:
+    renamed-from: renamed-to
+  reviews:
+    a:
+      subject: SA
+      text: TA
+    b:
+      subject: SB
+      text: TB
+  role: input
+  source-compare-key: the-source-compare-key
+  uid: current
+- hash: null
+  name: source-compare-previous
+  role: input
+  source-compare-key: the-source-compare-key
+  uid: previous
+output-html: null
+output-pdf: null
+pkg-type: directory-state
+type: pkg

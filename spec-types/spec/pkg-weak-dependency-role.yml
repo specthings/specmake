@@ -1,0 +1,23 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: weak-package-build-dependency
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      It defines the weak dependency role of links and is used to define a
+      package build ordering dependency which is not an input.
+    mandatory-attributes: all
+spec-name: Weak Dependency Link Role
+spec-type: pkg-weak-dependency-role
+type: spec

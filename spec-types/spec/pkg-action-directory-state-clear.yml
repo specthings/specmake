@@ -1,0 +1,39 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2022, 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: action
+  spec-value: directory-state-clear
+  uid: pkg-action
+- role: spec-refinement
+  spec-key: action
+  spec-value: directory-state-discard
+  uid: pkg-action
+- role: spec-refinement
+  spec-key: action
+  spec-value: directory-state-discard-and-clear
+  uid: pkg-action
+- role: spec-refinement
+  spec-key: action
+  spec-value: directory-state-discard-excludes
+  uid: pkg-action
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      output-name:
+        description: |
+          It shall be name of the output directory state.
+        spec-type: str
+    description: |
+      This set of attributes specifies a directory state clear, discard,
+      discard and clear, or discard-excludes action.
+    mandatory-attributes: all
+spec-name: Directory State Clear/Discard/Discard-Clear/Discard-Excludes Action
+spec-type: pkg-action-directory-state-clear-or-discard
+type: spec

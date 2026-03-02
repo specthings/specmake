@@ -1,0 +1,158 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+attribute-actions:
+- action: set-default
+  enabled-by: true
+  path: /a
+  value: ta
+- action: set
+  enabled-by: false
+  path: /a
+  value: ta
+- action: set-default
+  enabled-by: true
+  path: /b
+  value: tb
+- action: set
+  enabled-by: true
+  path: /c
+  value: ${.:/a}/$${.:/b}
+- action: extend
+  enabled-by: true
+  path: /d
+  value:
+  - td
+- action: set
+  enabled-by: true
+  path: /directory-state-type
+  value: explicit
+- action: set-default
+  enabled-by: true
+  path: /e/e0
+  value: 2
+- action: set-default
+  enabled-by: true
+  path: /e/e1
+  value: 1
+- action: set-default
+  enabled-by: true
+  path: /list
+  value: []
+- action: append
+  enabled-by: true
+  path: /list
+  value:
+    k: 1
+- action: extend
+  enabled-by: true
+  path: /list
+  value:
+  - 2
+  - []
+- action: append
+  enabled-by: true
+  path: /list[2]
+  value:
+    k: 3
+- action: extend
+  enabled-by: true
+  path: /list[2]
+  value:
+  - k: 4
+- action: insert-after
+  enabled-by: true
+  path: /list
+  value:
+    k: 5
+  where-key: k
+  where-value: 1
+- action: insert-before
+  enabled-by: true
+  path: /list
+  value:
+    k: 6
+  where-key: k
+  where-value: 1
+- action: insert-after
+  enabled-by: true
+  path: /list[4]
+  value:
+   k: 7
+  where-key: k
+  where-value: 4
+- action: insert-before
+  enabled-by: true
+  path: /list[4]
+  value:
+    k: 8
+  where-key: k
+  where-value: 3
+- action: insert-after
+  enabled-by: true
+  path: /list[4]
+  value:
+    k: 9
+  where-key: k
+  where-value: 9
+- action: set-default
+  enabled-by: true
+  path: /list-2
+  value:
+  - a: 1
+    b: 2
+  - c: 3
+    d: 4
+- action: remove
+  enabled-by: true
+  path: /list-2[1]
+- action: remove
+  enabled-by: true
+  path: /list-2[0]/a
+- action: set-default
+  enabled-by: true
+  path: /list-3
+  value:
+  - x
+  - y
+  - z
+- action: remove-list-items
+  enabled-by: true
+  path: /list-3
+  pattern: x|z
+- action: set-default
+  enabled-by: true
+  path: /list-4
+  value:
+  - - X
+    - Y
+    - Z
+- action: remove-list-items
+  enabled-by: true
+  path: /list-4[0]
+  pattern: X|Z
+- action: set-default
+  enabled-by: true
+  path: /list-5
+  value:
+  - u
+- action: set
+  enabled-by: true
+  path: /list-5[0]
+  value: $$$${.:/a}
+- action: substitute
+  enabled-by: true
+  path: /list-5[0]
+- action: substitute
+  enabled-by: true
+  path:
+  - /list-5
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+enabled-set-actions: []
+enabled-set-feedback-mapping: {}
+links:
+- role: use-package-template
+  uid: template-item-a
+pkg-type: template
+template-type: component
+type: pkg

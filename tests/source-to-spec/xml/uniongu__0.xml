@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.12.0" xml:lang="en-US">
+  <compounddef id="uniongu__0" kind="union" language="C++" prot="public">
+    <compoundname>gu_0</compoundname>
+    <includes refid="header_8h" local="no">header.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="uniongu__0_1ada50eac1a833cdc3ec0912c960afc5c9" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gu_0::i</definition>
+        <argsstring></argsstring>
+        <name>i</name>
+        <qualifiedname>gu_0::i</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="155" column="7" bodyfile="header.h" bodystart="155" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="uniongu__0_1a5b018f5d8da27b129a695da32fb76766" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float gu_0::f</definition>
+        <argsstring></argsstring>
+        <name>f</name>
+        <qualifiedname>gu_0::f</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="156" column="9" bodyfile="header.h" bodystart="156" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Brief <ref refid="uniongu__0" kindref="compound">gu_0</ref>. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Description <ref refid="uniongu__0" kindref="compound">gu_0</ref>. </para>
+    </detaileddescription>
+    <location file="header.h" line="154" column="1" bodyfile="header.h" bodystart="154" bodyend="157"/>
+    <listofallmembers>
+      <member refid="uniongu__0_1a5b018f5d8da27b129a695da32fb76766" prot="public" virt="non-virtual"><scope>gu_0</scope><name>f</name></member>
+      <member refid="uniongu__0_1ada50eac1a833cdc3ec0912c960afc5c9" prot="public" virt="non-virtual"><scope>gu_0</scope><name>i</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

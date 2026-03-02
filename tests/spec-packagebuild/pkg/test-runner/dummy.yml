@@ -1,0 +1,15 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+description: Description.
+do-not-run: []
+enabled-by: run-tests-dummy
+links:
+- role: target
+  uid: /target/alpha
+max-retry-count-per-executable: 0
+name: Dummy
+params: {}
+pkg-type: test-runner
+test-runner-type: dummy
+type: pkg

@@ -1,0 +1,48 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: workspace-type
+  spec-value: file
+  uid: pkg-workspace
+- role: spec-refinement
+  spec-key: workspace-type
+  spec-value: test-log
+  uid: pkg-workspace
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      copyrights-by-license:
+        description: null
+        spec-type: pkg-copyrights-by-license
+      destination-directory:
+        description: |
+          It shall be the destination directory.
+        spec-type: str
+      destination-file:
+        description: |
+          It shall be the destination file relative to the destination
+          directory.
+        spec-type: str
+      directory:
+        description: |
+          It shall be the source directory in the workspace.
+        spec-type: str
+      source-file:
+        description: |
+          It shall be the source file relative to the source directory in the
+          workspace.  If a list is specified, then the first existing source
+          file on the list will be used.
+        spec-type: str-or-list-str
+    description: |
+      This set of attributes specifies a workspace file.
+    mandatory-attributes: all
+spec-name: Workspace File Item Type
+spec-type: pkg-workspace-file
+type: spec

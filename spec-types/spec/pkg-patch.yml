@@ -1,0 +1,26 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      file:
+        description: |
+          It shall be the path to the patch file
+        spec-type: str
+      hash:
+        description: |
+          It shall be the hash of the patch file.
+        spec-type: sha512
+    description: |
+      This set of attributes specifies a patch.
+    mandatory-attributes: all
+spec-name: Patch
+spec-type: pkg-patch
+type: spec

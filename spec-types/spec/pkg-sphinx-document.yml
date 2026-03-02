@@ -1,0 +1,113 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020, 2023 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: directory-state-type
+  spec-value: sphinx
+  uid: pkg-directory-state
+spec-description: |
+  Items of this type shall have the following links:
+
+  * There shall be exactly one link to a ${pkg-directory-state:/spec-name} item
+    with the ${pkg-input-role:/spec-name} and the name ``"source"``.  The link
+    target directory state item defines the source directory of the file copy
+    operation and the list of files to copy.
+
+  * There shall be exactly one link to a ${pkg-directory-state:/spec-name} item
+    with the ${pkg-output-role:/spec-name} and the name ``"build"``.  The link
+    target directory state item defines the build directory.
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      document-components:
+        description: null
+        spec-type: pkg-sphinx-component-list
+      document-contributors:
+        description: null
+        spec-type: pkg-sphinx-contributor-action-list
+      document-copyrights:
+        description: |
+          It shall be the list of copyright statements of explicit contributors
+          to the document.  The first contributor on the list is the main
+          contributor.
+        spec-type: copyrights
+      document-html-help-base-name:
+        description: |
+          It shall be the HTML help base name.
+        spec-type: str
+      document-html-footer:
+        description: |
+          It shall be the HTML extra footer.
+        spec-type: str
+      document-key:
+        description: |
+          It shall be the document key, for example "icd".
+        spec-type: name
+      document-latex-footer-right:
+        description: |
+          It shall be the document LaTeX right footer.
+        spec-type: str
+      document-latex-geometry:
+        description: |
+          It shall be the document LaTeX geometry options.
+        spec-type: str
+      document-latex-header-left:
+        description: |
+          It shall be the document LaTeX left header.
+        spec-type: str
+      document-latex-sphinxsetup:
+        description: |
+          It shall be the document LaTeX Sphinx setup.
+        spec-type: str
+      document-latex-theme:
+        description: |
+          It shall be the document LaTeX theme (for example: ``manual`` or ``howto``).
+        spec-type: str
+      document-license:
+        description: |
+          It shall be the document license.
+        spec-type: spdx-license-identifier
+      document-license-map:
+        description: |
+          It shall be the document license map.
+        spec-type: pkg-document-license-map
+      document-releases:
+        description: null
+        spec-type: pkg-sphinx-release-list
+      document-title:
+        description: |
+          It shall be the document title.  Use ``$${break}`` to add break hints
+          between words.
+        spec-type: str
+      document-toctree-maxdepth:
+        description: |
+          It shall be the maximum depth of the document table of contents tree.
+        spec-type: int
+      document-type:
+        description: |
+          It shall be the document type.
+        spec-type: str
+      output-html:
+        description: |
+          If the value is present, then it shall be the path to the generated
+          HTML document directory relative to the base directory of the
+          directory state production.
+        spec-type: optional-str
+      output-pdf:
+        description: |
+          If the value is present, then it shall be the path to the generated
+          PDF document relative to the base directory of the directory state
+          production.
+        spec-type: optional-str
+    description: |
+      This set of attributes specifies a document using the Sphinx
+      documentation framework.
+    mandatory-attributes: all
+spec-name: Sphinx Document Item Type
+spec-type: pkg-sphinx-document
+type: spec

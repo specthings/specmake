@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.12.0" xml:lang="en-US">
+  <compounddef id="structgs__0" kind="struct" language="C++" prot="public">
+    <compoundname>gs_0</compoundname>
+    <includes refid="header_8h" local="no">header.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structgs__0_1a5226a883ac10623503af9aff0d08974f" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gs_0::a</definition>
+        <argsstring></argsstring>
+        <name>a</name>
+        <qualifiedname>gs_0::a</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="145" column="7" bodyfile="header.h" bodystart="145" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structgs__0_1a685de05882780fc00a682548615f210c" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int gs_0::b</definition>
+        <argsstring></argsstring>
+        <name>b</name>
+        <qualifiedname>gs_0::b</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="146" column="7" bodyfile="header.h" bodystart="146" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Brief <ref refid="structgs__0" kindref="compound">gs_0</ref>. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Description <ref refid="structgs__0" kindref="compound">gs_0</ref>. </para>
+    </detaileddescription>
+    <location file="header.h" line="144" column="1" bodyfile="header.h" bodystart="144" bodyend="147"/>
+    <listofallmembers>
+      <member refid="structgs__0_1a5226a883ac10623503af9aff0d08974f" prot="public" virt="non-virtual"><scope>gs_0</scope><name>a</name></member>
+      <member refid="structgs__0_1a685de05882780fc00a682548615f210c" prot="public" virt="non-virtual"><scope>gs_0</scope><name>b</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

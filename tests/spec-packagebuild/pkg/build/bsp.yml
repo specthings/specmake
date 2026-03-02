@@ -1,0 +1,26 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/build-directory}/bsp
+directory-state-type: explicit
+enabled-by: true
+files:
+- file: a.exe
+  hash: null
+- file: b.exe
+  hash: null
+- file: do-not-run.exe
+  hash: null
+- file: b.norun.exe
+  hash: null
+- file: f.gcno
+  hash: null
+hash: null
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+pkg-type: directory-state
+type: pkg

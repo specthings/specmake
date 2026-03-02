@@ -1,0 +1,23 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2022 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: directory-state-type
+  spec-value: performance-images
+  uid: pkg-directory-state
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      This set of attributes specifies a build of runtime performance
+      measurement images.
+    mandatory-attributes: all
+spec-name: Build Runtime Performance Measurement Images Item Type
+spec-type: pkg-build-performance-images
+type: spec

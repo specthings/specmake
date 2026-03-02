@@ -1,0 +1,15 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+acceptable-test-errors:
+- no-test-results
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: verification-member
+  uid: /rtems/target-a
+- role: verification
+  uid: /rtems/val/test-case
+text: |
+  This target cannot provide test results for this validation test.
+type: verification
+verification-type: test-failure

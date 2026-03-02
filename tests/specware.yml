@@ -1,0 +1,78 @@
+build:
+  arch: sparc
+  bsp: gr712rc
+  config-ini: |
+    [${arch}/${bsp}]
+    RTEMS_SMP = True
+    RTEMS_QUAL = True
+    BUILD_TESTS = False
+    BUILD_MEMBENCH = True
+    BUILD_UNITTESTS = True
+    BUILD_VALIDATIONTESTS = True
+    BSP_PRINT_EXCEPTION_CONTEXT = False
+  doxyfile-template: templates/Doxyfile
+  enabled:
+  - bsps/sparc/leon3
+  - sparc/gr712rc
+  source-directory: test-files/repo
+  build-uids: []
+  base-directory-map:
+  - source: spec-packagebuild
+    target: test-files/repo
+  workspace-directory: workspace/rtems
+spec:
+  cache-directory: cache
+  paths:
+    spec-packagebuild/acfg: /acfg/
+    spec-packagebuild/build: /build/
+    spec-packagebuild/c: /c/
+    spec-packagebuild/glossary: /glossary/
+    spec-packagebuild/req: /req/
+    spec-packagebuild/rtems: /rtems/
+    spec-packagebuild/score: /score/
+    spec-packagebuild/testsuites: /testsuites/
+    spec-packagebuild/verification: /verification/
+  resolve-proxies: true
+  spec-type-root-uid: /spec/root
+glossary:
+  project-groups: []
+  project-header: Glossary
+  project-target: glossary.md
+  documents: []
+appl-config:
+  doxygen-target: test-files/repo/appl-config.h
+  enabled-source: []
+  enabled-documentation: []
+  groups:
+  - uid: /rtems/if/group-acfg
+    target: /dev/null
+validation:
+  base-directory-map:
+  - source: spec-packagebuild
+    target: test-files/repo
+interface:
+  enabled: []
+  item-level-interfaces: []
+  domains:
+    /rtems/if/domain: test-files/repo
+interface-documentation:
+  enabled: []
+  groups: []
+  types:
+    domains: []
+    groups: []
+    target: rtems_data_types.md
+spec-verification:
+  root-type: /spec/root
+spec-documentation:
+  doc-target: modules/rtems-docs/eng/req/items.md
+  hierarchy-subsection-name: Specification Item Hierarchy
+  hierarchy-text: |
+    The specification item types have the following hierarchy:
+  ignore: '^$'
+  item-types-subsection-name: Specification Item Types
+  label-prefix: SpecType
+  root-type: /spec/root
+  section-label-prefix: ReqEng
+  section-name: Specification Items
+  value-types-subsection-name: Specification Attribute Sets and Value Types

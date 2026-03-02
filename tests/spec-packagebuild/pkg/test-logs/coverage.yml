@@ -1,0 +1,18 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/deployment-directory}
+directory-state-type: explicit
+enabled-by: true
+files:
+- file: test-log-coverage.json
+  hash: null
+hash: null
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+pkg-type: directory-state
+type: pkg

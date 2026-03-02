@@ -1,0 +1,32 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: requirement-refinement
+  uid: ../if/group
+- role: runtime-measurement-request
+  uid: /score/cpu/val/perf
+non-functional-type: performance-runtime
+params: {}
+rationale: null
+references: []
+requirement-type: non-functional
+test-body:
+  brief: |
+    Brief.
+  code: |
+    code();
+  description: |
+    Description.
+test-cleanup: null
+test-prepare: null
+test-setup: null
+test-teardown: null
+text: |
+  Environment is ${.:/environment},
+  limit kind is ${.:/limit-kind},
+  limit condition is ${.:/limit-condition},
+  buffer count is ${/score/cpu/val/perf:/params/buffer-count},
+  sample count is ${/score/cpu/val/perf:/params/sample-count}.
+type: requirement

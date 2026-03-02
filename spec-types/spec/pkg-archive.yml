@@ -1,0 +1,58 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: directory-state-type
+  spec-value: archive
+  uid: pkg-directory-state
+spec-description: |
+  Items of this type shall have the following links:
+
+  * There shall be links to a ${pkg-directory-state:/spec-name} item
+    with the ${pkg-input-role:/spec-name} and the name
+    ``"member"``.  The link target directory state item defines the member
+    files of the archive.
+
+  * There shall be at most one link to a ${pkg-directory-state:/spec-name} item
+    with the ${pkg-output-role:/spec-name} and the name ``"verify-script"``.
+    The link target directory state item defines the destination directory of
+    the package verification script.
+
+  * There shall be at most one link to a ${pkg-directory-state:/spec-name} item
+    with the ${pkg-output-role:/spec-name} and the name ``"spec-export"``.
+    The link target directory state item defines the directory for a
+    specification data export.
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      archive-file:
+        description: |
+          It shall be the path to the archive file relative to the base
+          directory of the ``"archive"`` directory state production.  The
+          method to compress the archive is determined by the archive file name
+          extension.
+        spec-type: str
+      archive-strip-prefix:
+        description: |
+          It shall be the prefix to strip from an archive member file path.
+        spec-type: str
+      verification-script:
+        description: |
+          If the value is present, then it shall be the verification script
+          file name.  The verification script is automatically generated and
+          will be included in the archive.  The script can be used to verify
+          that a file of an unpacked archive has the same state as the file
+          packed into the archive.  It shows also missing and additional files
+          inside an unpacked archive base directory.
+        spec-type: optional-str
+    description: |
+      This set of attributes specifies an archive file.
+    mandatory-attributes: all
+spec-name: Archive Item Type
+spec-type: pkg-archive
+type: spec

@@ -1,0 +1,26 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: pkg-type
+  spec-value: make
+  uid: pkg-root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      make-type:
+        description: |
+          It shall be the make type.
+        spec-type: name
+    description: |
+      This set of attributes specifies how to make another item.
+    mandatory-attributes: all
+spec-name: Make Item Type
+spec-type: pkg-make
+type: spec

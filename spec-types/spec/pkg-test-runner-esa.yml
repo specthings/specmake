@@ -1,0 +1,37 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: test-runner-type
+  spec-value: esa
+  uid: pkg-test-runner
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      git-fetch-delay-in-seconds:
+        description: |
+          It shall be the delay between Git fetches from the remote repository
+          in seconds.
+        spec-type: int
+      max-request-delay-in-seconds:
+        description: |
+          It shall be the maximum request delay in seconds which is tolerated.
+          A request delay may occur if multiple agents access the boards in
+          parallel.
+        spec-type: int
+      strip-program-path:
+        description: |
+          It shall be the path to the strip program.
+        spec-type: str
+    description: |
+      This set of attributes specifies an ESA test runner.
+    mandatory-attributes: all
+spec-name: ESA Test Runner Item Type
+spec-type: pkg-test-runner-esa
+type: spec

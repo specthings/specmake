@@ -1,0 +1,57 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: name
+  spec-value: spec-compare
+  uid: pkg-input-role
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      current-revision:
+        description: |
+          If shall be the Git revision of the current specification.
+        spec-type: str
+      enabled-set-actions:
+        description: |
+          It shall be the list of enabled set actions to produce the previous
+          enabled set from the current enabled set.
+        spec-type: enabled-set-action-list
+      ignored-commits:
+        description: |
+          If shall be the list of ignored Git commits.
+        spec-type: pkg-git-hash-list
+      label:
+        description: |
+          If shall be the section label prefix.
+        spec-type: str
+      previous-revision:
+        description: |
+          If shall be the Git revision of the previous specification.
+        spec-type: str
+      spec-compare-key:
+        description: |
+          If shall be the key to associate the specification comparison.
+        spec-type: str
+      spec-paths:
+        description: |
+          If shall be the list of specification item paths relative to the
+          repository.
+        spec-type: list-str
+      root-uid:
+        description: |
+          If shall be the UID of the specification root item.
+        spec-type: uid
+    description: |
+      The input link shall reference the repository containing the
+      specification history.
+    mandatory-attributes: all
+spec-name: Specification Comparison Input Link Role
+spec-type: pkg-input-spec-compare-role
+type: spec

@@ -1,0 +1,133 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2022 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: name
+  spec-value: archive
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: associate
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: build
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: build-configuration
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: build-spec
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: component
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: config
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: dependency
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: document-element
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: gcda
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: images
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: link-hub
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: log
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: member
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: package-changes
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: rst-files
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: rtems
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: redirection-target
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: repository
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: source
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: spec
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: tagfile
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: target
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: test-aggregation
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: test-runner
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: test-suites
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: tools
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: verify-package
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
+  spec-value: version
+  uid: pkg-input-role
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: null
+    mandatory-attributes: all
+spec-name: Generic Input Link Role
+spec-type: pkg-input-generic-role
+type: spec

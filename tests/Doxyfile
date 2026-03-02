@@ -1,0 +1,12 @@
+STRIP_FROM_PATH        = test-files/repo
+INPUT                  = test-files/repo
+RECURSIVE              = YES
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = YES
+PREDEFINED             = "T_TEST_CASE(x)=void T_case_body_##x(void)" "T_TEST_CASE_FIXTURE(x, y)=void T_case_body_##x(void)"
+GENERATE_HTML          = NO
+GENERATE_LATEX         = NO
+GENERATE_TAGFILE       = test-files/tagfile

@@ -1,0 +1,37 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: name
+  spec-value: benchmark-variant
+  uid: pkg-input-role
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      description:
+        description: |
+          It shall be the benchmark variant description.
+        spec-type: str
+      priority:
+        description: |
+          It shall be the benchmark variant priority.  A benchmark variant
+          which the lexicographically earliest priority value will be the
+          baseline.
+        spec-type: str
+      variant-name:
+        description: |
+          It shall be the benchmark variant name.
+        spec-type: str
+    description: |
+      It defines the benchmark variant role of links and is used to register a
+      test log with an associated benchmark variant at the package manual.
+    mandatory-attributes: all
+spec-name: Benchmark Variant Link Role
+spec-type: pkg-benchmark-variant-role
+type: spec

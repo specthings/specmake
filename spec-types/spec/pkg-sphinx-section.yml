@@ -1,0 +1,30 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: pkg-type
+  spec-value: sphinx-section
+  uid: pkg-root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      content:
+        description: |
+          It shall be the section content.
+        spec-type: str
+      label:
+        description: |
+          If the value is present, then it shall be the section label.
+        spec-type: optional-str
+    description: |
+      This set of attributes specifies a Sphinx section.
+    mandatory-attributes: all
+spec-name: Sphinx Section Item Type
+spec-type: pkg-sphinx-section
+type: spec

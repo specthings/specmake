@@ -1,0 +1,37 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+branch: pkg
+clone-depth: null
+commit: 40abab3c7aca7f38d06f339d784fa08178588f47
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+copyrights-by-license:
+  description: |
+    Description.
+  files:
+  - README.md
+description: |
+  Description.
+destination-directory: ${.:/component/deployment-directory}/repo-2
+directory: ${.:/component/deployment-directory}/source/repo
+enabled-by: true
+links:
+- role: repository
+  uid: /pkg/component
+- hash: null
+  name: component
+  role: input
+  uid: /pkg/component
+- hash: null
+  name: source
+  role: input
+  uid: archive
+origin-branch: main
+origin-commit: 40abab3c7aca7f38d06f339d784fa08178588f47
+origin-commit-url: https://foobar.org
+origin-fetch: []
+origin-url: https://foobar.org
+pkg-type: workspace
+post-clone-commands: []
+symbolic-links: []
+type: pkg
+workspace-type: repository

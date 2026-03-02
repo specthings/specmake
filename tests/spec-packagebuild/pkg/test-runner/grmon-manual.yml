@@ -1,0 +1,21 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+description: Description.
+do-not-run: []
+enabled-by: true
+grmon-script: |
+  ${.:/test-executables-grmon}
+links:
+- role: target
+  uid: /target/alpha
+max-retry-count-per-executable: 0
+name: GRMON
+params:
+  x: abc
+pkg-type: test-runner
+script-base-path: ${.:/component/prefix-directory}/tests
+shell-script: |
+  ${.:/params/x}
+test-runner-type: grmon-manual
+type: pkg

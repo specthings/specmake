@@ -1,0 +1,26 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      link-name:
+        description: |
+          It shall be the symbolic link name.
+        spec-type: str
+      target:
+        description: |
+          It shall be the symbolic link target.
+        spec-type: str
+    description: |
+      This set of attributes specifies a symbolic link.
+    mandatory-attributes: all
+spec-name: Symbolic Link
+spec-type: pkg-symbolic-link
+type: spec

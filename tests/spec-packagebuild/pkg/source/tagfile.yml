@@ -1,0 +1,23 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/prefix-directory}
+directory-state-type: explicit
+enabled-by:
+  not:
+  - link-hub-files-without-group
+  - link-hub-groups-without-items
+  - link-hub-no-file
+  - link-hub-no-tagfile
+files:
+- file: tagfile
+  hash: null
+hash: null
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+pkg-type: directory-state
+type: pkg

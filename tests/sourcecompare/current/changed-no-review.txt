@@ -1,0 +1,39 @@
+Current
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+static inline void f(void) {};
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+/* Current */
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes

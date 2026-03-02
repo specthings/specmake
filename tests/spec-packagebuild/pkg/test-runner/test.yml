@@ -1,0 +1,16 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+description: Description.
+do-not-run:
+- do-not-run.exe
+enabled-by: true
+links:
+- role: target
+  uid: /target/alpha
+max-retry-count-per-executable: 3
+name: Test
+params: {}
+pkg-type: test-runner
+test-runner-type: test
+type: pkg

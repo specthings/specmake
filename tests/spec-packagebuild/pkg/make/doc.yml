@@ -1,0 +1,36 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/deployment-directory}
+directory-state-type: sphinx
+document-components:
+- action: copy-and-substitute
+  add-to-index: true
+  file: source/make.rst
+document-contributors: []
+document-copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+document-html-footer: footer
+document-html-help-base-name: Make
+document-key: make
+document-latex-footer-right: footer right
+document-latex-geometry: geometry
+document-latex-header-left: header left
+document-latex-sphinxsetup: sphinxsetup
+document-latex-theme: manual
+document-license: CC-BY-SA-4.0
+document-license-map:
+  CC-BY-SA-4.0 OR BSD-2-Clause: CC-BY-SA-4.0
+document-releases: []
+document-title: Make Title
+document-toctree-maxdepth: 4
+document-type: generic
+enabled-by: true
+files: []
+hash: null
+links: []
+output-html: null
+output-pdf: null
+pkg-type: directory-state
+type: pkg

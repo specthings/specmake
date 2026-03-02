@@ -1,0 +1,31 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      overall:
+        description: |
+          It shall list the coverage limits for the coverage overall files.
+        spec-type: pkg-test-coverage-limits
+      per-file:
+        description: |
+          It shall list the default coverage limits for individual files.
+        spec-type: pkg-test-coverage-limits
+    description: |
+      This set of attributes specifies test coverage limits for coverage areas.
+    generic-attributes:
+      description: |
+        It shall list the test coverage limits for specific files.
+      key-spec-type: str
+      value-spec-type: pkg-test-coverage-limits
+    mandatory-attributes: all
+spec-name: Test Coverage Limits by Area
+spec-type: pkg-test-coverage-limits-by-area
+type: spec

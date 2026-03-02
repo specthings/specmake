@@ -1,0 +1,22 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/prefix-directory}
+directory-state-type: explicit
+enabled-by: true
+files: []
+hash: null
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+- hash: null
+  name: run-actions-member
+  params:
+    member-param: some/more/dirs/file
+  role: input-to
+  uid: run-actions
+pkg-type: directory-state
+type: pkg

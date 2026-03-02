@@ -1,0 +1,133 @@
+# SPDX-License-Identifier: BSD-2-Clause
+""" Provides package change descriptions. """
+
+# Copyright (C) 2023, 2026 embedded brains GmbH & Co. KG
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+import itertools
+
+from specitems import Item, ItemMapper, SphinxContent
+
+from .pkgitems import BuildItem
+
+
+def _issue_prologue(status: str) -> str:
+    return ("At the time when the package of this version was produced, "
+            f"the following {status} were present.")
+
+
+def _add_issues(content: SphinxContent, issues: set[Item], header: str,
+                prologue: str, which: str) -> None:
+    with content.section(header):
+        if issues:
+            content.add(prologue)
+            rows: list[tuple[str,
+                             ...]] = [("Database", "Identifier", "Subject")]
+            for item in sorted(issues):
+                database = item.parent("issue-member")
+                url = ItemMapper(item).substitute(database["url"])
+                identifier = f"`{item['identifier']} <{url}>`_"
+                subject = item["subject"].replace("`", "\\`")
+                rows.append((database["name"], identifier, subject))
+            content.add_grid_table(rows, [27, 14, 59])
+        else:
+            content.add(f"""At the time when the package was produced,
+there were no {which} associated.""")
+
+
+class PackageChanges(BuildItem):
+    """ Provides package change descriptions. """
+
+    def _get_issues(self, change: dict[str,
+                                       str]) -> tuple[set[Item], set[Item]]:
+        issues: tuple[set[Item], set[Item]] = (set(), set())
+        package_status = self.item.map(change["package-status"])
+        for link in package_status.links_to_parents("issue"):
+            issues[int(link["status"] == "open")].add(link.item)
+        return issues
+
+    def _get_change_list(self, section_level: int,
+                         with_description: bool) -> list[SphinxContent]:
+        # pylint: disable=too-many-locals
+        change_list: list[SphinxContent] = []
+        past_issues: tuple[set[Item], set[Item]] = (set(), set())
+        previous_issues: tuple[set[Item], set[Item]] = (set(), set())
+        for index, change in enumerate(self["change-list"]):
+            for past, previous in zip(past_issues, previous_issues):
+                past.update(previous)
+            content = SphinxContent(section_level=section_level)
+            if with_description:
+                content.add_blank_line()
+                content.open_section(change["name"])
+                content.add(change["description"])
+            current_issues = self._get_issues(change)
+            new_issues = current_issues[1].difference(previous_issues[1])
+            open_issues = current_issues[1].intersection(previous_issues[1])
+            closed_issues = current_issues[0].difference(past_issues[0])
+            if index == 0:
+                assert not open_issues
+                _add_issues(
+                    content, new_issues, "Initially open issues",
+                    "For the initial package version, "
+                    "the following issues were open.", "open")
+            else:
+                status = ("newly open issues with respect to "
+                          "the previous package version")
+                _add_issues(content, new_issues, "Newly open issues",
+                            _issue_prologue(status), status)
+                status = ("open issues which were newly or already open "
+                          "in the previous package version")
+                _add_issues(content, open_issues, "Already open issues",
+                            _issue_prologue(status), status)
+                _add_issues(
+                    content, closed_issues, "Closed issues",
+                    "For this package version, the following "
+                    "issues which were newly or already open in "
+                    "the previous package version were closed.", "closed")
+            if with_description:
+                content.close_section()
+            change_list.insert(0, content)
+            previous_issues = current_issues
+        return change_list
+
+    def get_change_list(self, section_level: int) -> str:
+        """ Get the change list using the section level. """
+        change_list = self._get_change_list(section_level, True)
+        return "\n".join(itertools.chain.from_iterable(change_list))
+
+    def get_open_issues(self, section_level: int) -> str:
+        """ Get the open issues using the section level. """
+        content = SphinxContent(section_level=section_level)
+        _, open_issues = self._get_issues(self["change-list"][-1])
+        _add_issues(content, open_issues, "Open issues",
+                    _issue_prologue("open issues"), "open")
+        return "\n".join(content)
+
+    def get_current_changes(self) -> str:
+        """ Get the current changes. """
+        return self["change-list"][-1]["description"]
+
+    def get_current_issues(self, section_level: int) -> str:
+        """ Get the current issues using the section level. """
+        change_list = self._get_change_list(section_level, False)
+        return "\n".join(change_list[0])

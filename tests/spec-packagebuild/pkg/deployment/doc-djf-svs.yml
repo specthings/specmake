@@ -1,0 +1,50 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/deployment-directory}/doc-djf-svs
+directory-state-type: sphinx
+document-components:
+- action: copy-and-substitute
+  add-to-index: false
+  file: source/index.rst
+document-contributors: []
+document-copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+document-html-footer: footer
+document-html-help-base-name: SVS
+document-key: blub
+document-latex-footer-right: footer right
+document-latex-geometry: geometry
+document-latex-header-left: header left
+document-latex-sphinxsetup: sphinxsetup
+document-latex-theme: manual
+document-license: CC-BY-SA-4.0
+document-license-map: {}
+document-releases: []
+document-title: SVS
+document-toctree-maxdepth: 4
+document-type: test-plan
+enabled-by: djf-svs
+files: []
+hash: null
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+- hash: null
+  name: spec
+  role: input
+  uid: ../steps/rtems-item-cache
+- hash: null
+  name: source
+  role: input
+  uid: ../source/doc-djf-svs
+- name: build
+  role: output
+  uid: ../build/doc-djf-svs
+output-html: null
+output-pdf: null
+pkg-type: directory-state
+type: pkg

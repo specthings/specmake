@@ -1,0 +1,47 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: document-type
+  spec-value: ddf-sreld
+  uid: pkg-sphinx-document
+- role: spec-refinement
+  spec-key: document-type
+  spec-value: djf-svr
+  uid: pkg-sphinx-document
+- role: spec-refinement
+  spec-key: document-type
+  spec-value: package-manual
+  uid: pkg-sphinx-document
+- role: spec-refinement
+  spec-key: document-type
+  spec-value: test-plan
+  uid: pkg-sphinx-document
+- role: spec-refinement
+  spec-key: document-type
+  spec-value: ts-icd
+  uid: pkg-sphinx-document
+- role: spec-refinement
+  spec-key: document-type
+  spec-value: ts-srs
+  uid: pkg-sphinx-document
+- role: spec-refinement
+  spec-key: document-type
+  spec-value: generic
+  uid: pkg-sphinx-document
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      This empty set of attributes is used for refined Sphinx document types
+      which do not need extra attributes.
+    mandatory-attributes: all
+spec-name: Generic Sphinx Document Item Types
+spec-type: pkg-sphinx-types
+type: spec

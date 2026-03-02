@@ -1,0 +1,15 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+enabled-by: false
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+- hash: null
+  name: bla
+  role: input-to
+  uid: c
+pkg-type: test
+type: pkg

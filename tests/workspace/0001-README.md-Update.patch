@@ -1,0 +1,19 @@
+From c60aa3c626628152251ffc221941d99b830e9061 Mon Sep 17 00:00:00 2001
+From: Sebastian Huber <sebastian.huber@embedded-brains.de>
+Date: Fri, 7 Nov 2025 01:27:51 +0100
+Subject: [PATCH] README.md: Update
+
+---
+ README.md | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/README.md b/README.md
+index cd97684..5550f57 100644
+--- a/README.md
++++ b/README.md
+@@ -1 +1,2 @@
+ This is a Git repository.
++Added by patch.
+-- 
+2.51.0
+

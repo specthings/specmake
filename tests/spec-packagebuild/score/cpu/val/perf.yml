@@ -1,0 +1,26 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: validation
+  uid: /req/root
+params:
+  buffer-count: 10
+  sample-count: 100
+test-brief: |
+  Brief.
+test-cleanup: null
+test-context: []
+test-context-support: null
+test-description: |
+  Description.
+test-includes: []
+test-local-includes: []
+test-prepare: null
+test-setup: null
+test-stop: null
+test-support: null
+test-target: tests/tc-perf.c
+test-teardown: null
+type: runtime-measurement-test

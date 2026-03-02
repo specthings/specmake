@@ -1,0 +1,20 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  Blub2 brief.
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+description: |
+  Description.
+enabled-by: true
+identifier: Blub2
+index-entries: []
+interface-type: group
+links:
+- role: interface-placement
+  uid: header-2
+- role: requirement-refinement
+  uid: /req/api
+name: Blub2
+text: |
+  Blub2 text.
+type: interface

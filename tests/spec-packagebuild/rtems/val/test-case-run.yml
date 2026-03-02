@@ -1,0 +1,49 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links: []
+test-actions:
+- action-brief: |
+    Action brief.
+  action-code: |
+    /* Nothing to do */
+  checks:
+  - brief: |
+      Check brief.
+    code: |
+      /* Check code */
+    links:
+    - role: validation
+      uid: ../req/func
+    - role: validation
+      uid: ../req/group
+    - role: validation
+      uid: ../req/perf
+  links: []
+test-brief: |
+  Test brief
+test-context: []
+test-context-support: null
+test-description: null
+test-header:
+  code: null
+  freestanding: true
+  includes: []
+  local-includes: []
+  run-params:
+  - description: |
+      Parameter description
+    dir: null
+    name: source
+    specifier: int ${.:name}
+  target: tests/tr-test-case.h
+test-includes: []
+test-local-includes:
+- tr-test-case.h
+test-setup: null
+test-stop: null
+test-support: null
+test-target: tests/tr-test-case.c
+test-teardown: null
+type: test-case

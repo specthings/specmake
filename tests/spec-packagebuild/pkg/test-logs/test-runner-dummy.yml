@@ -1,0 +1,31 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/deployment-directory}
+directory-state-type: test-log
+enabled-by: run-tests-dummy
+files:
+- file: test-log-dummy.json
+  hash: null
+hash: null
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+- hash: null
+  name: target
+  role: input
+  uid: /target/alpha
+- hash: null
+  name: build-configuration
+  role: input
+  uid: ../build-config-empty
+- hash: null
+  output-name: log
+  params: {}
+  role: make
+  uid: ../test-runner/dummy
+pkg-type: directory-state
+type: pkg

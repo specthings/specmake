@@ -1,0 +1,23 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+command:
+- foo
+- bar
+- ${.:/test-executable}
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+description: Description.
+discard-patterns:
+- enabled-by: true
+  pattern: 'u.*v.*w'
+do-not-run: []
+enabled-by: true
+links:
+- role: target
+  uid: /target/alpha
+max-process-count: 1
+max-retry-count-per-executable: 0
+name: Subprocess
+params: {}
+pkg-type: test-runner
+test-runner-type: subprocess
+type: pkg

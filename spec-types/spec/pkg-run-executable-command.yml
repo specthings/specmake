@@ -1,0 +1,26 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: directory-state-type
+  spec-value: run-executable-command
+  uid: pkg-directory-state
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      file-name:
+        description: |
+          It shall be the file name of the command.
+        spec-type: str
+    description: |
+      This set of attributes specifies a command to run executables.
+    mandatory-attributes: all
+spec-name: Run Executable Command Item Type
+spec-type: pkg-run-executable-command
+type: spec

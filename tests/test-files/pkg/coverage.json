@@ -1,0 +1,1594 @@
+{
+    "gcovr/format_version": "0.14",
+    "files": [
+        {
+            "file": "cpukit/score/src/threadqenqueue.c",
+            "lines": [
+                {
+                    "line_number": 193,
+                    "function_name": "_Thread_queue_Path_release",
+                    "count": 7369,
+                    "branches": [],
+                    "gcovr/md5": "cfea7fa1d8e46d670bb3bcd986e95745"
+                },
+                {
+                    "line_number": 229,
+                    "function_name": "_Thread_queue_Path_release",
+                    "count": 7369,
+                    "branches": [],
+                    "gcovr/md5": "cbb184dd8e05c9709e5dcaedaa0495cf"
+                },
+                {
+                    "line_number": 276,
+                    "function_name": "_Thread_queue_Path_acquire",
+                    "count": 7369,
+                    "branches": [],
+                    "gcovr/md5": "1a2e9ccfc6caad15036e6d0cfcfc53a9"
+                },
+                {
+                    "line_number": 369,
+                    "function_name": "_Thread_queue_Path_acquire",
+                    "count": 8480,
+                    "branches": [],
+                    "gcovr/md5": "2f1de8edfdd8db47b8c12a3bc2e030f4"
+                },
+                {
+                    "line_number": 371,
+                    "function_name": "_Thread_queue_Path_acquire",
+                    "count": 8480,
+                    "branches": [
+                        {
+                            "branchno": 0,
+                            "count": 0,
+                            "fallthrough": true,
+                            "throw": false,
+                            "source_block_id": 0
+                        },
+                        {
+                            "branchno": 1,
+                            "count": 0,
+                            "fallthrough": false,
+                            "throw": false,
+                            "source_block_id": 0
+                        }
+                    ],
+                    "gcovr/md5": "29755c156b7564024ca5f9434ea32681"
+                },
+                {
+                    "line_number": 372,
+                    "function_name": "_Thread_queue_Path_acquire",
+                    "count": 840,
+                    "branches": [],
+                    "gcovr/md5": "c69973bbc8cba4f0d9a820a2ad6d3765"
+                },
+                {
+                    "line_number": 375,
+                    "function_name": "_Thread_queue_Path_acquire",
+                    "count": 7640,
+                    "branches": [
+                        {
+                            "branchno": 0,
+                            "count": 0,
+                            "fallthrough": true,
+                            "throw": false,
+                            "source_block_id": 0
+                        },
+                        {
+                            "branchno": 1,
+                            "count": 7494,
+                            "fallthrough": false,
+                            "throw": false,
+                            "source_block_id": 0
+                        }
+                    ],
+                    "gcovr/md5": "1ae2d2e795756db526cdade16c66cf33"
+                },
+                {
+                    "line_number": 376,
+                    "function_name": "_Thread_queue_Path_acquire",
+                    "count": 146,
+                    "branches": [],
+                    "gcovr/md5": "c0d0dbbba009b9ebb0fd691c766d190e"
+                },
+                {
+                    "line_number": 379,
+                    "function_name": "_Thread_queue_Path_acquire",
+                    "count": 7494,
+                    "branches": [],
+                    "gcovr/md5": "b86e849f309df241cda2edb23d7cfa56"
+                },
+                {
+                    "line_number": 380,
+                    "function_name": "_Thread_queue_Path_acquire",
+                    "count": 7494,
+                    "branches": [
+                        {
+                            "branchno": 0,
+                            "count": 0,
+                            "fallthrough": true,
+                            "throw": false,
+                            "source_block_id": 0
+                        },
+                        {
+                            "branchno": 1,
+                            "count": 6383,
+                            "fallthrough": false,
+                            "throw": false,
+                            "source_block_id": 0
+                        }
+                    ],
+                    "gcovr/md5": "90b14a674b07ffc306e68f758764769b"
+                },
+                {
+                    "line_number": 383,
+                    "function_name": "_Thread_queue_Path_acquire",
+                    "count": 6383,
+                    "branches": [],
+                    "gcovr/md5": "d6725878ea5e1174d34c9a855876fecf"
+                },
+                {
+                    "line_number": 386,
+                    "function_name": "_Thread_queue_Enqueue_do_nothing_extra",
+                    "count": 453,
+                    "branches": [],
+                    "gcovr/md5": "e652895e8348c57d4129c29d1c3f2812"
+                },
+                {
+                    "line_number": 394,
+                    "function_name": "_Thread_queue_Enqueue_do_nothing_extra",
+                    "count": 453,
+                    "branches": [],
+                    "gcovr/md5": "cbb184dd8e05c9709e5dcaedaa0495cf"
+                },
+                {
+                    "line_number": 396,
+                    "function_name": "_Thread_queue_Deadlock_status",
+                    "count": 0,
+                    "branches": [],
+                    "gcovr/md5": "c9e5352e75e1bba93f0ffb375ca65286"
+                },
+                {
+                    "line_number": 398,
+                    "function_name": "_Thread_queue_Deadlock_status",
+                    "count": 0,
+                    "branches": [],
+                    "gcovr/md5": "0ec19daff54426f5cc8984857102f660"
+                },
+                {
+                    "line_number": 399,
+                    "function_name": "_Thread_queue_Deadlock_status",
+                    "count": 0,
+                    "branches": [],
+                    "gcovr/md5": "cbb184dd8e05c9709e5dcaedaa0495cf"
+                },
+                {
+                    "line_number": 401,
+                    "function_name": "_Thread_queue_Deadlock_fatal",
+                    "count": 56,
+                    "branches": [],
+                    "gcovr/md5": "01b0545658683b780ca0cfaa17438fa6"
+                },
+                {
+                    "line_number": 403,
+                    "function_name": "_Thread_queue_Deadlock_fatal",
+                    "count": 56,
+                    "branches": [],
+                    "gcovr/md5": "aaee3733133d96195a55c9cc88df1862"
+                },
+                {
+                    "line_number": 406,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 7369,
+                    "branches": [],
+                    "gcovr/md5": "0fc142a9ae76a6621e751f80ba7face0"
+                },
+                {
+                    "line_number": 425,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 7369,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 7369
+                        }
+                    ],
+                    "gcovr/md5": "0e434795572552e6219447465105e06d"
+                },
+                {
+                    "line_number": 428,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 7369,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 7369
+                        }
+                    ],
+                    "gcovr/md5": "a2e4e9b35434a969c634f01b94f2ca0f"
+                },
+                {
+                    "line_number": 430,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 7369,
+                    "branches": [
+                        {
+                            "branchno": 0,
+                            "count": 146,
+                            "fallthrough": true,
+                            "throw": false,
+                            "source_block_id": 0
+                        },
+                        {
+                            "branchno": 1,
+                            "count": 7223,
+                            "fallthrough": false,
+                            "throw": false,
+                            "source_block_id": 0
+                        }
+                    ],
+                    "gcovr/md5": "ee09a0f87afeaea9f13f3b0f50cbcaba"
+                },
+                {
+                    "line_number": 431,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 146,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 146
+                        }
+                    ],
+                    "gcovr/md5": "d6fbd6c02aedd4d05c6f3bac1b5430de"
+                },
+                {
+                    "line_number": 432,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 146,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 146
+                        }
+                    ],
+                    "gcovr/md5": "90306aa94abeba9abd517fb1f115c939"
+                },
+                {
+                    "line_number": 433,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 146,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 146
+                        }
+                    ],
+                    "gcovr/md5": "6260c04b286541ca2aa0494cf4c6b7be"
+                },
+                {
+                    "line_number": 434,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 146,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 146
+                        }
+                    ],
+                    "gcovr/md5": "4b67e3ffb2683184cc757d6db483a12e"
+                },
+                {
+                    "line_number": 436,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 146,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 90
+                        }
+                    ],
+                    "gcovr/md5": "39ddfaedd874953aa3f05533c05dc541"
+                },
+                {
+                    "line_number": 437,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 90,
+                    "branches": [],
+                    "gcovr/md5": "be0ac0b84c2df61ee2e8b8582500c0d8"
+                },
+                {
+                    "line_number": 440,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 7223,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 7223
+                        }
+                    ],
+                    "gcovr/md5": "8770fd56b1a93c13937eccf43d45c6ae"
+                },
+                {
+                    "line_number": 441,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 7223,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 7223
+                        }
+                    ],
+                    "gcovr/md5": "ebdaf60ad00972b3451ba2c77029dfbf"
+                },
+                {
+                    "line_number": 442,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 7223,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 7223
+                        }
+                    ],
+                    "gcovr/md5": "cc0a07e25c9b7c915587497389aa0e3b"
+                },
+                {
+                    "line_number": 444,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 7223,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 7223
+                        }
+                    ],
+                    "gcovr/md5": "398daf52b680868074f015a2f6d3cb7b"
+                },
+                {
+                    "line_number": 446,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 7223,
+                    "branches": [],
+                    "gcovr/md5": "42b51aaddc60572e3e41e71e24a3bbf9"
+                },
+                {
+                    "line_number": 447,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 7223,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 7223
+                        }
+                    ],
+                    "gcovr/md5": "3046e58067bdabdfd44f3f52fbb5b66e"
+                },
+                {
+                    "line_number": 448,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 7223,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 7223
+                        }
+                    ],
+                    "gcovr/md5": "fee57a9290b1e37afb77bf1fea6bca46"
+                },
+                {
+                    "line_number": 449,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 7223,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 7223
+                        }
+                    ],
+                    "gcovr/md5": "ff09ab574076ae8f00826ab8e468452d"
+                },
+                {
+                    "line_number": 451,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 7223,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 7223
+                        }
+                    ],
+                    "gcovr/md5": "a56a95976ec6c4262aedc02d059e2721"
+                },
+                {
+                    "line_number": 461,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 7223,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 7223
+                        }
+                    ],
+                    "gcovr/md5": "ea3fde7d1b95147585a2aa53915c11f6"
+                },
+                {
+                    "line_number": 472,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 7223,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 7223
+                        }
+                    ],
+                    "gcovr/md5": "4ec6eb41da1537a42038c82b9d75adcb"
+                },
+                {
+                    "line_number": 477,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 7223,
+                    "branches": [
+                        {
+                            "branchno": 0,
+                            "count": 328,
+                            "fallthrough": true,
+                            "throw": false,
+                            "source_block_id": 0
+                        },
+                        {
+                            "branchno": 1,
+                            "count": 6895,
+                            "fallthrough": false,
+                            "throw": false,
+                            "source_block_id": 0
+                        }
+                    ],
+                    "gcovr/md5": "7f2ba483d81ac26cda19e83e9d0f8ecd"
+                },
+                {
+                    "line_number": 478,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 328,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 328
+                        }
+                    ],
+                    "gcovr/md5": "0189a9419964c2703e401a2fccb505d2"
+                },
+                {
+                    "line_number": 481,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 7223,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 7223
+                        }
+                    ],
+                    "gcovr/md5": "9381af9a3b1c9be106e9e6049f49a2a1"
+                },
+                {
+                    "line_number": 482,
+                    "function_name": "_Thread_queue_Enqueue",
+                    "count": 7223,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 6708
+                        }
+                    ],
+                    "gcovr/md5": "f7280486f366ab5792fea6509f8e21f3"
+                },
+                {
+                    "line_number": 573,
+                    "function_name": "_Thread_queue_Force_ready_again",
+                    "count": 3297,
+                    "branches": [],
+                    "gcovr/md5": "49796e5689ba87a5d512e45dde656bf2"
+                },
+                {
+                    "line_number": 579,
+                    "function_name": "_Thread_queue_Force_ready_again",
+                    "count": 3297,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 3297
+                        }
+                    ],
+                    "gcovr/md5": "ee8657fe9b4e5d7d3f545729608261ee"
+                },
+                {
+                    "line_number": 580,
+                    "function_name": "_Thread_queue_Force_ready_again",
+                    "count": 3297,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 3297
+                        }
+                    ],
+                    "gcovr/md5": "8dc72920850753f38ddcbcdde42c8396"
+                },
+                {
+                    "line_number": 581,
+                    "function_name": "_Thread_queue_Force_ready_again",
+                    "count": 3297,
+                    "branches": [],
+                    "gcovr/md5": "cbb184dd8e05c9709e5dcaedaa0495cf"
+                },
+                {
+                    "line_number": 583,
+                    "function_name": "_Thread_queue_Make_ready_again",
+                    "count": 2964,
+                    "branches": [],
+                    "gcovr/md5": "7850cff710240dd0ab0f7db5592fc7dd"
+                },
+                {
+                    "line_number": 592,
+                    "function_name": "_Thread_queue_Make_ready_again",
+                    "count": 2964,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2964
+                        }
+                    ],
+                    "gcovr/md5": "c119b90302bf8056489d86fa7eef22fc"
+                },
+                {
+                    "line_number": 597,
+                    "function_name": "_Thread_queue_Make_ready_again",
+                    "count": 2964,
+                    "branches": [
+                        {
+                            "branchno": 0,
+                            "count": 14,
+                            "fallthrough": true,
+                            "throw": false,
+                            "source_block_id": 0
+                        },
+                        {
+                            "branchno": 1,
+                            "count": 2950,
+                            "fallthrough": false,
+                            "throw": false,
+                            "source_block_id": 0
+                        }
+                    ],
+                    "gcovr/md5": "fc0eeb9cd67ed2b132b44f2d75f0d866"
+                },
+                {
+                    "line_number": 598,
+                    "function_name": "_Thread_queue_Make_ready_again",
+                    "count": 14,
+                    "branches": [],
+                    "gcovr/md5": "26b412760050d23321b2d72449b4d151"
+                },
+                {
+                    "line_number": 601,
+                    "function_name": "_Thread_queue_Make_ready_again",
+                    "count": 2950,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2950
+                        }
+                    ],
+                    "gcovr/md5": "c8043933ff0e95bd86bfc934e6083e21"
+                },
+                {
+                    "line_number": 602,
+                    "function_name": "_Thread_queue_Make_ready_again",
+                    "count": 2950,
+                    "branches": [],
+                    "gcovr/md5": "0c5a48e78188005d42e7b64035dbc7a5"
+                },
+                {
+                    "line_number": 605,
+                    "function_name": "_Thread_queue_Make_ready_again",
+                    "count": 2964,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2964
+                        }
+                    ],
+                    "gcovr/md5": "8dc72920850753f38ddcbcdde42c8396"
+                },
+                {
+                    "line_number": 606,
+                    "function_name": "_Thread_queue_Make_ready_again",
+                    "count": 2964,
+                    "branches": [],
+                    "gcovr/md5": "86cca26d429a1f60cb383962966ad5f1"
+                },
+                {
+                    "line_number": 621,
+                    "function_name": "_Thread_queue_Make_new_owner_ready_again",
+                    "count": 3297,
+                    "branches": [],
+                    "gcovr/md5": "ba4ad85088fb5ac0c83d4d6b8f75dc5f"
+                },
+                {
+                    "line_number": 627,
+                    "function_name": "_Thread_queue_Make_new_owner_ready_again",
+                    "count": 3297,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 3297
+                        }
+                    ],
+                    "gcovr/md5": "4dadfa5ac125cfc8a19332adca9f9cc3"
+                },
+                {
+                    "line_number": 628,
+                    "function_name": "_Thread_queue_Make_new_owner_ready_again",
+                    "count": 3297,
+                    "branches": [],
+                    "gcovr/md5": "afeb26dcbf236beadd48be0fdfa090ed"
+                },
+                {
+                    "line_number": 632,
+                    "function_name": "_Thread_queue_Unblock_new_owner_and_remove_timer",
+                    "count": 3297,
+                    "branches": [],
+                    "gcovr/md5": "3514902c6d076983f81fafaaa5cd1899"
+                },
+                {
+                    "line_number": 644,
+                    "function_name": "_Thread_queue_Unblock_new_owner_and_remove_timer",
+                    "count": 3297,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 3297
+                        }
+                    ],
+                    "gcovr/md5": "bb23f99bfa940ce677313ddcf2bca181"
+                },
+                {
+                    "line_number": 646,
+                    "function_name": "_Thread_queue_Unblock_new_owner_and_remove_timer",
+                    "count": 3297,
+                    "branches": [],
+                    "gcovr/md5": "cbb184dd8e05c9709e5dcaedaa0495cf"
+                },
+                {
+                    "line_number": 648,
+                    "function_name": "_Thread_queue_Extract_locked",
+                    "count": 2473,
+                    "branches": [],
+                    "gcovr/md5": "f135a73def33ec190490174f32653603"
+                },
+                {
+                    "line_number": 658,
+                    "function_name": "_Thread_queue_Extract_locked",
+                    "count": 2473,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2473
+                        }
+                    ],
+                    "gcovr/md5": "7b94a9b34ec8fd994e6d6255c0c978b3"
+                },
+                {
+                    "line_number": 659,
+                    "function_name": "_Thread_queue_Extract_locked",
+                    "count": 2473,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2473
+                        }
+                    ],
+                    "gcovr/md5": "aee8635275771dbf25b9b511b9703dba"
+                },
+                {
+                    "line_number": 662,
+                    "function_name": "_Thread_queue_Resume",
+                    "count": 491,
+                    "branches": [],
+                    "gcovr/md5": "f306d1e0de9bfddcc8e9dbf1da9a80b1"
+                },
+                {
+                    "line_number": 670,
+                    "function_name": "_Thread_queue_Resume",
+                    "count": 491,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 491
+                        }
+                    ],
+                    "gcovr/md5": "e48a82d6352632de832a18d5a098cbdb"
+                },
+                {
+                    "line_number": 672,
+                    "function_name": "_Thread_queue_Resume",
+                    "count": 491,
+                    "branches": [
+                        {
+                            "branchno": 0,
+                            "count": 487,
+                            "fallthrough": true,
+                            "throw": false,
+                            "source_block_id": 0
+                        },
+                        {
+                            "branchno": 1,
+                            "count": 4,
+                            "fallthrough": false,
+                            "throw": false,
+                            "source_block_id": 0
+                        }
+                    ],
+                    "gcovr/md5": "ad26f282441c161e378fbad282b911c0"
+                },
+                {
+                    "line_number": 675,
+                    "function_name": "_Thread_queue_Resume",
+                    "count": 487,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 487
+                        }
+                    ],
+                    "gcovr/md5": "729577bcf6ac137dd47480457e36e568"
+                },
+                {
+                    "line_number": 676,
+                    "function_name": "_Thread_queue_Resume",
+                    "count": 487,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 487
+                        }
+                    ],
+                    "gcovr/md5": "545b118f22b0b41dad027c10e9270437"
+                },
+                {
+                    "line_number": 680,
+                    "function_name": "_Thread_queue_Resume",
+                    "count": 487,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 487
+                        }
+                    ],
+                    "gcovr/md5": "0189a9419964c2703e401a2fccb505d2"
+                },
+                {
+                    "line_number": 682,
+                    "function_name": "_Thread_queue_Resume",
+                    "count": 487,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 487
+                        }
+                    ],
+                    "gcovr/md5": "acd29f43898a80bfcf5b099aaff7046e"
+                },
+                {
+                    "line_number": 684,
+                    "function_name": "_Thread_queue_Resume",
+                    "count": 4,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 4
+                        }
+                    ],
+                    "gcovr/md5": "545b118f22b0b41dad027c10e9270437"
+                },
+                {
+                    "line_number": 688,
+                    "function_name": "_Thread_queue_Resume",
+                    "count": 491,
+                    "branches": [],
+                    "gcovr/md5": "cbb184dd8e05c9709e5dcaedaa0495cf"
+                },
+                {
+                    "line_number": 690,
+                    "function_name": "_Thread_queue_Surrender",
+                    "count": 2857,
+                    "branches": [],
+                    "gcovr/md5": "35683b23efe81691709071701a42ad01"
+                },
+                {
+                    "line_number": 704,
+                    "function_name": "_Thread_queue_Surrender",
+                    "count": 2857,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2857
+                        }
+                    ],
+                    "gcovr/md5": "8770fd56b1a93c13937eccf43d45c6ae"
+                },
+                {
+                    "line_number": 705,
+                    "function_name": "_Thread_queue_Surrender",
+                    "count": 2857,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2857
+                        }
+                    ],
+                    "gcovr/md5": "1cb7c887acb11e452de459a146c1f744"
+                },
+                {
+                    "line_number": 711,
+                    "function_name": "_Thread_queue_Surrender",
+                    "count": 2857,
+                    "branches": [],
+                    "gcovr/md5": "b11d84166aa3c5efe431baca29f34a2d"
+                },
+                {
+                    "line_number": 717,
+                    "function_name": "_Thread_queue_Surrender",
+                    "count": 2857,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2857
+                        }
+                    ],
+                    "gcovr/md5": "90da14ecd09d88b3f229ddbe99b9418a"
+                },
+                {
+                    "line_number": 720,
+                    "function_name": "_Thread_queue_Surrender",
+                    "count": 2857,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2857
+                        }
+                    ],
+                    "gcovr/md5": "abc8612a1ffe83e6fad724c10a8f0449"
+                },
+                {
+                    "line_number": 722,
+                    "function_name": "_Thread_queue_Surrender",
+                    "count": 2857,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2857
+                        }
+                    ],
+                    "gcovr/md5": "fee57a9290b1e37afb77bf1fea6bca46"
+                },
+                {
+                    "line_number": 723,
+                    "function_name": "_Thread_queue_Surrender",
+                    "count": 2857,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2857
+                        }
+                    ],
+                    "gcovr/md5": "6724186fe04be04f08123e2c1a54e68f"
+                },
+                {
+                    "line_number": 728,
+                    "function_name": "_Thread_queue_Surrender",
+                    "count": 2857,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2857
+                        }
+                    ],
+                    "gcovr/md5": "9381af9a3b1c9be106e9e6049f49a2a1"
+                },
+                {
+                    "line_number": 729,
+                    "function_name": "_Thread_queue_Surrender",
+                    "count": 2857,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2857
+                        }
+                    ],
+                    "gcovr/md5": "e7d5934c91604c22887bd39070fd1bf6"
+                },
+                {
+                    "line_number": 735,
+                    "function_name": "_Thread_queue_Surrender",
+                    "count": 2857,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2857
+                        }
+                    ],
+                    "gcovr/md5": "88b57ce2cfe4ab415be963f3791df6f6"
+                },
+                {
+                    "line_number": 736,
+                    "function_name": "_Thread_queue_Surrender",
+                    "count": 2857,
+                    "branches": [],
+                    "gcovr/md5": "cbb184dd8e05c9709e5dcaedaa0495cf"
+                },
+                {
+                    "line_number": 738,
+                    "function_name": "_Thread_queue_Surrender_no_priority",
+                    "count": 357,
+                    "branches": [],
+                    "gcovr/md5": "fa5ab846be8f71fc37e25b19c7512930"
+                },
+                {
+                    "line_number": 750,
+                    "function_name": "_Thread_queue_Surrender_no_priority",
+                    "count": 357,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 357
+                        }
+                    ],
+                    "gcovr/md5": "57bf831d74f93ff7fbcb57bced094a16"
+                },
+                {
+                    "line_number": 756,
+                    "function_name": "_Thread_queue_Surrender_no_priority",
+                    "count": 357,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 357
+                        }
+                    ],
+                    "gcovr/md5": "a94893e372a4cd025d8de7379edcd933"
+                },
+                {
+                    "line_number": 757,
+                    "function_name": "_Thread_queue_Surrender_no_priority",
+                    "count": 357,
+                    "branches": [],
+                    "gcovr/md5": "cbb184dd8e05c9709e5dcaedaa0495cf"
+                },
+                {
+                    "line_number": 759,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 2585,
+                    "branches": [],
+                    "gcovr/md5": "239de8370694bf334c93cde77694564f"
+                },
+                {
+                    "line_number": 773,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 2585,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2585
+                        }
+                    ],
+                    "gcovr/md5": "13a597f71a5654f8d499d46c0e29e83f"
+                },
+                {
+                    "line_number": 775,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 2585,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2585
+                        }
+                    ],
+                    "gcovr/md5": "8770fd56b1a93c13937eccf43d45c6ae"
+                },
+                {
+                    "line_number": 776,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 2585,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2585
+                        }
+                    ],
+                    "gcovr/md5": "6dc4fd622d073fafa43ab2b9c163b5b2"
+                },
+                {
+                    "line_number": 777,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 2585,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2585
+                        }
+                    ],
+                    "gcovr/md5": "130411e3f7aa14e80da661fdbe0d98a3"
+                },
+                {
+                    "line_number": 778,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 2585,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2585
+                        }
+                    ],
+                    "gcovr/md5": "cc637e1649f3517bba70add22a427324"
+                },
+                {
+                    "line_number": 780,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 2585,
+                    "branches": [],
+                    "gcovr/md5": "ccec13140e7d51e52c41cc2b12ef9014"
+                },
+                {
+                    "line_number": 781,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 2585,
+                    "branches": [],
+                    "gcovr/md5": "d813d071d5766847d4807c26c981630d"
+                },
+                {
+                    "line_number": 783,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 2585,
+                    "branches": [
+                        {
+                            "branchno": 0,
+                            "count": 2145,
+                            "fallthrough": true,
+                            "throw": false,
+                            "source_block_id": 0
+                        },
+                        {
+                            "branchno": 1,
+                            "count": 440,
+                            "fallthrough": false,
+                            "throw": false,
+                            "source_block_id": 0
+                        }
+                    ],
+                    "gcovr/md5": "54faa7e80ee73e67a1c6226f9cbf1d18"
+                },
+                {
+                    "line_number": 784,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 2145,
+                    "branches": [],
+                    "gcovr/md5": "60658d4a69d85752abb6d5cff501b14f"
+                },
+                {
+                    "line_number": 785,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 2145,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2145
+                        }
+                    ],
+                    "gcovr/md5": "10b77071ee17632aaa387da151801788"
+                },
+                {
+                    "line_number": 787,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 2145,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2145
+                        }
+                    ],
+                    "gcovr/md5": "545b118f22b0b41dad027c10e9270437"
+                },
+                {
+                    "line_number": 791,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 2145,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2145
+                        }
+                    ],
+                    "gcovr/md5": "ccc1ed6cd7e1920336b5457d701c1d25"
+                },
+                {
+                    "line_number": 792,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 2145,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 2145
+                        }
+                    ],
+                    "gcovr/md5": "acd29f43898a80bfcf5b099aaff7046e"
+                },
+                {
+                    "line_number": 793,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 2145,
+                    "branches": [],
+                    "gcovr/md5": "c6af2fdcb66fcf788cdd0cdb887d756a"
+                },
+                {
+                    "line_number": 796,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 440,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 440
+                        }
+                    ],
+                    "gcovr/md5": "1cb7c887acb11e452de459a146c1f744"
+                },
+                {
+                    "line_number": 803,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 440,
+                    "branches": [],
+                    "gcovr/md5": "b11d84166aa3c5efe431baca29f34a2d"
+                },
+                {
+                    "line_number": 805,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 440,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 440
+                        }
+                    ],
+                    "gcovr/md5": "abc8612a1ffe83e6fad724c10a8f0449"
+                },
+                {
+                    "line_number": 811,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 440,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 440
+                        }
+                    ],
+                    "gcovr/md5": "90da14ecd09d88b3f229ddbe99b9418a"
+                },
+                {
+                    "line_number": 812,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 440,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 440
+                        }
+                    ],
+                    "gcovr/md5": "f7a9d1c21724bc9407d812841644499d"
+                },
+                {
+                    "line_number": 813,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 440,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 440
+                        }
+                    ],
+                    "gcovr/md5": "aa00bde8b00d0d21cec32acd0729c415"
+                },
+                {
+                    "line_number": 814,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 440,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 440
+                        }
+                    ],
+                    "gcovr/md5": "a348b3b042726696c7d0ba02d33c423e"
+                },
+                {
+                    "line_number": 817,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 440,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 440
+                        }
+                    ],
+                    "gcovr/md5": "fee57a9290b1e37afb77bf1fea6bca46"
+                },
+                {
+                    "line_number": 818,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 440,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 440
+                        }
+                    ],
+                    "gcovr/md5": "6724186fe04be04f08123e2c1a54e68f"
+                },
+                {
+                    "line_number": 823,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 440,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 440
+                        }
+                    ],
+                    "gcovr/md5": "9381af9a3b1c9be106e9e6049f49a2a1"
+                },
+                {
+                    "line_number": 824,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 440,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 440
+                        }
+                    ],
+                    "gcovr/md5": "e7d5934c91604c22887bd39070fd1bf6"
+                },
+                {
+                    "line_number": 830,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 440,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 440
+                        }
+                    ],
+                    "gcovr/md5": "88b57ce2cfe4ab415be963f3791df6f6"
+                },
+                {
+                    "line_number": 831,
+                    "function_name": "_Thread_queue_Surrender_priority_ceiling",
+                    "count": 0,
+                    "branches": [],
+                    "gcovr/md5": "196e5e2792e6a11f8b854af40f827543"
+                }
+            ],
+            "functions": [
+                {
+                    "name": "_Thread_queue_Path_release",
+                    "lineno": 193,
+                    "execution_count": 7369,
+                    "blocks_percent": 100.0
+                },
+                {
+                    "name": "_Thread_queue_Path_acquire",
+                    "lineno": 276,
+                    "execution_count": 7369,
+                    "blocks_percent": 100.0
+                },
+                {
+                    "name": "_Thread_queue_Enqueue_do_nothing_extra",
+                    "lineno": 386,
+                    "execution_count": 0,
+                    "blocks_percent": 100.0
+                },
+                {
+                    "name": "_Thread_queue_Deadlock_status",
+                    "lineno": 396,
+                    "execution_count": 0,
+                    "blocks_percent": 100.0
+                },
+                {
+                    "name": "_Thread_queue_Deadlock_fatal",
+                    "lineno": 401,
+                    "execution_count": 56,
+                    "blocks_percent": 100.0
+                },
+                {
+                    "name": "_Thread_queue_Enqueue",
+                    "lineno": 406,
+                    "execution_count": 7369,
+                    "blocks_percent": 100.0
+                },
+                {
+                    "name": "_Thread_queue_Force_ready_again",
+                    "lineno": 573,
+                    "execution_count": 3297,
+                    "blocks_percent": 100.0
+                },
+                {
+                    "name": "_Thread_queue_Make_ready_again",
+                    "lineno": 583,
+                    "execution_count": 2964,
+                    "blocks_percent": 100.0
+                },
+                {
+                    "name": "_Thread_queue_Make_new_owner_ready_again",
+                    "lineno": 621,
+                    "execution_count": 3297,
+                    "blocks_percent": 100.0
+                },
+                {
+                    "name": "_Thread_queue_Unblock_new_owner_and_remove_timer",
+                    "lineno": 632,
+                    "execution_count": 3297,
+                    "blocks_percent": 100.0
+                },
+                {
+                    "name": "_Thread_queue_Extract_locked",
+                    "lineno": 648,
+                    "execution_count": 2473,
+                    "blocks_percent": 100.0
+                },
+                {
+                    "name": "_Thread_queue_Resume",
+                    "lineno": 662,
+                    "execution_count": 491,
+                    "blocks_percent": 100.0
+                },
+                {
+                    "name": "_Thread_queue_Surrender",
+                    "lineno": 690,
+                    "execution_count": 2857,
+                    "blocks_percent": 100.0
+                },
+                {
+                    "name": "_Thread_queue_Surrender_no_priority",
+                    "lineno": 738,
+                    "execution_count": 357,
+                    "blocks_percent": 100.0
+                },
+                {
+                    "name": "_Thread_queue_Surrender_priority_ceiling",
+                    "lineno": 759,
+                    "execution_count": 2585,
+                    "blocks_percent": 100.0
+                }
+            ]
+        },
+        {
+            "file": "cpukit/score/src/threadyield.c",
+            "lines": [
+                {
+                    "line_number": 44,
+                    "function_name": "_Thread_Yield",
+                    "count": 26949,
+                    "branches": [],
+                    "gcovr/md5": "7314614b843e5ef0ed6222c32c0dcdb3"
+                },
+                {
+                    "line_number": 48,
+                    "function_name": "_Thread_Yield",
+                    "count": 26949,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 26949
+                        }
+                    ],
+                    "gcovr/md5": "a865180975949b17f08f4b6e65cc3d48"
+                },
+                {
+                    "line_number": 50,
+                    "function_name": "_Thread_Yield",
+                    "count": 26949,
+                    "branches": [
+                        {
+                            "branchno": 1,
+                            "count": 26947,
+                            "fallthrough": true,
+                            "throw": false,
+                            "source_block_id": 0
+                        },
+                        {
+                            "branchno": 2,
+                            "count": 2,
+                            "fallthrough": false,
+                            "throw": false,
+                            "source_block_id": 0
+                        }
+                    ],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 26949
+                        }
+                    ],
+                    "gcovr/md5": "60037fee4645acfa01e78ecb2f660abd"
+                },
+                {
+                    "line_number": 51,
+                    "function_name": "_Thread_Yield",
+                    "count": 26947,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 26947
+                        }
+                    ],
+                    "gcovr/md5": "99397a981d91c7352130c7c460310a10"
+                },
+                {
+                    "line_number": 54,
+                    "function_name": "_Thread_Yield",
+                    "count": 26949,
+                    "branches": [],
+                    "calls": [
+                        {
+                            "callno": 0,
+                            "source_block_id": 0,
+                            "returned": 26949
+                        }
+                    ],
+                    "gcovr/md5": "04fd3cbdb81a8688d6e8669323638888"
+                },
+                {
+                    "line_number": 55,
+                    "function_name": "_Thread_Yield",
+                    "count": 0,
+                    "branches": [],
+                    "gcovr/md5": "cbb184dd8e05c9709e5dcaedaa0495cf"
+                }
+            ],
+            "functions": []
+        }
+    ]
+}

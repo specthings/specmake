@@ -1,0 +1,19 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+a: a
+component-type: generic
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+d:
+- d
+e:
+ e0: 0
+enabled-by: true
+enabled-set: []
+enabled-set-actions: []
+enabled-set-feedback-mapping: {}
+links:
+- role: use-package-component-template
+  uid: /pkg/template/component
+pkg-type: workspace
+type: pkg
+workspace-type: component

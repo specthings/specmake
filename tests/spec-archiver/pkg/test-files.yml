@@ -1,0 +1,19 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025, 2026 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+destination-directory: ${.:/component/tmpdir}
+directory: ${.:/component/workspace-directory}
+enabled-by: true
+links:
+- hash: null
+  name: component
+  role: input
+  uid: component
+patterns:
+- exclude: []
+  include:
+  - '**/*'
+pkg-type: workspace
+type: pkg
+workspace-type: directory

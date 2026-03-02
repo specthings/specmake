@@ -1,0 +1,35 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2023, 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: action
+  spec-value: create-kconfig-file
+  uid: pkg-action
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      output-name:
+        description: |
+          It shall be name of the output directory state.
+        spec-type: str
+      key-value-pairs:
+        description: null
+        spec-type: pkg-config-key-value-pair-list
+      target:
+        description: |
+          If the value is present, then it shall be the target file relative to
+          the base directory of the output directory state, otherwise the
+          target file is the first file of the output directory state.
+        spec-type: optional-str
+    description: |
+      This set of attributes specifies a create kconfig file action.
+    mandatory-attributes: all
+spec-name: Create Kconfig File Action
+spec-type: pkg-action-create-kconfig-file
+type: spec

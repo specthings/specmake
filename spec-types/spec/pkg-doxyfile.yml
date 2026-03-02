@@ -1,0 +1,32 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: directory-state-type
+  spec-value: doxyfile
+  uid: pkg-directory-state
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      generate-html:
+        description: |
+          It shall be true, to enable generation of HTML output, otherwise
+          false.
+        spec-type: bool
+      generate-latex:
+        description: |
+          It shall be true, to enable generation of LaTeX output, otherwise
+          false.
+        spec-type: bool
+    description: |
+      This set of attributes specifies a Doxyfile.
+    mandatory-attributes: all
+spec-name: Doxyfile Item Type
+spec-type: pkg-doxyfile
+type: spec

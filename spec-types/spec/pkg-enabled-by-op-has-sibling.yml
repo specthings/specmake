@@ -1,0 +1,42 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      sibling-role:
+        description: |
+          If the value is present, then it shall be the set of child roles to
+          select the siblings.  If the value is not present, then all sibling
+          roles are selected.
+        spec-type: optional-str-or-list-str
+      sibling-type:
+        description: |
+          If the value is present, then it shall be the set of child types to
+          select the siblings.  If the value is not present, then all siblings
+          are selected.
+        spec-type: optional-str-or-list-str
+      parent-role:
+        description: |
+          If the value is present, then it shall be the set of parent roles to
+          select the parents.  If the value is not present, then all parent
+          roles are selected.
+        spec-type: optional-str-or-list-str
+      parent-type:
+        description: |
+          If the value is present, then it shall be the set of parent types to
+          select the parents.  If the value is not present, then all parents
+          are selected.
+        spec-type: optional-str-or-list-str
+    description: |
+      This set of attributes specifies an enabled-by has sibling operation.
+    mandatory-attributes: all
+spec-name: Enabled-By Has Sibling Operation
+spec-type: pkg-enabled-by-op-has-sibling
+type: spec

@@ -1,0 +1,31 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: template-type
+  spec-value: component
+  uid: pkg-template
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      enabled-set-actions:
+        description: |
+          It shall be the list of enabled set actions.
+        spec-type: enabled-set-action-list
+      enabled-set-feedback-mapping:
+        description: |
+          It shall be the mapping of enabled set keys potentially present at
+          the component to the associated key for the upper-level component.
+        spec-type: str-to-str
+    description: |
+      This set of attributes specifies a component template.
+    mandatory-attributes: all
+spec-name: Component Template Item Type
+spec-type: pkg-template-component
+type: spec

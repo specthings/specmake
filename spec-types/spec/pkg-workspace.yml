@@ -1,0 +1,26 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: pkg-type
+  spec-value: workspace
+  uid: pkg-root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      workspace-type:
+        description: |
+          It shall be the workspace type.
+        spec-type: name
+    description: |
+      This set of attributes specifies a package workspace.
+    mandatory-attributes: all
+spec-name: Package Workspace Item Type
+spec-type: pkg-workspace
+type: spec

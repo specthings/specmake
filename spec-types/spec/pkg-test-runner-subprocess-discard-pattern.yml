@@ -1,0 +1,30 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      enabled-by:
+        description: |
+          It shall define the conditions under which the discard pattern is
+          enabled.  The executable file name is the enabled set.
+        spec-type: enabled-by
+      pattern:
+        description: |
+          It shall define the regular expression to determine if a test result
+          may get discarded.  If the test output matches with the pattern, then
+          the test may get executed again.
+        spec-type: str
+    description: |
+      This set of attributes specifies a discard pattern and the conditions
+      under which it is enabled.
+    mandatory-attributes: all
+spec-name: Subprocess Test Runner Discard Pattern
+spec-type: pkg-test-runner-subprocess-discard-pattern
+type: spec

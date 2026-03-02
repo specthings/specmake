@@ -1,0 +1,313 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+actions:
+- action: mkdir
+  enabled-by: true
+  exist-ok: false
+  parents: true
+  path: ${.:/component/build-directory}/some/more/dirs
+- action: for-each
+  enabled-by: true
+  member-actions:
+  - action: touch
+    enabled-by: true
+    exist-ok: false
+    path: ${.:/component/build-directory}/${.:/params/member-param}
+- action: touch
+  enabled-by:
+    has-output: there-is-no-output
+  exist-ok: false
+  path: ${.:/component/build-directory}/some/more/dirs/file
+- action: touch
+  enabled-by: true
+  exist-ok: true
+  path: ${.:/component/build-directory}/some/more/dirs/file
+- action: remove
+  enabled-by: true
+  missing-ok: false
+  path: ${.:/component/build-directory}/some/more/dirs/file
+- action: remove
+  enabled-by: true
+  missing-ok: true
+  path: ${.:/component/build-directory}/some/more/dirs/file
+- action: remove
+  enabled-by: true
+  missing-ok: false
+  path: ${.:/component/build-directory}/some/more/dirs
+- action: remove
+  enabled-by: true
+  missing-ok: true
+  path: ${.:/component/build-directory}/some/more/dirs
+- action: mkdir
+  enabled-by: true
+  exist-ok: false
+  parents: false
+  path: ${.:/component/build-directory}/some/more/dirs
+- action: touch
+  enabled-by: true
+  exist-ok: false
+  path: ${.:/component/build-directory}/some/more/dirs/file
+- action: remove-empty-directories
+  enabled-by: true
+  path: ${.:/component/build-directory}/some
+- action: remove
+  enabled-by: true
+  missing-ok: false
+  path: ${.:/component/build-directory}/some/more/dirs/file
+- action: remove-empty-directories
+  enabled-by: true
+  path: ${.:/component/build-directory}/some
+- action: mkdir
+  enabled-by: true
+  exist-ok: false
+  parents: true
+  path: ${.:/component/build-directory}/some/more/dirs
+- action: touch
+  enabled-by: true
+  exist-ok: false
+  path: ${.:/component/build-directory}/some/more/dirs/file
+- action: remove-tree
+  enabled-by: true
+  missing-ok: true
+  path: ${.:/component/build-directory}/some/more
+- action: remove-tree
+  enabled-by: true
+  missing-ok: true
+  path: ${.:/component/build-directory}/some/more
+- action: remove-tree
+  enabled-by: true
+  missing-ok: false
+  path: ${.:/component/build-directory}/some
+- action: mkdir
+  enabled-by: true
+  exist-ok: false
+  parents: true
+  path: ${.:/component/build-directory}/some/more/dirs
+- action: touch
+  enabled-by: true
+  exist-ok: false
+  path: ${.:/component/build-directory}/some/more/dirs/file
+- action: remove-glob
+  enabled-by: true
+  path: ${.:/component/build-directory}/some/more/dirs
+  patterns:
+  - foobar
+  remove-tree: false
+- action: remove-glob
+  enabled-by: true
+  path: ${.:/component/build-directory}/some/more/dirs
+  patterns:
+  - file
+  remove-tree: false
+- action: touch
+  enabled-by: true
+  exist-ok: false
+  path: ${.:/component/build-directory}/some/more/dirs/file
+- action: remove-glob
+  enabled-by: true
+  path: ${.:/component/build-directory}/some
+  patterns:
+  - more
+  remove-tree: true
+- action: remove-glob
+  enabled-by: true
+  path: ${.:/component/build-directory}
+  patterns:
+  - some
+  remove-tree: false
+- action: directory-state-discard
+  enabled-by: true
+  output-name: destination
+- action: directory-state-discard-and-clear
+  enabled-by: true
+  output-name: destination
+- action: directory-state-clear
+  enabled-by:
+    has-output: destination
+  output-name: destination
+- action: directory-state-clear
+  enabled-by: true
+  output-name: disabled
+- action: directory-state-add-tarfile-members
+  enabled-by: true
+  extract: true
+  output-name: destination
+  pattern: archive.tar.xz
+  prefix-path: ${.:/component/deployment-directory}
+  search-path: ${.:/component/prefix-directory}
+- action: directory-state-clear
+  enabled-by: true
+  output-name: destination
+- action: mkdir
+  enabled-by: true
+  exist-ok: false
+  parents: true
+  path: ${.:/component/build-directory}/some/more/dirs
+- action: touch
+  enabled-by: true
+  exist-ok: false
+  path: ${.:/component/build-directory}/some/more/dirs/file
+- action: directory-state-add-files
+  enabled-by: true
+  output-name: destination
+  path: ${.:/component/prefix-directory}
+  pattern: archive.tar.xz
+- action: directory-state-add-tree
+  enabled-by: true
+  excludes: []
+  output-name: destination
+  prefix: null
+  root: ${.:/component/build-directory}/some/more
+- action: mkdir
+  enabled-by: true
+  exist-ok: false
+  parents: true
+  path: ${../output/run-actions:/directory}/dirs
+- action: touch
+  enabled-by: true
+  exist-ok: false
+  path: ${../output/run-actions:/directory}/dirs/file
+- action: directory-state-copy-tree
+  enabled-by: true
+  excludes: []
+  output-name: destination
+  prefix: u
+  root: ${.:/component/build-directory}/some/more
+- action: directory-state-move-tree
+  enabled-by: true
+  excludes: []
+  output-name: destination
+  prefix: v
+  root: ${../output/run-actions:/directory}/u/dirs
+- action: touch
+  enabled-by: true
+  exist-ok: false
+  path: ${../output/run-actions:/directory}/u/dirs/file
+- action: directory-state-clear
+  enabled-by: true
+  output-name: destination
+- action: create-ini-file
+  enabled-by: true
+  output-name: destination
+  sections: []
+  target: foo.ini
+- action: create-ini-file
+  enabled-by: true
+  output-name: destination
+  sections:
+  - enabled-by: true
+    key-value-pairs:
+    - enabled-by: true
+      key: KA
+      value: VA
+    - enabled-by:
+      - eq:
+        - ${.:/params/foo}
+        - ${.:/make-params/huh}
+      - not:
+          eq:
+          - only-one-element
+      - not:
+          eq:
+          - blub
+          - blub
+      key: KB
+      value: VB
+    name: AA
+  - enabled-by: false
+    key-value-pairs: []
+    name: SB
+  target: null
+- action: create-kconfig-file
+  enabled-by: true
+  output-name: destination
+  key-value-pairs:
+  - enabled-by: true
+    key: A
+    value: 'y'
+  - enabled-by: false
+    key: B
+    value: 'n'
+  target: null
+- action: copy-and-substitute
+  enabled-by: true
+  input-name: source
+  output-name: destination
+  source: null
+  target: null
+- action: copy-and-substitute
+  enabled-by: true
+  input-name: source
+  output-name: destination
+  source: dir/subdir/c.txt
+  target: null
+- action: copy-and-substitute
+  enabled-by: true
+  input-name: source
+  output-name: destination
+  source: null
+  target: some/other
+- action: copy-and-substitute
+  enabled-by: true
+  input-name: source
+  output-name: destination
+  source: dir/subdir/c.txt
+  target: some/other/file.txt
+- action: subprocess
+  command:
+  - git
+  - foobar
+  enabled-by: true
+  env: []
+  expected-return-code: null
+  working-directory: ${.:/component/build-directory}
+- action: subprocess
+  command:
+  - git
+  - status
+  enabled-by: true
+  env:
+  - action: clear
+    name: PATH
+    value: null
+  - action: set
+    name: FOOBAR
+    value: foo
+  - action: path-append
+    name: FOOBAR
+    value: bar
+  - action: path-prepend
+    name: FOOBAR
+    value: ${.:/host-processor-count}
+  - action: unset
+    name: FOOBAR
+    value: null
+  - action: set
+    name: BLUB
+    value: blub
+  - action: path-append
+    name: BLUB
+    value: blub-append
+  - action: path-prepend
+    name: BLUB
+    value: blub-prepend
+  - action: ignore
+    name: IGNORE
+    value: ignore
+  expected-return-code: null
+  working-directory: .
+- action: subprocess
+  command:
+  - git
+  - status
+  enabled-by: true
+  env: []
+  expected-return-code: 0
+  working-directory: ${.:/component/build-directory}
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+enabled-by: true
+links: []
+params:
+  foo: bar
+pkg-type: run-actions
+type: pkg

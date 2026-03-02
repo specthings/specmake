@@ -1,0 +1,12 @@
+SPDX-License-Identifier: CC-BY-SA-4.0
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- customer-status: Y
+  role: statement-of-compliance
+  supplier-status: N
+  uid: clause-1
+text: |
+  No.
+type: statement-of-compliance

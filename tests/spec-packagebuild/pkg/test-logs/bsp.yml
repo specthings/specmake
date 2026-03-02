@@ -1,0 +1,41 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/deployment-directory}
+directory-state-type: test-log
+enabled-by:
+- run-executable-command
+- run-tests
+files:
+- file: test-log-bsp.json
+  hash: null
+hash: null
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+- hash: null
+  name: target
+  role: input
+  uid: /target/alpha
+- hash: null
+  name: build-configuration
+  role: input
+  uid: ../build-config
+- hash: null
+  name: source
+  role: input
+  uid: ../build/bsp
+- hash: null
+  name: test-log
+  role: input-to
+  uid: ../deployment/run
+- hash: null
+  output-name: log
+  params: {}
+  role: make
+  uid: ../test-runner/test
+pkg-type: directory-state
+type: pkg

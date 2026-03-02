@@ -1,0 +1,32 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: action
+  spec-value: glossary
+  uid: pkg-sphinx-component
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      file:
+        description: |
+          It shall be the glossary target file path relative to the build
+          directory.
+        spec-type: str
+      glossary-groups:
+        description: |
+          It shall be the list of Glossary group identifiers.
+        spec-type: list-uid
+    description: |
+      This set of attributes specifies that a file which should contain the
+      glossary of a document using Sphinx documentation framework.
+    mandatory-attributes: all
+spec-name: Glossary Sphinx Document Component
+spec-type: pkg-sphinx-component-glossary
+type: spec

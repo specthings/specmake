@@ -1,0 +1,39 @@
+Previous
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+static RTEMS_INLINE_ROUTINE void f(void) {};
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+/* Previous */
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes
+No changes

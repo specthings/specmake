@@ -1,0 +1,41 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: name
+  spec-value: test-property
+  uid: pkg-input-role
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      expected:
+        description: |
+          It shall be the expected value of the test property.
+        spec-type: str
+      key:
+        description: |
+          It shall be the test property key.
+        spec-type: str
+      property-name:
+        description: |
+          It shall be the name of the test property.  This name is used in test
+          reports.
+        spec-type: str
+      type:
+        description: |
+          It shall be the type of the test property.  The type is used to
+          evaluate and present the property in test reports.
+        spec-type: str
+    description: |
+      It defines the test property input role of links and is used to provide a
+      property for a test report.
+    mandatory-attributes: all
+spec-name: Test Property Input Link Role
+spec-type: pkg-input-test-property-role
+type: spec

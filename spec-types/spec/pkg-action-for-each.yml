@@ -1,0 +1,26 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: action
+  spec-value: for-each
+  uid: pkg-action
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      member-actions:
+        description: |
+          It shall be the list of actions to run for each member.
+        spec-type: pkg-action-list
+    description: |
+      This set of attributes specifies a list of actions to run for each member.
+    mandatory-attributes: all
+spec-name: For Each Member Action
+spec-type: pkg-action-for-each
+type: spec

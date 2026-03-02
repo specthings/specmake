@@ -1,0 +1,79 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.12.0" xml:lang="en-US">
+  <compound refid="structgs__0" kind="struct"><name>gs_0</name>
+    <member refid="structgs__0_1a5226a883ac10623503af9aff0d08974f" kind="variable"><name>a</name></member>
+    <member refid="structgs__0_1a685de05882780fc00a682548615f210c" kind="variable"><name>b</name></member>
+  </compound>
+  <compound refid="structgt__0" kind="struct"><name>gt_0</name>
+    <member refid="structgt__0_1a9aa1d8ed9d7e498e65f425aa4fbfe002" kind="variable"><name>x</name></member>
+    <member refid="structgt__0_1ae7e13b530de35e0b0265f70d40deacc3" kind="variable"><name>y</name></member>
+  </compound>
+  <compound refid="uniongu__0" kind="union"><name>gu_0</name>
+    <member refid="uniongu__0_1ada50eac1a833cdc3ec0912c960afc5c9" kind="variable"><name>i</name></member>
+    <member refid="uniongu__0_1a5b018f5d8da27b129a695da32fb76766" kind="variable"><name>f</name></member>
+  </compound>
+  <compound refid="uniongu__1" kind="union"><name>gu_1</name>
+    <member refid="uniongu__1_1ac89ff798820290332bdfbaf10e82d03a" kind="variable"><name>i</name></member>
+    <member refid="uniongu__1_1ae457d8d965623a77a7a126f4799b2132" kind="variable"><name>f</name></member>
+  </compound>
+  <compound refid="structs__0" kind="struct"><name>s_0</name>
+    <member refid="structs__0_1ad73531d55d1edbe65a44638f48650fa4" kind="variable"><name>a</name></member>
+    <member refid="structs__0_1a87787b0ceed5fde395b76a2a4ceaa409" kind="variable"><name>b</name></member>
+  </compound>
+  <compound refid="structt__0" kind="struct"><name>t_0</name>
+    <member refid="structt__0_1af92e5d9afdf5bd2b6b22ba776396e8bd" kind="variable"><name>x</name></member>
+    <member refid="structt__0_1a1b608434dbda7079d334b0fe032ad4f5" kind="variable"><name>y</name></member>
+  </compound>
+  <compound refid="unionu__0" kind="union"><name>u_0</name>
+    <member refid="unionu__0_1a92d7a79506e2ee00ed0c4479fc1f4623" kind="variable"><name>c</name></member>
+    <member refid="unionu__0_1a2d0cd97db97651ad770ca48d5049eacf" kind="variable"><name>i</name></member>
+  </compound>
+  <compound refid="unionu__1" kind="union"><name>u_1</name>
+    <member refid="unionu__1_1a2f0f43ae7543e722da1864ba60e5e48c" kind="variable"><name>c</name></member>
+    <member refid="unionu__1_1aef977ba9d71bb0c099a908d03302781d" kind="variable"><name>i</name></member>
+  </compound>
+  <compound refid="bad_8c" kind="file"><name>bad.c</name>
+    <member refid="bad_8c_1a8cc687906d3e4964fc993ca1bf18472e" kind="function"><name>bad_f</name></member>
+  </compound>
+  <compound refid="foobar_8h" kind="file"><name>foobar.h</name>
+  </compound>
+  <compound refid="header_8h" kind="file"><name>header.h</name>
+    <member refid="group__FooGroup_1ga983f90c33690e3ad1647997231aafc7d" kind="define"><name>GM_0</name></member>
+    <member refid="group__FooGroup_1gacdd314c944182a477291569a0f5e632a" kind="define"><name>GD_1</name></member>
+    <member refid="header_8h_1a435562b339e8cd3ed2275b5f6a8e41be" kind="define"><name>M_0</name></member>
+    <member refid="header_8h_1ab31d832d82bef7f1c6df989c3040a216" kind="define"><name>D_1</name></member>
+    <member refid="group__FooGroup_1gad9450fd0bc1a7ba2ce704c69f0bbfb46" kind="enum"><name>ge_0</name></member>
+    <member refid="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9f" kind="enum"><name>e_0</name></member>
+    <member refid="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9fad67b160e0559ffcbea0f19ab5a997668" kind="enumvalue"><name>E_0_A</name></member>
+    <member refid="header_8h_1adbc74fb9d93477777c8774e9db9864a2" kind="enum"><name>e_1</name></member>
+    <member refid="header_8h_1adbc74fb9d93477777c8774e9db9864a2af8032135292d00116d68c5e58e3301e1" kind="enumvalue"><name>E_1_A</name></member>
+    <member refid="header_8h_1a01325395cf2af877fccf63801bcc2aeb" kind="typedef"><name>e_0</name></member>
+    <member refid="group__FooGroup_1ga670c7f2490aa4624e8b3ee3d04ce448b" kind="function"><name>gf_0</name></member>
+    <member refid="group__FooGroup_1ga4f62ceb5b79ec2e1e2ccc4f379ca2d5f" kind="function"><name>gf_1</name></member>
+    <member refid="group__FooGroup_1ga4ce2d0c839ba3140c1285e4a29fe71e4" kind="function"><name>gf_2</name></member>
+    <member refid="group__FooGroup_1ga0da7a13a733311498f208f6a08b6e918" kind="function"><name>gf_3</name></member>
+    <member refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" kind="function"><name>gf_4</name></member>
+    <member refid="header_8h_1aa2f8caf29834418e60688b225e2413db" kind="function"><name>f_0</name></member>
+    <member refid="header_8h_1a17124d351aade94c069796b00a063b72" kind="function"><name>f_1</name></member>
+    <member refid="header_8h_1a25096a68ec7d02165d897d8cf59e3dce" kind="function"><name>f_2</name></member>
+  </compound>
+  <compound refid="source_8c" kind="file"><name>source.c</name>
+    <member refid="group__FooGroup_1ga670c7f2490aa4624e8b3ee3d04ce448b" kind="function"><name>gf_0</name></member>
+    <member refid="group__FooGroup_1ga4f62ceb5b79ec2e1e2ccc4f379ca2d5f" kind="function"><name>gf_1</name></member>
+    <member refid="source_8c_1aa2f8caf29834418e60688b225e2413db" kind="function"><name>f_0</name></member>
+    <member refid="source_8c_1a17124d351aade94c069796b00a063b72" kind="function"><name>f_1</name></member>
+  </compound>
+  <compound refid="group__FooGroup" kind="group"><name>FooGroup</name>
+    <member refid="group__FooGroup_1gad9450fd0bc1a7ba2ce704c69f0bbfb46" kind="enum"><name>ge_0</name></member>
+    <member refid="group__FooGroup_1ggad9450fd0bc1a7ba2ce704c69f0bbfb46ab6b348f38612ea526613c0a9d40a0f4b" kind="enumvalue"><name>GE_0_A</name></member>
+    <member refid="group__FooGroup_1ggad9450fd0bc1a7ba2ce704c69f0bbfb46abe38e392580fc344890940799adb8460" kind="enumvalue"><name>GE_0_B</name></member>
+    <member refid="group__FooGroup_1ggad9450fd0bc1a7ba2ce704c69f0bbfb46a6abf4f552630e9e8994c91aeadf9d9d0" kind="enumvalue"><name>GE_0_C</name></member>
+    <member refid="group__FooGroup_1ga670c7f2490aa4624e8b3ee3d04ce448b" kind="function"><name>gf_0</name></member>
+    <member refid="group__FooGroup_1ga4f62ceb5b79ec2e1e2ccc4f379ca2d5f" kind="function"><name>gf_1</name></member>
+    <member refid="group__FooGroup_1ga4ce2d0c839ba3140c1285e4a29fe71e4" kind="function"><name>gf_2</name></member>
+    <member refid="group__FooGroup_1ga0da7a13a733311498f208f6a08b6e918" kind="function"><name>gf_3</name></member>
+    <member refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" kind="function"><name>gf_4</name></member>
+    <member refid="group__FooGroup_1ga983f90c33690e3ad1647997231aafc7d" kind="define"><name>GM_0</name></member>
+    <member refid="group__FooGroup_1gacdd314c944182a477291569a0f5e632a" kind="define"><name>GD_1</name></member>
+  </compound>
+</doxygenindex>

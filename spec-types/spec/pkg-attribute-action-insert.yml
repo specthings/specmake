@@ -1,0 +1,39 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: action
+  spec-value: insert-after
+  uid: pkg-attribute-action
+- role: spec-refinement
+  spec-key: action
+  spec-value: insert-before
+  uid: pkg-attribute-action
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      value:
+        description: |
+          If shall be the action value.
+        spec-type: any
+      where-key:
+        description: |
+          If shall be the list member attribute key to select the value
+          defining the insert position.
+        spec-type: any
+      where-value:
+        description: |
+          If shall be the value defining the insert position.
+        spec-type: any
+    description: |
+      This set of attributes specifies an insert attribute action.
+    mandatory-attributes: all
+spec-name: Insert Attribute Action
+spec-type: pkg-attribute-action-insert
+type: spec

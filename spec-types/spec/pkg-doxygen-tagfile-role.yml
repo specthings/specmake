@@ -1,0 +1,23 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: doxygen-tagfile
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      It defines the Doxygen tagfile role of links and is used to define the
+      filename of a Doxygen tagfile.
+    mandatory-attributes: all
+spec-name: Doxygen Tagfile Link Role
+spec-type: pkg-doxygen-tagfile-role
+type: spec

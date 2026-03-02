@@ -1,0 +1,28 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: template-type
+  spec-value: inline-item
+  uid: pkg-template
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      attributes:
+        description: |
+          It shall be the attribute set of the item.  The
+          ``SPDX-License-Identifier`` and ``copyrights`` attributes are taken
+          from the template item.
+        spec-type: any
+    description: |
+      This set of attributes specifies an inline item template.
+    mandatory-attributes: all
+spec-name: Inline Item Template Item Type
+spec-type: pkg-template-inline-item
+type: spec

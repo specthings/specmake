@@ -1,0 +1,25 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  Brief target A.
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+enabled-by: true
+description: |
+  Description target A.
+key: a
+links:
+- role: requirement-refinement
+  uid: ../req/root
+- role: performance-runtime-limits-provider
+  uid: target-a-perf
+- role: verification-provider
+  uid: /verification/test-failures/default
+name: Name Target A
+non-functional-type: design-target
+rationale: null
+references: []
+requirement-type: non-functional
+target-hash: cpI09Ju6orF2eoJcmJi4igeIarypsRNwUxTrZSs9LMg=
+text: |
+  The ${.:/name} shall be a target.
+type: requirement

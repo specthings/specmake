@@ -1,0 +1,42 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: pkg-type
+  spec-value: sphinx-element
+  uid: pkg-root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      content:
+        description: |
+          It shall be the element content.
+        spec-type: str
+      element-key:
+        description: |
+          It shall be the element key.  Elements of the same key are listed
+          together.
+        spec-type: name
+      header:
+        description: |
+          It shall be the element header.  If more than one element is
+          associated with the element key, then the elements are listed using
+          the header followed by the content of each element.  If exactly one
+          element is associated with the element key, then no list is
+          generated, the header is omitted, and only the content of the element
+          is added to the document.
+        spec-type: str
+    description: |
+      This set of attributes specifies a Sphinx element which can be added to a
+      document together with other elements associated with the same element
+      key.
+    mandatory-attributes: all
+spec-name: Sphinx Element Item Type
+spec-type: pkg-sphinx-element
+type: spec

@@ -1,0 +1,23 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+content: |
+  Subsection content: ${.:/component/arch}
+
+  ${.:/label}
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+enabled-by: true
+label: ${.:/links[1]/header}
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../subcomponent
+- hash: null
+  header: ${.:/links[1]/section-key} 2 Header
+  header-is-optional: true
+  name: document-section
+  role: input-to
+  section-key: subsection
+  uid: doc-section
+pkg-type: sphinx-section
+type: pkg

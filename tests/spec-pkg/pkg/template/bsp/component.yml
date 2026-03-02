@@ -1,0 +1,73 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+attribute-actions:
+- action: set
+  enabled-by:
+    not:
+      has-sibling:
+        sibling-role: does-not-exist
+        sibling-type: does-not-exist
+        parent-role: does-not-exist
+        parent-type: does-not-exist
+  path: /has-sibling-0
+  value: has-sibling-0
+- action: set
+  enabled-by:
+    not:
+      has-sibling:
+        sibling-role: does-not-exist
+        sibling-type: does-not-exist
+        parent-role: null
+        parent-type: does-not-exist
+  path: /has-sibling-1
+  value: has-sibling-1
+- action: set
+  enabled-by:
+    not:
+      has-sibling:
+        sibling-role: does-not-exist
+        sibling-type: does-not-exist
+        parent-role: input
+        parent-type: null
+  path: /has-sibling-2
+  value: has-sibling-2
+- action: set
+  enabled-by:
+    not:
+      has-sibling:
+        sibling-role: input
+        sibling-type: does-not-exist
+        parent-role: input
+        parent-type: pkg/workspace/component
+  path: /has-sibling-3
+  value: has-sibling-3
+- action: set
+  enabled-by:
+    has-sibling:
+      sibling-role:
+      - input
+      sibling-type:
+      - pkg/workspace/component
+      parent-role:
+      - input
+      parent-type:
+      - pkg/workspace/component
+  path: /has-sibling-4
+  value: has-sibling-4
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+enabled-set-actions:
+- action: add
+  enabled-by: true
+  value:
+  - ${.:/bsp}
+  - ${.:/bsp-family}
+enabled-set-feedback-mapping:
+  ${.:/bsp}: pkg.bsp.${.:/component/arch}.${.:/bsp}
+  ${.:/bsp-family}: pkg.bsp-family.${.:/component/arch}.${.:/bsp-family}
+  bsp-feature: pkg.feature.red
+  bsp-2-feature: pkg.feature.blue
+links: []
+pkg-type: template
+template-type: component
+type: pkg

@@ -1,0 +1,21 @@
+SPDX-License-Identifier: CC-BY-SA-4.0
+aim: Aim.
+bullet: y
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+expected-output: Expected output.
+links:
+- role: requirement-refinement
+  uid: standard
+name: Clause 1 name
+non-functional-type: ecss
+notes:
+- Note.
+rationale: null
+references: []
+requirement-type: non-functional
+section: 1.2.3.4
+text: |
+  The clause shall be 1.
+type: requirement

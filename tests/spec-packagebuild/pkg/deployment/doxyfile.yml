@@ -1,0 +1,60 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/build-directory}
+directory-state-type: doxyfile
+enabled-by: doxyfile
+files:
+- file: Doxyfile
+  hash: null
+generate-html: true
+generate-latex: false
+hash: null
+links:
+- role: doxygen-tagfile
+  uid: doxyfile
+- role: output-directory
+  uid: doxyfile
+- exclude-patterns:
+  - enabled-by: true
+    path: '*/exclude/a/*'
+  hash: null
+  include-path:
+  - enabled-by: true
+    path:
+    - include/path/0
+    - include/path/1
+  - enabled-by: false
+    path:
+    - include/path/2
+  input:
+  - enabled-by: true
+    path: input/path/0
+  name: doxygen
+  role: input
+  strip-from-path:
+  - enabled-by: true
+    path: strip/from/path
+  uid: ../source/a
+- exclude-patterns:
+  - enabled-by: true
+    path:
+    - '*/exclude/b/*'
+  hash: null
+  include-path: []
+  input: []
+  name: doxygen
+  role: input
+  strip-from-path: []
+  uid: ../source/b
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+- hash: null
+  name: source
+  role: input
+  uid: ../source/doxyfile
+pkg-type: directory-state
+type: pkg

@@ -1,0 +1,33 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+- hash: null
+  name: foo
+  role: input
+  uid: a
+- name: blub
+  role: output
+  uid: ../output/a
+- name: moo
+  role: output
+  uid: ../output/b
+pkg-type: test-mapper
+type: pkg
+values:
+  a: a
+  b:
+  - b1
+  - b2
+  c: c
+  list:
+  - ${.:/values/a}
+  - ${.:/values/b}
+  - - d
+    - e
+  - ${.:/values/c}

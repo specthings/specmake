@@ -1,0 +1,14 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+index-entries: []
+interface-type: unspecified-header-file
+links:
+- role: interface-placement
+  uid: domain
+- role: interface-ingroup
+  uid: unspec-group
+path: bar/more/unspec.h
+references: []
+type: interface

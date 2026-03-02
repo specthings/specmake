@@ -1,0 +1,322 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.12.0" xml:lang="en-US">
+  <compounddef id="group__FooGroup" kind="group">
+    <compoundname>FooGroup</compoundname>
+    <title>Example Group</title>
+    <innerfile refid="foobar_8h">foobar.h</innerfile>
+    <innerfile refid="header_8h">header.h</innerfile>
+    <innerfile refid="source_8c">source.c</innerfile>
+    <innerclass refid="structgt__0" prot="public">gt_0</innerclass>
+    <innerclass refid="structgs__0" prot="public">gs_0</innerclass>
+    <innerclass refid="uniongu__0" prot="public">gu_0</innerclass>
+    <innerclass refid="uniongu__1" prot="public">gu_1</innerclass>
+    <sectiondef kind="enum">
+      <memberdef kind="enum" id="group__FooGroup_1gad9450fd0bc1a7ba2ce704c69f0bbfb46" prot="public" static="no" strong="no">
+        <type></type>
+        <name>ge_0</name>
+        <enumvalue id="group__FooGroup_1ggad9450fd0bc1a7ba2ce704c69f0bbfb46ab6b348f38612ea526613c0a9d40a0f4b" prot="public">
+          <name>GE_0_A</name>
+          <briefdescription>
+<para>Brief GE_0_A. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>Description GE_0_A. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group__FooGroup_1ggad9450fd0bc1a7ba2ce704c69f0bbfb46abe38e392580fc344890940799adb8460" prot="public">
+          <name>GE_0_B</name>
+          <briefdescription>
+<para>Brief GE_0_B. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>Description GE_0_B. </para>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="group__FooGroup_1ggad9450fd0bc1a7ba2ce704c69f0bbfb46a6abf4f552630e9e8994c91aeadf9d9d0" prot="public">
+          <name>GE_0_C</name>
+          <briefdescription>
+<para>Brief GE_0_C. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>Description GE_0_C. </para>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Brief ge_0. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Description ge_0. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="174" column="1" bodyfile="header.h" bodystart="174" bodyend="195"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="group__FooGroup_1ga670c7f2490aa4624e8b3ee3d04ce448b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int gf_0</definition>
+        <argsstring>(const int *in, int *out, int *inout, int none)</argsstring>
+        <name>gf_0</name>
+        <param>
+          <type>const int *</type>
+          <declname>in</declname>
+        </param>
+        <param>
+          <type>int *</type>
+          <declname>out</declname>
+        </param>
+        <param>
+          <type>int *</type>
+          <declname>inout</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>none</declname>
+        </param>
+        <briefdescription>
+<para>Brief <ref refid="group__FooGroup_1ga670c7f2490aa4624e8b3ee3d04ce448b" kindref="member">gf_0()</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Description <ref refid="group__FooGroup_1ga670c7f2490aa4624e8b3ee3d04ce448b" kindref="member">gf_0()</ref>.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">in</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="group__FooGroup_1ga670c7f2490aa4624e8b3ee3d04ce448b" kindref="member">gf_0()</ref> in description.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="out">out</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="group__FooGroup_1ga670c7f2490aa4624e8b3ee3d04ce448b" kindref="member">gf_0()</ref> out description.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="inout">inout</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="group__FooGroup_1ga670c7f2490aa4624e8b3ee3d04ce448b" kindref="member">gf_0()</ref> inout description.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>none</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="group__FooGroup_1ga670c7f2490aa4624e8b3ee3d04ce448b" kindref="member">gf_0()</ref> none description.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><ref refid="group__FooGroup_1ga670c7f2490aa4624e8b3ee3d04ce448b" kindref="member">gf_0()</ref> return description.</para>
+</simplesect>
+<parameterlist kind="retval"><parameteritem>
+<parameternamelist>
+<parametername>retval</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="group__FooGroup_1ga670c7f2490aa4624e8b3ee3d04ce448b" kindref="member">gf_0()</ref> retval description. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="68" column="5" bodyfile="source.c" bodystart="40" bodyend="43" declfile="header.h" declline="68" declcolumn="5"/>
+      </memberdef>
+      <memberdef kind="function" id="group__FooGroup_1ga4f62ceb5b79ec2e1e2ccc4f379ca2d5f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void gf_1</definition>
+        <argsstring>(void)</argsstring>
+        <name>gf_1</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+<para>Brief <ref refid="group__FooGroup_1ga4f62ceb5b79ec2e1e2ccc4f379ca2d5f" kindref="member">gf_1()</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Description <ref refid="group__FooGroup_1ga4f62ceb5b79ec2e1e2ccc4f379ca2d5f" kindref="member">gf_1()</ref>. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="75" column="6" bodyfile="source.c" bodystart="45" bodyend="48" declfile="header.h" declline="75" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="group__FooGroup_1ga4ce2d0c839ba3140c1285e4a29fe71e4" prot="public" static="yes" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>int</type>
+        <definition>static int gf_2</definition>
+        <argsstring>(int x, int y)</argsstring>
+        <name>gf_2</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <briefdescription>
+<para>Brief gf_2(). </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Description gf_2().</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">x</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>gf_2() x description.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">y</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>gf_2() y description.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>gf_2() return description.</para>
+</simplesect>
+<parameterlist kind="retval"><parameteritem>
+<parameternamelist>
+<parametername>retval</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>gf_2() retval description. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="90" column="19" bodyfile="header.h" bodystart="90" bodyend="93"/>
+      </memberdef>
+      <memberdef kind="function" id="group__FooGroup_1ga0da7a13a733311498f208f6a08b6e918" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void gf_3</definition>
+        <argsstring>(int x, int y)</argsstring>
+        <name>gf_3</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>y</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="96" column="6" declfile="header.h" declline="96" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int gf_4</definition>
+        <argsstring>(const int *in, int *out)</argsstring>
+        <name>gf_4</name>
+        <param>
+          <type>const int *</type>
+          <declname>in</declname>
+        </param>
+        <param>
+          <type>int *</type>
+          <declname>out</declname>
+        </param>
+        <briefdescription>
+<para>Brief <ref refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" kindref="member">gf_4()</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Description <ref refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" kindref="member">gf_4()</ref>.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">in</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" kindref="member">gf_4()</ref> in description.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="out">out</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" kindref="member">gf_4()</ref> out description.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><ref refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" kindref="member">gf_4()</ref> return description. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="109" column="5" declfile="header.h" declline="109" declcolumn="5"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="define">
+      <memberdef kind="define" id="group__FooGroup_1ga983f90c33690e3ad1647997231aafc7d" prot="public" static="no">
+        <name>GM_0</name>
+        <param><defname>a</defname></param>
+        <param><defname>b</defname></param>
+        <initializer>((a) &gt; (b) ? (a) : (b))</initializer>
+        <briefdescription>
+<para>Brief <ref refid="group__FooGroup_1ga983f90c33690e3ad1647997231aafc7d" kindref="member">GM_0()</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>Description <ref refid="group__FooGroup_1ga983f90c33690e3ad1647997231aafc7d" kindref="member">GM_0()</ref>.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="in">a</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="group__FooGroup_1ga983f90c33690e3ad1647997231aafc7d" kindref="member">GM_0()</ref> a description.</para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><ref refid="group__FooGroup_1ga983f90c33690e3ad1647997231aafc7d" kindref="member">GM_0()</ref> b description.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para><ref refid="group__FooGroup_1ga983f90c33690e3ad1647997231aafc7d" kindref="member">GM_0()</ref> return description. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="122" column="9" bodyfile="header.h" bodystart="122" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="group__FooGroup_1gacdd314c944182a477291569a0f5e632a" prot="public" static="no">
+        <name>GD_1</name>
+        <initializer>4096</initializer>
+        <briefdescription>
+<para>Brief GD_1. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="127" column="9" bodyfile="header.h" bodystart="127" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>This group contains example items. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

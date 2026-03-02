@@ -1,0 +1,30 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: pkg-type
+  spec-value: template
+  uid: pkg-root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      attribute-actions:
+        description: |
+          It shall be the list of attribute actions.
+        spec-type: pkg-attribute-action-list
+      template-type:
+        description: |
+          It shall be the template type.
+        spec-type: name
+    description: |
+      This set of attributes specifies a package template.
+    mandatory-attributes: all
+spec-name: Package Template Item Type
+spec-type: pkg-template
+type: spec

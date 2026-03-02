@@ -1,0 +1,39 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: add-package-template
+  uid: link
+- role: spec-refinement
+  spec-key: role
+  spec-value: add-package-component-template
+  uid: link
+- role: spec-refinement
+  spec-key: role
+  spec-value: use-package-template
+  uid: link
+- role: spec-refinement
+  spec-key: role
+  spec-value: use-package-component-template
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      It defines the package template role of links.  The
+      ``add-package-template`` and ``add-package-component-template`` roles are
+      intended for parent links to register the package template at the parent
+      so that the parent can use the package template through a child link.  The
+      ``use-package-template`` and ``use-package-component-template`` roles are
+      intended for parent links to directly use the referenced package template.
+    mandatory-attributes: all
+spec-name: Package Template Link Role
+spec-type: pkg-template-role
+type: spec

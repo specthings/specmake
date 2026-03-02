@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.12.0" xml:lang="en-US">
+  <compounddef id="unionu__1" kind="union" language="C++" prot="public">
+    <compoundname>u_1</compoundname>
+    <includes refid="header_8h" local="no">header.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="unionu__1_1a2f0f43ae7543e722da1864ba60e5e48c" prot="public" static="no" mutable="no">
+        <type>char</type>
+        <definition>char u_1::c</definition>
+        <argsstring></argsstring>
+        <name>c</name>
+        <qualifiedname>u_1::c</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="301" column="8" bodyfile="header.h" bodystart="301" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="unionu__1_1aef977ba9d71bb0c099a908d03302781d" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int u_1::i</definition>
+        <argsstring></argsstring>
+        <name>i</name>
+        <qualifiedname>u_1::i</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="302" column="7" bodyfile="header.h" bodystart="302" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Brief <ref refid="unionu__1" kindref="compound">u_1</ref>. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>Description <ref refid="unionu__1" kindref="compound">u_1</ref>. </para>
+    </detaileddescription>
+    <location file="header.h" line="300" column="1" bodyfile="header.h" bodystart="300" bodyend="303"/>
+    <listofallmembers>
+      <member refid="unionu__1_1a2f0f43ae7543e722da1864ba60e5e48c" prot="public" virt="non-virtual"><scope>u_1</scope><name>c</name></member>
+      <member refid="unionu__1_1aef977ba9d71bb0c099a908d03302781d" prot="public" virt="non-virtual"><scope>u_1</scope><name>i</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

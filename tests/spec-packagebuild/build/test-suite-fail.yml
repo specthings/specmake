@@ -1,0 +1,24 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+build-type: test-program
+cflags: []
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+cppflags: []
+cxxflags: []
+enabled-by: true
+features: c cprogram
+includes: []
+ldflags: []
+links: []
+source:
+source:
+- tests/tc-action.c
+- tests/tc-action-2.c
+- tests/tc-fail.c
+- tests/tr-test-case.c
+- tests/ts-fail.c
+stlib: []
+target: tests/ts-fail.exe
+type: build
+use-after: []
+use-before: []

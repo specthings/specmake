@@ -1,0 +1,39 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 EDISOFT
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: document-type
+  spec-value: paf-spamr
+  uid: pkg-sphinx-document
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      cppcheck-command:
+        description: |
+          It shall be cppcheck command to run on RTEMS.
+        spec-type: list-str
+      metrics-thresholds:
+        description: |
+          It shall be the RTEMS metrics thresholds to apply.
+        spec-type: pkg-metrics-thresholds
+      metrixplusplus-collect:
+        description: |
+          It shall be the metrix++ RTEMS metrics collect command.
+        spec-type: list-str
+      metrixplusplus-view:
+        description: |
+          It shall be the metrix++ RTEMS metrics gather command.
+        spec-type: list-str
+    description: |
+      This set of attributes specifies the additional specific PAF SPAMR
+      document attributes.
+    mandatory-attributes: all
+spec-name: PAF SPAMR Document Item Type
+spec-type: pkg-build-paf-spamr
+type: spec

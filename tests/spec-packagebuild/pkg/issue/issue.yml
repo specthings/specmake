@@ -1,0 +1,16 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+created: '2025-10-03T10:41Z'
+enabled-by: true
+identifier: '42'
+labels: []
+links:
+- role: issue-member
+  uid: database
+milestone: '1.0'
+pkg-type: issue
+status: open
+subject: Subject
+type: pkg
+updated: '2025-10-03T10:42Z'

@@ -1,0 +1,83 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: workspace-type
+  spec-value: repository
+  uid: pkg-workspace
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      branch:
+        description: |
+          It shall be a branch in the source repository for the commit.
+        spec-type: str
+      clone-depth:
+        description: |
+          If the value is present, it shall be the Git clone depth, otherwise
+          the Git branch of the repository is completely cloned.
+        spec-type: optional-int
+      commit:
+        description: |
+          It shall be the commit of the branch in the source repository.
+        spec-type: str
+      copyrights-by-license:
+        description: null
+        spec-type: pkg-copyrights-by-license
+      description:
+        description: |
+          It shall be the description of the repository.
+        spec-type: str
+      destination-directory:
+        description: |
+          It shall be the destination directory.
+        spec-type: str
+      directory:
+        description: |
+          It shall be the source directory in the workspace.
+        spec-type: str
+      origin-branch:
+        description: |
+          It shall be the origin branch name.
+        spec-type: optional-str
+      origin-commit:
+        description: |
+          It shall be the commit of the origin branch.
+        spec-type: optional-str
+      origin-commit-url:
+        description: |
+          It shall be the URL of the commit web page at the origin.
+        spec-type: optional-str
+      origin-fetch:
+        description: |
+          It shall be a list of Git ``refspec`` items.  For each ``refspec``
+          item, a Git fetch command is issued after cloning the repository and
+          before checking out the branch.
+        spec-type: list-str
+      origin-url:
+        description: |
+          It shall be the repository URL of the origin.
+        spec-type: optional-str
+      post-clone-commands:
+        description: |
+          It shall be the list of commands issued after cloning the repository
+          and checking out the branch.  The working directory of the commands
+          is the destination directory.
+        spec-type: list-list-str
+      symbolic-links:
+        description: |
+          It shall be the list of symbolic links added to the cloned
+          repository.
+        spec-type: pkg-symbolic-link-list
+    description: |
+      This set of attributes specifies a workspace repository.
+    mandatory-attributes: all
+spec-name: Workspace Repository Item Type
+spec-type: pkg-workspace-repository
+type: spec

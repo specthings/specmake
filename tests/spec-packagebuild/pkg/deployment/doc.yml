@@ -1,0 +1,96 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2023 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/deployment-directory}/doc
+directory-state-type: sphinx
+document-components:
+- action: copy-and-substitute
+  add-to-index: true
+  file: source/copy-and-substitute.rst
+- action: copy-and-substitute
+  add-to-index: false
+  enabled-by: false
+  file: source/nada.rst
+- action: copy
+  add-to-index: false
+  file: some.txt
+- action: add-to-index
+  add-to-index: true
+  file: source/glossary.rst
+- action: copy-and-substitute
+  add-to-index: false
+  file:
+  - source/index.rst
+  - some.txt
+- action: glossary
+  add-to-index: false
+  file: source/glossary.rst
+  glossary-groups:
+  - /glossary/group
+document-contributors:
+- action: Written by
+  contributors:
+  - first-name: John
+    last-name: Doe
+    organization: Some Organization
+  - first-name: Foo
+    last-name: Bar
+    organization: Bár Organization
+- action: Super Action
+  contributors:
+  - first-name: This is a
+    last-name: Long Name
+    organization: Short
+document-copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+document-html-footer: footer
+document-html-help-base-name: Base
+document-key: blub
+document-latex-footer-right: footer right
+document-latex-geometry: geometry
+document-latex-header-left: header left
+document-latex-sphinxsetup: sphinxsetup
+document-latex-theme: manual
+document-license: CC-BY-SA-4.0
+document-license-map:
+  CC-BY-SA-4.0 OR BSD-2-Clause: CC-BY-SA-4.0
+document-releases:
+- changes: Initial release.
+  date: '1970-01-01'
+  status: Replaced
+- changes: |
+    * ${.:/document-copyright}
+
+    * e
+  date: '2020-10-26'
+  status: Draft
+document-title: The\breakTitle
+document-toctree-maxdepth: 4
+document-type: generic
+enabled-by: sphinx-builder
+files: []
+hash: null
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+- hash: null
+  name: source
+  role: input
+  uid: ../source/doc
+- hash: null
+  header: Section Header
+  header-is-optional: true
+  name: document-section
+  role: input
+  section-key: section
+  uid: ../source/doc-section
+- name: build
+  role: output
+  uid: ../build/doc
+output-html: html
+output-pdf: doc.pdf
+pkg-type: directory-state
+type: pkg

@@ -1,0 +1,26 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+archive-file: archive-0.tar.xz
+archive-strip-prefix: ${.:/component/prefix-directory}/
+copyrights:
+- Copyright (C) 2023, 2026 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/build-directory}
+directory-state-type: archive
+enabled-by: true
+files: []
+hash: null
+links:
+- hash: null
+  name: component
+  role: input
+  uid: component
+- hash: null
+  name: member
+  role: input
+  uid: a
+- name: spec-export
+  role: output
+  uid: spec
+pkg-type: directory-state
+type: pkg
+verification-script: null

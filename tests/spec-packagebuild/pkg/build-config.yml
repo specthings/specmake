@@ -1,0 +1,21 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+build-label: build-label
+config-key: build-config-key
+copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+enabled-by: true
+description: |
+  Build configuration description.
+name: Build Configuration Name
+test-timeout-key:
+- enabled-by: RTEMS_SMP
+  key: smp
+- enabled-by: true
+  key: default
+links:
+- hash: null
+  name: component
+  role: input
+  uid: component
+pkg-type: build-configuration
+type: pkg

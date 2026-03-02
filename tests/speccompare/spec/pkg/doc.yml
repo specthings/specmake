@@ -1,0 +1,50 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/deployment-directory}/doc
+directory-state-type: sphinx
+document-components: []
+document-contributors: []
+document-copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+document-html-footer: footer
+document-html-help-base-name: HBN
+document-key: document-key
+document-latex-footer-right: footer right
+document-latex-geometry: geometry
+document-latex-header-left: header left
+document-latex-sphinxsetup: sphinxsetup
+document-latex-theme: manual
+document-license: CC-BY-SA-4.0
+document-license-map: {}
+document-releases: []
+document-title: Title
+document-toctree-maxdepth: 4
+document-type: generic
+enabled-by: true
+files: []
+hash: null
+links:
+- hash: null
+  name: component
+  role: input
+  uid: component
+- current-revision: 05787a9d5c130272572a7e9b9a9553d7db8cd8af
+  enabled-set-actions: []
+  hash: null
+  ignored-commits: []
+  label: L
+  name: spec-compare
+  previous-revision: e28aeb9e3ed57002ac5a5ee0660111436fe4d2a1
+  role: input
+  root-uid: /root
+  spec-compare-key: the-spec-compare-key
+  spec-paths:
+  - spec
+  - other
+  uid: repo
+output-html: null
+output-pdf: null
+pkg-type: directory-state
+type: pkg

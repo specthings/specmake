@@ -1,0 +1,36 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024, 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: make
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      hash:
+        description: |
+          If the value is present, then it shall be the expected hash of the
+          input, otherwise the input dependency is not yet initialized.
+        spec-type: pkg-optional-hash
+      output-name:
+        description: |
+          If shall be the output name of the item.
+        spec-type: str
+      params:
+        description: |
+          It shall be an optional set of parameters which may be used to make the outputs.
+        spec-type: any
+    description: |
+      It defines the make role of links and is used to make the outputs of the
+      item from the inputs and the parameters.
+    mandatory-attributes: all
+spec-name: Make Link Role
+spec-type: pkg-make-role
+type: spec

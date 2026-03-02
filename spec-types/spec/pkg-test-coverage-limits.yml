@@ -1,0 +1,30 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      branch-min-percent:
+        description: |
+          It shall be the minimum branch coverage in percent.
+        spec-type: float
+      function-min-percent:
+        description: |
+          It shall be the minimum function coverage in percent.
+        spec-type: float
+      line-min-percent:
+        description: |
+          It shall be the minimum line coverage in percent.
+        spec-type: float
+    description: |
+      This set of attributes specifies test coverage limits.
+    mandatory-attributes: all
+spec-name: Test Coverage Limits
+spec-type: pkg-test-coverage-limits
+type: spec

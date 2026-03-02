@@ -1,0 +1,45 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/deployment-directory}
+directory-state-type: test-coverage
+enabled-by: true
+files:
+- file: coverage-good.json
+  hash: null
+hash: null
+limits:
+  overall:
+    branch-min-percent: 100.0
+    function-min-percent: 100.0
+    line-min-percent: 100.0
+  per-file:
+    branch-min-percent: 80.0
+    function-min-percent: 100.0
+    line-min-percent: 100.0
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+- hash: null
+  name: target
+  role: input
+  uid: ../../rtems/target-a
+- hash: null
+  name: build-configuration
+  role: input
+  uid: ../build-config
+- role: test-procedure
+  uid: ../component
+- hash: null
+  name: test-coverage
+  role: input-to
+  uid: ../steps/aggregate-test-results
+- name: html
+  role: output
+  uid: target-a-good-html
+scope: Good
+pkg-type: directory-state
+type: pkg

@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<tagfile doxygen_version="1.15.0">
+  <compound kind="file">
+    <name>a.c</name>
+    <path></path>
+    <filename>a_8c.html</filename>
+  </compound>
+  <compound kind="group">
+    <name>Group</name>
+    <title>Group</title>
+    <filename>group__Group.html</filename>
+  </compound>
+</tagfile>

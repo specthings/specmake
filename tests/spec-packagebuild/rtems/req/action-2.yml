@@ -1,0 +1,136 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2021, 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+functional-type: action
+links:
+- role: interface-function
+  uid: ../if/func
+- role: interface-function
+  uid: ../if/unspec-function
+post-conditions:
+- name: X
+  states:
+  - name: XA
+    test-code: |
+      /* Code */
+    text: |
+      XA
+  - name: XB
+    test-code: |
+      /* Code */
+    text: |
+      XB
+  test-epilogue: null
+  test-prologue: null
+- name: Y
+  states:
+  - name: YA
+    test-code: |
+      /* Code */
+    text: |
+      YA
+  - name: YB
+    test-code: |
+      /* Code */
+    text: |
+      YB
+  test-epilogue: null
+  test-prologue: null
+pre-conditions:
+- name: A
+  states:
+  - name: AA
+    test-code: |
+      /* Code */
+    text: |
+      AA
+  - name: AB
+    test-code: |
+      /* Code */
+    text: |
+      AB
+  test-epilogue: null
+  test-prologue: null
+- name: B
+  states:
+  - name: BA
+    test-code: |
+      /* Code */
+    text: |
+      BA
+  - name: BB
+    test-code: |
+      /* Code */
+    text: |
+      BB
+  test-epilogue: null
+  test-prologue: null
+- name: C
+  states:
+  - name: CA
+    test-code: |
+      /* Code */
+    text: |
+      CA
+  - name: CB
+    test-code: |
+      /* Code */
+    text: |
+      CB
+  test-epilogue: null
+  test-prologue: null
+rationale: null
+references: []
+requirement-type: functional
+skip-reasons:
+  S: Skip
+test-action: |
+  /* Action */
+test-brief: null
+test-cleanup: null
+test-context: []
+test-context-support: null
+test-description: null
+test-header: null
+test-includes: []
+test-local-includes: []
+test-prepare: null
+test-setup: null
+test-stop: null
+test-support: null
+test-target: tests/tc-action-2.c
+test-teardown: null
+text: ${.:text-template}
+transition-map:
+- enabled-by: true
+  post-conditions:
+    X:
+    - if:
+        pre-conditions:
+          A: AB
+      then: XB
+    - else: XA
+    Y:
+    - if:
+        pre-conditions:
+          A: AB
+      then: N/A
+    - else: YA
+  pre-conditions:
+    A: all
+    B:
+      not-applicable:
+        pre-conditions:
+          A: AB
+    C: all
+- enabled-by: true
+  post-conditions: S
+  pre-conditions:
+    A:
+    - AA
+    B:
+    - BA
+    C:
+    - CA
+type: requirement

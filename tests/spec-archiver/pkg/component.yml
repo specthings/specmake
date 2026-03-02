@@ -1,0 +1,18 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+build-directory: ${.:/deployment-directory}/build
+component-type: generic
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-set: []
+deployment-directory: ${.:/prefix-directory}/${.:/package-directory}
+enabled-by: true
+enabled-set: []
+enabled-set-actions: []
+enabled-set-feedback-mapping: {}
+links: []
+package-directory: pkg
+params: {}
+prefix-directory: ${.:/tmpdir}
+pkg-type: workspace
+type: pkg
+workspace-type: component
