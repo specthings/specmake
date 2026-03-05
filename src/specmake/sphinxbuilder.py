@@ -72,7 +72,7 @@ def _get_normal_title(ctx: ItemGetValueContext) -> str:
 def _get_sphinx_title(ctx: ItemGetValueContext) -> str:
     content = SphinxContent()
     content.add_header(_get_normal_title(ctx), level=1)
-    return "\n".join(content.lines)
+    return content.join().rstrip()
 
 
 def _get_release(ctx: ItemGetValueContext) -> str:
@@ -127,7 +127,7 @@ def _get_contributors(ctx: ItemGetValueContext) -> Any:
     with content.directive(
             "table", options=[":class: longtable", ":widths: 16 26 30 28"]):
         content.add(lines)
-    return "\n".join(content.lines)
+    return content.join()
 
 
 def _latex_escape(value: str) -> str:

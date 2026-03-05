@@ -191,7 +191,6 @@ class RunActionsProvider:
         client = self._client
         client.description.add("Run the following actions:")
         with client.description.directive("code-block", "none", [":linenos:"]):
-            client.description.add_blank_line()
             self._run_actions(client, actions)
 
     def _equal(self, _enabled_set: list[str], enabled_by: Any,

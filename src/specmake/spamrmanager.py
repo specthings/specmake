@@ -114,7 +114,7 @@ class SpamrManager(DocumentBuilder):
                     content.add(
                         line.replace(self.component["deployment-directory"],
                                      ""))
-        return "\n".join(content.lines)
+        return content.join()
 
     def _requirement_implementation_and_vv_coverage(
             self, _ctx: ItemGetValueContext) -> Any:
@@ -147,7 +147,7 @@ class SpamrManager(DocumentBuilder):
 
         content = SphinxContent()
         content.add(report)
-        return "\n".join(content.lines)
+        return content.join()
 
     def _requirement_testability(self, _ctx: ItemGetValueContext) -> Any:
         reqs_with_val_test = 0
@@ -182,7 +182,7 @@ class SpamrManager(DocumentBuilder):
 
         content = SphinxContent()
         content.add(report)
-        return "\n".join(content.lines)
+        return content.join()
 
     def _get_tbd_requirements(self) -> List[Item]:
         tbd_reqs = []
@@ -208,7 +208,7 @@ class SpamrManager(DocumentBuilder):
             content.add("This metric is OK")
         else:
             content.add("This metric is NOK")
-        return "\n".join(content.lines)
+        return content.join()
 
     def _user_documentation_completeness(self,
                                          _ctx: ItemGetValueContext) -> Any:
@@ -279,7 +279,7 @@ class SpamrManager(DocumentBuilder):
             content.add("This metric is OK")
         else:
             content.add("This metric is NOK")
-        return "\n".join(content.lines)
+        return content.join()
 
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-nested-blocks
@@ -309,8 +309,7 @@ class SpamrManager(DocumentBuilder):
                             content = SphinxContent()
                             with content.directive("code-block", value="text"):
                                 content.add(metrics)
-                            all_metrics = all_metrics + "\n\n" + "\n".join(
-                                content.lines)
+                            all_metrics = all_metrics + "\n\n" + content.join()
 
         wrong_files_content = SphinxContent()
         wrong_files_content.add("The following files contain errors in the " +
@@ -318,7 +317,7 @@ class SpamrManager(DocumentBuilder):
                                 "above report of each file.\n\n")
         wrong_files_content.add_list(incorrect_metrics_files)
 
-        return all_metrics + "\n\n" + "\n".join(wrong_files_content.lines)
+        return all_metrics + "\n\n" + wrong_files_content.join()
 
     def _process_metrics(self, metrics_output: List[str],
                          base_dir: str) -> Tuple[List[str], bool, str]:
@@ -414,7 +413,7 @@ class SpamrManager(DocumentBuilder):
         code_size = int(info_dict["code"]["total"] +
                         info_dict["preprocessor"]["total"])
         sphinx_content.add("The RTEMS code size is " + str(code_size))
-        return "\n".join(sphinx_content.lines)
+        return sphinx_content.join()
 
     def _sprs_and_ncrws(self, _ctx: ItemGetValueContext) -> str:
         sphinx_content = SphinxContent()
@@ -431,7 +430,7 @@ class SpamrManager(DocumentBuilder):
                 sphinx_content.add_list_item(url)
         output = {
             False: "There are no RIDs currently open.",
-            True: "\n".join(sphinx_content.lines)
+            True: sphinx_content.join()
         }
         return output[existing_rids]
 
@@ -462,7 +461,7 @@ class SpamrManager(DocumentBuilder):
         for index, title in enumerate(actions):
             sphinx_content.add_list_item(title + ": " +
                                          str(actions_rtems[index]))
-        return "\n".join(sphinx_content.lines)
+        return sphinx_content.join()
 
     def _vv_coverage_unit_integration(self, _ctx: ItemGetValueContext) -> str:
         sphinx_content = SphinxContent()
@@ -486,4 +485,4 @@ class SpamrManager(DocumentBuilder):
         sphinx_content.add(
             metric_ok[self.item["metrics-thresholds"]["vv-coverage"] *
                       100 <= coverage])
-        return "\n".join(sphinx_content.lines)
+        return sphinx_content.join()

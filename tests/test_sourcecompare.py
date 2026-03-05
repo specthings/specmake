@@ -282,6 +282,7 @@ changed-no-review.txt
 
 Unchanged files
 ###############
+
 """
     builder = director["/pkg/doc"]
     assert isinstance(builder, DocumentBuilder)
@@ -449,6 +450,7 @@ changed-no-review.txt
 .. _LabelUnchangedFiles:
 
 Unchanged files
-==============="""
+===============
+"""
     with pytest.raises(ValueError):
         builder.substitute("${.:/compare-sources:0:invalid}")
