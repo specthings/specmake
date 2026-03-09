@@ -29,7 +29,10 @@ origin-branch: null
 origin-commit: null
 origin-commit-url: https://foobar.org
 origin-fetch:
-- +main:other
+- enabled-by: false
+  value: invalid
+- enabled-by: true
+  value: +main:other
 origin-url: null
 pkg-type: workspace
 post-clone-commands:

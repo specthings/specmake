@@ -1,0 +1,26 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      value:
+        description: |
+          It shall be the conditional value.
+        spec-type: str
+      enabled-by:
+        description: |
+          It shall define the condition under which the value is enabled.
+        spec-type: enabled-by
+    description: |
+      This set of attributes specifies a conditional string value.
+    mandatory-attributes: all
+spec-name: Conditional String Value
+spec-type: str-conditional
+type: spec

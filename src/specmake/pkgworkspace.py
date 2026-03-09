@@ -37,8 +37,9 @@ from typing import Iterator, Optional
 
 from specitems import (EnabledSet, Item, ItemCache, ItemCacheConfig,
                        ItemDataByUID, ItemGetValueContext, ItemSelection,
-                       JSONItemCache, data_digest, hash_file, link_is_enabled,
-                       load_data, to_iterable, verify_specification_format)
+                       JSONItemCache, data_digest, hash_file, is_enabled,
+                       link_is_enabled, load_data, to_iterable,
+                       verify_specification_format)
 from specware import run_command
 
 from .directorystate import DirectoryState, RepositoryState
@@ -371,6 +372,12 @@ class WorkspaceRepository(_WorkspaceItem):
             [f"file://{source_directory}", destination_directory])
         status = run_command(clone_command, source_directory)
         assert status == 0
+        for fetch in self["origin-fetch"]:
+            if is_enabled(self.enabled_set, fetch["enabled-by"]):
+                status = run_command(
+                    ["git", "fetch", "origin", fetch["value"]],
+                    destination_directory)
+                assert status == 0
         origin_url = self["origin-url"]
         if origin_url:
             status = run_command(["git", "remote", "add", "tmp", origin_url],
@@ -380,10 +387,6 @@ class WorkspaceRepository(_WorkspaceItem):
                                  destination_directory)
             assert status == 0
             status = run_command(["git", "remote", "rename", "tmp", "origin"],
-                                 destination_directory)
-            assert status == 0
-        for fetch in self["origin-fetch"]:
-            status = run_command(["git", "fetch", "origin", fetch],
                                  destination_directory)
             assert status == 0
         origin_branch = self["origin-branch"]

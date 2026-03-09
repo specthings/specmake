@@ -56,10 +56,10 @@ spec-info:
         spec-type: optional-str
       origin-fetch:
         description: |
-          It shall be a list of Git ``refspec`` items.  For each ``refspec``
-          item, a Git fetch command is issued after cloning the repository and
-          before checking out the branch.
-        spec-type: list-str
+          It shall be a list of conditional Git ``refspec`` items.  For each
+          enabled ``refspec`` item, a Git fetch command is issued after cloning
+          the repository and before checking out the branch.
+        spec-type: str-conditional-list
       origin-url:
         description: |
           It shall be the repository URL of the origin.
