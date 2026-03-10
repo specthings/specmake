@@ -34,8 +34,9 @@ import yaml
 
 from specitems import (BibTeXCitationProvider, Copyrights,
                        DocumentGlossaryConfig, GlossaryConfig, Item,
-                       ItemGetValueContext, SphinxContent, generate_glossary,
-                       get_value_subprocess, is_enabled, to_iterable)
+                       ItemGetValueContext, ItemMapper, SphinxContent,
+                       generate_glossary, get_value_subprocess, is_enabled,
+                       to_iterable)
 from specware import BSD_2_CLAUSE_LICENSE, run_command
 
 from .directorystate import DirectoryState
@@ -66,7 +67,7 @@ def _normal_title(item: Item) -> str:
 
 
 def _get_normal_title(ctx: ItemGetValueContext) -> str:
-    return _normal_title(ctx.item)
+    return ctx.substitute_and_transform(_normal_title(ctx.item))
 
 
 def _get_sphinx_title(ctx: ItemGetValueContext) -> str:
@@ -97,7 +98,8 @@ def _row(row: tuple[str, ...], maxi: tuple[int, ...]) -> str:
 def _get_contributors(ctx: ItemGetValueContext) -> Any:
     rows = [("Action", "Name", "Organization", "Signature")]
     maxi = tuple(map(len, rows[0]))
-    for action in ctx.item["document-contributors"]:
+    for action in ctx.mapper.substitute_data(
+            ctx.item["document-contributors"]):
         for contributor in action["contributors"]:
             first = contributor["first-name"]
             last = contributor["last-name"]
@@ -138,34 +140,35 @@ _COPYRIGHT = re.compile(r"^\s*Copyright\s+\(C\)\s+", re.IGNORECASE)
 _YEARS = re.compile(r"^[0-9, ]*")
 
 
-def _document_copyright(item: Item) -> str:
+def _document_copyright(item: Item, mapper: ItemMapper) -> str:
     copyrights = item["document-copyrights"]
     main = _COPYRIGHT.sub("", copyrights[0])
+    main = mapper.substitute(main)
     if len(copyrights) == 1:
         return main
     return f"{main} and contributors"
 
 
-def _document_author(item: Item) -> str:
-    return _YEARS.sub("", _document_copyright(item))
+def _document_author(item: Item, mapper: ItemMapper) -> str:
+    return _YEARS.sub("", _document_copyright(item, mapper))
 
 
-def _document_year(item: Item) -> str:
-    match = _YEARS.search(_document_copyright(item))
+def _document_year(item: Item, mapper: ItemMapper) -> str:
+    match = _YEARS.search(_document_copyright(item, mapper))
     assert match
     return match.group(0).split(",")[-1].strip()
 
 
 def _get_document_copyright(ctx: ItemGetValueContext) -> str:
-    return _document_copyright(ctx.item)
+    return _document_copyright(ctx.item, ctx.mapper)
 
 
 def _get_document_author(ctx: ItemGetValueContext) -> str:
-    return _document_author(ctx.item)
+    return _document_author(ctx.item, ctx.mapper)
 
 
 def _get_document_year(ctx: ItemGetValueContext) -> str:
-    return _document_year(ctx.item)
+    return _document_year(ctx.item, ctx.mapper)
 
 
 def _get_latex_title(ctx: ItemGetValueContext) -> str:
@@ -179,8 +182,7 @@ def _get_value_latex(ctx: ItemGetValueContext) -> str:
 
 
 def _get_latex_copyright(ctx: ItemGetValueContext) -> str:
-    return _latex_escape(
-        ctx.substitute_and_transform(_get_document_copyright(ctx)))
+    return _latex_escape(_get_document_copyright(ctx))
 
 
 def _get_title_page_title(ctx: ItemGetValueContext) -> Any:
@@ -210,36 +212,37 @@ def _augment_report(
     return lines, report["data-ranges"]
 
 
-def _get_fields(item: Item) -> tuple[str, dict[str, str | list[str]]]:
-    organizations: set[str] = set()
-    authors: set[str] = set()
-    for action in item["document-contributors"]:
-        for contributor in action["contributors"]:
-            first = contributor["first-name"]
-            last = contributor["last-name"]
-            authors.add(f"{last}, {first}")
-            organizations.add(contributor["organization"])
-    fields: dict[str, str | list[str]] = {
-        "author": sorted(authors),
-        "organization": ", ".join(sorted(organizations)),
-        "title": _normal_title(item),
-        "url": f"{item['directory']}/{item['output-pdf']}",
-        "year": _document_year(item)
-    }
-    return "manual", fields
-
-
 class _CitationProvider(BibTeXCitationProvider):
 
     def __init__(self, builder: "SphinxBuilder") -> None:
         super().__init__(builder.mapper)
-        self.add_get_fields("pkg/directory-state/sphinx", _get_fields)
+        self.add_get_fields("pkg/directory-state/sphinx",
+                            self._get_document_fields)
         self.mapper.add_get_value("pkg/directory-state/sphinx:/bibtex-entries",
                                   self.get_bibtex_entries)
         self.mapper.add_get_value("pkg/directory-state/sphinx:/cite-group",
                                   self.get_cite_group)
         self.mapper.add_get_value("statement-of-compliance:/cite-group",
                                   self.get_cite_group)
+
+    def _get_document_fields(
+            self, item: Item) -> tuple[str, dict[str, str | list[str]]]:
+        organizations: set[str] = set()
+        authors: set[str] = set()
+        for action in item["document-contributors"]:
+            for contributor in action["contributors"]:
+                first = contributor["first-name"]
+                last = contributor["last-name"]
+                authors.add(f"{last}, {first}")
+                organizations.add(contributor["organization"])
+        fields: dict[str, str | list[str]] = {
+            "author": sorted(authors),
+            "organization": ", ".join(sorted(organizations)),
+            "title": _normal_title(item),
+            "url": f"{item['directory']}/{item['output-pdf']}",
+            "year": _document_year(item, self.mapper)
+        }
+        return "manual", fields
 
 
 class SphinxBuilder(DirectoryState):
@@ -411,7 +414,7 @@ class SphinxBuilder(DirectoryState):
             with content.directive("topic", line):
                 lines = self._push_pop_enabled_by(
                     release["changes"].splitlines())
-                content.add(self.mapper.substitute("\n".join(lines), ctx.item))
+                content.add(lines)
         return ctx.substitute_and_transform(content.join())
 
     def _add_to_index(self, component: dict[str, Any]) -> None:
