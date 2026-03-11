@@ -242,9 +242,11 @@ def _add_comparison(content: specitems.TextContent,
         ctx.add_files(previous.files, "Removed files")
         with ctx.content.section("Files with unspecific changes"):
             ctx.add_diffs(ctx.other, True)
-        with ctx.content.section("Files with RTEMS_INLINE_ROUTINE changes"):
-            ctx.content.add(f"See :ref:`{ctx.make_label('inline')}`.")
-            ctx.add_diffs(ctx.inline, False)
+        if ctx.inline:
+            with ctx.content.section(
+                    "Files with RTEMS_INLINE_ROUTINE changes"):
+                ctx.content.add(f"See :ref:`{ctx.make_label('inline')}`.")
+                ctx.add_diffs(ctx.inline, False)
         with ctx.content.section("Files with changes inside of comments"):
             ctx.add_diffs(ctx.comments, False)
         with ctx.content.section("Unchanged files"):

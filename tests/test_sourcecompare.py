@@ -54,13 +54,6 @@ def test_sourcecompare(caplog, tmpdir):
                                   label="Label")
     content = specitems.SphinxContent()
     compare_sources(content, config)
-
-.. _LabelFilesWithRTEMSINLINEROUTINEChanges:
-
-Files with RTEMS_INLINE_ROUTINE changes
-#######################################
-
-See :ref:`LabelInline`.
     assert str(content) == """.. _LabelUnchangedFiles:
 
 Unchanged files
