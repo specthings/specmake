@@ -284,13 +284,15 @@ class CompareSourcesProvider(specitems.ItemValueProvider):
             _, previous_sources = builder.input_link_by_key(
                 "source-compare-previous", "source-compare-key", key)
             assert isinstance(previous_sources, DirectoryState)
+            current_data = ctx.mapper.substitute_data(current_link.data,
+                                                      builder.item)
             config = CompareSourcesConfig(
                 current=current_sources,
                 previous=previous_sources,
-                reviews=current_link["reviews"],
-                file_to_review=current_link["file-to-review"],
-                renamed=current_link["renamed"],
-                label=current_link["label"])
+                reviews=current_data["reviews"],
+                file_to_review=current_data["file-to-review"],
+                renamed=current_data["renamed"],
+                label=current_data["label"])
             assert isinstance(self.mapper, specitems.TextMapper)
             content = self.mapper.create_content(
                 section_level=builder.section_level)

@@ -43,7 +43,7 @@ links:
   reviews:
     a:
       subject: SA
-      text: TA
+      text: TA ${.:/document-title}
     b:
       subject: SB
       text: TB
