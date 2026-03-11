@@ -54,25 +54,6 @@ def test_sourcecompare(caplog, tmpdir):
                                   label="Label")
     content = specitems.SphinxContent()
     compare_sources(content, config)
-    assert str(content) == """.. _LabelReviews:
-
-Reviews
-#######
-
-.. _LabelNewFiles:
-
-New files
-#########
-
-.. _LabelRemovedFiles:
-
-Removed files
-#############
-
-.. _LabelFilesWithUnspecificChanges:
-
-Files with unspecific changes
-#############################
 
 .. _LabelFilesWithRTEMSINLINEROUTINEChanges:
 
@@ -80,13 +61,7 @@ Files with RTEMS_INLINE_ROUTINE changes
 #######################################
 
 See :ref:`LabelInline`.
-
-.. _LabelFilesWithChangesInsideOfComments:
-
-Files with changes inside of comments
-#####################################
-
-.. _LabelUnchangedFiles:
+    assert str(content) == """.. _LabelUnchangedFiles:
 
 Unchanged files
 ###############
@@ -277,12 +252,6 @@ changed-no-review.txt
      No changes
      No changes
      No changes
-
-.. _LabelUnchangedFiles:
-
-Unchanged files
-###############
-
 """
     builder = director["/pkg/doc"]
     assert isinstance(builder, DocumentBuilder)
@@ -445,12 +414,6 @@ changed-no-review.txt
     +/* Current */
      No changes
      No changes
-     No changes
-
-.. _LabelUnchangedFiles:
-
-Unchanged files
-===============
-"""
+     No changes"""
     with pytest.raises(ValueError):
         builder.substitute("${.:/compare-sources:0:invalid}")

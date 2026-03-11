@@ -56,11 +56,6 @@ def test_testreporter(caplog, tmpdir):
 Target - Name Target A
 ######################
 
-.. _ATestProcedureDescription:
-
-Test procedure description
-**************************
-
 .. _ABuildConfigKey:
 
 Configuration - build-config-key
@@ -1823,11 +1818,6 @@ The following table lists files having the expected coverage.
 
 Target - Name Target B
 ######################
-
-.. _BTestProcedureDescription:
-
-Test procedure description
-**************************
 
 .. _BBuildConfigKey:
 

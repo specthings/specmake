@@ -986,16 +986,6 @@ Unexpected Test Failures
 Component - sparc/gr712rc/smp/4
 ===============================
 
-.. _PackageSummarySparcGr712rcSmp4UnexpectedTestFailuresComponentSparcGr712rcSmp4:
-
-Component - sparc/gr712rc/smp/4
-===============================
-
-.. _PackageSummarySparcGr712rcSmp4UnexpectedTestFailuresComponentSparcGr712rcSmp4:
-
-Component - sparc/gr712rc/smp/4
-===============================
-
 - /rtems/target-a
 
   - /build/test-program
