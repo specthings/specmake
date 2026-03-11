@@ -27,6 +27,7 @@
 
 import base64
 import graphlib
+import itertools
 import pickle
 import logging
 import lzma
@@ -253,7 +254,9 @@ class Archiver(DirectoryState):
         files: list[str] = []
         factory = self.director.factory
         build_order = self.item.view["package-build-order"]
-        for uid, item in self.director.item_cache.items():
+        item_cache = self.director.item_cache
+        for uid, item in itertools.chain(item_cache.items(),
+                                         item_cache.proxies.items()):
             if item.type.startswith("spec"):
                 continue
             data = factory.export_data(item, uid in member_uids, build_order)
