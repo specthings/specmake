@@ -571,3 +571,37 @@ def test_directorystate_glob():
                                  ]) == _files(["spec-glossary/glossary/t.yml"])
     assert dir_state.substitute(["${.:/glob-executables:*}"
                                  ]) == _files(["hello.py"])
+
+
+def test_directorystate_load_before_use():
+    item_cache = EmptyItemCache(type_provider=BuildItemTypeProvider({}))
+    factory = BuildItemFactory()
+    factory.add_constructor("pkg/directory-state/explicit", DirectoryState)
+    director = PackageBuildDirector(item_cache, "?", factory)
+    base = os.path.abspath(os.path.dirname(__file__))
+    data = {
+        "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+        "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        "copyrights-by-license": {},
+        "directory": base,
+        "directory-state-type": "explicit",
+        "enabled-by": True,
+        "files": [{
+            "file": "hello.py",
+            "hash": None
+        }],
+        "hash": None,
+        "links": [],
+        "pkg-type": "directory-state",
+        "type": "pkg"
+    }
+    item = item_cache.add_item("/directory-state", data)
+    dir_state = director["/directory-state"]
+    assert [digest for name, digest in dir_state.files_and_hashes()] == [None]
+
+    data["directory-state-load-before-use"] = True
+    del director["/directory-state"]
+    dir_state_2 = director["/directory-state"]
+    assert [digest for name, digest in dir_state_2.files_and_hashes()] == [
+        "9hgOv9b7ff8c3NpW5g62EUUY0UZ-Dnqv0tO36wFs94XHmAOkDLbdYPSc18FBdSanbrNFroBspMQoyp1tyH0cug=="
+    ]

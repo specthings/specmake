@@ -135,6 +135,8 @@ class DirectoryStateBase(BuildItem):
         self._files: dict[str, Optional[str]] = dict(
             (file_info["file"], file_info["hash"])
             for file_info in item.get("files", []))
+        if self.item.get("directory-state-load-before-use", False):
+            self.load()
 
     def __iter__(self):
         yield from self.files()

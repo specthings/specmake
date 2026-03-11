@@ -30,6 +30,15 @@ spec-info:
         description: |
           It shall be the source directory in the workspace.
         spec-type: str
+      directory-state-load-before-use:
+        description: |
+          It shall be true, to load the directory state from the filesystem
+          before it is used during the package build, otherwise false.  By
+          default, directory states are loaded on demand when the package build
+          changed files associated with the directory state.  The default
+          behaviour is a performance optimization.  Carefully consider the
+          implications before you enable this option for a directory state.
+        spec-type: bool
       file-mappings:
         description: null
         spec-type: pkg-file-mapping-list

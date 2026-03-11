@@ -230,7 +230,8 @@ class WorkspaceDirectory(_WorkspaceItem, DirectoryState):
     def get_buildspace_data(self) -> dict:
         data = _make_directory_state_data(self.item["destination-directory"],
                                           "explicit")
-        self.copy_attributes(data, ("copyrights-by-license", "params"))
+        self.copy_attributes(data, ("directory-state-load-before-use",
+                                    "copyrights-by-license", "params"))
         return data
 
     def _copy_to_buildspace_actions(self,
