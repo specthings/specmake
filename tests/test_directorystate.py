@@ -32,7 +32,8 @@ from specitems import Item, EmptyItemCache, Link
 
 import specmake
 from specmake import (DirectoryState, RepositoryState, BuildItemFactory,
-                      BuildItemTypeProvider, PackageBuildDirector)
+                      BuildItemTypeProvider, PackageBuildDirector,
+                      PackageComponent)
 
 from .util import get_and_clear_log
 
@@ -605,3 +606,136 @@ def test_directorystate_load_before_use():
     assert [digest for name, digest in dir_state_2.files_and_hashes()] == [
         "9hgOv9b7ff8c3NpW5g62EUUY0UZ-Dnqv0tO36wFs94XHmAOkDLbdYPSc18FBdSanbrNFroBspMQoyp1tyH0cug=="
     ]
+
+
+def test_directorystate_input_file_list():
+    item_cache = EmptyItemCache(type_provider=BuildItemTypeProvider({}))
+    factory = BuildItemFactory()
+    factory.add_constructor("pkg/component/generic", PackageComponent)
+    factory.add_constructor("pkg/directory-state/explicit", DirectoryState)
+    director = PackageBuildDirector(item_cache, "?", factory)
+    base = os.path.abspath(os.path.dirname(__file__))
+    item_cache.add_item(
+        "/component", {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "base": base,
+            "component-type": "generic",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+            "enabled-by": True,
+            "enabled-set": [],
+            "links": [],
+            "pkg-type": "component",
+            "type": "pkg",
+        })
+    item_cache.add_item(
+        "/directory-state", {
+            "SPDX-License-Identifier":
+            "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+            "copyrights-by-license": {},
+            "directory":
+            base,
+            "directory-state-type":
+            "explicit",
+            "directory-state-load-before-use":
+            True,
+            "enabled-by":
+            True,
+            "files": [{
+                "file": "hello.py",
+                "hash": None
+            }],
+            "hash":
+            None,
+            "links": [{
+                "role": "input",
+                "hash": None,
+                "name": "component",
+                "uid": "/component"
+            }],
+            "pkg-type":
+            "directory-state",
+            "type":
+            "pkg",
+        })
+    item_cache.add_item(
+        "/directory-state-2", {
+            "SPDX-License-Identifier":
+            "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+            "copyrights-by-license": {},
+            "directory":
+            base,
+            "directory-state-type":
+            "explicit",
+            "enabled-by":
+            True,
+            "files": [],
+            "hash":
+            None,
+            "links": [{
+                "role": "input",
+                "hash": None,
+                "name": "component",
+                "uid": "/component"
+            }, {
+                "role": "input",
+                "hash": None,
+                "name": "source",
+                "uid": "/directory-state"
+            }],
+            "pkg-type":
+            "directory-state",
+            "type":
+            "pkg",
+        })
+    item_cache.add_item(
+        "/directory-state-3", {
+            "SPDX-License-Identifier":
+            "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+            "copyrights-by-license": {},
+            "directory":
+            base,
+            "directory-state-type":
+            "explicit",
+            "enabled-by":
+            True,
+            "files": [],
+            "hash":
+            None,
+            "links": [{
+                "role": "input",
+                "hash": None,
+                "name": "component",
+                "uid": "/component"
+            }, {
+                "role": "input",
+                "hash": None,
+                "name": "source",
+                "uid": "/directory-state-2"
+            }],
+            "pkg-type":
+            "directory-state",
+            "type":
+            "pkg",
+        })
+    dir_state_3 = director["/directory-state-3"]
+
+    assert dir_state_3.substitute(
+        "${.:/input-file-list:relpath=%(.:/component/base),foobar}") == ""
+
+    assert dir_state_3.substitute(
+        "${.:/input-file-list:relpath=%(.:/component/base),component}") == ""
+
+    assert dir_state_3.substitute(
+        "${.:/input-file-list:relpath=%(.:/component/base),source}") == ""
+
+    assert dir_state_3.substitute(
+        "${.:/input-file-list:relpath=%(.:/component/base),source,source}"
+    ) == "- :file:`hello.​py`"
+
+    assert dir_state_3.substitute(
+        "${.:/input-file-list-with-hashes:relpath=%(.:/component/base),source,source}"
+    ) == """- :file:`hello.​py` with an SHA512 digest of
+  f​6​1​8​0​e​b​f​d​6​f​b​7​d​f​f​1​c​d​c​d​a​5​6​e​6​0​e​b​6​1​1​4​5​1​8​d​1​4​6​7​e​0​e​7​a​a​f​d​2​d​3​b​7​e​b​0​1​6​c​f​7​8​5​c​7​9​8​0​3​a​4​0​c​b​6​d​d​6​0​f​4​9​c​d​7​c​1​4​1​7​5​2​6​a​7​6​e​b​3​4​5​a​e​8​0​6​c​a​4​c​4​2​8​c​a​9​d​6​d​c​8​7​d​1​c​b​a"""

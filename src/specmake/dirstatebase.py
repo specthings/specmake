@@ -37,8 +37,8 @@ import stat
 import tarfile
 from typing import Any, Callable, Iterable, Iterator, Optional
 
-from specitems import (Item, ItemGetValueContext, base64_to_hex_text,
-                       hash_file)
+from specitems import (Item, ItemGetValueContext, ItemValueProvider,
+                       base64_to_hex_text, hash_file)
 
 from .pkgitems import (BuildItem, BuildItemFactory, BuildItemMapper,
                        PackageBuildDirector, export_data)
@@ -131,6 +131,7 @@ class DirectoryStateBase(BuildItem):
                  item: Item,
                  mapper: Optional[BuildItemMapper] = None) -> None:
         super().__init__(director, item, mapper)
+        DirectoryStateValueProvider(self)
         self._discarded_files: set[str] = set()
         self._files: dict[str, Optional[str]] = dict(
             (file_info["file"], file_info["hash"])
@@ -621,3 +622,66 @@ class DirectoryStateBase(BuildItem):
             base = self.directory
             self.git_add([os.path.join(base, path) for path in sorted(files)])
         super().commit(reason)
+
+
+def _make_digest(value: Optional[str]) -> str:
+    assert value is not None
+    return base64_to_hex_text(value)
+
+
+def _gather_files_and_hashes(build_item: BuildItem, names: list[str],
+                             base: Optional[str], relpath: str,
+                             files_and_hashes: set[tuple[str, str]]) -> None:
+    if not names:
+        return
+    for name in names[0].split(" "):
+        for input_item in build_item.inputs(name):
+            if isinstance(input_item, DirectoryStateBase):
+                files_and_hashes.update(
+                    (os.path.relpath(file, relpath), _make_digest(digest))
+                    for file, digest in input_item.files_and_hashes(base))
+            _gather_files_and_hashes(input_item, names[1:], base, relpath,
+                                     files_and_hashes)
+
+
+class DirectoryStateValueProvider(ItemValueProvider):
+    """ Provides values related to directory states. """
+
+    # pylint: disable=too-few-public-methods
+
+    def __init__(self, build_item: BuildItem) -> None:
+        mapper = build_item.mapper
+        super().__init__(mapper)
+        self._build_item = build_item
+        type_name = build_item.item.type
+        mapper.add_get_value(f"{type_name}:/input-file-list",
+                             self._get_input_files)
+        mapper.add_get_value(f"{type_name}:/input-file-list-with-hashes",
+                             self._get_input_files_and_hashes)
+
+    def _files_and_hashes(self,
+                          ctx: ItemGetValueContext) -> list[tuple[str, str]]:
+        files_and_hashes: set[tuple[str, str]] = set()
+        args, kwargs = ctx.unpack_args_dict(ctx.mapper.substitute)
+        base = kwargs.get("base")
+        relpath = kwargs.get("relpath", "/")
+        _gather_files_and_hashes(self._build_item, args, base, relpath,
+                                 files_and_hashes)
+        return sorted(files_and_hashes)
+
+    def _get_input_files(self, ctx: ItemGetValueContext) -> str:
+        mapper = self.mapper
+        assert isinstance(mapper, BuildItemMapper)
+        content = mapper.create_content()
+        content.add_list(f"{content.path(file)}"
+                         for file, _ in self._files_and_hashes(ctx))
+        return content.join()
+
+    def _get_input_files_and_hashes(self, ctx: ItemGetValueContext) -> str:
+        mapper = self.mapper
+        assert isinstance(mapper, BuildItemMapper)
+        content = mapper.create_content()
+        content.add_list(
+            f"{content.path(file)} with an SHA512 digest of {digest}"
+            for file, digest in self._files_and_hashes(ctx))
+        return content.join()
