@@ -63,7 +63,9 @@ class PackageChanges(BuildItem):
         issues: tuple[set[Item], set[Item]] = (set(), set())
         package_status = self.item.map(change["package-status"])
         for link in package_status.links_to_parents("issue"):
-            issues[int(link["status"] == "open")].add(link.item)
+            status = link["status"]
+            if status != "N/A":
+                issues[int(status == "open")].add(link.item)
         return issues
 
     def _get_change_list(self, section_level: int,
