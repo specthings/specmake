@@ -93,7 +93,8 @@ is applicable to this directory or parts of the directory:""")
                     content.add_blank_line()
                     file_path = os.path.join(member.directory, name)
                     with open(file_path, "r", encoding="utf-8") as src:
-                        content.add_code_block(src.readlines())
+                        content.add_code_block(src.readlines(),
+                                               line_numbers=False)
     for the_license in license_listing:
         license_listing[the_license].register(
             copyrights_by_license.get(the_license, []))
@@ -426,7 +427,8 @@ relative to {content.path(deployment_directory)}.""")
                     with content.section(f"{the_license} copyrights"):
                         content.add(copyrights.get_statements("| ©"))
                         content.add_code_block(
-                            _LICENSE_LISTING[the_license].split("\n"))
+                            _LICENSE_LISTING[the_license].split("\n"),
+                            line_numbers=False)
             return content.join()
 
     def _get_targets(self, ctx: ItemGetValueContext) -> str:

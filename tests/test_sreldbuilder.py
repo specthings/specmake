@@ -52,6 +52,10 @@ Newly open issues
 
 At the time when the package of this version was produced, the following newly open issues with respect to the previous package version were present.
 
+.. raw:: latex
+
+    \\begin{{footnotesize}}
+
 .. table::
     :class: longtable
     :widths: 27,14,59
@@ -62,12 +66,20 @@ At the time when the package of this version was produced, the following newly o
     | RTEMS Ticket | `2548 <https://devel.rtems.org/ticket/2548>`_ | Problematic integer conversion in rtems_clock_get_tod() |
     +--------------+-----------------------------------------------+---------------------------------------------------------+
 
+.. raw:: latex
+
+    \\end{{footnotesize}}
+
 .. _AlreadyOpenIssues:
 
 Already open issues
 -------------------
 
 At the time when the package of this version was produced, the following open issues which were newly or already open in the previous package version were present.
+
+.. raw:: latex
+
+    \\begin{{footnotesize}}
 
 .. table::
     :class: longtable
@@ -79,12 +91,20 @@ At the time when the package of this version was produced, the following open is
     | RTEMS Ticket | `2365 <https://devel.rtems.org/ticket/2365>`_ | Task pre-emption disable is broken due to pseudo ISR tasks |
     +--------------+-----------------------------------------------+------------------------------------------------------------+
 
+.. raw:: latex
+
+    \\end{{footnotesize}}
+
 .. _ClosedIssues:
 
 Closed issues
 -------------
 
 For this package version, the following issues which were newly or already open in the previous package version were closed.
+
+.. raw:: latex
+
+    \\begin{{footnotesize}}
 
 .. table::
     :class: longtable
@@ -95,4 +115,8 @@ For this package version, the following issues which were newly or already open 
     +==============+===============================================+======================================================+
     | RTEMS Ticket | `2189 <https://devel.rtems.org/ticket/2189>`_ | Insufficient documentation for rtems_clock_get_tod() |
     +--------------+-----------------------------------------------+------------------------------------------------------+
+
+.. raw:: latex
+
+    \\end{{footnotesize}}
 """

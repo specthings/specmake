@@ -496,6 +496,10 @@ Newly open issues
 
 At the time when the package of this version was produced, the following newly open issues with respect to the previous package version were present.
 
+.. raw:: latex
+
+    \\begin{{footnotesize}}
+
 .. table::
     :class: longtable
     :widths: 27,14,59
@@ -506,12 +510,20 @@ At the time when the package of this version was produced, the following newly o
     | RTEMS Ticket | `2548 <https://devel.rtems.org/ticket/2548>`_ | Problematic integer conversion in rtems_clock_get_tod() |
     +--------------+-----------------------------------------------+---------------------------------------------------------+
 
+.. raw:: latex
+
+    \\end{{footnotesize}}
+
 .. _Name2AlreadyOpenIssues:
 
 Already open issues
 ^^^^^^^^^^^^^^^^^^^
 
 At the time when the package of this version was produced, the following open issues which were newly or already open in the previous package version were present.
+
+.. raw:: latex
+
+    \\begin{{footnotesize}}
 
 .. table::
     :class: longtable
@@ -523,12 +535,20 @@ At the time when the package of this version was produced, the following open is
     | RTEMS Ticket | `2365 <https://devel.rtems.org/ticket/2365>`_ | Task pre-emption disable is broken due to pseudo ISR tasks |
     +--------------+-----------------------------------------------+------------------------------------------------------------+
 
+.. raw:: latex
+
+    \\end{{footnotesize}}
+
 .. _Name2ClosedIssues:
 
 Closed issues
 ^^^^^^^^^^^^^
 
 For this package version, the following issues which were newly or already open in the previous package version were closed.
+
+.. raw:: latex
+
+    \\begin{{footnotesize}}
 
 .. table::
     :class: longtable
@@ -539,6 +559,10 @@ For this package version, the following issues which were newly or already open 
     +==============+===============================================+======================================================+
     | RTEMS Ticket | `2189 <https://devel.rtems.org/ticket/2189>`_ | Insufficient documentation for rtems_clock_get_tod() |
     +--------------+-----------------------------------------------+------------------------------------------------------+
+
+.. raw:: latex
+
+    \\end{{footnotesize}}
 
 .. _Name1:
 
@@ -554,6 +578,10 @@ Newly open issues
 
 At the time when the package of this version was produced, the following newly open issues with respect to the previous package version were present.
 
+.. raw:: latex
+
+    \\begin{{footnotesize}}
+
 .. table::
     :class: longtable
     :widths: 27,14,59
@@ -565,6 +593,10 @@ At the time when the package of this version was produced, the following newly o
     +--------------+-----------------------------------------------+------------------------------------------------------------+
     | RTEMS Ticket | `2365 <https://devel.rtems.org/ticket/2365>`_ | Task pre-emption disable is broken due to pseudo ISR tasks |
     +--------------+-----------------------------------------------+------------------------------------------------------------+
+
+.. raw:: latex
+
+    \\end{{footnotesize}}
 
 .. _Name1AlreadyOpenIssues:
 
@@ -604,6 +636,10 @@ Open issues
 
 At the time when the package of this version was produced, the following open issues were present.
 
+.. raw:: latex
+
+    \\begin{{footnotesize}}
+
 .. table::
     :class: longtable
     :widths: 27,14,59
@@ -615,6 +651,10 @@ At the time when the package of this version was produced, the following open is
     +--------------+-----------------------------------------------+------------------------------------------------------------+
     | RTEMS Ticket | `2548 <https://devel.rtems.org/ticket/2548>`_ | Problematic integer conversion in rtems_clock_get_tod()    |
     +--------------+-----------------------------------------------+------------------------------------------------------------+
+
+.. raw:: latex
+
+    \\end{{footnotesize}}
 .. license-info
 All directories and file paths in this section are
 relative to {_format_path(tmp_dir, 'pkg')}.
@@ -633,9 +673,17 @@ The license file
 :file:`.​.​/​dir/​a.​txt`
 is applicable to this directory or parts of the directory:
 
+.. raw:: latex
+
+    \\begin{{footnotesize}}
+
 .. code-block:: none
 
     ​A
+
+.. raw:: latex
+
+    \\end{{footnotesize}}
 
 .. _BSD2ClauseCopyrights:
 
@@ -643,6 +691,10 @@ BSD-2-Clause copyrights
 -----------------------
 
 | © 2023 Alice
+
+.. raw:: latex
+
+    \\begin{{footnotesize}}
 
 .. code-block:: none
 
@@ -666,6 +718,10 @@ BSD-2-Clause copyrights
     ​CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
     ​ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
     ​POSSIBILITY OF SUCH DAMAGE.
+
+.. raw:: latex
+
+    \\end{{footnotesize}}
 .. clear-copyrights-by-license
 clear copyrights by license
 .. license-info
@@ -1087,18 +1143,38 @@ Repositories
 build/src/a
 ===========
 
+.. raw:: latex
+
+    \\begin{footnotesize}
+
 .. code-block:: none
+    :linenos:
+    :lineno-start: 1
 
     ​git log -1
+
+.. raw:: latex
+
+    \\end{footnotesize}
 
 .. _PackageSummarySparcGr712rcSmp4RepositoriesBuildSrcB:
 
 build/src/b
 ===========
 
+.. raw:: latex
+
+    \\begin{footnotesize}
+
 .. code-block:: none
+    :linenos:
+    :lineno-start: 1
 
     ​git log -1
+
+.. raw:: latex
+
+    \\end{footnotesize}
 """
     pm2_build = Path(director["/pkg/build/doc-package-manual-2"].directory)
     pm2_index = pm2_build / "source" / "index.rst"

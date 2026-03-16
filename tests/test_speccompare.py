@@ -81,42 +81,72 @@ Do the C
 spec:/new
 *********
 
-.. code-block:: diff
+.. raw:: latex
 
-    @@ -10,5 +10,5 @@ rationale: null
-     references: []
-     requirement-type: non-functional
-     text: |
-    -  The bar shall be a buh.
-    +  The bar shall be a ups.
-     type: requirement
+    \\begin{footnotesize}
+
+.. code-block:: diff
+    :linenos:
+    :lineno-start: 1
+
+    ​@@ -10,5 +10,5 @@ rationale: null
+    ​ references: []
+    ​ requirement-type: non-functional
+    ​ text: |
+    ​-  The bar shall be a buh.
+    ​+  The bar shall be a ups.
+    ​ type: requirement
+
+.. raw:: latex
+
+    \\end{footnotesize}
 
 .. _LDoTheCSpecRoot:
 
 spec:/root
 **********
 
-.. code-block:: diff
+.. raw:: latex
 
-    @@ -20,7 +20,7 @@ text: |
-       No changes.
-       No changes.
-       No changes.
-    -  The foo shall be a bar.
-    +  The foo shall be a buh.
-       No changes.
-       No changes.
-       No changes.
+    \\begin{footnotesize}
 
 .. code-block:: diff
+    :linenos:
+    :lineno-start: 1
 
-    @@ -33,5 +33,5 @@ text: |
-       No changes.
-       No changes.
-       No changes.
-    -  More stuff.
-    +  Some more stuff.
-     type: requirement
+    ​@@ -20,7 +20,7 @@ text: |
+    ​   No changes.
+    ​   No changes.
+    ​   No changes.
+    ​-  The foo shall be a bar.
+    ​+  The foo shall be a buh.
+    ​   No changes.
+    ​   No changes.
+    ​   No changes.
+
+.. raw:: latex
+
+    \\end{footnotesize}
+
+.. raw:: latex
+
+    \\begin{footnotesize}
+
+.. code-block:: diff
+    :linenos:
+    :lineno-start: 1
+
+    ​@@ -33,5 +33,5 @@ text: |
+    ​   No changes.
+    ​   No changes.
+    ​   No changes.
+    ​-  More stuff.
+    ​+  Some more stuff.
+    ​ type: requirement
+
+.. raw:: latex
+
+    \\end{footnotesize}
 
 .. _LDoTheE:
 
@@ -171,26 +201,36 @@ Do the J
 spec:/root
 **********
 
-.. code-block:: diff
+.. raw:: latex
 
-    @@ -34,4 +34,17 @@ text: |
-       No changes.
-       No changes.
-       Some more stuff.
-    +  No changes.
-    +  No changes.
-    +  No changes.
-    +  No changes.
-    +  No changes.
-    +  No changes.
-    +  No changes.
-    +  No changes.
-    +  No changes.
-    +  No changes.
-    +  No changes.
-    +  No changes.
-    +  Even more stuff.
-     type: requirement
+    \\begin{footnotesize}
+
+.. code-block:: diff
+    :linenos:
+    :lineno-start: 1
+
+    ​@@ -34,4 +34,17 @@ text: |
+    ​   No changes.
+    ​   No changes.
+    ​   Some more stuff.
+    ​+  No changes.
+    ​+  No changes.
+    ​+  No changes.
+    ​+  No changes.
+    ​+  No changes.
+    ​+  No changes.
+    ​+  No changes.
+    ​+  No changes.
+    ​+  No changes.
+    ​+  No changes.
+    ​+  No changes.
+    ​+  No changes.
+    ​+  Even more stuff.
+    ​ type: requirement
+
+.. raw:: latex
+
+    \\end{footnotesize}
 
 .. _LDoTheK:
 
@@ -202,26 +242,36 @@ Do the K
 spec:/root
 **********
 
-.. code-block:: diff
+.. raw:: latex
 
-    @@ -34,17 +34,4 @@ text: |
-       No changes.
-       No changes.
-       Some more stuff.
-    -  No changes.
-    -  No changes.
-    -  No changes.
-    -  No changes.
-    -  No changes.
-    -  No changes.
-    -  No changes.
-    -  No changes.
-    -  No changes.
-    -  No changes.
-    -  No changes.
-    -  No changes.
-    -  Even more stuff.
-     type: requirement
+    \\begin{footnotesize}
+
+.. code-block:: diff
+    :linenos:
+    :lineno-start: 1
+
+    ​@@ -34,17 +34,4 @@ text: |
+    ​   No changes.
+    ​   No changes.
+    ​   Some more stuff.
+    ​-  No changes.
+    ​-  No changes.
+    ​-  No changes.
+    ​-  No changes.
+    ​-  No changes.
+    ​-  No changes.
+    ​-  No changes.
+    ​-  No changes.
+    ​-  No changes.
+    ​-  No changes.
+    ​-  No changes.
+    ​-  No changes.
+    ​-  Even more stuff.
+    ​ type: requirement
+
+.. raw:: latex
+
+    \\end{footnotesize}
 """
     builder = director["/pkg/doc"]
     assert isinstance(builder, DocumentBuilder)

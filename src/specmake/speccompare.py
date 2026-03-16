@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Compare two specification sets. """
 
-# Copyright (C) 2019, 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2019, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -252,9 +252,7 @@ def compare_specs(content: TextContent, config: CompareSpecsConfig) -> None:
                         continue
                     with content.section(f"spec:{b_uid}"):
                         for chunk in diff["chunks"]:
-                            for begin in range(0, len(chunk), 100):
-                                with content.directive("code-block", "diff"):
-                                    content.add(chunk[begin:begin + 100])
+                            content.add_code_block(chunk, language="diff")
 
 
 class CompareSpecsProvider(ItemValueProvider):

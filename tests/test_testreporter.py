@@ -528,15 +528,7 @@ The following table lists an evaluation of the reported test information.
 Test output
 ***********
 
-The test report was generated from the following test output.
-
-.. raw:: latex
-
-    \\begin{tiny}
-
-.. raw:: latex
-
-    \\end{tiny}"""
+The test report was generated from the following test output."""
 
     assert _get_tr(
         "a-build-config-key-build-testsuites-tmtests-tmfine01.rst"
@@ -593,15 +585,7 @@ The following table lists an evaluation of the reported test information.
 Test output
 ***********
 
-The test report was generated from the following test output.
-
-.. raw:: latex
-
-    \\begin{tiny}
-
-.. raw:: latex
-
-    \\end{tiny}"""
+The test report was generated from the following test output."""
 
     assert _get_tr("a-build-config-key-hello.exe.rst"
                    ) == """.. _a-build-config-key-hello.exe:

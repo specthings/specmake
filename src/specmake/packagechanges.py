@@ -49,7 +49,7 @@ def _add_issues(content: SphinxContent, issues: set[Item], header: str,
                 identifier = f"`{item['identifier']} <{url}>`_"
                 subject = item["subject"].replace("`", "\\`")
                 rows.append((database["name"], identifier, subject))
-            content.add_grid_table(rows, [27, 14, 59])
+            content.add_grid_table(rows, widths=[27, 14, 59], font_size=-2)
         else:
             content.add(f"""At the time when the package was produced,
 there were no {which} associated.""")
