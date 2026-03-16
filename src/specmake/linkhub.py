@@ -38,6 +38,10 @@ from .rtems import RTEMSItemCache
 
 _EB_PKG_SUPPORT = "https://embedded-brains.de/qdp-support"
 
+# Sorted by expected frequency
+_ELEMENT_KINDS = ("function", "define", "group", "file", "type", "enum",
+                  "object", "enumerator")
+
 
 def _member_link(elem: Any) -> str:
     return f"{elem.find('anchorfile').text}#{elem.find('anchor').text}"
@@ -872,6 +876,16 @@ items.""")
         """ Return the SDD link for the function with the name. """
         return self.get_sdd_link("function", name)
 
+    def get_any_sdd_link(self, name: str) -> str:
+        """ Return an SDD link for the name. """
+        for kind in _ELEMENT_KINDS:
+            elem_info = self.name_info.get(f"{kind}/{name}")
+            if elem_info is not None:
+                break
+        if elem_info is None:
+            raise ValueError("there is no SDD element with this name: {name}")
+        return f"`{elem_info['name']} <{elem_info['link']}>`__"
+
 
 class SpecMapper(BuildItemMapper):
     """ Item mapper for specifications. """
@@ -924,6 +938,7 @@ class SpecMapper(BuildItemMapper):
             self.add_default_get_value(
                 f"sdd-{kind}", functools.partial(self._get_value_sdd_link,
                                                  kind))
+        self.add_default_get_value("sdd", self._get_value_sdd_link_unique)
 
     def make_reference(self, item: Item, name: Optional[str] = None) -> str:
         """
@@ -959,3 +974,10 @@ class SpecMapper(BuildItemMapper):
         assert isinstance(link_hub, LinkHub)
         assert ctx.args
         return link_hub.get_sdd_link(kind, ctx.args)
+
+    def _get_value_sdd_link_unique(self, ctx: ItemGetValueContext) -> str:
+        link_hub_uid = self._build_item.component.item.child("link-hub").uid
+        link_hub = self._build_item.director[link_hub_uid]
+        assert isinstance(link_hub, LinkHub)
+        assert ctx.args
+        return link_hub.get_any_sdd_link(ctx.args)

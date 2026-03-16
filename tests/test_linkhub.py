@@ -79,6 +79,11 @@ def test_linkhub(caplog, tmpdir):
         "${.:/sdd-group:GroupA}"
     ) == f"`A <{tmpdir}/pkg/doc-ddf-sdd/html/group__GroupA.html>`__"
     assert mapper.substitute(
+        "${.:/sdd:GroupA}"
+    ) == f"`A <{tmpdir}/pkg/doc-ddf-sdd/html/group__GroupA.html>`__"
+    with pytest.raises(ValueError):
+        mapper.substitute("${.:/sdd:DoesNotExist}")
+    assert mapper.substitute(
         "${.:/sdd-object:obj}"
     ) == f"`obj <{tmpdir}/pkg/doc-ddf-sdd/html/group__Blub.html#gafc83d933ee990064a19b6b66ccad1800>`__"
     assert mapper.substitute(
