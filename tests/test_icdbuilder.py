@@ -1770,7 +1770,6 @@ This structure defines the Reg Block register block memory map.
 
     +-+-+
     | Bits [0:7] | REG_BLOCK_B bits. |
-    +=+=+
     +-+-+
 
 .. rubric:: SOFTWARE DESIGN:

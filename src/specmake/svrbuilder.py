@@ -27,7 +27,7 @@
 import itertools
 from typing import Iterator
 
-from specitems import Item, ItemGetValueContext, SphinxContent
+from specitems import COL_SPAN, Item, ItemGetValueContext, SphinxContent
 
 from .directorystate import DirectoryState
 from .membench import generate
@@ -101,9 +101,10 @@ class SVRBuilder(SpecDocumentBuilder):
     def _traceability_requirements_to_design(self,
                                              _ctx: ItemGetValueContext) -> str:
         content = SphinxContent(section_level=2)
-        rows = [["Requirement", "Design Component"]]
+        rows: list[tuple[str | int,
+                         ...]] = [("Requirement", "Design Component")]
         for item, components in self._req_to_design():
-            req = self.mapper.get_link(item)
+            req: str | int = self.mapper.get_link(item)
             for component in sorted(set(components)):
                 try:
                     link = component.view["document-links"]["sdd"]
@@ -115,11 +116,11 @@ class SVRBuilder(SpecDocumentBuilder):
                         link = "N/A (external design)"
                     else:
                         link = "**no reference to SDD**"
-                rows.append([req, link])
-                req = ""
-            if req:
+                rows.append((req, link))
+                req = COL_SPAN
+            if isinstance(req, str) and req:
                 rows.append(
-                    [req, "N/A (no directly associated design components)"])
+                    (req, "N/A (no directly associated design components)"))
         content.add_grid_table(rows, [50, 50], font_size=-4)
         return str(content)
 
@@ -128,7 +129,7 @@ class SVRBuilder(SpecDocumentBuilder):
         content = SphinxContent(section_level=2)
         link_hub = self.input("link-hub")
         assert isinstance(link_hub, LinkHub)
-        rows = [["Design Component", "Requirement"]]
+        rows = [("Design Component", "Requirement")]
         for _, info in sorted(link_hub.name_info.items(),
                               key=lambda x: _get_name(x[0])):
             if not isinstance(info, dict):
@@ -142,7 +143,7 @@ class SVRBuilder(SpecDocumentBuilder):
                     name = f"{name} in `{spacify(file_path)} <{file_link}>`__"
                 for item in sorted(variant["items"]):
                     url = item.view["document-links"]["url"]
-                    rows.append([name, f"`{item.spec_2} <{url}>`__"])
+                    rows.append((name, f"`{item.spec_2} <{url}>`__"))
         content.add_grid_table(rows, [60, 40], font_size=-4)
         return str(content)
 
@@ -178,10 +179,10 @@ class SVRBuilder(SpecDocumentBuilder):
 
     def _traceability_design_to_code(self, _ctx: ItemGetValueContext) -> str:
         content = SphinxContent(section_level=2)
-        rows = [["Design Component", "File"]]
+        rows: list[tuple[str | int, ...]] = [("Design Component", "File")]
         last = ""
         for design, code in self._get_design_to_code():
-            rows.append(["" if last == design else design, code])
+            rows.append((COL_SPAN if last == design else design, code))
             last = design
         content.add_grid_table(rows, [60, 40], font_size=-4)
         return str(content)
@@ -190,10 +191,10 @@ class SVRBuilder(SpecDocumentBuilder):
         content = SphinxContent(section_level=2)
         code_to_design = sorted(
             (code, design) for design, code in self._get_design_to_code())
-        rows = [["File", "Design Component"]]
-        last = ""
+        rows: list[tuple[str | int, ...]] = [("File", "Design Component")]
+        last: str | int = COL_SPAN
         for code, design in code_to_design:
-            rows.append(["" if last == code else code, design])
+            rows.append((COL_SPAN if last == code else code, design))
             last = code
         content.add_grid_table(rows, [40, 60], font_size=-4)
         return str(content)
@@ -202,14 +203,12 @@ class SVRBuilder(SpecDocumentBuilder):
         content = SphinxContent(section_level=2)
         test_suites: list[Item] = []
         gather_test_suites(self.item.cache["/testsuites/unit"], test_suites)
-        rows = [["Test Case", "Status"]]
+        rows = [("Test Case", "Status")]
         unspecified: dict[str, list[str]] = {}
         for test_suite in sorted(test_suites):
             for test_case in test_suite.children("test-case"):
-                rows.append([
-                    self.mapper.get_link(test_case),
-                    get_test_result_status(test_case, "", "")
-                ])
+                rows.append((self.mapper.get_link(test_case),
+                             get_test_result_status(test_case, "", "")))
             for test_results in test_suite.view.get("test-results",
                                                     {}).values():
                 for data in test_results:
@@ -232,13 +231,11 @@ class SVRBuilder(SpecDocumentBuilder):
 
     def _performance_summary(self, _ctx: ItemGetValueContext) -> str:
         content = SphinxContent(section_level=2)
-        types = ["requirement/non-functional/performance-runtime"]
-        rows = [["Requirement", "Status"]]
+        types = ("requirement/non-functional/performance-runtime", )
+        rows = [("Requirement", "Status")]
         for item in self.spec.get_related_items_by_type(types):
-            rows.append([
-                self.mapper.get_link(item),
-                get_test_result_status(item, "", "")
-            ])
+            rows.append((self.mapper.get_link(item),
+                         get_test_result_status(item, "", "")))
         content.add_grid_table(rows, [80, 20], font_size=-1)
         return str(content)
 

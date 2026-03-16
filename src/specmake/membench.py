@@ -3,7 +3,7 @@
 Provides functions for the generation of memory benchmark documentation.
 """
 
-# Copyright (C) 2021, 2023 embedded brains GmbH & Co. KG
+# Copyright (C) 2021, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -28,9 +28,10 @@ Provides functions for the generation of memory benchmark documentation.
 
 import os
 import re
-from typing import Any, Dict, List, NamedTuple, Tuple
+from typing import Any, NamedTuple
 
-from specitems import get_reference, Item, ItemCache, ItemMapper, SphinxContent
+from specitems import (COL_SPAN, Item, ItemCache, ItemMapper, SphinxContent,
+                       get_reference)
 from specware import run_command
 
 
@@ -40,7 +41,7 @@ class MembenchVariant(NamedTuple):
     build_label: str
 
 
-SectionsByUID = Dict[str, Dict[str, int]]
+SectionsByUID = dict[str, dict[str, int]]
 
 _SECTIONS = {".text": 0, ".rodata": 1, ".data": 2, ".bss": 3, ".noinit": 4}
 
@@ -235,23 +236,23 @@ _OBJECT_SIZES = {
 }
 
 
-def _section_key(key_value: Tuple[str, Any]) -> int:
+def _section_key(key_value: tuple[str, Any]) -> int:
     return _SECTIONS[key_value[0]]
 
 
 def _get_sections_of_item(sections_by_uid: SectionsByUID,
-                          item: Item) -> Tuple[int, ...]:
+                          item: Item) -> tuple[int, ...]:
     return tuple(size for _, size in sorted(
         sections_by_uid.get(item.uid, {}).items(), key=_section_key))
 
 
 def gather_sections(item_cache: ItemCache, path: str, objdump: str,
-                    gdb: str) -> Dict[str, Dict[str, int]]:
+                    gdb: str) -> dict[str, dict[str, int]]:
     """
     Gathers the object sizes for all memory benchmarks of the item cache using
     the programs of the path.
     """
-    sections_by_uid: Dict[str, Dict[str, int]] = {}
+    sections_by_uid: dict[str, dict[str, int]] = {}
     for item in item_cache.items_by_type["memory-benchmark"]:
         sections = _get_sections(item, path, objdump, gdb)
         if sections:
@@ -260,12 +261,12 @@ def gather_sections(item_cache: ItemCache, path: str, objdump: str,
 
 
 def gather_object_sizes(item_cache: ItemCache, path: str,
-                        gdb: str) -> Dict[str, int]:
+                        gdb: str) -> dict[str, int]:
     """
     Gathers the object sizes for all memory benchmarks of the item cache using
     the programs of the path.
     """
-    object_sizes: Dict[str, int] = {}
+    object_sizes: dict[str, int] = {}
     for key, value in _OBJECT_SIZES.items():
         try:
             item = item_cache[value["uid"]]
@@ -275,7 +276,7 @@ def gather_object_sizes(item_cache: ItemCache, path: str,
         for command in value["commands"]:
             cmd = [gdb, "-ex", f"p {command}", "--batch", ""]
             cmd[-1] = file
-            stdout: List[str] = []
+            stdout: list[str] = []
             status = run_command(cmd, stdout=stdout)
             if status == 0:
                 output = " ".join(stdout)
@@ -286,7 +287,7 @@ def gather_object_sizes(item_cache: ItemCache, path: str,
     return object_sizes
 
 
-def _do_gather_test_suites(items: List[Item], item: Item) -> None:
+def _do_gather_test_suites(items: list[Item], item: Item) -> None:
     if item.type == "memory-benchmark":
         items.append(item)
     # Gather the validation items first so that the root validation item shows
@@ -297,9 +298,9 @@ def _do_gather_test_suites(items: List[Item], item: Item) -> None:
         _do_gather_test_suites(items, child)
 
 
-def _gather_benchmarks(root: Item) -> List[Item]:
+def _gather_benchmarks(root: Item) -> list[Item]:
     """ Gather all test suite items related to the root item. """
-    items: List[Item] = []
+    items: list[Item] = []
     _do_gather_test_suites(items, root)
     return items
 
@@ -311,24 +312,24 @@ def _get_path_to_test_suite_elf_file(item: Item, path: str) -> str:
 
 
 def _try_add_workspace(gdb: str, elf: str,
-                       section_limits: Dict[str, Tuple[int, int]]) -> None:
+                       section_limits: dict[str, tuple[int, int]]) -> None:
     if ".noinit" in section_limits:
         return
     # Maybe an older version of RTEMS
-    stdout: List[str] = []
+    stdout: list[str] = []
     cmd = [gdb, "-ex", "p Configuration.work_space_size", "--batch", elf]
     status = run_command(cmd, stdout=stdout)
     if status == 0 and stdout[0].startswith("$1 = "):
         section_limits[".noinit"] = (0, int(stdout[0][5:]))
 
 
-def _get_size(section_limits: Dict[str, Tuple[int, int]], key: str) -> int:
+def _get_size(section_limits: dict[str, tuple[int, int]], key: str) -> int:
     limits = section_limits.get(key, (0, 0))
     return limits[1] - limits[0]
 
 
-def _run_objdump(objdump: str, elf: str) -> List[str]:
-    stdout: List[str] = []
+def _run_objdump(objdump: str, elf: str) -> list[str]:
+    stdout: list[str] = []
     status = run_command([objdump, "-h", elf], stdout=stdout)
     if status != 0:
         return []
@@ -336,8 +337,8 @@ def _run_objdump(objdump: str, elf: str) -> List[str]:
 
 
 def _make_sections(
-        section_limits: Dict[str, Tuple[int, int]]) -> Dict[str, int]:
-    sections: Dict[str, int] = {}
+        section_limits: dict[str, tuple[int, int]]) -> dict[str, int]:
+    sections: dict[str, int] = {}
     for key in _SECTIONS:
         sections[key] = _get_size(section_limits, key)
     sections[".noinit"] += _get_size(section_limits, ".vector")
@@ -345,7 +346,7 @@ def _make_sections(
 
 
 def _get_sections(item: Item, path_to_elf_files: str, objdump: str,
-                  gdb: str) -> Dict[str, int]:
+                  gdb: str) -> dict[str, int]:
     """
     Get the memory benchmark sections of the program associated with the item
     in the path to ELF files.
@@ -354,7 +355,7 @@ def _get_sections(item: Item, path_to_elf_files: str, objdump: str,
     stdout = _run_objdump(objdump, elf)
     if not stdout:
         return {}
-    section_limits: Dict[str, Tuple[int, int]] = {}
+    section_limits: dict[str, tuple[int, int]] = {}
     for line in stdout:
         match = _SECTION.search(line)
         if match:
@@ -376,9 +377,9 @@ def _make_label(scope: str, item: Item) -> str:
 
 
 def _generate_table(content: SphinxContent, sections_by_uid: SectionsByUID,
-                    items: List[Item]) -> None:
+                    items: list[Item]) -> None:
     scope = content.label
-    rows: List[Tuple[str, ...]] = []
+    rows: list[tuple[str, ...]] = []
     for index, item in enumerate(items):
         sections = _get_sections_of_item(sections_by_uid, item)
         spec = (get_reference(_make_label(scope, item), item.uid), )
@@ -419,7 +420,7 @@ _WARNING_NO_MEMBENCH = """.. topic:: WARNING
 
 def _generate_paragraphs(content: SphinxContent,
                          sections_by_uid: SectionsByUID, mapper: ItemMapper,
-                         items: List[Item]) -> None:
+                         items: list[Item]) -> None:
     for item in items:
         with content.section(f"Benchmark: {item.spec}"):
             content.wrap(mapper.substitute(item["test-brief"], item))
@@ -435,7 +436,7 @@ def _generate_paragraphs(content: SphinxContent,
 
 
 def _generate_tables(content: SphinxContent, sections_by_uid: SectionsByUID,
-                     root: Item, table_pivots: List[str]) -> List[Item]:
+                     root: Item, table_pivots: list[str]) -> list[Item]:
     root_items = _gather_benchmarks(root)
     _generate_table(content, sections_by_uid, root_items)
     for pivot_uid in table_pivots:
@@ -448,23 +449,24 @@ def _generate_tables(content: SphinxContent, sections_by_uid: SectionsByUID,
 
 
 def generate_tables(content: SphinxContent, sections_by_uid: SectionsByUID,
-                    root: Item, table_pivots: List[str]) -> None:
+                    root: Item, table_pivots: list[str]) -> None:
     """ Generate memory benchmark tables. """
     _generate_tables(content, sections_by_uid, root, table_pivots)
 
 
 def generate_variants_table(content: SphinxContent,
-                            sections_by_build_label: Dict[str,
-                                                          Dict[str,
+                            sections_by_build_label: dict[str,
+                                                          dict[str,
                                                                SectionsByUID]],
                             root: Item,
-                            variants: List[MembenchVariant]) -> None:
+                            variants: list[MembenchVariant]) -> None:
     """ Generate memory benchmark variant comparison tables. """
     items = _gather_benchmarks(root)
-    rows: List[Tuple[str,
+    rows: list[tuple[str | int,
                      ...]] = [("Specification", "Variant") + _SECTION_KEYS]
     for item in items:
-        spec = get_reference(_make_label(content.label, item), item.uid)
+        spec: str | int = get_reference(_make_label(content.label, item),
+                                        item.uid)
         for index, variant in enumerate(variants):
             sections = _get_sections_of_item(
                 sections_by_build_label[variant.build_label]["membench"], item)
@@ -479,12 +481,12 @@ def generate_variants_table(content: SphinxContent,
                                              for i, j in zip(sections, base)))
                 else:
                     rows.append(what + tuple("?") * len(base))
-            spec = ""
+            spec = COL_SPAN
     content.add_grid_table(rows, [35, 20, 9, 9, 9, 9, 9], font_size=-3)
 
 
 def generate(content: SphinxContent, sections_by_uid: SectionsByUID,
-             root: Item, table_pivots: List[str], mapper: ItemMapper) -> None:
+             root: Item, table_pivots: list[str], mapper: ItemMapper) -> None:
     """
     Generate memory benchmark documentation for items dependent on the root
     item and executables in the path.

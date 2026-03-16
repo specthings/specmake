@@ -31,7 +31,8 @@ import logging
 import os
 from typing import Any
 
-from specitems import Item, link_is_enabled, make_label, SphinxContent
+from specitems import (COL_SPAN, Item, link_is_enabled, make_label,
+                       SphinxContent)
 from specware import CodeMapper
 
 from .directorystate import DirectoryState
@@ -719,15 +720,16 @@ class TestAggregator(BuildItem):
 
     def add_coverage_achievement(self, content: SphinxContent) -> None:
         """ Add the code/branch coverage achievement to the content. """
-        rows = [[
+        rows: list[list[str | int]] = [[
             "Target", "Configuration", "Scope", "Functions", "Status", "Lines",
             "Status", "Branches", "Status"
         ]]
         for target_data in self.targets.values():
-            target = f"`{target_data['name']} <{target_data['link']}>`__"
+            target: str | int = (f"`{target_data['name']} "
+                                 f"<{target_data['link']}>`__")
             for config_data in target_data["configs"]:
                 key = config_data["config-key"]
-                config = f"`{key} <{config_data['link']}>`__"
+                config: str | int = f"`{key} <{config_data['link']}>`__"
                 for coverage in config_data.get("coverage", []):
                     summary = _CoverageSummary(self, coverage)
                     row = [target, config, coverage["scope"]]
@@ -735,8 +737,8 @@ class TestAggregator(BuildItem):
                         row.append(summary.overall[f"{kind}-info"])
                         row.append(summary.overall[f"{kind}-status"])
                     rows.append(row)
-                    config = ""
-                    target = ""
+                    config = COL_SPAN
+                    target = COL_SPAN
         content.add_grid_table(rows, [18, 8, 8, 13, 7, 13, 7, 13, 7],
                                font_size=-3)
 

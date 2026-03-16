@@ -30,8 +30,8 @@ import logging
 import os
 from typing import Iterator
 
-from specitems import (Copyrights, Item, ItemGetValueContext, make_label, Link,
-                       SphinxContent, SphinxMapper)
+from specitems import (COL_SPAN, Copyrights, Item, ItemGetValueContext,
+                       make_label, Link, SphinxContent, SphinxMapper)
 from specware import (BSD_2_CLAUSE_LICENSE, MIT_LICENSE, gather_api_items,
                       run_command)
 
@@ -277,13 +277,13 @@ class PackageManualBuilder(DocumentBuilder):
     def _make_performance_variants_rows(
         self, item: Item, envs: list[str], env_links: dict[str, str],
         measurements_by_variant: dict[int, _ItemToEnvStats]
-    ) -> list[tuple[str, ...]]:
+    ) -> list[tuple[str | int, ...]]:
         # pylint: disable=too-many-locals
-        rows: list[tuple[str, ...]] = []
-        info_spec = self.mapper.get_link(item)
+        rows: list[tuple[str | int, ...]] = []
+        info_spec: str | int = self.mapper.get_link(item)
         for env in envs:
             env_link = env_links[env.split("/")[0]]
-            info_env = f"`{env} <{env_link}>`__"
+            info_env: str | int = f"`{env} <{env_link}>`__"
             for index, (link, test_log) in enumerate(
                     self._yield_benchmark_variants()):
                 stats = measurements_by_variant[index].get(item.ident,
@@ -303,8 +303,8 @@ class PackageManualBuilder(DocumentBuilder):
                         for j, value in enumerate(stats)))
                 else:
                     rows.append(info + ("?", "?", "?"))
-                info_spec = ""
-                info_env = ""
+                info_spec = COL_SPAN
+                info_env = COL_SPAN
         return rows
 
     def _get_performance_variants_table(self, ctx: ItemGetValueContext) -> str:
@@ -326,7 +326,7 @@ class PackageManualBuilder(DocumentBuilder):
                 "DirtyCache": f"{req_path}dirty-cache",
                 "Load": f"{req_path}load"
             }
-            rows: list[tuple[str, ...]] = [
+            rows: list[tuple[str | int, ...]] = [
                 ("Specification", "Environment", "Variant", "Min [μs]",
                  "Median [μs]", "Max [μs]")
             ]

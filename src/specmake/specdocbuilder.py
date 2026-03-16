@@ -29,9 +29,9 @@ import os
 import re
 from typing import Any, Callable, NamedTuple
 
-from specitems import (EnabledSet, GenericContent, Item, ItemGetValueContext,
-                       ItemMapper, is_enabled, Link, link_is_enabled,
-                       make_label, SphinxContent)
+from specitems import (COL_SPAN, EnabledSet, GenericContent, Item,
+                       ItemGetValueContext, ItemMapper, is_enabled, Link,
+                       link_is_enabled, make_label, SphinxContent)
 from specware import (align_declarations, CodeMapper, document_directive,
                       document_option, forward_declaration, TransitionMap)
 
@@ -287,29 +287,26 @@ def _document_perf_runtime(ctx: _Context) -> None:
             ctx.content.wrap(f"""For the
 {ctx.mapper.get_link(target)} target, the following runtime
 performance limits shall apply:""")
-            rows = [["${ENVIRONMENT}", "${LIMIT_KIND}", "${LIMIT_CONDITION}"]]
+            rows: list[tuple[str | int, ...]] = [
+                ("${ENVIRONMENT}", "${LIMIT_KIND}", "${LIMIT_CONDITION}")
+            ]
             for env, limits in sorted(link["limits"].items(),
                                       key=environment_order):
                 env_name, _, _ = env.partition("/")
                 env_item = ctx.spec.name_to_item[
                     f"perf-runtime-env/{env_name}"]
                 lower_bound = limits["min-lower-bound"]
-                rows.append([
-                    f":ref:`{env} <{make_label(env_item.spec)}>`", "Minimum",
-                    f"{duration(lower_bound)} :math:`\\leq` Minimum"
-                ])
+                rows.append(
+                    (f":ref:`{env} <{make_label(env_item.spec)}>`", "Minimum",
+                     f"{duration(lower_bound)} :math:`\\leq` Minimum"))
                 lower_bound = limits["median-lower-bound"]
                 upper_bound = limits["median-upper-bound"]
-                rows.append([
-                    "", "Median",
-                    f"{duration(lower_bound)} :math:`\\leq` Median "
-                    f":math:`\\leq` {duration(upper_bound)}"
-                ])
+                rows.append((COL_SPAN, "Median",
+                             f"{duration(lower_bound)} :math:`\\leq` Median "
+                             f":math:`\\leq` {duration(upper_bound)}"))
                 upper_bound = limits["max-upper-bound"]
-                rows.append([
-                    "", "Maximum",
-                    f"Maximum :math:`\\leq` {duration(upper_bound)}"
-                ])
+                rows.append((COL_SPAN, "Maximum",
+                             f"Maximum :math:`\\leq` {duration(upper_bound)}"))
             ctx.content.add_grid_table(rows, [25, 25, 50])
             try:
                 test_results = ctx.item.view["test-results"][target.uid]
@@ -445,16 +442,16 @@ def _document_register_block(ctx: _Context) -> None:
     _document_unspecified(ctx)
     _add_text(ctx, "brief", "BRIEF DESCRIPTION")
     ctx.content.add_rubric("REGISTER BLOCK:")
-    rows = [["Offset", "Register"]]
+    rows: list[tuple[str | int, ...]] = [("Offset", "Register")]
     for member in ctx.item["definition"]:
         definition = _definition(member, ctx.mapper, ctx.spec.enabled_set)
         count = definition["count"]
         array = f"[ {count} ]" if count > 1 else ""
-        rows.append([f"{member['offset']:#x}", f"{definition['name']}{array}"])
+        rows.append((f"{member['offset']:#x}", f"{definition['name']}{array}"))
     ctx.content.add_grid_table(rows, [20, 80])
     for reg in ctx.item["registers"]:
         ctx.content.add_rubric(f"REGISTER {reg['name']}:")
-        rows = [[f"Bits [0:{reg['width'] - 1}]", f"{reg['brief'].strip()}"]]
+        rows = [(f"Bits [0:{reg['width'] - 1}]", f"{reg['brief'].strip()}")]
         for bits in reg["bits"]:
             definition = _definition(bits, ctx.mapper, ctx.spec.enabled_set)
             for field in definition:
@@ -464,7 +461,7 @@ def _document_register_block(ctx: _Context) -> None:
                     pos = str(start)
                 else:
                     pos = f"[{start}:{start + width - 1}]"
-                rows.append([pos, field["name"]])
+                rows.append((pos, field["name"]))
         ctx.content.add_grid_table(rows, [20, 80])
     _add_text(ctx, "description", "DESCRIPTION")
     _add_text(ctx, "notes", "NOTES")
@@ -917,15 +914,14 @@ class SpecDocumentBuilder(DocumentBuilder):
         content.add(
             self.mapper.substitute(
                 _VALIDATION_APPROACH.replace("SPEC_ROOT", spec_root)))
-        rows = [[
-            "Interface / Requirement", "Status", "Refinement / Validation",
-            "Role"
-        ]]
+        rows: list[tuple[str | int,
+                         ...]] = [("Interface / Requirement", "Status",
+                                   "Refinement / Validation", "Role")]
         for item in sorted(items,
                            key=lambda x:
                            (len(x.view["order"]), x.view["order"])):
-            req = f"_`{item.uid}`"
-            status = _status(item)
+            req: str | int = f"_`{item.uid}`"
+            status: str | int = _status(item)
             for validation in item.view["validation-dependencies"]:
                 item_2 = item_cache[validation[0]]
                 role = _validation_role(item_2, validation[1])
@@ -940,14 +936,12 @@ class SpecDocumentBuilder(DocumentBuilder):
                     item_2_ref = get_link(item_2,
                                           document_key="test-plan").replace(
                                               "spec:", "")
-                rows.append([req, status, item_2_ref, role])
-                req = ""
-                status = ""
-            if req:
-                rows.append([
-                    req, status, "N/A",
-                    item.view.get("validation-status", "N/A")
-                ])
+                rows.append((req, status, item_2_ref, role))
+                req = COL_SPAN
+                status = COL_SPAN
+            if isinstance(req, str) and req:
+                rows.append((req, status, "N/A",
+                             item.view.get("validation-status", "N/A")))
         content.add_grid_table(rows, [32, 14, 32, 22], font_size=-4)
 
     def _validation_verification(self, ctx: ItemGetValueContext) -> str:
