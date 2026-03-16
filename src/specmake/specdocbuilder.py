@@ -24,16 +24,20 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# pylint: disable=too-many-lines
+
 import functools
+import itertools
 import os
 import re
-from typing import Any, Callable, NamedTuple
+from typing import Any, Callable, Iterable, NamedTuple
 
 from specitems import (COL_SPAN, EnabledSet, GenericContent, Item,
-                       ItemGetValueContext, ItemMapper, is_enabled, Link,
-                       link_is_enabled, make_label, SphinxContent)
-from specware import (align_declarations, CodeMapper, document_directive,
-                      document_option, forward_declaration, TransitionMap)
+                       ItemGetValueContext, ItemMapper, ROW_SPAN, is_enabled,
+                       Link, link_is_enabled, make_label, SphinxContent)
+from specware import (CodeMapper, TransitionMap, PreCondsOfPostCond,
+                      align_declarations, document_directive, document_option,
+                      forward_declaration)
 
 from .docbuilder import DocumentBuilder
 from .pkgitems import PackageBuildDirector
@@ -328,25 +332,99 @@ def _document_perf_runtime_env(ctx: _Context) -> None:
 measurement environment is ``{ctx.item['name']}``.""")
 
 
+_UPPER = re.compile(r"[A-Z]+")
+
+
+def _upper_spacify(match: re.Match[str]) -> str:
+    return f"\u200b{match.group(0)}"
+
+
+def _spacify(name: str) -> str:
+    return _UPPER.sub(_upper_spacify, name).lstrip("\u200b")
+
+
+def _name_ref(ctx: _Context, name: str, which: str) -> str:
+    label = make_label(f"{ctx.item.spec} {which} {name}")
+    return f":ref:`{_spacify(name)} <{label}>`"
+
+
 def _add_pre_condition_variants(ctx: _Context, transition_map: TransitionMap,
                                 pre_conds: Any) -> None:
     for row in pre_conds:
         entries = []
         for co_idx, co_states in enumerate(row):
             co_name = transition_map.pre_co_idx_to_co_name(co_idx)
-            label = make_label(f"{ctx.item.spec} Pre {co_name}")
-            co_name = f":ref:`{co_name} <{label}>`"
+            co_name = _name_ref(ctx, co_name, "Pre")
             states = [
                 transition_map.pre_co_idx_st_idx_to_st_name(co_idx, st_idx)
                 for st_idx in set(co_states)
             ]
             if len(states) == 1:
-                if states[0] != "NA":
-                    entries.append(f"{co_name} = {states[0]}")
+                entries.append(f"{co_name} = {states[0]}")
             else:
                 entries.append(f"{co_name} = {{{', '.join(states)}}}")
         ctx.content.add("")
         ctx.content.add("    * " + ", ".join(entries))
+
+
+def _states(transition_map: TransitionMap, co_idx: int,
+            states: list[int]) -> str:
+    return ", ".join(
+        _spacify(transition_map.pre_co_idx_st_idx_to_st_name(co_idx, st_idx))
+        for st_idx in set(states))
+
+
+def _add_transition_map(
+    ctx: _Context
+) -> tuple[TransitionMap, list[tuple[str, PreCondsOfPostCond]]]:
+    infeasible_pre_conds: list[tuple[str, PreCondsOfPostCond]] = []
+    transition_map = TransitionMap(ctx.item, "N/A")
+    rows: list[Iterable[str | int]] = [
+        ("Pre-Conditions", ) + (ROW_SPAN, ) *
+        (transition_map.pre_co_count - 1) + ("Post-Conditions", ) +
+        (ROW_SPAN, ) * (transition_map.post_co_count - 1)
+    ]
+    rows.append(
+        tuple(
+            itertools.chain((_name_ref(ctx, condition["name"], "Pre")
+                             for condition in ctx.item["pre-conditions"]),
+                            (_name_ref(ctx, condition["name"], "Post")
+                             for condition in ctx.item["post-conditions"]))))
+    for post_co, pre_co_collection in transition_map.get_post_conditions(
+            ctx.spec.enabled_set):
+        if post_co[0]:
+            infeasible_pre_conds.append(
+                (transition_map.skip_idx_to_name(post_co[0]),
+                 pre_co_collection))
+            post_co_row = ((_name_ref(
+                ctx, transition_map.skip_idx_to_name(post_co[0]), "Skip"), ) +
+                           (ROW_SPAN, ) * (transition_map.post_co_count - 1))
+            post_co_col_span: tuple[str | int,
+                                    ...] = ((COL_SPAN, ) +
+                                            (COL_SPAN | ROW_SPAN, ) *
+                                            (transition_map.post_co_count - 1))
+        else:
+            post_co_row = tuple(
+                _spacify(
+                    transition_map.post_co_idx_st_idx_to_st_name(
+                        co_idx, st_idx))
+                for co_idx, st_idx in enumerate(post_co[1:]))
+            post_co_col_span = (COL_SPAN, ) * transition_map.post_co_count
+        for pre_co in pre_co_collection:
+            pre_co_row = tuple(
+                _states(transition_map, co_idx, co_states)
+                for co_idx, co_states in enumerate(pre_co))
+            rows.append(pre_co_row + post_co_row)
+            post_co_row = post_co_col_span
+    co_count = transition_map.pre_co_count + transition_map.post_co_count
+    with ctx.content.latex_environment("landscape", use=co_count > 10):
+        font_size = -((co_count + 4) // 5)
+        with ctx.content.latex_font_size(font_size):
+            cell_width = 100 // co_count
+            widths = [100 - cell_width *
+                      (co_count - 1)] + [cell_width] * (co_count - 1)
+            ctx.content.add_grid_table(rows, widths=widths, header_rows=2)
+    return transition_map, infeasible_pre_conds
 
 
 def _add_conditions(ctx: _Context, which: str) -> None:
@@ -356,7 +434,7 @@ def _add_conditions(ctx: _Context, which: str) -> None:
         name = condition['name']
         ctx.content.add_label(make_label(f"{ctx.item.spec} {caption} {name}"))
         with ctx.content.directive("topic", f"{caption}-Condition - {name}"):
-            ctx.content.wrap(f"""The *{name}* {which}-condition has the
+            ctx.content.add(f"""The *{name}* {which}-condition has the
 following states:""")
             for state in condition["states"]:
                 text = ctx.mapper.substitute(state["text"])
@@ -378,30 +456,13 @@ resulting post-condition state variant produced by the trigger action.""")
     ctx.content.add_rubric("TRANSITION MAP:")
     ctx.content.wrap("""For each of the resulting post-condition state variants
 below, the set of producing pre-condition variants is listed.""")
-    transition_map = TransitionMap(ctx.item)
-    infeasible_pre_conds = []
-    for post_cond, pre_conds in transition_map.get_post_conditions(
-            ctx.spec.enabled_set):
-        ctx.content.add("")
-        if post_cond[0]:
-            infeasible_pre_conds.append(
-                (transition_map.skip_idx_to_name(post_cond[0]), pre_conds))
-        else:
-            names: list[str] = []
-            for co_idx, st_idx in enumerate(post_cond[1:]):
-                st_name = transition_map.post_co_idx_st_idx_to_st_name(
-                    co_idx, st_idx)
-                if st_name != "NA":
-                    co_name = transition_map.post_co_idx_to_co_name(co_idx)
-                    label = make_label(f"{ctx.item.spec} Post {co_name}")
-                    co_name = f":ref:`{co_name} <{label}>`"
-                    names.append(f"{co_name} = {st_name}")
-            ctx.content.wrap(", ".join(names))
-        _add_pre_condition_variants(ctx, transition_map, pre_conds)
+    transition_map, infeasible_pre_conds = _add_transition_map(ctx)
     if infeasible_pre_conds:
         ctx.content.add_rubric("INFEASIBLE PRE-CONDITION VARIANTS:")
         for reason, pre_conds in infeasible_pre_conds:
-            ctx.content.wrap(
+            ctx.content.add_label(make_label(f"{ctx.item.spec} Skip {reason}"))
+            ctx.content.add(f"{ctx.content.emphasize(reason)}:")
+            ctx.content.paste(
                 ctx.mapper.substitute(ctx.item["skip-reasons"][reason]))
             ctx.content.paste(
                 """Therefore, the following pre-condition state variants

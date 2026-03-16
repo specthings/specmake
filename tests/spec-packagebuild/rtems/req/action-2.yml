@@ -78,6 +78,11 @@ pre-conditions:
       /* Code */
     text: |
       CB
+  - name: CC
+    test-code: |
+      /* Code */
+    text: |
+      CC
   test-epilogue: null
   test-prologue: null
 rationale: null
@@ -133,4 +138,5 @@ transition-map:
     - BA
     C:
     - CA
+    - CC
 type: requirement

@@ -288,7 +288,8 @@ This action requirement is validated by a validation by test specified by `spec:
 
 .. topic:: Pre-Condition - Value
 
-    The **Value** pre-condition has the following states:
+    The *Value* pre-condition has the
+    following states:
 
     Zero
         While the parameter value is equal to zero.
@@ -308,7 +309,8 @@ directive is called.
 
 .. topic:: Post-Condition - Result
 
-    The **Result** post-condition has the following states:
+    The *Result* post-condition has the
+    following states:
 
     Zero
         The return value of `UnspecFunction()
@@ -326,13 +328,27 @@ directive is called.
 For each of the resulting post-condition state variants below, the set of
 producing pre-condition variants is listed.
 
-:ref:`Result <SpecRtemsReqActionPostResult>` = Zero
+.. raw:: latex
 
-    * :ref:`Value <SpecRtemsReqActionPreValue>` = Zero
+    \\begin{small}
 
-:ref:`Result <SpecRtemsReqActionPostResult>` = LastBitSet
+.. table::
+    :class: longtable
+    :widths: 50,50
 
-    * :ref:`Value <SpecRtemsReqActionPreValue>` = NonZero
+    +-+-+
+    | Pre-Conditions | Post-Conditions |
+    +-+-+
+    | :ref:`Value <SpecRtemsReqActionPreValue>` | :ref:`Result <SpecRtemsReqActionPostResult>` |
+    +=+=+
+    | Zero | Zero |
+    +-+-+
+    | Non​Zero | Last​Bit​Set |
+    +-+-+
+
+.. raw:: latex
+
+    \\end{small}
 
 .. raw:: latex
 
@@ -369,7 +385,8 @@ This action requirement is validated by a validation by test specified by `spec:
 
 .. topic:: Pre-Condition - A
 
-    The **A** pre-condition has the following states:
+    The *A* pre-condition has the
+    following states:
 
     AA
         AA
@@ -381,7 +398,8 @@ This action requirement is validated by a validation by test specified by `spec:
 
 .. topic:: Pre-Condition - B
 
-    The **B** pre-condition has the following states:
+    The *B* pre-condition has the
+    following states:
 
     BA
         BA
@@ -393,13 +411,17 @@ This action requirement is validated by a validation by test specified by `spec:
 
 .. topic:: Pre-Condition - C
 
-    The **C** pre-condition has the following states:
+    The *C* pre-condition has the
+    following states:
 
     CA
         CA
 
     CB
         CB
+
+    CC
+        CC
 
 .. rubric:: TRIGGER ACTION:
 
@@ -411,7 +433,8 @@ When the directive is called.
 
 .. topic:: Post-Condition - X
 
-    The **X** post-condition has the following states:
+    The *X* post-condition has the
+    following states:
 
     XA
         XA
@@ -423,7 +446,8 @@ When the directive is called.
 
 .. topic:: Post-Condition - Y
 
-    The **Y** post-condition has the following states:
+    The *Y* post-condition has the
+    following states:
 
     YA
         YA
@@ -436,22 +460,37 @@ When the directive is called.
 For each of the resulting post-condition state variants below, the set of
 producing pre-condition variants is listed.
 
-:ref:`X <SpecRtemsReqAction2PostX>` = XA, :ref:`Y <SpecRtemsReqAction2PostY>` =
-YA
+.. raw:: latex
 
-    * :ref:`A <SpecRtemsReqAction2PreA>` = AA, :ref:`C <SpecRtemsReqAction2PreC>` = {CA, CB}
+    \\begin{small}
 
-:ref:`X <SpecRtemsReqAction2PostX>` = XB
+.. table::
+    :class: longtable
+    :widths: 20,20,20,20,20
 
-    * :ref:`A <SpecRtemsReqAction2PreA>` = AB, :ref:`C <SpecRtemsReqAction2PreC>` = {CA, CB}
+    +-+-+-+-+-+
+    | Pre-Conditions | Post-Conditions |
+    +-+-+-+-+-+
+    | :ref:`A <SpecRtemsReqAction2PreA>` | :ref:`B <SpecRtemsReqAction2PreB>` | :ref:`C <SpecRtemsReqAction2PreC>` | :ref:`X <SpecRtemsReqAction2PostX>` | :ref:`Y <SpecRtemsReqAction2PostY>` |
+    +=+=+=+=+=+
+    | AA | N/​A | CA, CB, CC | XA | YA |
+    +-+-+-+-+-+
+    | AB | N/​A | CA, CB, CC | XB | N/​A |
+    +-+-+-+-+-+
+    | AA | BA | CA, CC | :ref:`S <SpecRtemsReqAction2SkipS>` |
+    +-+-+-+-+-+
 
-    * :ref:`A <SpecRtemsReqAction2PreA>` = AA, :ref:`B <SpecRtemsReqAction2PreB>` = BA, :ref:`C <SpecRtemsReqAction2PreC>` = CA
+.. raw:: latex
+
+    \\end{small}
 
 .. rubric:: INFEASIBLE PRE-CONDITION VARIANTS:
 
-Skip Therefore, the following pre-condition state variants are infeasible:
+.. _SpecRtemsReqAction2SkipS:
 
-    * :ref:`A <SpecRtemsReqAction2PreA>` = AA, :ref:`B <SpecRtemsReqAction2PreB>` = BA, :ref:`C <SpecRtemsReqAction2PreC>` = CA
+*S*: Skip Therefore, the following pre-condition state variants are infeasible:
+
+    * :ref:`A <SpecRtemsReqAction2PreA>` = AA, :ref:`B <SpecRtemsReqAction2PreB>` = BA, :ref:`C <SpecRtemsReqAction2PreC>` = {CA, CC}
 
 .. raw:: latex
 
