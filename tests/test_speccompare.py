@@ -89,13 +89,13 @@ spec:/new
     :linenos:
     :lineno-start: 1
 
-    ​@@ -10,5 +10,5 @@ rationale: null
-    ​ references: []
-    ​ requirement-type: non-functional
-    ​ text: |
-    ​-  The bar shall be a buh.
-    ​+  The bar shall be a ups.
-    ​ type: requirement
+    @@ -10,5 +10,5 @@ rationale: null
+     references: []
+     requirement-type: non-functional
+     text: |
+    -  The bar shall be a buh.
+    +  The bar shall be a ups.
+     type: requirement
 
 .. raw:: latex
 
@@ -114,15 +114,15 @@ spec:/root
     :linenos:
     :lineno-start: 1
 
-    ​@@ -20,7 +20,7 @@ text: |
-    ​   No changes.
-    ​   No changes.
-    ​   No changes.
-    ​-  The foo shall be a bar.
-    ​+  The foo shall be a buh.
-    ​   No changes.
-    ​   No changes.
-    ​   No changes.
+    @@ -20,7 +20,7 @@ text: |
+       No changes.
+       No changes.
+       No changes.
+    -  The foo shall be a bar.
+    +  The foo shall be a buh.
+       No changes.
+       No changes.
+       No changes.
 
 .. raw:: latex
 
@@ -136,13 +136,13 @@ spec:/root
     :linenos:
     :lineno-start: 1
 
-    ​@@ -33,5 +33,5 @@ text: |
-    ​   No changes.
-    ​   No changes.
-    ​   No changes.
-    ​-  More stuff.
-    ​+  Some more stuff.
-    ​ type: requirement
+    @@ -33,5 +33,5 @@ text: |
+       No changes.
+       No changes.
+       No changes.
+    -  More stuff.
+    +  Some more stuff.
+     type: requirement
 
 .. raw:: latex
 
@@ -209,24 +209,24 @@ spec:/root
     :linenos:
     :lineno-start: 1
 
-    ​@@ -34,4 +34,17 @@ text: |
-    ​   No changes.
-    ​   No changes.
-    ​   Some more stuff.
-    ​+  No changes.
-    ​+  No changes.
-    ​+  No changes.
-    ​+  No changes.
-    ​+  No changes.
-    ​+  No changes.
-    ​+  No changes.
-    ​+  No changes.
-    ​+  No changes.
-    ​+  No changes.
-    ​+  No changes.
-    ​+  No changes.
-    ​+  Even more stuff.
-    ​ type: requirement
+    @@ -34,4 +34,17 @@ text: |
+       No changes.
+       No changes.
+       Some more stuff.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  Even more stuff.
+     type: requirement
 
 .. raw:: latex
 
@@ -250,24 +250,24 @@ spec:/root
     :linenos:
     :lineno-start: 1
 
-    ​@@ -34,17 +34,4 @@ text: |
-    ​   No changes.
-    ​   No changes.
-    ​   Some more stuff.
-    ​-  No changes.
-    ​-  No changes.
-    ​-  No changes.
-    ​-  No changes.
-    ​-  No changes.
-    ​-  No changes.
-    ​-  No changes.
-    ​-  No changes.
-    ​-  No changes.
-    ​-  No changes.
-    ​-  No changes.
-    ​-  No changes.
-    ​-  Even more stuff.
-    ​ type: requirement
+    @@ -34,17 +34,4 @@ text: |
+       No changes.
+       No changes.
+       Some more stuff.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  Even more stuff.
+     type: requirement
 
 .. raw:: latex
 
