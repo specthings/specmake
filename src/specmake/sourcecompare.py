@@ -105,8 +105,13 @@ class _Context:
             with self.content.section(name, label=label):
                 if ref_review:
                     self.add_review_ref(name)
+                line_number_start = 1
                 for chunk in chunks:
-                    self.content.add_code_block(chunk, language="diff")
+                    self.content.add_code_block(
+                        chunk,
+                        language="diff",
+                        line_number_start=line_number_start)
+                    line_number_start += len(chunk)
 
     def add_files(self, files: set[str], section: str) -> None:
         """ Add the section with files to the content. """

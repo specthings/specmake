@@ -134,7 +134,7 @@ spec:/root
 
 .. code-block:: diff
     :linenos:
-    :lineno-start: 1
+    :lineno-start: 10
 
     @@ -33,5 +33,5 @@ text: |
        No changes.

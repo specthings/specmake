@@ -251,8 +251,13 @@ def compare_specs(content: TextContent, config: CompareSpecsConfig) -> None:
                                 "This change removed the specification item.")
                         continue
                     with content.section(f"spec:{b_uid}"):
+                        line_number_start = 1
                         for chunk in diff["chunks"]:
-                            content.add_code_block(chunk, language="diff")
+                            content.add_code_block(
+                                chunk,
+                                language="diff",
+                                line_number_start=line_number_start)
+                            line_number_start += len(chunk)
 
 
 class CompareSpecsProvider(ItemValueProvider):
