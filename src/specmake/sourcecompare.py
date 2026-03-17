@@ -106,9 +106,7 @@ class _Context:
                 if ref_review:
                     self.add_review_ref(name)
                 for chunk in chunks:
-                    for begin in range(0, len(chunk), 100):
-                        with self.content.directive("code-block", "diff"):
-                            self.content.add(chunk[begin:begin + 100])
+                    self.content.add_code_block(chunk, language="diff")
 
     def add_files(self, files: set[str], section: str) -> None:
         """ Add the section with files to the content. """

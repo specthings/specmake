@@ -191,7 +191,13 @@ changed-no-review.txt
 
     This change has no associated review.
 
+.. raw:: latex
+
+    \\begin{footnotesize}
+
 .. code-block:: diff
+    :linenos:
+    :lineno-start: 1
 
     @@ -1,4 +1,4 @@
     -Previous
@@ -199,6 +205,10 @@ changed-no-review.txt
      No changes
      No changes
      No changes
+
+.. raw:: latex
+
+    \\end{footnotesize}
 
 .. _LabelFilesWithRTEMSINLINEROUTINEChanges:
 
@@ -212,7 +222,13 @@ See :ref:`LabelInline`.
 changed-no-review.txt
 *********************
 
+.. raw:: latex
+
+    \\begin{footnotesize}
+
 .. code-block:: diff
+    :linenos:
+    :lineno-start: 1
 
     @@ -11,7 +11,7 @@
      No changes
@@ -224,6 +240,10 @@ changed-no-review.txt
      No changes
      No changes
 
+.. raw:: latex
+
+    \\end{footnotesize}
+
 .. _LabelFilesWithChangesInsideOfComments:
 
 Files with changes inside of comments
@@ -234,7 +254,13 @@ Files with changes inside of comments
 changed-no-review.txt
 *********************
 
+.. raw:: latex
+
+    \\begin{footnotesize}
+
 .. code-block:: diff
+    :linenos:
+    :lineno-start: 1
 
     @@ -24,7 +24,7 @@
      No changes
@@ -245,6 +271,10 @@ changed-no-review.txt
      No changes
      No changes
      No changes
+
+.. raw:: latex
+
+    \\end{footnotesize}
 """
     builder = director["/pkg/doc"]
     assert isinstance(builder, DocumentBuilder)
@@ -354,7 +384,13 @@ changed-no-review.txt
 
     This change has no associated review.
 
+.. raw:: latex
+
+    \\begin{footnotesize}
+
 .. code-block:: diff
+    :linenos:
+    :lineno-start: 1
 
     @@ -1,4 +1,4 @@
     -Previous
@@ -362,6 +398,10 @@ changed-no-review.txt
      No changes
      No changes
      No changes
+
+.. raw:: latex
+
+    \\end{footnotesize}
 
 .. _LabelFilesWithRTEMSINLINEROUTINEChanges:
 
@@ -375,7 +415,13 @@ See :ref:`LabelInline`.
 changed-no-review.txt
 ---------------------
 
+.. raw:: latex
+
+    \\begin{footnotesize}
+
 .. code-block:: diff
+    :linenos:
+    :lineno-start: 1
 
     @@ -11,7 +11,7 @@
      No changes
@@ -387,6 +433,10 @@ changed-no-review.txt
      No changes
      No changes
 
+.. raw:: latex
+
+    \\end{footnotesize}
+
 .. _LabelFilesWithChangesInsideOfComments:
 
 Files with changes inside of comments
@@ -397,7 +447,13 @@ Files with changes inside of comments
 changed-no-review.txt
 ---------------------
 
+.. raw:: latex
+
+    \\begin{footnotesize}
+
 .. code-block:: diff
+    :linenos:
+    :lineno-start: 1
 
     @@ -24,7 +24,7 @@
      No changes
@@ -407,6 +463,10 @@ changed-no-review.txt
     +/* Current */
      No changes
      No changes
-     No changes"""
+     No changes
+
+.. raw:: latex
+
+    \\end{footnotesize}"""
     with pytest.raises(ValueError):
         builder.substitute("${.:/compare-sources:0:invalid}")
