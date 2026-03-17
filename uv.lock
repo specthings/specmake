@@ -1587,7 +1587,7 @@ wheels = [
 
 [[package]]
 name = "specitems"
-version = "1.1.8"
+version = "1.1.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "mdformat" },
@@ -1598,9 +1598,9 @@ dependencies = [
     { name = "mdformat-tables" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d6/70/98e734d8ca21b4d86de31d31290ab53a7c9b3e16d5d5c7e18a8906aef4d9/specitems-1.1.8.tar.gz", hash = "sha256:c94485a5e9d50dba97eda9621e6c79af943bb2874a53accfdc49fcf44d981272", size = 54301, upload-time = "2026-03-16T08:22:51.527Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d0/5f/ada721ffcc5855e9112b6b675182f9b56a13655d823f50eae86c0f3fea09/specitems-1.1.9.tar.gz", hash = "sha256:b89e99547deb90c8aff08c1d43049d74ddc158aef242033bbac9a8a8dfe2328f", size = 54328, upload-time = "2026-03-17T06:13:06.574Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7f/c4/b7b78c07e86ea9f487fe1759d3cee7e168c04cbaf73ee2c1312ab85f6076/specitems-1.1.8-py3-none-any.whl", hash = "sha256:bd533511d0f284cc2b959bbf707b8f225309532121cbf9af34ac75aa8667aff0", size = 75700, upload-time = "2026-03-16T08:22:52.718Z" },
+    { url = "https://files.pythonhosted.org/packages/77/22/23f15eac348b74ee54b51439e3f03fa5937e43f73c85c3275b84907389ac/specitems-1.1.9-py3-none-any.whl", hash = "sha256:19c743e6ae933874af8532b6db4841e63621c8da65145caf135c911f02ea3849", size = 75734, upload-time = "2026-03-17T06:13:07.926Z" },
 ]
 
 [[package]]
@@ -1648,7 +1648,7 @@ dev = [
 requires-dist = [
     { name = "gcovr", specifier = ">=8.6" },
     { name = "matplotlib", specifier = ">=3.10.1" },
-    { name = "specitems", specifier = ">=1.1.8" },
+    { name = "specitems", specifier = ">=1.1.9" },
     { name = "specware", specifier = ">=1.1.3" },
     { name = "sphinx", specifier = ">=8.2.3" },
     { name = "sphinx-better-subsection", specifier = ">=0.2" },
