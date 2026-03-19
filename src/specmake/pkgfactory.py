@@ -30,6 +30,7 @@ from .docbuilder import DocumentBuilder
 from .doxyfile import Doxyfile
 from .gcdaproducer import GCDAProducer
 from .icdbuilder import ICDBuilder
+from .itemcachestate import ItemCacheDirectoryState
 from .linkhub import LinkHub
 from .membenchcollector import MembenchCollector
 from .pkgitems import (BuildItemFactory, GenericPackageComponent, Redirection)
@@ -63,6 +64,8 @@ def create_build_item_factory() -> BuildItemFactory:
     factory.add_constructor("pkg/directory-state/doxyfile", Doxyfile)
     factory.add_constructor("pkg/directory-state/explicit", DirectoryState)
     factory.add_constructor("pkg/directory-state/gcda-producer", GCDAProducer)
+    factory.add_constructor("pkg/directory-state/item-cache",
+                            ItemCacheDirectoryState)
     factory.add_constructor("pkg/directory-state/membench-collector",
                             MembenchCollector)
     factory.add_constructor("pkg/directory-state/package-summary",
