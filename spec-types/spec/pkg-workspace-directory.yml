@@ -30,6 +30,10 @@ spec-info:
         description: |
           It shall be the source directory in the workspace.
         spec-type: str
+      directory-state-type:
+        description: |
+          It shall be the directory state type in the buildspace.
+        spec-type: str
       directory-state-load-before-use:
         description: |
           It shall be true, to load the directory state from the filesystem

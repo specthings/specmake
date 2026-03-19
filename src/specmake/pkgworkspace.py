@@ -94,14 +94,17 @@ _DEFAULT_ATTRIBUTES = ("SPDX-License-Identifier", "copyrights", "enabled-by",
                        "links", "type")
 
 
-def _make_directory_state_data(directory: str,
-                               directory_state_type: str) -> dict:
+def _make_directory_state_data(item: Item, directory_state_type: str) -> dict:
     return {
-        "directory": directory,
-        "directory-state-type": directory_state_type,
+        "directory":
+        item["destination-directory"],
+        "directory-state-type":
+        item.get("directory-state-type", directory_state_type),
         "files": [],
-        "hash": None,
-        "pkg-type": "directory-state"
+        "hash":
+        None,
+        "pkg-type":
+        "directory-state"
     }
 
 
@@ -180,8 +183,7 @@ class WorkspaceArchive(_WorkspaceItem):
     """ Represents a workspace archive. """
 
     def get_buildspace_data(self) -> dict:
-        data = _make_directory_state_data(self.item["destination-directory"],
-                                          "unpacked-archive")
+        data = _make_directory_state_data(self.item, "unpacked-archive")
         data["archive-file"] = os.path.basename(self["archive-file"])
         self.copy_attributes(
             data, ("archive-hash", "archive-patches", "archive-url",
@@ -233,8 +235,7 @@ class WorkspaceDirectory(_WorkspaceItem, DirectoryState):
         return super().load_workspace_state()
 
     def get_buildspace_data(self) -> dict:
-        data = _make_directory_state_data(self.item["destination-directory"],
-                                          "explicit")
+        data = _make_directory_state_data(self.item, "explicit")
         self.copy_attributes(data, ("directory-state-load-before-use",
                                     "copyrights-by-license", "params"))
         return data
@@ -328,8 +329,7 @@ class WorkspaceRepository(_WorkspaceItem):
         return super().load_workspace_state()
 
     def get_buildspace_data(self) -> dict:
-        data = _make_directory_state_data(self.item["destination-directory"],
-                                          "repository")
+        data = _make_directory_state_data(self.item, "repository")
         data["commit"] = self["commit"]
         data["origin-commit"] = self["origin-commit"]
         self.copy_attributes(
