@@ -30,6 +30,7 @@ from .directorystate import *  # noqa: F401, F403
 from .doxyfile import *  # noqa: F401, F403
 from .gcdaproducer import *  # noqa: F401, F403
 from .icdbuilder import *  # noqa: F401, F403
+from .itemcachestate import *  # noqa: F401, F403
 from .linkhub import *  # noqa: F401, F403
 from .membench import *  # noqa: F401, F403
 from .membenchcollector import *  # noqa: F401, F403

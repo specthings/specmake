@@ -1,0 +1,30 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: directory-state-type
+  spec-value: item-cache
+  uid: pkg-directory-state
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      patterns:
+        description: null
+        spec-type: pkg-directory-state-pattern-list
+      spec-paths:
+        description: |
+          It shall be the list of subdirectories with specification items
+          relative to the source directory state.
+        spec-type: list-str
+    description: |
+      This set of attributes specifies an item cache directory state.
+    mandatory-attributes: all
+spec-name: Item Cache Directory State Item Type
+spec-type: pkg-item-cache
+type: spec
