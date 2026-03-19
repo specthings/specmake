@@ -276,7 +276,8 @@ spec:/root
     builder = director["/pkg/doc"]
     assert isinstance(builder, DocumentBuilder)
     assert builder.substitute(
-        "${.:/compare-specs:0:the-spec-compare-key}") == """.. _LDoTheH:
+        "${.:/input/spec-compare-registry/compare-specs:0:the-spec-compare-key}"
+    ) == """.. _LDoTheH:
 
 Do the H
 ========
@@ -295,4 +296,5 @@ spec:/strange
 
 This change removed the specification item."""
     with pytest.raises(ValueError):
-        builder.substitute("${.:/compare-specs:0:invalid}")
+        builder.substitute(
+            "${.:/input/spec-compare-registry/compare-specs:0:invalid}")

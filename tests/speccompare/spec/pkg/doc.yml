@@ -30,20 +30,10 @@ links:
   name: component
   role: input
   uid: component
-- current-revision: 05787a9d5c130272572a7e9b9a9553d7db8cd8af
-  enabled-set-actions: []
-  hash: null
-  ignored-commits: []
-  label: L
-  name: spec-compare
-  previous-revision: e28aeb9e3ed57002ac5a5ee0660111436fe4d2a1
+- hash: null
+  name: spec-compare-registry
   role: input
-  root-uid: /root
-  spec-compare-key: the-spec-compare-key
-  spec-paths:
-  - spec
-  - other
-  uid: repo
+  uid: registry
 output-html: null
 output-pdf: null
 pkg-type: directory-state
