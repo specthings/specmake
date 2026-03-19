@@ -2,24 +2,55 @@ SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
 - Copyright (C) 2025, 2026 embedded brains GmbH & Co. KG
 enabled-by: true
+ignored-commits:
+- 9a2e490f8c74e720b9d827030e0c3f89bc75052c
 links:
 - hash: null
   name: component
   role: input
   uid: component
-- current-revision: 05787a9d5c130272572a7e9b9a9553d7db8cd8af
-  enabled-set-actions: []
+- hash: null
+  name: repository
+  role: input
+  uid: repo
+- enabled-set-actions:
+  - action: add
+    enabled-by: false
+    value: []
   hash: null
-  ignored-commits: []
-  label: L
-  name: spec-compare
-  previous-revision: e28aeb9e3ed57002ac5a5ee0660111436fe4d2a1
+  label: L0
+  name: spec-compare-revision
+  revision-key: v0
+  revision-name: Name v0
   role: input
   root-uid: /root
-  spec-compare-key: the-spec-compare-key
-  spec-paths:
-  - spec
-  - other
-  uid: repo
+  uid: cache-v0
+- enabled-set-actions: []
+  hash: null
+  label: L1
+  name: spec-compare-revision
+  revision-key: v1
+  revision-name: Name v1
+  role: input
+  root-uid: /root
+  uid: cache-v1
+- enabled-set-actions: []
+  hash: null
+  label: L2
+  name: spec-compare-revision
+  revision-key: v2
+  revision-name: Name v2
+  role: input
+  root-uid: /root
+  uid: cache-v2
+- enabled-set-actions: []
+  hash: null
+  label: L3
+  name: spec-compare-revision
+  revision-key: v3
+  revision-name: Name v3
+  role: input
+  root-uid: /root
+  uid: cache-v3
 pkg-type: spec-compare-registry
 type: pkg

@@ -27,56 +27,42 @@
 from pathlib import Path
 
 import pytest
-import specitems
 
-from specmake import (DocumentBuilder, DirectoryState, CompareSpecsConfig,
-                      compare_specs)
+from specmake import DocumentBuilder
 
 from .util import create_package
 
 
-def test_sourcecompare(caplog, tmpdir):
+def test_speccompare(caplog, tmp_path):
     package = create_package(caplog,
-                             Path(tmpdir),
+                             tmp_path,
                              Path("speccompare/spec"),
                              workspace_dir="speccompare")
     director = package.director
-    repo = director["/pkg/repo"]
-    assert isinstance(repo, DirectoryState)
-    config = CompareSpecsConfig(
-        repository=repo,
-        root_uid="/root",
-        current_revision="fe7782fc29caf331d9cf4d61592f5769d124318d",
-        previous_revision="eb06e17a1a44e22dc3b44dbd857da379cab2f51f",
-        ignored_commits=["9a2e490f8c74e720b9d827030e0c3f89bc75052c"],
-        spec_paths=["spec", "other"],
-        selection=repo.component.selection,
-        enabled_set_actions=[{
-            "action": "add",
-            "enabled-by": False,
-            "value": []
-        }],
-        label="L")
-    content = specitems.SphinxContent()
-    compare_specs(content, config)
-    assert str(content) == """.. _LDoTheB:
+    director.build_only("/pkg/registry")
+    builder = director["/pkg/doc"]
+    assert isinstance(builder, DocumentBuilder)
+
+    assert builder.substitute(
+        "${.:/input/spec-compare-registry/spec-change-log:-2:v0..v3}"
+    ) == """.. _L3DoTheB:
 
 Do the B
 ########
 
-.. _LDoTheBSpecNew:
+.. _L3DoTheBSpecNew:
 
 spec:/new
 *********
 
 This change added the specification item.
 
-.. _LDoTheC:
+.. _L3DoTheC:
 
 Do the C
 ########
 
-.. _LDoTheCSpecNew:
+.. _L3DoTheCSpecNew:
 
 spec:/new
 *********
@@ -101,7 +87,7 @@ spec:/new
 
     \\end{footnotesize}
 
-.. _LDoTheCSpecRoot:
+.. _L3DoTheCSpecRoot:
 
 spec:/root
 **********
@@ -148,55 +134,55 @@ spec:/root
 
     \\end{footnotesize}
 
-.. _LDoTheE:
+.. _L3DoTheE:
 
 Do the E
 ########
 
-.. _LDoTheESpecRemove:
+.. _L3DoTheESpecRemove:
 
 spec:/remove
 ************
 
 This change removed the specification item.
 
-.. _LDoTheG:
+.. _L3DoTheG:
 
 Do the G
 ########
 
-.. _LDoTheGSpecOther:
+.. _L3DoTheGSpecOther:
 
 spec:/other
 ***********
 
 This change added the specification item.
 
-.. _LDoTheH:
+.. _L3DoTheH:
 
 Do the H
 ########
 
-.. _LDoTheHSpecMove:
+.. _L3DoTheHSpecMove:
 
 spec:/move
 **********
 
 This change removed the specification item.
 
-.. _LDoTheHSpecStrange:
+.. _L3DoTheHSpecStrange:
 
 spec:/strange
 *************
 
 This change removed the specification item.
 
-.. _LDoTheJ:
+.. _L3DoTheJ:
 
 Do the J
 ########
 
-.. _LDoTheJSpecRoot:
+.. _L3DoTheJSpecRoot:
 
 spec:/root
 **********
@@ -232,12 +218,12 @@ spec:/root
 
     \\end{footnotesize}
 
-.. _LDoTheK:
+.. _L3DoTheK:
 
 Do the K
 ########
 
-.. _LDoTheKSpecRoot:
+.. _L3DoTheKSpecRoot:
 
 spec:/root
 **********
@@ -271,25 +257,22 @@ spec:/root
 
 .. raw:: latex
 
-    \\end{footnotesize}
-"""
-    builder = director["/pkg/doc"]
-    assert isinstance(builder, DocumentBuilder)
+    \\end{footnotesize}"""
     assert builder.substitute(
-        "${.:/input/spec-compare-registry/compare-specs:0:the-spec-compare-key}"
-    ) == """.. _LDoTheH:
+        "${.:/input/spec-compare-registry/spec-change-log:0:v1..v2}"
+    ) == """.. _L2DoTheH:
 
 Do the H
 ========
 
-.. _LDoTheHSpecMove:
+.. _L2DoTheHSpecMove:
 
 spec:/move
 ----------
 
 This change removed the specification item.
 
-.. _LDoTheHSpecStrange:
+.. _L2DoTheHSpecStrange:
 
 spec:/strange
 -------------
@@ -297,4 +280,7 @@ spec:/strange
 This change removed the specification item."""
     with pytest.raises(ValueError):
         builder.substitute(
-            "${.:/input/spec-compare-registry/compare-specs:0:invalid}")
+            "${.:/input/spec-compare-registry/spec-change-log:0:invalid}")
+    with pytest.raises(ValueError):
+        builder.substitute(
+            "${.:/input/spec-compare-registry/spec-change-log:0:v1..invalid}")
