@@ -25,43 +25,63 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import dataclasses
-import os
+import itertools
 import re
-import tempfile
 from typing import Any
 
-from specitems import (Item, ItemCache, ItemCacheConfig, ItemGetValueContext,
-                       ItemValueProvider, ItemSelection, TextContent,
-                       TextMapper)
-from specware import run_command, validate
+from specitems import (Item, ItemCache, ItemGetValueContext, ItemValueProvider,
+                       ItemSelection, TextContent, TextMapper)
+from specware import run_command, gather_related_items
 
 from .directorystate import DirectoryState
+from .itemcachestate import ItemCacheDirectoryState
 from .sphinxbuilder import SphinxBuilder
 from .pkgitems import BuildItem, PackageBuildDirector
 
 _COMMIT = re.compile(r"commit ([0-9a-f]+)$")
 
 
+def _get_uids(item_cache: ItemCache, selection: ItemSelection,
+              enabled_set_actions: list[dict[str, Any]],
+              root_uid: str) -> frozenset[str]:
+    selection = selection.clone(item_cache)
+    for action in enabled_set_actions:
+        selection.apply_action(action)
+    with item_cache.selection(selection):
+        uids = frozenset(
+            item.uid for item in gather_related_items(item_cache[root_uid]))
+    return uids
+
+
 @dataclasses.dataclass
-class CompareSpecsConfig:
-    # pylint: disable=too-many-instance-attributes
+class _SpecRevision:
+    """ Represents a specification revision. """
+
+    def __init__(self, state: ItemCacheDirectoryState,
+                 selection: ItemSelection, data: dict) -> None:
+        item_cache = state.cache()
+        self.uids = _get_uids(item_cache, selection,
+                              data["enabled-set-actions"], data["root-uid"])
+        self.key: str = data["revision-key"]
+        self.label: str = data["label"]
+        self.revision: str = state.input("source")["commit"]
+        self.spec_paths = state.spec_paths("")
+
+
+@dataclasses.dataclass
+class _CompareSpecsConfig:
     """ Represents a specification comparison configuration. """
     repository: DirectoryState
-    root_uid: str
-    current_revision: str
-    previous_revision: str
     ignored_commits: list[str]
-    spec_paths: list[str]
-    selection: ItemSelection
-    enabled_set_actions: list[dict[str, Any]]
-    label: str
+    current: _SpecRevision
+    previous: _SpecRevision
 
 
 class _LogParser:
     # pylint: disable=too-few-public-methods
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, uids: set[str], ignored_commits: list[str],
+    def __init__(self, uids: frozenset[str], ignored_commits: list[str],
                  spec_paths: list[str]):
         self._uids = uids
         self._ignored_commits = ignored_commits
@@ -187,54 +207,29 @@ class _LogParser:
             return
 
 
-def _validate(_item: Item, validated: bool) -> bool:
-    return validated
-
-
-def _get_uids_current(config: CompareSpecsConfig) -> set[str]:
-    return set(item.uid for item in validate(
-        config.repository.item.cache[config.root_uid], _validate))
-
-
-def _get_uids_previous(config: CompareSpecsConfig) -> set[str]:
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        cache_config = ItemCacheConfig(paths=[
-            os.path.join(config.repository.directory, path)
-            for path in config.spec_paths
-        ],
-                                       cache_directory=tmp_dir)
-        item_cache = ItemCache(cache_config)
-        selection = config.selection.clone(item_cache)
-        for action in config.enabled_set_actions:
-            selection.apply_action(action)
-        item_cache.set_selection(selection)
-        uids: set[str] = set()
-        for item in item_cache.values():
-            if not item.enabled or item.type == "spec":
-                continue
-            uids.add(item.uid)
-        return uids
-
-
-def _get_commits(config: CompareSpecsConfig) -> list[str]:
+def _get_commits(config: _CompareSpecsConfig,
+                 spec_paths: list[str]) -> list[str]:
     stdout: list[str] = []
     status = run_command([
         "git", "log", "--no-renames", "-p",
-        f"{config.previous_revision}..{config.current_revision}"
-    ] + config.spec_paths, config.repository.directory, stdout)
+        f"{config.previous.revision}..{config.current.revision}", "--"
+    ] + spec_paths, config.repository.directory, stdout)
     assert status == 0
     return stdout
 
 
-def compare_specs(content: TextContent, config: CompareSpecsConfig) -> None:
-    """ Compare two specifications according to the configuration. """
-    uids_current = _get_uids_current(config)
-    uids_previous = _get_uids_previous(config)
+def _add_change_log(content: TextContent, config: _CompareSpecsConfig) -> None:
+    uids_current = config.current.uids
+    uids_previous = config.previous.uids
     all_uids = uids_current.union(uids_previous)
-    parser = _LogParser(all_uids, config.ignored_commits, config.spec_paths)
-    for line in _get_commits(config):
+    spec_paths = sorted(
+        set(
+            itertools.chain(config.current.spec_paths,
+                            config.previous.spec_paths)))
+    parser = _LogParser(all_uids, config.ignored_commits, spec_paths)
+    for line in _get_commits(config, spec_paths):
         parser.consume(line.rstrip("\n"))
-    with content.label_scope(config.label):
+    with content.label_scope(config.current.label):
         for commit in reversed(parser.finalize()):
             with content.section(commit["message"][0]):
                 content.add(commit["message"][2:])
@@ -266,6 +261,43 @@ class CompareSpecsRegistry(BuildItem):
 
     def __init__(self, director: PackageBuildDirector, item: Item):
         super().__init__(director, item)
+        self._revisions: dict[str, _SpecRevision] = {}
+
+    def _initialize_revisions(self) -> None:
+        selection = self.item.cache.active_selection
+        for link, state in self.input_links("spec-compare-revision"):
+            assert isinstance(state, ItemCacheDirectoryState)
+            data = self.substitute(link.data)
+            revision = _SpecRevision(state, selection, data)
+            self._revisions[revision.key] = revision
+
+    def add_change_log(self, content: TextContent, previous_key: str,
+                       current_key: str) -> None:
+        """
+        Add a list of changes from the specification associated with the
+        previous key to the specification associated with the current key.
+        """
+        if not self._revisions:
+            self._initialize_revisions()
+        try:
+            previous = self._revisions[previous_key]
+        except KeyError as err:
+            raise ValueError(
+                "there are no revision associated with specification "
+                f"comparison previous key '{previous_key}'") from err
+        try:
+            current = self._revisions[current_key]
+        except KeyError as err:
+            raise ValueError(
+                "there are no revision associated with specification "
+                f"comparison current key '{current_key}'") from err
+        repo = self.input("repository")
+        assert isinstance(repo, DirectoryState)
+        config = _CompareSpecsConfig(repository=repo,
+                                     ignored_commits=self["ignored-commits"],
+                                     current=current,
+                                     previous=previous)
+        _add_change_log(content, config)
 
 
 class CompareSpecsProvider(ItemValueProvider):
@@ -276,31 +308,19 @@ class CompareSpecsProvider(ItemValueProvider):
     def __init__(self, builder: SphinxBuilder) -> None:
         super().__init__(builder.mapper)
         self._builder = builder
-        self.mapper.add_get_value("pkg/spec-compare-registry:/compare-specs",
-                                  self._get_compare_specs)
+        self.mapper.add_get_value("pkg/spec-compare-registry:/spec-change-log",
+                                  self._get_spec_change_log)
 
-    def _get_compare_specs(self, ctx: ItemGetValueContext) -> str:
+    def _get_spec_change_log(self, ctx: ItemGetValueContext) -> str:
         builder = self._builder
         director = builder.director
-        with builder.section_level_scope(ctx) as key:
-            registry = director[ctx.item.uid]
-            assert key
-            link, repo = registry.input_link_by_key("spec-compare",
-                                                    "spec-compare-key", key)
-            assert isinstance(repo, DirectoryState)
-            data = registry.substitute(link.data)
-            config = CompareSpecsConfig(
-                repository=repo,
-                root_uid=data["root-uid"],
-                current_revision=data["current-revision"],
-                previous_revision=data["previous-revision"],
-                ignored_commits=data["ignored-commits"],
-                spec_paths=data["spec-paths"],
-                selection=director.item_cache.active_selection,
-                enabled_set_actions=data["enabled-set-actions"],
-                label=data["label"])
+        with builder.section_level_scope(ctx) as key_arg:
             assert isinstance(self.mapper, TextMapper)
             content = self.mapper.create_content(
                 section_level=builder.section_level)
-            compare_specs(content, config)
+            registry = director[ctx.item.uid]
+            assert isinstance(registry, CompareSpecsRegistry)
+            assert key_arg
+            previous_key, _, current_key = key_arg.partition("..")
+            registry.add_change_log(content, previous_key, current_key)
             return "\n".join(content)
