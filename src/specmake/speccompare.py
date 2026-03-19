@@ -37,6 +37,7 @@ from specware import run_command, validate
 
 from .directorystate import DirectoryState
 from .sphinxbuilder import SphinxBuilder
+from .pkgitems import BuildItem, PackageBuildDirector
 
 _COMMIT = re.compile(r"commit ([0-9a-f]+)$")
 
@@ -260,6 +261,13 @@ def compare_specs(content: TextContent, config: CompareSpecsConfig) -> None:
                             line_number_start += len(chunk)
 
 
+class CompareSpecsRegistry(BuildItem):
+    """ Provides a registry for specification comparisons. """
+
+    def __init__(self, director: PackageBuildDirector, item: Item):
+        super().__init__(director, item)
+
+
 class CompareSpecsProvider(ItemValueProvider):
     """ Provides a specification comparison. """
 
@@ -268,17 +276,19 @@ class CompareSpecsProvider(ItemValueProvider):
     def __init__(self, builder: SphinxBuilder) -> None:
         super().__init__(builder.mapper)
         self._builder = builder
-        self.mapper.add_get_value(f"{builder.item.type}:/compare-specs",
+        self.mapper.add_get_value("pkg/spec-compare-registry:/compare-specs",
                                   self._get_compare_specs)
 
     def _get_compare_specs(self, ctx: ItemGetValueContext) -> str:
         builder = self._builder
+        director = builder.director
         with builder.section_level_scope(ctx) as key:
+            registry = director[ctx.item.uid]
             assert key
-            link, repo = builder.input_link_by_key("spec-compare",
-                                                   "spec-compare-key", key)
+            link, repo = registry.input_link_by_key("spec-compare",
+                                                    "spec-compare-key", key)
             assert isinstance(repo, DirectoryState)
-            data = builder.substitute(link.data)
+            data = registry.substitute(link.data)
             config = CompareSpecsConfig(
                 repository=repo,
                 root_uid=data["root-uid"],
@@ -286,7 +296,7 @@ class CompareSpecsProvider(ItemValueProvider):
                 previous_revision=data["previous-revision"],
                 ignored_commits=data["ignored-commits"],
                 spec_paths=data["spec-paths"],
-                selection=builder.director.item_cache.active_selection,
+                selection=director.item_cache.active_selection,
                 enabled_set_actions=data["enabled-set-actions"],
                 label=data["label"])
             assert isinstance(self.mapper, TextMapper)

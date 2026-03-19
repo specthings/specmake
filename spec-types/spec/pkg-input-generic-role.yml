@@ -91,6 +91,10 @@ links:
   uid: pkg-input-role
 - role: spec-refinement
   spec-key: name
+  spec-value: spec-compare-registry
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
   spec-value: tagfile
   uid: pkg-input-role
 - role: spec-refinement

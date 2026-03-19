@@ -44,6 +44,7 @@ from .runactions import RunActions
 from .runexecutablecmd import RunExecutableCommand
 from .sddlinker import SDDLinker
 from .spamrmanager import SpamrManager
+from .speccompare import CompareSpecsRegistry
 from .sreldbuilder import SRelDBuilder
 from .srsbuilder import SRSBuilder
 from .svrbuilder import SVRBuilder
@@ -106,6 +107,7 @@ def create_build_item_factory() -> BuildItemFactory:
     factory.add_constructor("pkg/redirection", Redirection)
     factory.add_constructor("pkg/rtems-item-cache", RTEMSItemCache)
     factory.add_constructor("pkg/run-actions", RunActions)
+    factory.add_constructor("pkg/spec-compare-registry", CompareSpecsRegistry)
     factory.add_constructor("pkg/test-aggregator", TestAggregator)
     factory.add_constructor("pkg/test-runner/esa", ESATestRunner)
     factory.add_constructor("pkg/test-runner/dummy", TestRunner)
