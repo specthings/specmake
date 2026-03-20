@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: BSD-2-Clause
+
+# Copyright (C) 2026 embedded brains GmbH & Co. KG
+
+name: Python package on FreeBSD
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@v6
+    - name: Make
+      uses: vmactions/freebsd-vm@v1
+      with:
+        run: |
+          pkg install -y python3 py311-numpy py311-lxml py311-pillow py311-sqlite3 uv cmake gmake git
+          git config --global user.email "you@example.com"
+          git config --global user.name "Your Name"
+          git config --global --add safe.directory /home/runner/work/specmake/specmake
+          export MPLBACKEND=Agg
+          gmake
