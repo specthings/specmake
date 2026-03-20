@@ -155,16 +155,21 @@ def _apply_patches(workspace_directory: str,
                    unpacked_archive: DirectoryState) -> None:
     for patch in unpacked_archive["archive-patches"]:
         command = [
-            "patch", "--batch", "--no-backup-if-mismatch", "-p", "1", "-i",
+            "git", "--git-dir=.", "apply", "-v", "-p", "1",
             os.path.join(workspace_directory, patch["file"])
         ]
+        env = copy.deepcopy(os.environ.copy())
+        env["LANG"] = "en_US.UTF-8"
         logging.info("%s: apply patch in '%s': %s", unpacked_archive.uid,
                      unpacked_archive.directory, " ".join(command))
         output = subprocess.check_output(command,
-                                         cwd=unpacked_archive.directory)
+                                         cwd=unpacked_archive.directory,
+                                         env=env,
+                                         stderr=subprocess.STDOUT)
         patched_files = [
-            line[14:] for line in output.decode("utf-8").splitlines()
-            if line.startswith("patching file ")
+            line[14:].removesuffix(" cleanly.")
+            for line in output.decode("utf-8").splitlines()
+            if line.startswith("Applied patch ")
         ]
         logging.info("%s: patched files: %s", unpacked_archive.uid,
                      patched_files)
