@@ -223,6 +223,8 @@ spec:/root
 Do the K
 ########
 
+The do the K description.
+
 .. _L3DoTheKSpecRoot:
 
 spec:/root
@@ -278,9 +280,191 @@ spec:/strange
 -------------
 
 This change removed the specification item."""
+
     with pytest.raises(ValueError):
         builder.substitute(
             "${.:/input/spec-compare-registry/spec-change-log:0:invalid}")
+
     with pytest.raises(ValueError):
         builder.substitute(
             "${.:/input/spec-compare-registry/spec-change-log:0:v1..invalid}")
+
+    assert builder.substitute(
+        "${.:/input/spec-compare-registry/spec-item-changes:0:/root}"
+    ) == """The following changes are associated with Name v3.
+
+.. topic:: Do the K
+
+    The do the K description.
+
+.. raw:: latex
+
+    \\begin{footnotesize}
+
+.. code-block:: diff
+    :linenos:
+    :lineno-start: 1
+
+    @@ -34,17 +34,4 @@ text: |
+       No changes.
+       No changes.
+       Some more stuff.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  No changes.
+    -  Even more stuff.
+     type: requirement
+
+.. raw:: latex
+
+    \\end{footnotesize}
+
+.. topic:: Do the J
+
+    No commit message.
+
+.. raw:: latex
+
+    \\begin{footnotesize}
+
+.. code-block:: diff
+    :linenos:
+    :lineno-start: 1
+
+    @@ -34,4 +34,17 @@ text: |
+       No changes.
+       No changes.
+       Some more stuff.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  No changes.
+    +  Even more stuff.
+     type: requirement
+
+.. raw:: latex
+
+    \\end{footnotesize}
+
+The following changes are associated with Name v1.
+
+.. topic:: Do the C
+
+    No commit message.
+
+.. raw:: latex
+
+    \\begin{footnotesize}
+
+.. code-block:: diff
+    :linenos:
+    :lineno-start: 1
+
+    @@ -20,7 +20,7 @@ text: |
+       No changes.
+       No changes.
+       No changes.
+    -  The foo shall be a bar.
+    +  The foo shall be a buh.
+       No changes.
+       No changes.
+       No changes.
+
+.. raw:: latex
+
+    \\end{footnotesize}
+
+.. raw:: latex
+
+    \\begin{footnotesize}
+
+.. code-block:: diff
+    :linenos:
+    :lineno-start: 10
+
+    @@ -33,5 +33,5 @@ text: |
+       No changes.
+       No changes.
+       No changes.
+    -  More stuff.
+    +  Some more stuff.
+     type: requirement
+
+.. raw:: latex
+
+    \\end{footnotesize}"""
+
+    assert builder.substitute(
+        "${.:/input/spec-compare-registry/spec-item-changes:0:/move}"
+    ) == "The item was deleted in Name v2."
+
+    assert builder.substitute(
+        "${.:/input/spec-compare-registry/spec-item-changes:0:/new}"
+    ) == "The item is new in Name v1."
+
+    assert builder.substitute(
+        "${.:/input/spec-compare-registry/spec-item-changes:0:/does-not-exist}"
+    ) == "There are no changes since Name v0."
+
+    assert builder.substitute(
+        "${.:/input/spec-compare-registry/spec-changes-by-scope:0:requirements:v0}"
+    ) == """.. raw:: latex
+
+    \\begin{footnotesize}
+
+.. table::
+    :class: longtable
+    :widths: 80,20
+
+    +-------------------------+--------+
+    | Items                   | Status |
+    +=========================+========+
+    | /move                   | New    |
+    +-------------------------+--------+
+    | /remove                 | New    |
+    +-------------------------+--------+
+    | :ref:`/root <SpecRoot>` | New    |
+    +-------------------------+--------+
+    | /strange                | New    |
+    +-------------------------+--------+
+
+.. raw:: latex
+
+    \\end{footnotesize}"""
+
+    assert builder.substitute(
+        "${.:/input/spec-compare-registry/spec-changes-by-scope:0:requirements:v3}"
+    ) == """.. raw:: latex
+
+    \\begin{footnotesize}
+
+.. table::
+    :class: longtable
+    :widths: 80,20
+
+    +-------------------------+----------+
+    | Items                   | Status   |
+    +=========================+==========+
+    | :ref:`/root <SpecRoot>` | Modified |
+    +-------------------------+----------+
+
+.. raw:: latex
+
+    \\end{footnotesize}"""
