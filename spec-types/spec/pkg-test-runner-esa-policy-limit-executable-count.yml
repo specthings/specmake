@@ -1,0 +1,27 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: policy
+  spec-value: limit-executable-count
+  uid: pkg-test-runner-esa-policy
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      max-executable-count:
+        description: |
+          It shall be the maximum executable count in a request.
+        spec-type: int
+    description: |
+      This set of attributes specifies an ESA test runner limit executable
+      count policy.
+    mandatory-attributes: all
+spec-name: ESA Test Runner Limit Executable Count Policy
+spec-type: pkg-test-runner-esa-policy-limit-executable-count
+type: spec
