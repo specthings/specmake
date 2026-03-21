@@ -33,9 +33,13 @@ import os
 from typing import Callable, Iterable
 
 from specitems import (EnabledSet, Item, ItemCache, ItemGetValueContext,
-                       ItemMapper, is_enabled, Link, to_iterable)
+                       ItemMapper, is_enabled, Link)
 from specware import (augment_with_test_case_links, augment_with_test_links,
-                      is_validation_by_test, recursive_is_enabled, validate)
+                      get_items_by_type_map, get_item_types_by_prefix,
+                      get_items_by_types, get_interface_items,
+                      get_interface_and_requirement_items,
+                      get_requirement_items, is_validation_by_test,
+                      recursive_is_enabled, validate)
 
 from .pkgitems import (BuildItem, BuildItemFactory, build_item_input,
                        GenericPackageComponent, PackageBuildDirector,
@@ -220,7 +224,7 @@ class RTEMSItemCache(BuildItem):
         for item_2 in self.item_cache.values():
             _NAME.get(item_2.type, _name_default)(self.name_to_item, item_2)
         self.related_items: set[Item] = set()
-        self.related_items_by_type: dict[str, set[Item]] = {}
+        self.related_items_by_type: dict[str, list[Item]] = {}
         self.related_validations_by_test: set[Item] = set()
 
         # Calculate the overall item cache hash.  Ignore package configuration
@@ -263,9 +267,7 @@ view of the specification items.""")
         """ Validate the specification using test results. """
         self.related_items = validate(self.item_cache[self["spec-root-uid"]],
                                       self._validate_using_test_results)
-        for item_2 in self.related_items:
-            self.related_items_by_type.setdefault(item_2.type,
-                                                  set()).add(item_2)
+        self.related_items_by_type = get_items_by_type_map(self.related_items)
 
     def has_changed(self, link: Link) -> bool:
         return link["hash"] is None or self._hash != link["hash"]
@@ -276,12 +278,7 @@ view of the specification items.""")
     def get_related_items_by_type(self,
                                   types: str | Iterable[str]) -> list[Item]:
         """ Get related items by a list of types. """
-        items: list[Item] = []
-        for type_name in to_iterable(types):
-            items.extend(
-                item
-                for item in self.related_items_by_type.get(type_name, set()))
-        return sorted(items)
+        return get_items_by_types(self.related_items_by_type, types)
 
     def get_related_types_by_prefix(
         self,
@@ -291,29 +288,20 @@ view of the specification items.""")
         """
         Get the types of the related items having one of the type prefixes.
         """
-        return [
-            type_name for type_name in sorted(self.related_items_by_type)
-            if type_name.startswith(prefix) and type_name not in exclude
-        ]
+        return get_item_types_by_prefix(self.related_items_by_type, prefix,
+                                        exclude)
 
     def get_related_interfaces(self) -> list[Item]:
         """ Get the related interfaces. """
-        return self.get_related_items_by_type(
-            self.get_related_types_by_prefix(
-                ("interface/",
-                 "requirement/non-functional/interface-requirement")))
+        return get_interface_items(self.related_items_by_type)
 
     def get_related_requirements(self) -> list[Item]:
         """ Get the related requirements. """
-        return self.get_related_items_by_type(
-            self.get_related_types_by_prefix(
-                "requirement/",
-                ("requirement/non-functional/interface-requirement", )))
+        return get_requirement_items(self.related_items_by_type)
 
     def get_related_interfaces_and_requirements(self) -> list[Item]:
         """ Get the related interfaces and requirements. """
-        return self.get_related_items_by_type(
-            self.get_related_types_by_prefix(("interface/", "requirement/")))
+        return get_interface_and_requirement_items(self.related_items_by_type)
 
 
 def gather_test_suites(item: Item, test_suites: list[Item]) -> None:
