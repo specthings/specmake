@@ -27,11 +27,15 @@
 import dataclasses
 import itertools
 import re
-from typing import Any
+from typing import Any, Callable
 
 from specitems import (Item, ItemCache, ItemGetValueContext, ItemValueProvider,
-                       ItemSelection, TextContent, TextMapper)
-from specware import run_command, gather_related_items
+                       ItemSelection, SphinxContent, TextContent, TextMapper,
+                       get_reference, make_label)
+from specware import (run_command, gather_related_items, get_constraint_items,
+                      get_interface_items, get_items_by_type_map,
+                      get_requirement_items, get_validation_items,
+                      recursive_is_enabled)
 
 from .directorystate import DirectoryState
 from .itemcachestate import ItemCacheDirectoryState
@@ -40,30 +44,54 @@ from .pkgitems import BuildItem, PackageBuildDirector
 
 _COMMIT = re.compile(r"commit ([0-9a-f]+)$")
 
+_EMPTY_SCOPE_TO_UIDS: dict[str, frozenset[str]] = {
+    "all": frozenset(),
+    "interfaces": frozenset(),
+    "requirements": frozenset(),
+    "validations": frozenset()
+}
 
-def _get_uids(item_cache: ItemCache, selection: ItemSelection,
-              enabled_set_actions: list[dict[str, Any]],
-              root_uid: str) -> frozenset[str]:
-    selection = selection.clone(item_cache)
+
+def _get_items(item_cache: ItemCache, selection: ItemSelection,
+               enabled_set_actions: list[dict[str, Any]],
+               root_uid: str) -> list[Item]:
+    selection = ItemSelection(item_cache, selection.enabled_set,
+                              recursive_is_enabled)
     for action in enabled_set_actions:
         selection.apply_action(action)
     with item_cache.selection(selection):
-        uids = frozenset(
-            item.uid for item in gather_related_items(item_cache[root_uid]))
-    return uids
+        return gather_related_items(item_cache[root_uid])
 
 
 @dataclasses.dataclass
 class _SpecRevision:
     """ Represents a specification revision. """
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, state: ItemCacheDirectoryState,
-                 selection: ItemSelection, data: dict) -> None:
+                 selection: ItemSelection, data: dict,
+                 previous_uids: dict[str, frozenset[str]]) -> None:
         item_cache = state.cache()
-        self.uids = _get_uids(item_cache, selection,
-                              data["enabled-set-actions"], data["root-uid"])
+        items = _get_items(item_cache, selection, data["enabled-set-actions"],
+                           data["root-uid"])
+        items_by_type = get_items_by_type_map(items)
+        self.previous_uids = previous_uids
+        self.uids = {
+            "all":
+            frozenset(item.uid for item in items),
+            "interfaces":
+            frozenset(item.uid for item in get_interface_items(items_by_type)),
+            "requirements":
+            frozenset(item.uid for item in itertools.chain(
+                get_constraint_items(items_by_type),
+                get_requirement_items(items_by_type))),
+            "validations":
+            frozenset(item.uid for item in get_validation_items(items_by_type))
+        }
         self.key: str = data["revision-key"]
         self.label: str = data["label"]
+        self.name: str = data["revision-name"]
         self.revision: str = state.input("source")["commit"]
         self.spec_paths = state.spec_paths("")
 
@@ -73,8 +101,19 @@ class _CompareSpecsConfig:
     """ Represents a specification comparison configuration. """
     repository: DirectoryState
     ignored_commits: list[str]
-    current: _SpecRevision
     previous: _SpecRevision
+    current: _SpecRevision
+
+
+def _get_git_log(config: _CompareSpecsConfig,
+                 spec_paths: list[str]) -> list[str]:
+    stdout: list[str] = []
+    status = run_command([
+        "git", "log", "--no-renames", "-p",
+        f"{config.previous.revision}..{config.current.revision}", "--"
+    ] + spec_paths, config.repository.directory, stdout)
+    assert status == 0
+    return stdout
 
 
 class _LogParser:
@@ -86,7 +125,7 @@ class _LogParser:
         self._uids = uids
         self._ignored_commits = ignored_commits
         self._spec_paths = sorted(spec_paths, reverse=True)
-        self._commits: list[list[str]] = []
+        self._commits: list[dict[str, Any]] = []
         self._current_commit: dict[str, Any] = {}
         self._current_chunk: list[str] = []
         self._current_diff: dict[str, Any] = {}
@@ -102,7 +141,7 @@ class _LogParser:
                 return uid[:-4]
         raise ValueError
 
-    def _finalize_diff(self):
+    def _finalize_diff(self) -> None:
         diff = self._current_diff
         self._current_diff = {}
         if diff:
@@ -120,7 +159,7 @@ class _LogParser:
             diff["b-uid"] = b_uid
             self._current_commit["diffs"].append(diff)
 
-    def _finalize(self):
+    def _finalize(self) -> None:
         if self._current_chunk:
             self._current_diff["chunks"].append(self._current_chunk)
             self._current_chunk = []
@@ -131,7 +170,7 @@ class _LogParser:
                 "commit"] not in self._ignored_commits:
             self._commits.append(commit)
 
-    def finalize(self):
+    def finalize(self) -> list[dict[str, Any]]:
         """ Finalizes the parsing and returns the commits. """
         self._finalize()
         return self._commits
@@ -207,30 +246,23 @@ class _LogParser:
             return
 
 
-def _get_commits(config: _CompareSpecsConfig,
-                 spec_paths: list[str]) -> list[str]:
-    stdout: list[str] = []
-    status = run_command([
-        "git", "log", "--no-renames", "-p",
-        f"{config.previous.revision}..{config.current.revision}", "--"
-    ] + spec_paths, config.repository.directory, stdout)
-    assert status == 0
-    return stdout
-
-
-def _add_change_log(content: TextContent, config: _CompareSpecsConfig) -> None:
-    uids_current = config.current.uids
-    uids_previous = config.previous.uids
+def _get_commits(config: _CompareSpecsConfig) -> list[dict[str, Any]]:
+    uids_current = config.current.uids["all"]
+    uids_previous = config.previous.uids["all"]
     all_uids = uids_current.union(uids_previous)
     spec_paths = sorted(
         set(
             itertools.chain(config.current.spec_paths,
                             config.previous.spec_paths)))
     parser = _LogParser(all_uids, config.ignored_commits, spec_paths)
-    for line in _get_commits(config, spec_paths):
+    for line in _get_git_log(config, spec_paths):
         parser.consume(line.rstrip("\n"))
+    return parser.finalize()
+
+
+def _add_change_log(content: TextContent, config: _CompareSpecsConfig) -> None:
     with content.label_scope(config.current.label):
-        for commit in reversed(parser.finalize()):
+        for commit in reversed(_get_commits(config)):
             with content.section(commit["message"][0]):
                 content.add(commit["message"][2:])
                 for diff in commit["diffs"]:
@@ -256,20 +288,84 @@ def _add_change_log(content: TextContent, config: _CompareSpecsConfig) -> None:
                             line_number_start += len(chunk)
 
 
+def _ref(uid: str, present: frozenset[str]) -> str:
+    if uid in present:
+        return get_reference(make_label(f"Spec{uid}"), uid)
+    return uid
+
+
 class CompareSpecsRegistry(BuildItem):
     """ Provides a registry for specification comparisons. """
 
     def __init__(self, director: PackageBuildDirector, item: Item):
         super().__init__(director, item)
-        self._revisions: dict[str, _SpecRevision] = {}
+        self._revisions: list[_SpecRevision] = []
+        self._key_to_revision: dict[str, _SpecRevision] = {}
+        self._item_history: dict[str, dict] = {}
+
+    def _initialize_item_history(self) -> None:
+        repository = self.input("repository")
+        assert isinstance(repository, DirectoryState)
+        previous = self._revisions[0]
+        for current in self._revisions[1:]:
+            uid_to_commit_list: dict[str, list[dict[str, dict]]] = {}
+            config = _CompareSpecsConfig(
+                repository=repository,
+                ignored_commits=self["ignored-commits"],
+                previous=previous,
+                current=current)
+            for commit in reversed(_get_commits(config)):
+                uid_to_commit: dict[str, dict] = {}
+                for diff in commit["diffs"]:
+                    a_uid = diff["a-uid"]
+                    b_uid = diff["b-uid"]
+                    if b_uid is None:
+                        uid = a_uid
+                    else:
+                        uid = b_uid
+                    uid_to_commit.setdefault(uid, {
+                        "message": commit["message"],
+                        "diffs": []
+                    })["diffs"].append(diff)
+                for uid, item_commit in uid_to_commit.items():
+                    uid_to_commit_list.setdefault(uid, []).append(item_commit)
+            for uid, commit_list in uid_to_commit_list.items():
+                history = self._item_history.setdefault(
+                    uid, {
+                        "changes": [],
+                        "revisions": []
+                    })
+                history["changes"].append({
+                    "commits": commit_list,
+                    "key": current.key,
+                    "name": current.name,
+                    "revision": current,
+                    "previous-revision": previous
+                })
+                history["revisions"].append(current.key)
+            previous = current
 
     def _initialize_revisions(self) -> None:
+        if self._revisions:
+            return
         selection = self.item.cache.active_selection
+        previous_uids = _EMPTY_SCOPE_TO_UIDS
         for link, state in self.input_links("spec-compare-revision"):
             assert isinstance(state, ItemCacheDirectoryState)
             data = self.substitute(link.data)
-            revision = _SpecRevision(state, selection, data)
-            self._revisions[revision.key] = revision
+            revision = _SpecRevision(state, selection, data, previous_uids)
+            self._revisions.append(revision)
+            self._key_to_revision[revision.key] = revision
+            previous_uids = revision.uids
+        self._initialize_item_history()
+
+    def _get_revision(self, key: str) -> _SpecRevision:
+        try:
+            return self._key_to_revision[key]
+        except KeyError as err:
+            available = [revision.key for revision in self._revisions]
+            raise ValueError("there is no revision associated with the "
+                             f"key '{key}', available {available}") from err
 
     def add_change_log(self, content: TextContent, previous_key: str,
                        current_key: str) -> None:
@@ -277,27 +373,98 @@ class CompareSpecsRegistry(BuildItem):
         Add a list of changes from the specification associated with the
         previous key to the specification associated with the current key.
         """
-        if not self._revisions:
-            self._initialize_revisions()
-        try:
-            previous = self._revisions[previous_key]
-        except KeyError as err:
-            raise ValueError(
-                "there are no revision associated with specification "
-                f"comparison previous key '{previous_key}'") from err
-        try:
-            current = self._revisions[current_key]
-        except KeyError as err:
-            raise ValueError(
-                "there are no revision associated with specification "
-                f"comparison current key '{current_key}'") from err
-        repo = self.input("repository")
-        assert isinstance(repo, DirectoryState)
-        config = _CompareSpecsConfig(repository=repo,
+        self._initialize_revisions()
+        repository = self.input("repository")
+        assert isinstance(repository, DirectoryState)
+        previous = self._get_revision(previous_key)
+        current = self._get_revision(current_key)
+        config = _CompareSpecsConfig(repository=repository,
                                      ignored_commits=self["ignored-commits"],
-                                     current=current,
-                                     previous=previous)
+                                     previous=previous,
+                                     current=current)
         _add_change_log(content, config)
+
+    def add_change_log_by_args(self, content: TextContent, args: str) -> None:
+        """ Add a list of changes specified by args. """
+        previous_key, _, current_key = args.partition("..")
+        self.add_change_log(content, previous_key, current_key)
+
+    def add_item_changes(self, content: TextContent, uid: str) -> None:
+        """ Get the item history by UID. """
+        self._initialize_revisions()
+        history = self._item_history.get(uid)
+        if history is None:
+            content.add(
+                f"There are no changes since {self._revisions[0].name}.")
+            return
+        for change in reversed(history["changes"]):
+            name = change["name"]
+            in_current = uid in change["revision"].uids["all"]
+            in_previous = uid in change["previous-revision"].uids["all"]
+            if not in_previous and in_current:
+                content.add(f"The item is new in {name}.")
+                continue
+            if in_previous and not in_current:
+                content.add(f"The item was deleted in {name}.")
+                continue
+            content.add(f"The following changes are associated with {name}.")
+            for commit in reversed(change["commits"]):
+                message = commit["message"]
+                with content.directive("topic", message[0]):
+                    if len(message) >= 2:
+                        content.append(message[2:])
+                    else:
+                        content.append("No commit message.")
+                for diff in commit["diffs"]:
+                    line_number_start = 1
+                    for chunk in diff["chunks"]:
+                        content.add_code_block(
+                            chunk,
+                            language="diff",
+                            line_number_start=line_number_start)
+                        line_number_start += len(chunk)
+
+    def add_changes_by_scope(self, content: TextContent, scope: str,
+                             revision_key: str) -> None:
+        """
+        Add the changes of items within the scope from the revision associated
+        with the key compared to the previous revision.
+        """
+        # pylint: disable=too-many-locals
+        self._initialize_revisions()
+        current = self._get_revision(revision_key)
+        current_scope = current.uids[scope]
+        current_other = current.uids["all"].difference(current_scope)
+        previous_scope = current.previous_uids[scope]
+        previous_other = current.previous_uids["all"].difference(
+            previous_scope)
+        maybe_deleted = previous_scope.difference(current_scope)
+        moved_out = maybe_deleted.intersection(current_other)
+        deleted = maybe_deleted.difference(moved_out)
+        maybe_new = current_scope.difference(previous_scope)
+        moved_in = maybe_new.intersection(previous_other)
+        new = maybe_new.difference(moved_in)
+        modified = sorted(uid
+                          for uid in current_scope.intersection(previous_scope)
+                          if current.key in self._item_history.get(
+                              uid, {}).get("revisions", tuple()))
+        present = self._revisions[-1].uids[scope]
+        rows = [("Items", "Status")]
+        rows.extend((_ref(uid, present), "Deleted") for uid in sorted(deleted))
+        rows.extend(
+            (_ref(uid, present), "Moved out") for uid in sorted(moved_out))
+        rows.extend(
+            (_ref(uid, present), "Moved in") for uid in sorted(moved_in))
+        rows.extend((_ref(uid, present), "New") for uid in sorted(new))
+        rows.extend((_ref(uid, present), "Modified") for uid in modified)
+        assert isinstance(content, SphinxContent)
+        content.add_grid_table(rows, widths=[80, 20], font_size=-2)
+
+    def add_changes_by_scope_by_args(self, content: TextContent,
+                                     args: str) -> None:
+        """ Add the changes specified by args. """
+        scope, _, revision_key = args.partition(":")
+        self.add_changes_by_scope(content, scope, revision_key)
 
 
 class CompareSpecsProvider(ItemValueProvider):
@@ -310,17 +477,37 @@ class CompareSpecsProvider(ItemValueProvider):
         self._builder = builder
         self.mapper.add_get_value("pkg/spec-compare-registry:/spec-change-log",
                                   self._get_spec_change_log)
+        self.mapper.add_get_value(
+            "pkg/spec-compare-registry:/spec-item-changes",
+            self._get_spec_item_changes)
+        self.mapper.add_get_value(
+            "pkg/spec-compare-registry:/spec-changes-by-scope",
+            self._get_spec_changes_by_scope)
 
-    def _get_spec_change_log(self, ctx: ItemGetValueContext) -> str:
+    def _get_spec_things(
+            self, ctx: ItemGetValueContext,
+            what: Callable[[CompareSpecsRegistry, TextContent, str],
+                           None]) -> str:
         builder = self._builder
         director = builder.director
-        with builder.section_level_scope(ctx) as key_arg:
+        with builder.section_level_scope(ctx) as args:
             assert isinstance(self.mapper, TextMapper)
             content = self.mapper.create_content(
                 section_level=builder.section_level)
             registry = director[ctx.item.uid]
             assert isinstance(registry, CompareSpecsRegistry)
-            assert key_arg
-            previous_key, _, current_key = key_arg.partition("..")
-            registry.add_change_log(content, previous_key, current_key)
+            assert args
+            what(registry, content, args)
             return "\n".join(content)
+
+    def _get_spec_change_log(self, ctx: ItemGetValueContext) -> str:
+        return self._get_spec_things(
+            ctx, CompareSpecsRegistry.add_change_log_by_args)
+
+    def _get_spec_item_changes(self, ctx: ItemGetValueContext) -> str:
+        return self._get_spec_things(ctx,
+                                     CompareSpecsRegistry.add_item_changes)
+
+    def _get_spec_changes_by_scope(self, ctx: ItemGetValueContext) -> str:
+        return self._get_spec_things(
+            ctx, CompareSpecsRegistry.add_changes_by_scope_by_args)
