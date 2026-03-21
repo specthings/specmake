@@ -1,0 +1,22 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: policy
+  spec-value: use-timeouts
+  uid: pkg-test-runner-esa-policy
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      This set of attributes specifies an ESA test runner use timeouts policy.
+    mandatory-attributes: all
+spec-name: ESA Test Runner Use Timeouts Policy
+spec-type: pkg-test-runner-esa-policy-use-timeouts
+type: spec

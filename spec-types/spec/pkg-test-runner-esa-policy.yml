@@ -1,0 +1,22 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      policy:
+        description: |
+          It shall be the policy name.
+        spec-type: name
+    description: |
+      This set of attributes specifies an ESA test runner policy.
+    mandatory-attributes: all
+spec-name: ESA Test Runner Policy
+spec-type: pkg-test-runner-esa-policy
+type: spec
