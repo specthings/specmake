@@ -44,6 +44,7 @@ from .pkgitems import PackageBuildDirector
 from .linkhub import get_kind, spec_label, SpecMapper
 from .perfimages import environment_order
 from .rtems import RTEMSItemCache
+from .speccompare import CompareSpecsRegistry
 from .testaggregator import get_test_result_status
 from .util import duration
 
@@ -941,6 +942,12 @@ class SpecDocumentBuilder(DocumentBuilder):
         spec = self.input("spec")
         assert isinstance(spec, RTEMSItemCache)
         self.spec = spec
+        try:
+            spec_compare_registry = self.input("spec-compare-registry")
+            assert isinstance(spec_compare_registry, CompareSpecsRegistry)
+        except KeyError:
+            spec_compare_registry = None
+        self.spec_compare_registry = spec_compare_registry
         my_type = self.item.type
         self.mapper.add_get_value(f"{my_type}:/validation-verification",
                                   self._validation_verification)
@@ -961,6 +968,10 @@ class SpecDocumentBuilder(DocumentBuilder):
                                                      CodeMapper(item),
                                                      self.spec,
                                                      self.file_path))
+                spec_compare_registry = self.spec_compare_registry
+                if spec_compare_registry is not None:
+                    content.add_rubric("CHANGES:")
+                    spec_compare_registry.add_item_changes(content, item.uid)
 
     def _add_validation_table(self, content: SphinxContent) -> None:
         """ Add the document item validation table to the content. """

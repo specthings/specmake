@@ -350,6 +350,10 @@ producing pre-condition variants is listed.
 
     \\end{small}
 
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
+
 .. raw:: latex
 
     \\clearpage
@@ -492,6 +496,10 @@ producing pre-condition variants is listed.
 
     * :ref:`A <SpecRtemsReqAction2PreA>` = AA, :ref:`B <SpecRtemsReqAction2PreB>` = BA, :ref:`C <SpecRtemsReqAction2PreC>` = {CA, CC}
 
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
+
 .. raw:: latex
 
     \\clearpage
@@ -514,6 +522,10 @@ This interface define requirement specifies the function of the define
 .. rubric:: VALIDATION:
 
 This interface define requirement is **not validated**.
+
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
 
 .. raw:: latex
 
@@ -546,6 +558,10 @@ following items:
   </pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun>`__
   (validation by test)
 
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
+
 .. _RequirementsPerformanceRequirements:
 
 Performance requirements
@@ -576,6 +592,10 @@ This performance requirement is refined by performance requirement
 .. rubric:: VALIDATION:
 
 This **not validated** performance requirement is validated by the **not validated** refinement `spec:/​req/​perf-runtime-environment </pkg/doc-ts-srs/html/requirements.html#specreqperfruntimeenvironment>`__.
+
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
 
 .. raw:: latex
 
@@ -637,6 +657,10 @@ following items:
   </pkg/doc-ts-srs/html/requirements.html#specreqperfruntimeenvironmentload>`__
   (**not validated** refinement)
 
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
+
 .. raw:: latex
 
     \\clearpage
@@ -672,6 +696,10 @@ This runtime performance measurement environment is **not validated**.
 
 The RTEMS Test Framework name of this runtime measurement environment is
 ``DirtyCache``.
+
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
 
 .. raw:: latex
 
@@ -709,6 +737,10 @@ This runtime performance measurement environment is **not validated**.
 The RTEMS Test Framework name of this runtime measurement environment is
 ``FullCache``.
 
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
+
 .. raw:: latex
 
     \\clearpage
@@ -745,6 +777,10 @@ This runtime performance measurement environment is **not validated**.
 The RTEMS Test Framework name of this runtime measurement environment is
 ``HotCache``.
 
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
+
 .. raw:: latex
 
     \\clearpage
@@ -779,6 +815,10 @@ This runtime performance measurement environment is **not validated**.
 
 The RTEMS Test Framework name of this runtime measurement environment is
 ``Load``.
+
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
 
 .. raw:: latex
 
@@ -874,6 +914,10 @@ depends on the following items:
   </pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun>`__
   (validation by test)
 
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
+
 .. raw:: latex
 
     \\clearpage
@@ -937,6 +981,10 @@ This runtime performance requirement refines the interface group `Blub
 .. rubric:: VALIDATION:
 
 This runtime performance requirement is validated by a validation by test specified by `spec:/​rtems/​req/​perf-no-results </pkg/doc-djf-svs/html/test-case-specification.html#specrtemsreqperfnoresults>`__.
+
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
 
 .. _RequirementsInterfaceRequirements:
 
@@ -1074,6 +1122,10 @@ following items:
   </pkg/doc-ts-srs/html/requirements.html#spectestsuitesvalidation>`__
   (**not validated** refinement)
 
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
+
 .. raw:: latex
 
     \\clearpage
@@ -1099,6 +1151,10 @@ This design requirement is refined by constraint
 .. rubric:: VALIDATION:
 
 This validated design requirement is validated by the validated refinement `spec:/​acfg/​constraint/​option-not-pre-qualified </pkg/doc-ts-srs/html/requirements.html#specacfgconstraintoptionnotprequalified>`__.
+
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
 
 .. raw:: latex
 
@@ -1135,6 +1191,10 @@ items:
   </pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun>`__
   (validation by test)
 
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
+
 .. raw:: latex
 
     \\clearpage
@@ -1157,6 +1217,10 @@ This design group refines the design requirement `spec:/​req/​root
 
 This design group is **not validated**.
 
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
+
 .. raw:: latex
 
     \\clearpage
@@ -1178,6 +1242,10 @@ This design target refines the design requirement `spec:/​req/​root
 .. rubric:: VALIDATION:
 
 This design target is **not validated**.
+
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
 
 .. raw:: latex
 
@@ -1203,6 +1271,10 @@ This design group is refined by test suite `spec:/​testsuites/​unit-0
 .. rubric:: VALIDATION:
 
 This **not validated** design group is validated by the **not validated** refinement `spec:/​testsuites/​unit-0 </pkg/doc-djf-suitp/html/test-design.html#spectestsuitesunit0>`__.
+
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
 
 .. raw:: latex
 
@@ -1271,6 +1343,10 @@ items:
   </pkg/doc-ts-srs/html/requirements.html#spectestsuitesvalidationrefinement>`__
   (**not validated** refinement)
 
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
+
 .. raw:: latex
 
     \\clearpage
@@ -1295,6 +1371,10 @@ This design group is refined by test suite `spec:/​testsuites/​test-suite-fa
 .. rubric:: VALIDATION:
 
 This **not validated** design group is validated by the **not validated** refinement `spec:/​testsuites/​test-suite-fail </pkg/doc-djf-svs/html/test-design.html#spectestsuitestestsuitefail>`__.
+
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
 
 .. _RequirementsSecurityAndPrivacyRequirements:
 
@@ -1343,6 +1423,10 @@ This quality requirement refines the interface group `Blub
 .. rubric:: VALIDATION:
 
 This validated quality requirement is validated by the validation by inspection `spec:/​rtems/​val/​mem-basic </pkg/doc-djf-svs/html/test-design.html#specrtemsvalmembasic>`__.
+
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
 
 .. _RequirementsSoftwareReliabilityRequirements:
 
@@ -1432,4 +1516,8 @@ This constraint refines the design requirement `spec:/​req/​usage-constraint
 This constraint is applicable to application configuration option
 `CONFIGURE_INTEGER
 </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifacfginteger>`__.
+
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
 .. srs-constraints end"""
