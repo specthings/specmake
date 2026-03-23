@@ -218,6 +218,22 @@ The Title
 
     Initial release.
 
+.. _Release2Date20201026StatusDraft:
+
+Release: 2, Date: 2020-10-26, Status: Draft
+-------------------------------------------
+
+* 2020 embedded brains GmbH & Co. KG
+
+* e
+
+.. _Release1Date19700101StatusReplaced:
+
+Release: 1, Date: 1970-01-01, Status: Replaced
+----------------------------------------------
+
+Initial release.
+
 .. table::
     :class: longtable
     :widths: 16 26 30 28
