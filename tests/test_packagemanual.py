@@ -804,7 +804,7 @@ spec:/pkg/source/test-files
 
 Use input :ref:`spec:/pkg/component <PackageItemPkgComponent>`.
 
-Represent 75 files in directory
+Represent 76 files in directory
 {_format_path(tmp_dir, '')}.
 
 .. _PackageItemPkgCoverageTargetA:
@@ -1138,10 +1138,10 @@ Component - sparc/gr712rc/smp/4
 Repositories
 ************
 
-.. _PackageSummarySparcGr712rcSmp4RepositoriesBuildSrcA:
+.. _PackageSummarySparcGr712rcSmp4RepositoriesSpec:
 
-build/src/a
-===========
+../spec
+=======
 
 .. raw:: latex
 

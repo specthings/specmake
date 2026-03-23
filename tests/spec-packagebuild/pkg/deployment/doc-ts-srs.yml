@@ -50,6 +50,10 @@ links:
   role: input
   uid: perf-images-dummy
 - hash: null
+  name: spec-compare-registry
+  role: input
+  uid: spec-compare-registry
+- hash: null
   name: source
   role: input
   uid: ../source/doc-ts-srs
