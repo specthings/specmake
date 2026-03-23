@@ -95,7 +95,7 @@ def _row(row: tuple[str, ...], maxi: tuple[int, ...]) -> str:
                           for cell, width in zip(row, maxi)) + "|"
 
 
-def _get_contributors(ctx: ItemGetValueContext) -> Any:
+def _get_contributors(ctx: ItemGetValueContext) -> str:
     rows = [("Action", "Name", "Organization", "Signature")]
     maxi = tuple(map(len, rows[0]))
     for action in ctx.mapper.substitute_data(
@@ -185,7 +185,7 @@ def _get_latex_copyright(ctx: ItemGetValueContext) -> str:
     return _latex_escape(_get_document_copyright(ctx))
 
 
-def _get_title_page_title(ctx: ItemGetValueContext) -> Any:
+def _get_title_page_title(ctx: ItemGetValueContext) -> str:
     title: list[str] = []
     for part in ctx.substitute_and_transform(
             ctx.item["document-title"]).split(_BREAK):
@@ -297,7 +297,9 @@ class SphinxBuilder(DirectoryState):
         self.mapper.add_get_value(f"{my_type}:/document-index",
                                   self._get_index)
         self.mapper.add_get_value(f"{my_type}:/document-releases",
-                                  self._get_releases)
+                                  self._get_release_topics)
+        self.mapper.add_get_value(f"{my_type}:/document-release-sections",
+                                  self._get_release_sections)
         self.mapper.add_get_value(f"{my_type}:/document-contributors",
                                   _get_contributors)
         for name in [my_type, "pkg/sphinx-section"]:
@@ -403,26 +405,46 @@ class SphinxBuilder(DirectoryState):
         """ Substitute the text and wrap the text to the content. """
         content.wrap(self.mapper.substitute(text, item))
 
-    def _get_releases(self, ctx: ItemGetValueContext) -> Any:
-        content = SphinxContent()
-        releases = ctx.item["document-releases"]
-        count = len(releases)
-        for idx, release in enumerate(reversed(releases)):
-            date = release["date"]
-            status = release["status"]
-            line = f"Release: {count - idx}, Date: {date}, Status: {status}"
-            with content.directive("topic", line):
-                lines = self._push_pop_enabled_by(
-                    release["changes"].splitlines())
-                content.add(lines)
-        return ctx.substitute_and_transform(content.join())
+    def _get_releases(self, ctx: ItemGetValueContext, scope: Callable) -> str:
+        with self.section_level_scope(ctx):
+            content = SphinxContent(self.section_level)
+            releases = ctx.item["document-releases"]
+            count = len(releases)
+            for idx, release in enumerate(reversed(releases)):
+                date = release["date"]
+                status = release["status"]
+                header = ctx.substitute(
+                    f"Release: {count - idx}, Date: {date}, Status: {status}")
+                with scope(content, header):
+                    lines = self._push_pop_enabled_by(
+                        release["changes"].splitlines())
+                    content.add(ctx.substitute("\n".join(lines)))
+            return content.join()
+
+    def _get_release_topics(self, ctx: ItemGetValueContext) -> str:
+
+        @contextmanager
+        def _scope(content: SphinxContent, header: str) -> Iterator[None]:
+            with content.directive("topic", header):
+                yield
+
+        return self._get_releases(ctx, _scope)
+
+    def _get_release_sections(self, ctx: ItemGetValueContext) -> str:
+
+        @contextmanager
+        def _scope(content: SphinxContent, header: str) -> Iterator[None]:
+            with content.section(header):
+                yield
+
+        return self._get_releases(ctx, _scope)
 
     def _add_to_index(self, component: dict[str, Any]) -> None:
         if component.get("add-to-index", False):
             for file in to_iterable(component["file"]):
                 self._index.append(os.path.basename(file).replace(".rst", ""))
 
-    def _get_index(self, ctx: ItemGetValueContext) -> Any:
+    def _get_index(self, ctx: ItemGetValueContext) -> str:
         content = SphinxContent()
         maxdepth = f":maxdepth: {ctx.item['document-toctree-maxdepth']}"
         with content.directive("toctree", options=[maxdepth, ":numbered:"]):
@@ -443,7 +465,7 @@ class SphinxBuilder(DirectoryState):
             ])
         return copyrights
 
-    def _get_document_copyrights(self, ctx: ItemGetValueContext) -> Any:
+    def _get_document_copyrights(self, ctx: ItemGetValueContext) -> str:
         my_license = self["document-license"]
         assert " OR " not in my_license
         copyrights = self._get_copyrights()
@@ -451,7 +473,7 @@ class SphinxBuilder(DirectoryState):
         return "\n".join(copyrights[my_license].get_statements(f"{prefix}| ©"))
 
     def _get_document_bsd_2_clause_copyrights(
-            self, _ctx: ItemGetValueContext) -> Any:
+            self, _ctx: ItemGetValueContext) -> str:
         copyrights = self._get_copyrights()
         the_license = "BSD-2-Clause"
         if the_license not in copyrights:

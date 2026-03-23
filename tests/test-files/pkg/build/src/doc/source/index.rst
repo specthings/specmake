@@ -14,6 +14,8 @@ ${.:/document-sphinx-title}
 
 ${.:/document-releases}
 
+${.:/document-release-sections}
+
 ${.:/document-contributors}
 
 ${.:/document-index}
