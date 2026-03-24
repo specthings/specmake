@@ -10,7 +10,7 @@ links:
 - hash: null
   name: component
   role: input
-  uid: ../subcomponent
+  uid: ../sub/component
 - hash: null
   name: document-element
   role: input-to

@@ -174,6 +174,14 @@ text
 
 .. Copyright (C) 2023 embedded brains GmbH & Co. KG
 
+.. begin subcomponent list depth 0
+
+.. end subcomponent list depth 0
+
+.. begin subcomponent list depth 1
+sub and sub-b
+.. end subcomponent list depth 1
+
 2020 embedded brains GmbH & Co. KG
 
 embedded brains GmbH & Co. KG
@@ -319,7 +327,7 @@ Terms, definitions and abbreviated terms
     assert action_run == 1
 
     # Test make SphinxBuilder
-    subcomponent = director["/pkg/subcomponent"]
+    subcomponent = director["/pkg/sub/component"]
     _set_enabled_set(package, ["make"])
     director.build_package()
     doc_make_build = Path(director["/pkg/build/doc-make"].directory)
