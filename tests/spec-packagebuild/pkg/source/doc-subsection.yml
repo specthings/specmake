@@ -2,7 +2,7 @@ SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 content: |
   Subsection content: ${.:/component/arch}
 
-  ${.:/push-component:/pkg/subcomponent}
+  ${.:/push-component:/pkg/sub/component}
   Push component content: ${.:/component/arch}
   ${.:/pop-component}
 copyrights:

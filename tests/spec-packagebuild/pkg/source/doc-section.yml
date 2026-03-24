@@ -11,6 +11,6 @@ links:
 - hash: null
   name: component
   role: input
-  uid: ../subcomponent
+  uid: ../sub/component
 pkg-type: sphinx-section
 type: pkg

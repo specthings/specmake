@@ -11,7 +11,7 @@ links:
 - hash: null
   name: component
   role: input
-  uid: ../subcomponent
+  uid: ../sub/component
 - hash: null
   header: ${.:/links[1]/section-key} 2 Header
   header-is-optional: true

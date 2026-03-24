@@ -139,7 +139,7 @@ def test_packagebuild(caplog, tmpdir, monkeypatch):
     assert "INFO /pkg/steps/c: build is unnecessary" in log
 
     # Test PackageComponent
-    subcomponent = director["/pkg/subcomponent"]
+    subcomponent = director["/pkg/sub/component"]
     assert isinstance(subcomponent, PackageComponent)
     assert subcomponent["arch"] == "sub-arch"
     assert subcomponent["bsp"] == "gr712rc"

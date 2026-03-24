@@ -11,7 +11,7 @@ links:
 - hash: null
   name: component
   role: input
-  uid: ../subcomponent
+  uid: ../sub/component
 - hash: null
   name: source
   role: input

@@ -36,7 +36,7 @@ from specitems import (BibTeXCitationProvider, Copyrights,
                        DocumentGlossaryConfig, GlossaryConfig, Item,
                        ItemGetValueContext, ItemMapper, SphinxContent,
                        generate_glossary, get_value_subprocess, is_enabled,
-                       to_iterable)
+                       list_terms, to_iterable)
 from specware import BSD_2_CLAUSE_LICENSE, run_command
 
 from .directorystate import DirectoryState
@@ -205,6 +205,20 @@ def _get_title_page_title(ctx: ItemGetValueContext) -> str:
     return _latex_escape(" \\break \\break ".join(title))
 
 
+def _gather_subcomponents(component: Item, depth: int, at_depth: int,
+                          component_list: list[str]) -> None:
+    for subcomponent in component.children("input"):
+        if not subcomponent.type.startswith("pkg/component"):
+            continue
+        if depth == at_depth:
+            name = os.path.dirname(component.uid)
+            subname = os.path.dirname(subcomponent.uid)
+            component_list.append(subname.removeprefix(name).lstrip("/"))
+        else:
+            _gather_subcomponents(subcomponent, depth + 1, at_depth,
+                                  component_list)
+
+
 def _augment_report(
         lines: list[str]) -> tuple[list[str], list[tuple[int, int]]]:
     report: dict = {}
@@ -271,6 +285,8 @@ class SphinxBuilder(DirectoryState):
                 self.content_license.add(the_license)
         self.file_path = ""
         my_type = self.item.type
+        self.mapper.add_get_value(f"{my_type}:/subcomponent-list",
+                                  self._get_subcomponent_list)
         self.mapper.add_get_value(f"{my_type}:/document-author",
                                   _get_document_author)
         self.mapper.add_get_value(f"{my_type}:/document-latex-footer-right",
@@ -404,6 +420,14 @@ class SphinxBuilder(DirectoryState):
     def wrap(self, content: SphinxContent, item: Item, text: str) -> None:
         """ Substitute the text and wrap the text to the content. """
         content.wrap(self.mapper.substitute(text, item))
+
+    def _get_subcomponent_list(self, ctx: ItemGetValueContext) -> str:
+        assert ctx.args
+        at_depth = int(ctx.args)
+        component_list: list[str] = []
+        _gather_subcomponents(self.director[self.director.package_uid].item, 1,
+                              at_depth, component_list)
+        return list_terms(sorted(component_list))
 
     def _get_releases(self, ctx: ItemGetValueContext, scope: Callable) -> str:
         with self.section_level_scope(ctx):
