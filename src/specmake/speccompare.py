@@ -42,6 +42,8 @@ from .itemcachestate import ItemCacheDirectoryState
 from .sphinxbuilder import SphinxBuilder
 from .pkgitems import BuildItem, PackageBuildDirector
 
+_Commit = dict[str, Any]
+
 _COMMIT = re.compile(r"commit ([0-9a-f]+)$")
 
 _EMPTY_SCOPE_TO_UIDS: dict[str, frozenset[str]] = {
@@ -125,7 +127,7 @@ class _LogParser:
         self._uids = uids
         self._ignored_commits = ignored_commits
         self._spec_paths = sorted(spec_paths, reverse=True)
-        self._commits: list[dict[str, Any]] = []
+        self._commits: list[_Commit] = []
         self._current_commit: dict[str, Any] = {}
         self._current_chunk: list[str] = []
         self._current_diff: dict[str, Any] = {}
@@ -166,11 +168,12 @@ class _LogParser:
         self._finalize_diff()
         commit = self._current_commit
         self._current_commit = {}
-        if commit and commit["diffs"] and commit[
-                "commit"] not in self._ignored_commits:
+        if commit and commit["diffs"]:
+            if commit["commit"] in self._ignored_commits:
+                commit["diffs"] = []
             self._commits.append(commit)
 
-    def finalize(self) -> list[dict[str, Any]]:
+    def finalize(self) -> list[_Commit]:
         """ Finalizes the parsing and returns the commits. """
         self._finalize()
         return self._commits
@@ -246,7 +249,7 @@ class _LogParser:
             return
 
 
-def _get_commits(config: _CompareSpecsConfig) -> list[dict[str, Any]]:
+def _get_commits(config: _CompareSpecsConfig) -> list[_Commit]:
     uids_current = config.current.uids["all"]
     uids_previous = config.previous.uids["all"]
     all_uids = uids_current.union(uids_previous)
@@ -265,6 +268,11 @@ def _add_change_log(content: TextContent, config: _CompareSpecsConfig) -> None:
         for commit in reversed(_get_commits(config)):
             with content.section(commit["message"][0]):
                 content.add(commit["message"][2:])
+                if not commit["diffs"]:
+                    with content.directive("note"):
+                        content.add("The modifications of this change are "
+                                    "not listed in the document.")
+                    continue
                 for diff in commit["diffs"]:
                     a_uid = diff["a-uid"]
                     b_uid = diff["b-uid"]
