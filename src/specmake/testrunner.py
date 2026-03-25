@@ -168,9 +168,14 @@ class TestRunner(BuildItem):
 
             # Use previous report if the executable hash did not change
             report = previous_reports_by_hash.get(digest, None)
-            if report is None or cannot_reuse_reports:
+            error = None if report is None else report.get("error")
+            if report is None or cannot_reuse_reports or error is not None:
+                if error is not None:
+                    logging.info(
+                        "%s: do not reuse report for %s with error: %s",
+                        self.uid, path, error)
                 if name in do_not_run:
-                    logging.debug("%s: do not run: %s", self.uid, path)
+                    logging.info("%s: do not run: %s", self.uid, path)
                     report = TestRunner.run_tests(
                         self, [Executable(path, digest, 0.0)])[0]
                     augment_report(report, report["output"])
@@ -186,8 +191,7 @@ class TestRunner(BuildItem):
                     timeout = 2.0 * timeout + 10.0
                     executables.append(Executable(path, digest, timeout))
             else:
-                logging.debug("%s: use previous report for: %s", self.uid,
-                              path)
+                logging.info("%s: use previous report for: %s", self.uid, path)
                 report["executable"] = path
                 reports.append(report)
         return reports, executables
