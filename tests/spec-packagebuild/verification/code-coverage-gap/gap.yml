@@ -32,9 +32,7 @@ areas:
 copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
 enabled-by: true
-links:
-- role: verification
-  uid: /rtems/target-a
+links: []
 text: |
   This explains the code coverage gap.
 type: verification
