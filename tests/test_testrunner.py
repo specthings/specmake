@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Tests for the testrunner module. """
 
-# Copyright (C) 2023, 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2023, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -43,17 +43,17 @@ TestRunner.__test__ = False
 
 class _TestRunner(TestRunner):
 
-    def __init__(self, director: PackageBuildDirector, item: Item):
-        super().__init__(director, item)
-        self.run_count = 0
+    run_round = 0
+    run_count = 0
 
     def run_tests(self, executables: list[Executable]) -> list[Report]:
-        logging.info("executables: %s", executables)
-        super().run_tests(executables)
-        self.run_count += 1
-        if self.run_count == 1:
+        run_count = _TestRunner.run_count + 1
+        _TestRunner.run_count = run_count
+        logging.critical("[%s.%s] run executables: %s", _TestRunner.run_round,
+                         run_count, executables)
+        if run_count in (1, 5):
             return []
-        if self.run_count == 2:
+        if run_count == 2:
             return [{
                 "executable":
                 executables[0].path,
@@ -66,7 +66,7 @@ class _TestRunner(TestRunner):
                 "error": "blubb",
                 "output": []
             }]
-        if self.run_count == 3:
+        if run_count == 3:
             return [{
                 "executable":
                 executables[0].path,
@@ -83,6 +83,13 @@ class _TestRunner(TestRunner):
                     "Y:ReportHash:SHA256:JlS-9kM8jYqTjFvRbuUDzHpfph6PznxFxCLx30NkcoI="
                 ]
             }]
+        if run_count in (7, 8, 9, 10):
+            return [{
+                "error": "The Error Message",
+                "executable": executable.path,
+                "executable-sha512": executable.digest,
+                "output": []
+            } for executable in executables]
         return [{
             "executable": executable.path,
             "executable-sha512": executable.digest,
@@ -229,6 +236,8 @@ building the package and captures the output:
     # Test TestRunner
     build_bsp = director["/pkg/build/bsp"]
     build_bsp.load()
+    _TestRunner.run_round = 0
+    _TestRunner.run_count = 0
     director.build_package()
     log = get_and_clear_log(caplog)
     assert ": cannot reuse reports" in log
@@ -242,13 +251,27 @@ building the package and captures the output:
             f"Executable(path='{build_bsp.directory}/b.exe', "
             "digest='hopqxuHQKT10-tB_bZWVKz4B09MVPbZ3p12Ad5g_1OMNtr_Im3YIqT-yZ"
             "GkjOp8aCVctaHqcXaeLID6xUQQKFQ==', timeout=16.0)]") in log
+
     (tmp_dir / "pkg/test-log-bsp.json").unlink()
+    _TestRunner.run_round = 1
     director.build_package(force=["/pkg/test-logs/bsp"])
     log = get_and_clear_log(caplog)
     assert f": no report" in log
+
+    _TestRunner.run_round = 2
     director.build_package(force=["/pkg/test-logs/bsp"])
     log = get_and_clear_log(caplog)
     assert f"use previous report for: {build_bsp.directory}/a.exe" in log
+
+    (tmp_dir / "pkg/test-log-bsp.json").unlink()
+    _TestRunner.run_round = 3
+    director.build_package(force=["/pkg/test-logs/bsp"])
+    log = get_and_clear_log(caplog)
+
+    _TestRunner.run_round = 4
+    director.build_package(force=["/pkg/test-logs/bsp"])
+    log = get_and_clear_log(caplog)
+    assert f"do not reuse report for {build_bsp.directory}/a.exe with error: The Error Message" in log
 
 
 def test_testrunner_dummy(caplog, tmpdir):
