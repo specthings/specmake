@@ -123,7 +123,8 @@ def _gather_test_error_verifications(item: Item,
 def _gather_coverage_gap_verifications(
         uid: str, target: Item,
         verifications: dict[str, _FileToSpotJustification]) -> None:
-    for child in target.children("verification"):
+    for child in itertools.chain(target.parents("verification-by"),
+                                 target.children("verification")):
         if not child.type.startswith("verification/code-coverage-gap"):
             continue
         for scope_name, scope in child["areas"].items():

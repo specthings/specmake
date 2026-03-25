@@ -14,6 +14,8 @@ links:
   uid: target-a-perf
 - role: verification-provider
   uid: /verification/test-failures/default
+- role: verification-by
+  uid: /verification/code-coverage-gap/gap
 name: Name Target A
 non-functional-type: design-target
 rationale: null
