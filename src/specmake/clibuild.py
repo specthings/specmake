@@ -32,38 +32,37 @@ import logging
 import os
 import sys
 
-from specitems import init_logging
 from specware import run_command
 
 from .pkgitems import BuildItem
 from .pkgworkspace import (BuildspaceConfig, WorkspaceConfig, create_workspace,
                            export_to_buildspace)
-from .util import create_build_argument_parser
+from .util import get_build_arguments
 
 
-def _get_args_and_init_logging(argv: list[str]) -> argparse.Namespace:
-    parser = create_build_argument_parser()
-    parser.add_argument(
-        "--do-not-use-git",
-        help="do not use git to track changes in the workspace",
-        action="store_true")
-    parser.add_argument("--prefix",
-                        help="the prefix directory",
-                        default="/opt")
-    parser.add_argument("--config-directory",
-                        help="the configuration directory",
-                        default=".")
-    parser.add_argument("--enabled-set",
-                        help="the enabled set to configure the package",
-                        default="")
-    parser.add_argument("--name", help="the package name", default="pkg")
-    parser.add_argument("--cache-directory",
-                        help="the configuration cache directory",
-                        default="config-cache")
-    parser.add_argument('config_files', nargs='+')
-    args = parser.parse_args(argv)
-    init_logging(args)
-    return args
+def _get_arguments(argv: list[str]) -> argparse.Namespace:
+
+    def _add_arguments(parser):
+        parser.add_argument(
+            "--do-not-use-git",
+            help="do not use git to track changes in the workspace",
+            action="store_true")
+        parser.add_argument("--prefix",
+                            help="the prefix directory",
+                            default="/opt")
+        parser.add_argument("--config-directory",
+                            help="the configuration directory",
+                            default=".")
+        parser.add_argument("--enabled-set",
+                            help="the enabled set to configure the package",
+                            default="")
+        parser.add_argument("--name", help="the package name", default="pkg")
+        parser.add_argument("--cache-directory",
+                            help="the configuration cache directory",
+                            default="config-cache")
+        parser.add_argument('config_files', nargs='+')
+
+    return get_build_arguments(argv, add_arguments=(_add_arguments, ))
 
 
 def _make_deployment_directory(workspace_package: BuildItem) -> str:
@@ -84,7 +83,7 @@ def clibuild(argv: list[str] = sys.argv) -> None:
     Create a package workspace directory according to the configuration files.
     """
 
-    args = _get_args_and_init_logging(argv[1:])
+    args = _get_arguments(argv[1:])
     workspace_directory = os.path.abspath(args.config_directory)
     os.chdir(workspace_directory)
 

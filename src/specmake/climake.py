@@ -28,56 +28,47 @@ import argparse
 import logging
 import sys
 
-from specitems import (ItemCache, ItemCacheConfig, create_argument_parser,
-                       init_logging, verify_specification_format)
+from specitems import (ItemCache, ItemCacheConfig, get_item_cache_arguments,
+                       verify_specification_format)
 
 from .pkgfactory import create_build_item_factory
 from .pkgitems import BuildItemTypeProvider, PackageBuildDirector
 
 
-def _get_args_and_init_logging(argv: list[str]) -> argparse.Namespace:
-    parser = create_argument_parser()
-    parser.add_argument(
-        '--force',
-        type=str,
-        action="append",
-        default=None,
-        help="building items with an UID matching this pattern is forced")
-    parser.add_argument("--spec-directory",
-                        type=str,
-                        action="append",
-                        default=None,
-                        help="a specification directory (default: spec)")
-    parser.add_argument(
-        "--cache-directory",
-        help="the specification cache directory (default: spec-cache)",
-        default="spec-cache")
-    parser.add_argument(
-        "--package-uid",
-        help="the package component UID (default: /pkg/component)",
-        default="/pkg/component")
-    parser.add_argument('--spec-verify',
-                        action="store_true",
-                        help="verify the specification")
-    parser.add_argument("--use-git",
-                        action="store_true",
-                        help="use Git to track build steps")
-    parser.add_argument("uids",
-                        metavar="UID",
-                        nargs="*",
-                        help="the UIDs of items to make")
-    args = parser.parse_args(argv)
-    init_logging(args)
-    return args
+def _get_arguments(argv: list[str]) -> argparse.Namespace:
+
+    def _add_arguments(parser):
+        parser.add_argument(
+            "--force",
+            type=str,
+            action="append",
+            default=None,
+            help="building items with an UID matching this pattern is forced")
+        parser.add_argument(
+            "--package-uid",
+            help="the package component UID (default: /pkg/component)",
+            default="/pkg/component")
+        parser.add_argument("--spec-verify",
+                            action="store_true",
+                            help="verify the specification")
+        parser.add_argument("--use-git",
+                            action="store_true",
+                            help="use Git to track build steps")
+        parser.add_argument("uids",
+                            metavar="UID",
+                            nargs="*",
+                            help="the UID of an item to make")
+
+    return get_item_cache_arguments(argv,
+                                    description=climake.__doc__,
+                                    add_arguments=(_add_arguments, ))
 
 
 def climake(argv: list[str] = sys.argv) -> None:
     """ Make items of a package. """
 
-    args = _get_args_and_init_logging(argv[1:])
-    if args.spec_directory is None:
-        args.spec_directory = ["spec"]
-    cache_config = ItemCacheConfig(paths=args.spec_directory,
+    args = _get_arguments(argv[1:])
+    cache_config = ItemCacheConfig(paths=args.spec_directories,
                                    cache_directory=args.cache_directory)
     type_provider = BuildItemTypeProvider({})
     uid = args.package_uid
