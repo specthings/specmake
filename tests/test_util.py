@@ -27,11 +27,9 @@
 import os
 import logging
 
-from specitems import create_argument_parser, init_logging
 from specware import load_config, run_command
 
-from specmake import (duration, create_build_argument_parser, copy_file,
-                      copy_files)
+from specmake import (duration, get_build_arguments, copy_file, copy_files)
 
 from .util import get_and_clear_log
 
@@ -78,17 +76,18 @@ DEBUG A"""
     assert status == 0
 
 
-def test_args(tmpdir):
-    parser = create_build_argument_parser()
-    args = parser.parse_args([])
+def test_get_build_arguments_default():
+    args = get_build_arguments([])
     assert args.log_level == "INFO"
     assert args.log_file is None
     assert args.only is None
     assert args.force is None
     assert not args.no_spec_verify
-    init_logging(args)
+
+
+def test_get_build_arguments_explicit(tmpdir):
     log_file = os.path.join(tmpdir, "log.txt")
-    args = parser.parse_args([
+    args = get_build_arguments([
         "--log-level=DEBUG", f"--log-file={log_file}", "--only", "abc",
         "--force", "def", "--no-spec-verify"
     ])
@@ -97,7 +96,6 @@ def test_args(tmpdir):
     assert args.only == ["abc"]
     assert args.force == ["def"]
     assert args.no_spec_verify
-    init_logging(args)
 
 
 def test_duration():

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Provides a command line interface to update a performance limits item. """
 
-# Copyright (C) 2023 embedded brains GmbH & Co. KG
+# Copyright (C) 2023, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -24,24 +24,21 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import contextlib
+import argparse
 import json
 import sys
-from typing import Any, Dict, List
 
 from specitems import (Item, ItemCache, ItemCacheConfig,
-                       create_argument_parser, create_config, init_logging,
-                       item_is_enabled)
-from specware import load_specware_config, SpecWareTypeProvider
+                       get_item_cache_arguments)
 
 from .testoutputparser import augment_report
 
-_LimitsByUID = Dict[str, Dict[str, Dict[str, float]]]
+_LimitsByUID = dict[str, dict[str, dict[str, float]]]
 
 
-def _calculate_limits(runtime_measurement: Dict[str, Any], uid: str,
+def _calculate_limits(runtime_measurement: dict[str, float], uid: str,
                       variant: str, limits_by_uid: _LimitsByUID,
-                      args: Any) -> Dict[str, float]:
+                      args: argparse.Namespace) -> dict[str, float]:
     minimum = runtime_measurement["min"]
     median = runtime_measurement["q2"]
     maximum = runtime_measurement["max"]
@@ -75,8 +72,9 @@ def _calculate_limits(runtime_measurement: Dict[str, Any], uid: str,
     }
 
 
-def _update_perf_limits(reports: List[Any], name_to_uid: Dict[str, str],
-                        limits_by_uid: _LimitsByUID, args: Any) -> None:
+def _update_perf_limits(reports: list[dict], name_to_uid: dict[str, str],
+                        limits_by_uid: _LimitsByUID,
+                        args: argparse.Namespace) -> None:
     for report in reports:
         if "performance" in report["executable"]:
             if "info" not in report:
@@ -113,51 +111,54 @@ def _write_perf_limits(perf_limits: Item, limits_by_uid: _LimitsByUID) -> None:
 
 
 def cliupdateperf(argv: list[str] = sys.argv) -> None:
-    """ Updates a performance limits item. """
-    parser = create_argument_parser()
-    parser.add_argument("--config-file",
-                        type=str,
-                        default=None,
-                        help="use this configuration file")
-    parser.add_argument('--lazy',
-                        action="store_true",
-                        help="only update necessary limits")
-    parser.add_argument('--lower-bound-scaler',
-                        type=float,
-                        default=0.9,
-                        help="scaler to define lower bounds (default: 0.9)")
-    parser.add_argument('--upper-bound-scaler',
-                        type=float,
-                        default=1.1,
-                        help="scaler to define upper bounds (default: 1.1)")
-    parser.add_argument(
-        "perf_limits_uid",
-        metavar="PERF_LIMITS_UID",
-        nargs=1,
-        help="the UID of the performance limits item to update")
-    parser.add_argument("reports",
-                        metavar="REPORTS",
-                        nargs="+",
-                        help="the test report files")
-    args = parser.parse_args(argv[1:])
-    init_logging(args)
-    config, working_directory = load_specware_config(args.config_file)
-    with contextlib.chdir(working_directory):
-        item_cache = ItemCache(create_config(config["spec"], ItemCacheConfig),
-                               type_provider=SpecWareTypeProvider({}),
-                               is_item_enabled=item_is_enabled)
-        name_to_uid: Dict[str, str] = {}
-        for item in item_cache.items_by_type[
-                "requirement/non-functional/performance-runtime"]:
+    """ Update a performance limits item using test results. """
+
+    def _add_arguments(parser):
+        parser.add_argument("--lazy",
+                            action="store_true",
+                            help="only update necessary limits")
+        parser.add_argument(
+            "--lower-bound-scaler",
+            type=float,
+            default=0.9,
+            help="scaler to define lower bounds (default: 0.9)")
+        parser.add_argument(
+            "--upper-bound-scaler",
+            type=float,
+            default=1.1,
+            help="scaler to define upper bounds (default: 1.1)")
+        parser.add_argument(
+            "perf_limits_uid",
+            metavar="PERF_LIMITS_UID",
+            help="the UID of a performance limits item to update")
+        parser.add_argument("reports",
+                            metavar="REPORT",
+                            nargs="+",
+                            help="a test report JSON file")
+
+    args = get_item_cache_arguments(argv[1:],
+                                    description=cliupdateperf.__doc__,
+                                    add_arguments=(_add_arguments, ))
+    cache_config = ItemCacheConfig(paths=args.spec_directories,
+                                   cache_directory=args.cache_directory,
+                                   initialize_links=False,
+                                   resolve_proxies=False)
+    item_cache = ItemCache(cache_config)
+    name_to_uid: dict[str, str] = {}
+    for item in item_cache.values():
+        if item.get("type") != "requirement":
+            continue
+        if item["requirement-type"] != "non-functional":
+            continue
+        if item["non-functional-type"] == "performance-runtime":
             name_to_uid[item.ident] = item.uid
-        perf_limits = item_cache[args.perf_limits_uid[0]]
-        limits_by_uid: _LimitsByUID = {}
-        for link in perf_limits["links"]:
-            if link["role"] == "performance-runtime-limits":
-                limits_by_uid[link["uid"]] = link["limits"]
-        for report in args.reports:
-            with open(report, "r", encoding="utf-8") as src:
-                data = json.load(src)
-            _update_perf_limits(data["reports"], name_to_uid, limits_by_uid,
-                                args)
-        _write_perf_limits(perf_limits, limits_by_uid)
+    perf_limits = item_cache[args.perf_limits_uid]
+    limits_by_uid: _LimitsByUID = {}
+    for link in perf_limits["links"]:
+        if link["role"] == "performance-runtime-limits":
+            limits_by_uid[link["uid"]] = link["limits"]
+    for report in args.reports:
+        with open(report, "r", encoding="utf-8") as src:
+            data = json.load(src)
+        _update_perf_limits(data["reports"], name_to_uid, limits_by_uid, args)
+    _write_perf_limits(perf_limits, limits_by_uid)

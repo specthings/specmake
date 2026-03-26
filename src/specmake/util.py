@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Provides utility functions. """
 
-# Copyright (C) 2020, 2023 embedded brains GmbH & Co. KG
+# Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -25,11 +25,13 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import argparse
+import itertools
 import logging
 import os
 import shutil
+from typing import Callable, Iterable, Optional
 
-from specitems import create_argument_parser, ItemMapper
+from specitems import ItemMapper, get_arguments
 
 
 def duration(value: float | str) -> str:
@@ -105,26 +107,42 @@ def remove_empty_directories(scope: str, base: str) -> None:
         removed.add(root)
 
 
-def create_build_argument_parser(
-        default_log_level: str = "INFO") -> argparse.ArgumentParser:
-    """ Create an argument parser with default build options. """
-    parser = create_argument_parser(default_log_level)
-    parser.add_argument('--only',
-                        type=str,
-                        action="append",
-                        default=None,
-                        help="build only these steps")
-    parser.add_argument('--force',
-                        type=str,
-                        action="append",
-                        default=None,
-                        help="force to build these steps")
-    parser.add_argument('--skip',
-                        type=str,
-                        action="append",
-                        default=None,
-                        help="skip these steps")
-    parser.add_argument('--no-spec-verify',
-                        action="store_true",
-                        help="do not verify the specification")
-    return parser
+def get_build_arguments(
+    argv: list[str],
+    default_log_level: str = "INFO",
+    description: Optional[str] = None,
+    add_arguments: Iterable[Callable[[argparse.ArgumentParser],
+                                     None]] = tuple(),
+    post_process_arguments: Iterable[Callable[[argparse.Namespace],
+                                              None]] = tuple()
+) -> argparse.Namespace:
+    """
+    Create an argument parser with default logging and build options,
+    optionally add arguments to the parser, parse the argument vector,
+    initialize logging, optionally post process the parsed arguments, and
+    return the parsed arguments.
+    """
+
+    def _add_arguments(parser):
+        parser.add_argument("--only",
+                            type=str,
+                            action="append",
+                            default=None,
+                            help="build only these steps")
+        parser.add_argument("--force",
+                            type=str,
+                            action="append",
+                            default=None,
+                            help="force to build these steps")
+        parser.add_argument("--skip",
+                            type=str,
+                            action="append",
+                            default=None,
+                            help="skip these steps")
+        parser.add_argument("--no-spec-verify",
+                            action="store_true",
+                            help="do not verify the specification")
+
+    return get_arguments(argv, default_log_level, description,
+                         itertools.chain((_add_arguments, ), add_arguments),
+                         post_process_arguments)

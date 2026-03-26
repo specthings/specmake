@@ -28,7 +28,7 @@ import contextlib
 import os
 import sys
 
-from specitems import create_argument_parser, init_logging, save_data
+from specitems import get_arguments, save_data
 from specware import load_specware_config
 
 from .sourcetospec import (doxygen_xml_to_spec, DoxygenContext, DoxygenGroup,
@@ -63,23 +63,26 @@ def _propose_config(ctx: DoxygenContext, spec_dir: str, config: dict) -> None:
 
 def clifromsource(argv: list[str] = sys.argv) -> None:
     """
-    Generates interface items from Doxygen generated XML files using the
+    Generate interface items from Doxygen generated XML files using the
     configuration.
     """
-    parser = create_argument_parser()
-    parser.add_argument("--config-file",
-                        type=str,
-                        default=None,
-                        help="use this configuration file")
-    parser.add_argument("--propose-config",
-                        action="store_true",
-                        help="propose a configuration")
-    parser.add_argument("doxygen_xml_files",
-                        metavar="DOXYGEN_XML_FILES",
-                        nargs="+",
-                        help="the Doxygen generated XML files")
-    args = parser.parse_args(argv[1:])
-    init_logging(args)
+
+    def _add_arguments(parser):
+        parser.add_argument("--config-file",
+                            type=str,
+                            default=None,
+                            help="use this configuration file")
+        parser.add_argument("--propose-config",
+                            action="store_true",
+                            help="propose a configuration")
+        parser.add_argument("doxygen_xml_files",
+                            metavar="DOXYGEN_XML_FILES",
+                            nargs="+",
+                            help="the Doxygen generated XML files")
+
+    args = get_arguments(argv[1:],
+                         description=clifromsource.__doc__,
+                         add_arguments=(_add_arguments, ))
     config, working_directory = load_specware_config(args.config_file)
     config = config["spec-from-source"]
     with contextlib.chdir(working_directory):
