@@ -43,10 +43,10 @@ class SRelDBuilder(DocumentBuilder):
     def _get_changes(self, _ctx: ItemGetValueContext) -> str:
         changes = self.input("package-changes")
         assert isinstance(changes, PackageChanges)
-        return changes.get_current_changes()
+        return changes.get_current_changes(self.mapper)
 
     def _get_issues(self, ctx: ItemGetValueContext) -> str:
         with self.section_level_scope(ctx):
             changes = self.input("package-changes")
             assert isinstance(changes, PackageChanges)
-            return changes.get_current_issues(self.section_level)
+            return changes.get_current_issues(self.mapper, self.section_level)
