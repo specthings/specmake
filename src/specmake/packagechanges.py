@@ -36,8 +36,10 @@ def _issue_prologue(status: str) -> str:
             f"the following {status} were present.")
 
 
-def _add_issues(content: SphinxContent, issues: set[Item], header: str,
-                prologue: str, which: str) -> None:
+def _add_issues(content: SphinxContent, mapper: ItemMapper, issues: set[Item],
+                header: str, prologue: str, which: str) -> None:
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
     with content.section(header):
         if issues:
             content.add(prologue)
@@ -45,7 +47,7 @@ def _add_issues(content: SphinxContent, issues: set[Item], header: str,
                              ...]] = [("Database", "Identifier", "Subject")]
             for item in sorted(issues):
                 database = item.parent("issue-member")
-                url = ItemMapper(item).substitute(database["url"])
+                url = mapper.substitute(database["url"], item=item)
                 identifier = f"`{item['identifier']} <{url}>`_"
                 subject = item["subject"].replace("`", "\\`")
                 rows.append((database["name"], identifier, subject))
@@ -68,13 +70,15 @@ class PackageChanges(BuildItem):
                 issues[int(status == "open")].add(link.item)
         return issues
 
-    def _get_change_list(self, section_level: int,
+    def _get_change_list(self, mapper: ItemMapper, section_level: int,
                          with_description: bool) -> list[SphinxContent]:
         # pylint: disable=too-many-locals
         change_list: list[SphinxContent] = []
         past_issues: tuple[set[Item], set[Item]] = (set(), set())
         previous_issues: tuple[set[Item], set[Item]] = (set(), set())
-        for index, change in enumerate(self["change-list"]):
+        for index, change in enumerate(
+                mapper.substitute_data(self.item["change-list"],
+                                       item=self.item)):
             for past, previous in zip(past_issues, previous_issues):
                 past.update(previous)
             content = SphinxContent(section_level=section_level)
@@ -89,20 +93,21 @@ class PackageChanges(BuildItem):
             if index == 0:
                 assert not open_issues
                 _add_issues(
-                    content, new_issues, "Initially open issues",
+                    content, mapper, new_issues, "Initially open issues",
                     "For the initial package version, "
                     "the following issues were open.", "open")
             else:
                 status = ("newly open issues with respect to "
                           "the previous package version")
-                _add_issues(content, new_issues, "Newly open issues",
+                _add_issues(content, mapper, new_issues, "Newly open issues",
                             _issue_prologue(status), status)
                 status = ("open issues which were newly or already open "
                           "in the previous package version")
-                _add_issues(content, open_issues, "Already open issues",
+                _add_issues(content, mapper,
+                            open_issues, "Already open issues",
                             _issue_prologue(status), status)
                 _add_issues(
-                    content, closed_issues, "Closed issues",
+                    content, mapper, closed_issues, "Closed issues",
                     "For this package version, the following "
                     "issues which were newly or already open in "
                     "the previous package version were closed.", "closed")
@@ -112,24 +117,28 @@ class PackageChanges(BuildItem):
             previous_issues = current_issues
         return change_list
 
-    def get_change_list(self, section_level: int) -> str:
+    def get_change_list(self, mapper: ItemMapper, section_level: int) -> str:
         """ Get the change list using the section level. """
-        change_list = self._get_change_list(section_level, True)
+        change_list = self._get_change_list(mapper, section_level, True)
         return "\n".join(itertools.chain.from_iterable(change_list))
 
-    def get_open_issues(self, section_level: int) -> str:
+    def get_open_issues(self, mapper: ItemMapper, section_level: int) -> str:
         """ Get the open issues using the section level. """
         content = SphinxContent(section_level=section_level)
-        _, open_issues = self._get_issues(self["change-list"][-1])
-        _add_issues(content, open_issues, "Open issues",
+        _, open_issues = self._get_issues(
+            mapper.substitute_data(self.item["change-list"][-1],
+                                   item=self.item))
+        _add_issues(content, mapper, open_issues, "Open issues",
                     _issue_prologue("open issues"), "open")
         return "\n".join(content)
 
-    def get_current_changes(self) -> str:
+    def get_current_changes(self, mapper: ItemMapper) -> str:
         """ Get the current changes. """
-        return self["change-list"][-1]["description"]
+        return mapper.substitute(self.item["change-list"][-1]["description"],
+                                 item=self.item)
 
-    def get_current_issues(self, section_level: int) -> str:
+    def get_current_issues(self, mapper: ItemMapper,
+                           section_level: int) -> str:
         """ Get the current issues using the section level. """
-        change_list = self._get_change_list(section_level, False)
+        change_list = self._get_change_list(mapper, section_level, False)
         return "\n".join(change_list[0])
