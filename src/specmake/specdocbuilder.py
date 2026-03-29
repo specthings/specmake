@@ -956,6 +956,13 @@ class SpecDocumentBuilder(DocumentBuilder):
         """ Get the items of this document. """
         return self.spec.get_related_interfaces_and_requirements()
 
+    def add_item_changes(self, content: SphinxContent, item: Item) -> None:
+        """ Add the item changes to the content. """
+        spec_compare_registry = self.spec_compare_registry
+        if spec_compare_registry is not None:
+            content.add_rubric("CHANGES:")
+            spec_compare_registry.add_item_changes(content, item.uid)
+
     def add_item(self, content: SphinxContent, item: Item) -> None:
         """ Add the item documentation to the content. """
         content.register_license_and_copyrights_of_item(item)
@@ -968,10 +975,7 @@ class SpecDocumentBuilder(DocumentBuilder):
                                                      CodeMapper(item),
                                                      self.spec,
                                                      self.file_path))
-                spec_compare_registry = self.spec_compare_registry
-                if spec_compare_registry is not None:
-                    content.add_rubric("CHANGES:")
-                    spec_compare_registry.add_item_changes(content, item.uid)
+                self.add_item_changes(content, item)
 
     def _add_validation_table(self, content: SphinxContent) -> None:
         """ Add the document item validation table to the content. """

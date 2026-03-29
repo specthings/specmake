@@ -28,12 +28,12 @@ import itertools
 from typing import Iterator
 
 from specitems import COL_SPAN, Item, ItemGetValueContext, SphinxContent
+from specware import gather_benchmarks_and_test_suites
 
 from .directorystate import DirectoryState
 from .membench import generate
 from .pkgitems import PackageBuildDirector
 from .linkhub import LinkHub
-from .rtems import gather_test_suites
 from .sphinxbuilder import spacify
 from .specdocbuilder import SpecDocumentBuilder
 from .testaggregator import get_test_result_status, TestAggregator
@@ -202,7 +202,8 @@ class SVRBuilder(SpecDocumentBuilder):
     def _unit_verification(self, _ctx: ItemGetValueContext) -> str:
         content = SphinxContent(section_level=2)
         test_suites: list[Item] = []
-        gather_test_suites(self.item.cache["/testsuites/unit"], test_suites)
+        gather_benchmarks_and_test_suites(self.item.cache["/testsuites/unit"],
+                                          test_suites)
         rows = [("Test Case", "Status")]
         unspecified: dict[str, list[str]] = {}
         for test_suite in sorted(test_suites):

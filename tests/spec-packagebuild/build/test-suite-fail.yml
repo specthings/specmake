@@ -15,6 +15,7 @@ source:
 - tests/tc-action.c
 - tests/tc-action-2.c
 - tests/tc-fail.c
+- tests/tc-blub.c
 - tests/tr-test-case.c
 - tests/ts-fail.c
 stlib: []

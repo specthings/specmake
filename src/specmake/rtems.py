@@ -288,15 +288,6 @@ view of the specification items.""")
         return get_interface_and_requirement_items(self.related_items_by_type)
 
 
-def gather_test_suites(item: Item, test_suites: list[Item]) -> None:
-    """ Gather all test suites associated with the item. """
-    for child in item.children(("requirement-refinement", "validation")):
-        if child.type in ("memory-benchmark", "test-suite"):
-            test_suites.append(child)
-        else:
-            gather_test_suites(child, test_suites)
-
-
 class RTEMSPackageComponent(GenericPackageComponent):
     """ Provides a package with an RTEMS-specific item selection.  """
 
