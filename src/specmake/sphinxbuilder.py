@@ -234,10 +234,10 @@ class _CitationProvider(BibTeXCitationProvider):
                             self._get_document_fields)
         self.mapper.add_get_value("pkg/directory-state/sphinx:/bibtex-entries",
                                   self.get_bibtex_entries)
-        self.mapper.add_get_value("pkg/directory-state/sphinx:/cite-group",
-                                  self.get_cite_group)
-        self.mapper.add_get_value("statement-of-compliance:/cite-group",
-                                  self.get_cite_group)
+        for type_name in ("pkg/component", "pkg/directory-state/sphinx",
+                          "statement-of-compliance"):
+            self.mapper.add_get_value(f"{type_name}:/cite-group",
+                                      self.get_cite_group)
 
     def _get_document_fields(
             self, item: Item) -> tuple[str, dict[str, str | list[str]]]:
