@@ -24,25 +24,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from typing import Dict, List
-
 from specitems import (Item, ItemGetValueContext, SphinxContent, to_camel_case)
+from specware import gather_benchmarks_and_test_suites, gather_test_cases
 
 from .pkgitems import PackageBuildDirector
 from .linkhub import LinkHub, spec_label
-from .rtems import gather_test_suites
 from .specdocbuilder import SpecDocumentBuilder
 from .testrunner import TestRunner
-
-
-def _gather_test_cases(item: Item, test_cases: List[Item]) -> None:
-    for child in item.children(("runtime-measurement-request", "test-case")):
-        assert child.type in ("runtime-measurement-test",
-                              "requirement/functional/action",
-                              "requirement/non-functional/performance-runtime",
-                              "test-case")
-        test_cases.append(child)
-        _gather_test_cases(child, test_cases)
 
 
 def _get_test_case_function(item: Item, ident: str) -> str:
@@ -52,7 +40,8 @@ def _get_test_case_function(item: Item, ident: str) -> str:
 
 
 def _add_test_results(content: SphinxContent, kind: str, item: Item) -> None:
-    lines: List[str] = []
+    content.add_rubric("TEST RESULTS:")
+    lines: list[str] = []
     for test_results in item.view.get("test-results", {}).values():
         for data in test_results:
             config_data = data["config"]
@@ -64,9 +53,10 @@ def _add_test_results(content: SphinxContent, kind: str, item: Item) -> None:
                 spec = item.cache[test_suite['uid']].spec_2
                 name = f"{name} / Test suite - {spec}"
             lines.append(f"`{name} <{data['link']}>`__")
-    content.add_list(
-        lines, f"""For this {kind}, the following test results are
-available:""")
+    content.add_list(lines,
+                     f"""For this {kind}, the following test results are
+available:""",
+                     empty="There are no test results available.")
 
 
 class TestPlanBuilder(SpecDocumentBuilder):
@@ -104,7 +94,7 @@ class TestPlanBuilder(SpecDocumentBuilder):
         test_suites = self._test_suites
         if not test_suites:
             for parent in self.inputs("test-suites"):
-                gather_test_suites(parent.item, test_suites)
+                gather_benchmarks_and_test_suites(parent.item, test_suites)
             test_suites.sort()
         return test_suites
 
@@ -113,12 +103,15 @@ class TestPlanBuilder(SpecDocumentBuilder):
             content.add("\\clearpage")
         with content.section(item.spec, label=spec_label(item)):
             with content.section("General"):
+                content.add_rubric("DESCRIPTION:")
                 self.wrap(content, item, item["test-brief"])
                 self.wrap(content, item, item["test-description"])
-                _add_test_results(content, "test suite", item)
+                if item.type != "memory-benchmark":
+                    _add_test_results(content, "test suite", item)
+                self.add_item_changes(content, item)
             with content.section("Features to be tested"):
-                gathered_test_cases: List[Item] = []
-                _gather_test_cases(item, gathered_test_cases)
+                gathered_test_cases: list[Item] = []
+                gather_test_cases(item, gathered_test_cases)
                 test_cases = sorted(set(gathered_test_cases))
                 count = len(test_cases)
                 if item.type == "memory-benchmark":
@@ -157,9 +150,9 @@ necessary.  The test suite is implemented in the file
         return content.join()
 
     def _add_test_case_validations(self, content: SphinxContent, item: Item,
-                                   links: List[Dict[str,
+                                   links: list[dict[str,
                                                     str]], what: str) -> bool:
-        specs = []  # type: List[str]
+        specs: list[str] = []
         for link in links:
             if link["role"] != "validation":
                 continue
@@ -246,10 +239,13 @@ in the file {link_hub.get_file_sdd_link(item['test-target'])}.""")
 
     def _add_test_suite_memberships(self, content: SphinxContent,
                                     item: Item) -> None:
-        test_suites: List[str] = [
+        test_suites: list[str] = [
             self.mapper.make_reference(test_suite)
             for test_suite in item.parents("test-case")
         ]
+        if not test_suites:
+            return
+        content.add_rubric("TEST SUITES:")
         if len(test_suites) == 1:
             content.add("This test case is contained in the "
                         f"{test_suites[0]} test suite.")
@@ -264,10 +260,12 @@ in the file {link_hub.get_file_sdd_link(item['test-target'])}.""")
             content.add("\\clearpage")
         with content.section(item.spec, label=spec_label(item)):
             with content.section("General"):
+                content.add_rubric("DESCRIPTION:")
                 ident = to_camel_case(item.uid[1:])
                 self._documenter[item.type](content, link_hub, item, ident)
                 self._add_test_suite_memberships(content, item)
                 _add_test_results(content, "test case", item)
+                self.add_item_changes(content, item)
             with content.section("Input specifications"):
                 content.add("""The test case starts execution in the
 system state defined by the test suite runner and the test suite configuration.
@@ -290,9 +288,9 @@ itself.""")
 
     def _get_test_cases(self, _ctx: ItemGetValueContext) -> str:
         content = SphinxContent(section_level=2)
-        test_cases: List[Item] = []
+        test_cases: list[Item] = []
         for item in self._gather_test_suites():
-            _gather_test_cases(item, test_cases)
+            gather_test_cases(item, test_cases)
         for item in sorted(set(test_cases)):
             with self.mapper.scope(item):
                 self._add_test_case(content, item)
@@ -335,7 +333,7 @@ itself.""")
             "validation/by-analysis", "validation/by-inspection",
             "validation/by-review-of-design"
         ]
-        items: List[Item] = []
+        items: list[Item] = []
         for item in self.spec.get_related_items_by_type(types):
             items.extend(parent for parent in item.parents("validation"))
         content.add_list([
