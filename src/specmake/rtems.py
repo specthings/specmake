@@ -27,13 +27,12 @@
 import base64
 import functools
 import hashlib
-import itertools
 import logging
 import os
 from typing import Callable, Iterable
 
-from specitems import (EnabledSet, Item, ItemCache, ItemGetValueContext,
-                       ItemMapper, is_enabled, Link)
+from specitems import (EnabledSet, Item, ItemGetValueContext, ItemMapper,
+                       is_enabled, Link)
 from specware import (augment_with_test_case_links, augment_with_test_links,
                       get_items_by_type_map, get_item_types_by_prefix,
                       get_items_by_types, get_interface_items,
@@ -188,19 +187,6 @@ def _get_issue(ctx: ItemGetValueContext) -> str:
     return f"`{database['name']} {identifier} <{url}>`__"
 
 
-def _visit_domain(item: Item, domain: Item) -> None:
-    for item_2 in itertools.chain(item.children("interface-placement"),
-                                  item.parents("interface-enumerator")):
-        item_2.view["interface_domain"] = domain
-        _visit_domain(item_2, domain)
-
-
-def _augment_with_interface_domains(item_cache: ItemCache) -> None:
-    """ Augment the interface items with their interface domain. """
-    for item in item_cache.items_by_type["interface/domain"]:
-        _visit_domain(item, item)
-
-
 class RTEMSItemCache(BuildItem):
     """ Augments the items with RTEMS-specific attributes and links. """
 
@@ -217,8 +203,6 @@ class RTEMSItemCache(BuildItem):
         augment_with_test_links(self.item_cache)
         logging.info("%s: augment with test case links", self.uid)
         augment_with_test_case_links(self.item_cache)
-        logging.info("%s: augment with interface domains", self.uid)
-        _augment_with_interface_domains(self.item_cache)
         logging.info("%s: gather name information", self.uid)
         self.name_to_item: dict[str, Item] = {}
         for item_2 in self.item_cache.values():
