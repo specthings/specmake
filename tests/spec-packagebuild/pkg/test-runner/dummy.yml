@@ -1,6 +1,7 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
 - Copyright (C) 2023 embedded brains GmbH & Co. KG
+default-timeout-in-seconds: 90.0
 description: Description.
 do-not-run: []
 enabled-by: run-tests-dummy
@@ -8,8 +9,10 @@ links:
 - role: target
   uid: /target/alpha
 max-retry-count-per-executable: 0
+min-timeout-in-seconds: 10.0
 name: Dummy
 params: {}
 pkg-type: test-runner
 test-runner-type: dummy
+timeout-scaler: 2.0
 type: pkg

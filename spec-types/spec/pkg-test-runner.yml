@@ -1,6 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
-- Copyright (C) 2022, 2024 embedded brains GmbH & Co. KG
+- Copyright (C) 2022, 2026 embedded brains GmbH & Co. KG
 enabled-by: true
 links:
 - role: spec-member
@@ -14,6 +14,10 @@ spec-example: null
 spec-info:
   dict:
     attributes:
+      default-timeout-in-seconds:
+        description: |
+          It shall be the default timeout in seconds.
+        spec-type: float
       description:
         description: |
           It shall be the test runner description.
@@ -30,6 +34,10 @@ spec-info:
           executable run is retried if no report was produced, the gcov
           information was corrupt, or the test suite report was corrupt.
         spec-type: int
+      min-timeout-in-seconds:
+        description: |
+          It shall be the minimum timeout in seconds.
+        spec-type: float
       name:
         description: |
           It shall be the test runner name.
@@ -37,14 +45,23 @@ spec-info:
       params:
         description: |
           It shall be an optional set of parameters which may be used for
-          variable subsitution.
+          variable substitution.
         spec-type: any
       test-runner-type:
         description: |
           It shall be the test runner type.
         spec-type: name
+      timeout-scaler:
+        description: |
+          It shall be the timeout scaling factor.
+        spec-type: float
     description: |
-      This set of attributes specifies a test runner.
+      This set of attributes specifies a test runner.  Let *E* be the
+      test-specific timeout or the default timeout associated with a test
+      executable.  Let *M* be the maximum of *E* and the specified minimum
+      timeout.  Let *S* be *M* multiplied by the specified timeout scaler.  The
+      value *S* is passed to the test runner as the recommended timeout in
+      seconds for each test executable.
     mandatory-attributes: all
 spec-name: Test Runner Item Type
 spec-type: pkg-test-runner

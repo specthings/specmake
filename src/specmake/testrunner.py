@@ -154,6 +154,9 @@ class TestRunner(BuildItem):
         reports: list[Report] = []
         executables: list[Executable] = []
         do_not_run = self["do-not-run"]
+        default_timeout = self["default-timeout-in-seconds"]
+        min_timeout = self["min-timeout-in-seconds"]
+        timeout_scaler = self["timeout-scaler"]
         cannot_reuse_reports = self.get_runner_hash() != report_runner_hash
         if cannot_reuse_reports:
             logging.info(
@@ -185,10 +188,8 @@ class TestRunner(BuildItem):
                     try:
                         timeout = max(timeouts[timeout_key][name])
                     except KeyError:
-                        timeout = 85.0
-                    # Add 10 seconds to avoid issues with variances of fast
-                    # running tests
-                    timeout = 2.0 * timeout + 10.0
+                        timeout = default_timeout
+                    timeout = timeout_scaler * max(timeout, min_timeout)
                     executables.append(Executable(path, digest, timeout))
             else:
                 logging.info("%s: use previous report for: %s", self.uid, path)

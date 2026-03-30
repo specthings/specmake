@@ -250,7 +250,7 @@ building the package and captures the output:
             "XYXysP-DGNKHfuwvY7kxvUdBeoGlODJ6-SfaPg==', timeout=180.0), "
             f"Executable(path='{build_bsp.directory}/b.exe', "
             "digest='hopqxuHQKT10-tB_bZWVKz4B09MVPbZ3p12Ad5g_1OMNtr_Im3YIqT-yZ"
-            "GkjOp8aCVctaHqcXaeLID6xUQQKFQ==', timeout=16.0)]") in log
+            "GkjOp8aCVctaHqcXaeLID6xUQQKFQ==', timeout=20.0)]") in log
 
     (tmp_dir / "pkg/test-log-bsp.json").unlink()
     _TestRunner.run_round = 1
