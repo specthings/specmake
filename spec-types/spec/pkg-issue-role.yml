@@ -16,7 +16,7 @@ spec-info:
     attributes:
       status:
         description: |
-          If shall be the status of the issue with respect to the package.
+          It shall be the status of the issue with respect to the package.
         spec-type: pkg-issue-status
     description: |
       It defines the issue role of links and is used to associate issues with a

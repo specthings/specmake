@@ -28,7 +28,7 @@ spec-info:
     attributes:
       value:
         description: |
-          If shall be the action value.
+          It shall be the action value.
         spec-type: any
     description: |
       This set of attributes specifies a generic attribute action.

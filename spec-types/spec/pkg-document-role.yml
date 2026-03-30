@@ -16,12 +16,12 @@ spec-info:
     attributes:
       directory:
         description: |
-          If shall be the directory of the document relative to the referenced
+          It shall be the directory of the document relative to the referenced
           base directory.
         spec-type: str
       name:
         description: |
-          If shall be the name of the document.
+          It shall be the name of the document.
         spec-type: str
     description: |
       It defines the document role of links and is used to define a document

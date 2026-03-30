@@ -25,7 +25,7 @@ spec-info:
         spec-type: pkg-optional-hash
       name:
         description: |
-          If shall be the name of the input dependency.  The name may be used
+          It shall be the name of the input dependency.  The name may be used
           to distinguish it from other dependencies of the same item.
         spec-type: str
     description: |

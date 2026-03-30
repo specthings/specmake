@@ -21,19 +21,19 @@ spec-info:
         spec-type: enabled-set-action-list
       label:
         description: |
-          If shall be the section label prefix.
+          It shall be the section label prefix.
         spec-type: str
       revision-key:
         description: |
-          If shall be the key associated with the specification revision.
+          It shall be the key associated with the specification revision.
         spec-type: str
       revision-name:
         description: |
-          If shall be the name of the specification revision.
+          It shall be the name of the specification revision.
         spec-type: str
       root-uid:
         description: |
-          If shall be the UID of the specification root item.
+          It shall be the UID of the specification root item.
         spec-type: str
       unit-and-integration-test-suites:
         description: |

@@ -17,7 +17,7 @@ spec-info:
         spec-type: bool
       count:
         description: |
-          If shall be the maximum replacement count.  If the value is zero, all
+          It shall be the maximum replacement count.  If the value is zero, all
           occurrences will be replaced.
         spec-type: int
       pattern:
@@ -26,7 +26,7 @@ spec-info:
         spec-type: str
       replacement:
         description: |
-          If shall be the replacement.
+          It shall be the replacement.
         spec-type: str
     description: |
       This set of attributes specifies a file mapping.
