@@ -25,27 +25,30 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import os
+from typing import Any
 
-import specitems
+from specitems import (Item, ItemGetValueContext, ItemValueProvider,
+                       TextContent, TextMapper)
 
 from .sphinxbuilder import SphinxBuilder
+from .pkgitems import BuildItem, BuildItemFactory, export_data
 
 
-def _get_ecss_standard_and_clause(ctx: specitems.ItemGetValueContext) -> str:
+def _get_ecss_standard_and_clause(ctx: ItemGetValueContext) -> str:
     item = ctx.item
     standard = item.parent("requirement-refinement")["name"]
     clause = f"{item['section']}{item['bullet']}"
     return f":ref:`{standard} {clause} <{item.ident}>`"
 
 
-def _get_ecss_clause(ctx: specitems.ItemGetValueContext) -> str:
+def _get_ecss_clause(ctx: ItemGetValueContext) -> str:
     item = ctx.item
     clause = f"{item['section']}{item['bullet']}"
     return f":ref:`{clause} <{item.ident}>`"
 
 
-def _add_compliance_matrix(content: specitems.TextContent, name: str,
-                           clauses: list[specitems.Item]) -> None:
+def _add_compliance_matrix(content: TextContent, name: str,
+                           clauses: list[Item]) -> None:
     table_name = f"Compliance matrix of {name}"
     options = [":widths: 13, 12, 13, 12, 13, 12, 13, 12", ":header-rows: 1"]
     with content.directive("list-table", table_name, options):
@@ -70,15 +73,15 @@ def _add_compliance_matrix(content: specitems.TextContent, name: str,
         content.append(missing * ["  - \u200b", "  - \u200b"])
 
 
-def _add_topic(content: specitems.TextContent, builder: SphinxBuilder,
-               clause: specitems.Item, topic: str, text: str | None) -> None:
+def _add_topic(content: TextContent, builder: SphinxBuilder, clause: Item,
+               topic: str, text: str | None) -> None:
     if text:
         with content.directive("topic", topic):
             content.add(builder.substitute(text, clause))
 
 
-def _add_clause(content: specitems.TextContent, builder: SphinxBuilder,
-                name: str, clause: specitems.Item) -> None:
+def _add_clause(content: TextContent, builder: SphinxBuilder, name: str,
+                clause: Item) -> None:
     link = clause.child_link("statement-of-compliance")
     the_clause = f"{clause['section']}{clause['bullet']}"
     header = f"{clause['name']} ({the_clause})"
@@ -101,11 +104,11 @@ def _add_clause(content: specitems.TextContent, builder: SphinxBuilder,
                     f":ref:`tailoring table <CM{clause.ident}>`.")
 
 
-def _ecss_order(item: specitems.Item) -> list:
+def _ecss_order(item: Item) -> list:
     return [int(i) for i in item["section"].split(".")] + [item["bullet"]]
 
 
-class StandardTailoringProvider(specitems.ItemValueProvider):
+class StandardTailoringProvider(ItemValueProvider):
     """ Provides a statement of compliance and a standard tailoring. """
 
     # pylint: disable=too-few-public-methods
@@ -123,11 +126,10 @@ class StandardTailoringProvider(specitems.ItemValueProvider):
             "requirement/non-functional/ecss:/standard-and-clause",
             _get_ecss_standard_and_clause)
 
-    def _get_standard_tailoring(self,
-                                ctx: specitems.ItemGetValueContext) -> str:
+    def _get_standard_tailoring(self, ctx: ItemGetValueContext) -> str:
         builder = self._builder
         with builder.section_level_scope(ctx):
-            assert isinstance(self.mapper, specitems.TextMapper)
+            assert isinstance(self.mapper, TextMapper)
             content = self.mapper.create_content(
                 section_level=builder.section_level)
             for std in builder.item.parents("standard-tailoring"):
@@ -140,3 +142,22 @@ class StandardTailoringProvider(specitems.ItemValueProvider):
                     for clause in clauses:
                         _add_clause(content, builder, name, clause)
             return content.join()
+
+
+def _export_data(item: Item, present: bool, built_later: bool) -> Any:
+    data = export_data(item, present, built_later)
+    for key in ("aim", "expected-output", "notes"):
+        data[key] = None
+    data["name"] = "Text removed due to license issues"
+    data["text"] = "Text removed due to license issues."
+    return data
+
+
+class ECSSClause(BuildItem):
+    """ Controls the ECSS data export. """
+
+    @classmethod
+    def prepare_factory(cls, factory: BuildItemFactory,
+                        type_name: str) -> None:
+        BuildItem.prepare_factory(factory, type_name)
+        factory.add_export_data(type_name, _export_data)

@@ -47,6 +47,7 @@ from .spamrmanager import SpamrManager
 from .speccompare import CompareSpecsRegistry
 from .sreldbuilder import SRelDBuilder
 from .srsbuilder import SRSBuilder
+from .stdtailoring import ECSSClause
 from .svrbuilder import SVRBuilder
 from .testaggregator import TestAggregator
 from .testplanbuilder import TestPlanBuilder
@@ -114,4 +115,5 @@ def create_build_item_factory() -> BuildItemFactory:
     factory.add_constructor("pkg/test-runner/grmon-manual",
                             GRMONManualTestRunner)
     factory.add_constructor("pkg/test-runner/subprocess", SubprocessTestRunner)
+    factory.add_constructor("requirement/non-functional/ecss", ECSSClause)
     return factory
