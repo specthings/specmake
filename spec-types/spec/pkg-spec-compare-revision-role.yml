@@ -35,6 +35,14 @@ spec-info:
         description: |
           If shall be the UID of the specification root item.
         spec-type: str
+      unit-and-integration-test-suites:
+        description: |
+          It shall be the list of UIDs of unit and integration test suites.
+        spec-type: list-str
+      validation-test-suites:
+        description: |
+          It shall be the list of UIDs of validation test suites.
+        spec-type: list-str
     description: |
       The input link shall reference the repository containing the
       specification revision.

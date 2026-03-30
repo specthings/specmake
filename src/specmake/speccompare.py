@@ -27,15 +27,16 @@
 import dataclasses
 import itertools
 import re
-from typing import Any, Callable
+from typing import Any, Callable, Iterator
 
 from specitems import (Item, ItemCache, ItemGetValueContext, ItemValueProvider,
                        ItemSelection, SphinxContent, TextContent, TextMapper,
                        get_reference, make_label)
-from specware import (run_command, gather_related_items, get_constraint_items,
+from specware import (gather_benchmarks_and_test_suites, gather_related_items,
+                      gather_test_cases, get_constraint_items,
                       get_interface_items, get_items_by_type_map,
-                      get_requirement_items, get_validation_items,
-                      recursive_is_enabled)
+                      get_items_by_types, get_requirement_items,
+                      recursive_is_enabled, run_command)
 
 from .directorystate import DirectoryState
 from .itemcachestate import ItemCacheDirectoryState
@@ -50,7 +51,8 @@ _EMPTY_SCOPE_TO_UIDS: dict[str, frozenset[str]] = {
     "all": frozenset(),
     "interfaces": frozenset(),
     "requirements": frozenset(),
-    "validations": frozenset()
+    "validations": frozenset(),
+    "unit-and-integration-tests": frozenset(),
 }
 
 
@@ -65,11 +67,28 @@ def _get_items(item_cache: ItemCache, selection: ItemSelection,
         return gather_related_items(item_cache[root_uid])
 
 
+def _get_tests(item_cache: ItemCache, uids: list[str]) -> Iterator[str]:
+    for uid in uids:
+        test_suites: list[Item] = []
+        gather_benchmarks_and_test_suites(item_cache[uid], test_suites)
+        yield from (item.uid for item in test_suites)
+        for test_suite in test_suites:
+            test_cases: list[Item] = []
+            gather_test_cases(test_suite, test_cases)
+            yield from (item.uid for item in test_cases)
+
+
+def _get_other_validations(
+        items_by_type: dict[str, list[Item]]) -> Iterator[str]:
+    yield from (item.uid
+                for item in get_items_by_types(items_by_type, (
+                    "validation/by-analysis", "validation/by-inspection",
+                    "validation/by-review-of-design")))
+
+
 @dataclasses.dataclass
 class _SpecRevision:
     """ Represents a specification revision. """
-
-    # pylint: disable=too-many-instance-attributes
 
     def __init__(self, state: ItemCacheDirectoryState,
                  selection: ItemSelection, data: dict,
@@ -89,7 +108,14 @@ class _SpecRevision:
                 get_constraint_items(items_by_type),
                 get_requirement_items(items_by_type))),
             "validations":
-            frozenset(item.uid for item in get_validation_items(items_by_type))
+            frozenset(
+                itertools.chain(
+                    _get_tests(item_cache, data["validation-test-suites"]),
+                    _get_other_validations(items_by_type))),
+            "unit-and-integration-tests":
+            frozenset(
+                _get_tests(item_cache,
+                           data["unit-and-integration-test-suites"])),
         }
         self.key: str = data["revision-key"]
         self.label: str = data["label"]
