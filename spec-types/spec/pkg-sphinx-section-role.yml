@@ -26,7 +26,7 @@ spec-info:
         spec-type: bool
       section-key:
         description: |
-          If shall be the section key.
+          It shall be the section key.
         spec-type: name
     description: null
       It defines the document section role of links and is used to add a

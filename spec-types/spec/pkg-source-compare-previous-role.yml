@@ -16,7 +16,7 @@ spec-info:
     attributes:
       source-compare-key:
         description: |
-          If shall be the key to associate the current and previous sources for
+          It shall be the key to associate the current and previous sources for
           a comparison.
         spec-type: str
     description: |

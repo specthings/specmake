@@ -16,7 +16,7 @@ spec-info:
     attributes:
       pattern:
         description: |
-          If shall be the Python regular expression pattern to select items to
+          It shall be the Python regular expression pattern to select items to
           remove.
         spec-type: str
     description: |

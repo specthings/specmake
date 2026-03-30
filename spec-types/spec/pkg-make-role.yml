@@ -21,7 +21,7 @@ spec-info:
         spec-type: pkg-optional-hash
       output-name:
         description: |
-          If shall be the output name of the item.
+          It shall be the output name of the item.
         spec-type: str
       params:
         description: |

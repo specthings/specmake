@@ -16,7 +16,7 @@ spec-info:
     attributes:
       name:
         description: |
-          If shall be the name of the output production.  The name may be used
+          It shall be the name of the output production.  The name may be used
           to distinguish it from other productions of the same item.
         spec-type: str
     description: |

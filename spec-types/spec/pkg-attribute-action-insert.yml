@@ -20,16 +20,16 @@ spec-info:
     attributes:
       value:
         description: |
-          If shall be the action value.
+          It shall be the action value.
         spec-type: any
       where-key:
         description: |
-          If shall be the list member attribute key to select the value
+          It shall be the list member attribute key to select the value
           defining the insert position.
         spec-type: any
       where-value:
         description: |
-          If shall be the value defining the insert position.
+          It shall be the value defining the insert position.
         spec-type: any
     description: |
       This set of attributes specifies an insert attribute action.

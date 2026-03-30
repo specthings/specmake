@@ -16,23 +16,23 @@ spec-info:
     attributes:
       file-to-review:
         description: |
-          If shall be the mapping of files to reviews.
+          It shall be the mapping of files to reviews.
         spec-type: str-to-str-or-list-str
       label:
         description: |
-          If shall be the section label prefix.
+          It shall be the section label prefix.
         spec-type: str
       renamed:
         description: |
-          If shall be the mapping of renamed files.
+          It shall be the mapping of renamed files.
         spec-type: str-to-str
       reviews:
         description: |
-          If shall be the set of reviews.
+          It shall be the set of reviews.
         spec-type: pkg-source-compare-review-set
       source-compare-key:
         description: |
-          If shall be the key to associate the current and previous sources for
+          It shall be the key to associate the current and previous sources for
           a comparison.
         spec-type: str
     description: |

@@ -16,7 +16,7 @@ spec-info:
     attributes:
       ignored-commits:
         description: |
-          If shall be the list of ignored Git commits.
+          It shall be the list of ignored Git commits.
         spec-type: pkg-git-hash-list
     description: |
       This set of attributes specifies a specification comparison registry.
