@@ -21,5 +21,7 @@ links:
   role: input
   root-uid: /root
   uid: ../build/cache-v1
+  unit-and-integration-test-suites: []
+  validation-test-suites: []
 pkg-type: spec-compare-registry
 type: pkg

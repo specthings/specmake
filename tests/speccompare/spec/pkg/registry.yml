@@ -25,6 +25,8 @@ links:
   role: input
   root-uid: /root
   uid: cache-v0
+  unit-and-integration-test-suites: []
+  validation-test-suites: []
 - enabled-set-actions: []
   hash: null
   label: L1
@@ -34,6 +36,8 @@ links:
   role: input
   root-uid: /root
   uid: cache-v1
+  unit-and-integration-test-suites: []
+  validation-test-suites: []
 - enabled-set-actions: []
   hash: null
   label: L2
@@ -43,6 +47,8 @@ links:
   role: input
   root-uid: /root
   uid: cache-v2
+  unit-and-integration-test-suites: []
+  validation-test-suites: []
 - enabled-set-actions: []
   hash: null
   label: L3
@@ -52,5 +58,8 @@ links:
   role: input
   root-uid: /root
   uid: cache-v3
+  unit-and-integration-test-suites: []
+  validation-test-suites:
+  - /design-group
 pkg-type: spec-compare-registry
 type: pkg

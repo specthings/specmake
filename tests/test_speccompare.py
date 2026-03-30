@@ -268,6 +268,64 @@ spec:/root
 
 .. raw:: latex
 
+    \\end{footnotesize}
+
+.. _L3DoTheL:
+
+Do the L
+########
+
+.. _L3DoTheLSpecDesignGroup:
+
+spec:/design-group
+******************
+
+This change added the specification item.
+
+.. _L3DoTheLSpecTestCase:
+
+spec:/test-case
+***************
+
+This change added the specification item.
+
+.. _L3DoTheLSpecTestSuite:
+
+spec:/test-suite
+****************
+
+This change added the specification item.
+
+.. _L3DoTheM:
+
+Do the M
+########
+
+.. _L3DoTheMSpecTestCase:
+
+spec:/test-case
+***************
+
+.. raw:: latex
+
+    \\begin{footnotesize}
+
+.. code-block:: diff
+    :linenos:
+    :lineno-start: 1
+
+    @@ -9,7 +9,7 @@ test-actions: []
+     test-brief: Brief.
+     test-context: []
+     test-context-support: null
+    -test-description: Description.
+    +test-description: Better description.
+     test-header: null
+     test-includes: []
+     test-local-includes: []
+
+.. raw:: latex
+
     \\end{footnotesize}"""
     assert builder.substitute(
         "${.:/input/spec-compare-registry/spec-change-log:0:v1..v2}"
@@ -468,11 +526,35 @@ The following changes are associated with Name v1.
     :class: longtable
     :widths: 80,20
 
-    +-------------------------+----------+
-    | Items                   | Status   |
-    +=========================+==========+
-    | :ref:`/root <SpecRoot>` | Modified |
-    +-------------------------+----------+
+    +----------------------------------------+----------+
+    | Items                                  | Status   |
+    +========================================+==========+
+    | :ref:`/design-group <SpecDesignGroup>` | New      |
+    +----------------------------------------+----------+
+    | :ref:`/root <SpecRoot>`                | Modified |
+    +----------------------------------------+----------+
+
+.. raw:: latex
+
+    \\end{footnotesize}"""
+
+    assert builder.substitute(
+        "${.:/input/spec-compare-registry/spec-changes-by-scope:0:validations:v3}"
+    ) == """.. raw:: latex
+
+    \\begin{footnotesize}
+
+.. table::
+    :class: longtable
+    :widths: 80,20
+
+    +------------------------------------+--------+
+    | Items                              | Status |
+    +====================================+========+
+    | :ref:`/test-case <SpecTestCase>`   | New    |
+    +------------------------------------+--------+
+    | :ref:`/test-suite <SpecTestSuite>` | New    |
+    +------------------------------------+--------+
 
 .. raw:: latex
 

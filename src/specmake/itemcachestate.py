@@ -28,7 +28,7 @@ import os
 from typing import Optional
 
 from specitems import Item, ItemCache, ItemCacheConfig, ItemTypeProvider
-from specware import augment_with_test_links
+from specware import augment_with_test_case_links, augment_with_test_links
 
 from .directorystate import DirectoryState
 from .pkgitems import PackageBuildDirector
@@ -65,6 +65,7 @@ class ItemCacheDirectoryState(DirectoryState):
                                        type_provider.data_by_uid,
                                        type_provider.root_type_uid,
                                        permissive_type_errors=True))
+            augment_with_test_case_links(item_cache)
             augment_with_test_links(item_cache)
             self._cache = item_cache
         return item_cache
