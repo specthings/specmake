@@ -1,6 +1,7 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
 - Copyright (C) 2025 embedded brains GmbH & Co. KG
+default-timeout-in-seconds: 90.0
 description: |
   Run the tests using an agent through gRPC.
 do-not-run: []
@@ -9,6 +10,7 @@ links:
 - role: target
   uid: /target/alpha
 max-retry-count-per-executable: 3
+min-timeout-in-seconds: 10.0
 name: EB Test Runner for target ${.:/target-name}
 nm: ${.:/component/deployment-directory}/bin/${.:/component/arch}-rtems${.:/component/rtems-version}-nm
 params: {}
@@ -26,4 +28,5 @@ target:
 - enabled-by: true
   value: the/target
 test-runner-type: grpc
+timeout-scaler: 2.0
 type: pkg

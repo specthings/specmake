@@ -51,12 +51,6 @@ spec-info:
         description: |
           It shall be the path to the strip program.
         spec-type: str
-      timeout-scaling-factor:
-        description: |
-          It shall be factor to scale the timeout of individual executables.
-          For example, the scaling factor can be used to compensate a slower
-          test output compared to the reference test runner.
-        spec-type: float
     description: |
       This set of attributes specifies an ESA test runner.
     mandatory-attributes: all

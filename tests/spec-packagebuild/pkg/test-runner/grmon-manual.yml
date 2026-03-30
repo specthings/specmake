@@ -1,6 +1,7 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
 - Copyright (C) 2023 embedded brains GmbH & Co. KG
+default-timeout-in-seconds: 90.0
 description: Description.
 do-not-run: []
 enabled-by: true
@@ -10,6 +11,7 @@ links:
 - role: target
   uid: /target/alpha
 max-retry-count-per-executable: 0
+min-timeout-in-seconds: 10.0
 name: GRMON
 params:
   x: abc
@@ -18,4 +20,5 @@ script-base-path: ${.:/component/prefix-directory}/tests
 shell-script: |
   ${.:/params/x}
 test-runner-type: grmon-manual
+timeout-scaler: 2.0
 type: pkg

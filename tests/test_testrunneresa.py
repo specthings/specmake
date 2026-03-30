@@ -235,6 +235,8 @@ def test_testrunneresa(monkeypatch, tmp_path):
             "bsp-to-target-board": {
                 "Arch/BSP": "Board"
             },
+            "default-timeout-in-seconds":
+            90.0,
             "delete-remote-branch":
             True,
             "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
@@ -266,6 +268,8 @@ def test_testrunneresa(monkeypatch, tmp_path):
             0,
             "max-retry-count-per-executable":
             0,
+            "min-timeout-in-seconds":
+            10.0,
             "name":
             "Name",
             "params": {},
@@ -278,7 +282,7 @@ def test_testrunneresa(monkeypatch, tmp_path):
             "strip",
             "test-runner-type":
             "esa",
-            "timeout-scaling-factor":
+            "timeout-scaler":
             2.0,
             "type":
             "pkg",

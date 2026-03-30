@@ -129,9 +129,7 @@ to run the test programs on the ``{self._target_board()}`` target board."""
         max_executable_count = policy["max-executable-count"]
         todo = remaining[:max_executable_count]
         remaining[:] = remaining[max_executable_count:]
-        timeout_scaler = self["timeout-scaling-factor"]
-        overall_timeout = sum(
-            int(math.ceil(exe.timeout * timeout_scaler)) for exe in todo)
+        overall_timeout = sum(int(math.ceil(exe.timeout)) for exe in todo)
         jobs = [{exe.path: None} for exe in todo]
         return {
             "version":
@@ -150,12 +148,11 @@ to run the test programs on the ``{self._target_board()}`` target board."""
         overall_timeout = 0
         todo: list[Executable] = []
         max_overall_timeout = self["max-overall-timeout-in-seconds"]
-        timeout_scaler = self["timeout-scaling-factor"]
         jobs: list[dict[str, dict[str, int]]] = []
         max_timeout = 0
         while remaining:
             exe = remaining.pop(0)
-            timeout = int(math.ceil(exe.timeout * timeout_scaler))
+            timeout = int(math.ceil(exe.timeout))
             if overall_timeout == 0:
                 # Ignore maximum overall timeout for first executable
                 overall_timeout = timeout
