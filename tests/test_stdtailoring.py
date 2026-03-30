@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Tests for the stdtailoring module. """
 
-# Copyright (C) 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2025, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -26,7 +26,7 @@
 
 from pathlib import Path
 
-from specmake import DocumentBuilder
+from specmake import DocumentBuilder, ECSSClause
 
 from .util import create_package
 
@@ -36,6 +36,7 @@ def test_stdtailoring(caplog, tmpdir):
     director = package.director
     builder = director["/pkg/doc"]
     assert isinstance(builder, DocumentBuilder)
+
     assert builder.substitute(
         "${/standard/clause-0:/clause}") == ":ref:`4.3.1.1x <StandardClause0>`"
     assert builder.substitute(
@@ -119,3 +120,31 @@ Tailoring Status: Y
     Yes.
 
 For an overview of all clauses, see the :ref:`tailoring table <CMStandardClause0>`."""
+
+    clause = director["/standard/clause-0"]
+    assert isinstance(clause, ECSSClause)
+    assert director.factory.export_data(clause.item, True, 0) == {
+        "SPDX-License-Identifier": "CC-BY-SA-4.0",
+        "aim": None,
+        "bullet": "x",
+        "copyrights": [
+            "Copyright (C) 2025 embedded brains GmbH & Co. KG",
+        ],
+        "enabled-by": True,
+        "expected-output": None,
+        "links": [
+            {
+                "role": "requirement-refinement",
+                "uid": "standard",
+            },
+        ],
+        "name": "Text removed due to license issues",
+        "non-functional-type": "ecss",
+        "notes": None,
+        "rationale": None,
+        "references": [],
+        "requirement-type": "non-functional",
+        "section": "4.3.1.1",
+        "text": "Text removed due to license issues.",
+        "type": "requirement",
+    }
