@@ -25,7 +25,8 @@ server-address:
   value: 'iris:50051'
 strip: ${.:/component/deployment-directory}/bin/${.:/component/arch}-rtems${.:/component/rtems-version}-strip
 target:
-- enabled-by: true
+- enabled-by:
+    not: no-target
   value: the/target
 test-runner-type: grpc
 timeout-scaler: 2.0

@@ -59,4 +59,5 @@ from .testoutputparser import *  # noqa: F401, F403
 from .testreporter import *  # noqa: F401, F403
 from .testrunner import *  # noqa: F401, F403
 from .testrunneresa import *  # noqa: F401, F403
+from .testrunnergrpc import *  # noqa: F401, F403
 from .util import *  # noqa: F401, F403
