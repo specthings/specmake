@@ -28,8 +28,8 @@ spec-info:
         spec-type: pkg-optional-value-list
       strip:
         description: |
-          It shall be the path to the strip tool.
-        spec-type: str
+          It shall be the path to the optional strip tool.
+        spec-type: optional-str
       target:
         description: |
           It shall be the target identifier.
