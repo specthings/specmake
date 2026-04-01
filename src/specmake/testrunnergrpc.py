@@ -24,7 +24,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import datetime
 import logging
 from pathlib import Path
 import subprocess
@@ -40,10 +39,7 @@ from spectestrunner import (GRPCDescribeTargetRequest, GRPCRunImageRequest,
 
 from .pkgitems import PackageBuildDirector
 from .testrunner import Executable, Report, TestRunner
-
-
-def _now_utc() -> str:
-    return datetime.datetime.now(datetime.timezone.utc).isoformat()
+from .util import now_utc
 
 
 def _get_symbols(exe_path: str, nm_path: str) -> dict[str, list[int]]:
@@ -125,7 +121,7 @@ class GRPCTestRunner(TestRunner):
         with grpc.insecure_channel(server_address) as channel:
             stub = GRPCServiceStub(channel)
             for executable in executables:
-                start_time = _now_utc()
+                start_time = now_utc()
                 monotonic_begin = time.monotonic()
                 logging.debug("%s: send request for: %s", self.uid,
                               executable.path)
