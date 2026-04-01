@@ -25,6 +25,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import argparse
+import datetime
 import itertools
 import logging
 import os
@@ -32,6 +33,11 @@ import shutil
 from typing import Callable, Iterable, Optional
 
 from specitems import ItemMapper, get_arguments
+
+
+def now_utc() -> str:
+    """ Return the current UTC time in ISO 8601 format. """
+    return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
 
 def duration(value: float | str) -> str:

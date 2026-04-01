@@ -24,7 +24,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import datetime
 import json
 import logging
 import math
@@ -45,12 +44,9 @@ from specitems import is_enabled, Item, ItemGetValueContext
 from .directorystate import DirectoryState
 from .pkgitems import BuildItem, PackageBuildDirector
 from .testoutputparser import augment_report
+from .util import now_utc
 
 Report = dict[str, Any]
-
-
-def _now_utc() -> str:
-    return datetime.datetime.utcnow().isoformat()
 
 
 class Executable(NamedTuple):
@@ -116,7 +112,7 @@ class TestRunner(BuildItem):
         """
         Run the test executables and returns a list of test reports.
         """
-        start_time = _now_utc()
+        start_time = now_utc()
         return [{
             "executable": executable.path,
             "executable-sha512": executable.digest,
@@ -195,7 +191,7 @@ class TestRunner(BuildItem):
         return reports, executables
 
     def run(self) -> None:
-        start_time = _now_utc()
+        start_time = now_utc()
         begin = time.monotonic()
         log = self.output("log")
         assert isinstance(log, TestLog)
@@ -219,7 +215,7 @@ class TestRunner(BuildItem):
                 "build-configuration": config_key,
                 "timeout-key": timeout_key,
                 "duration": time.monotonic() - begin,
-                "end-time": _now_utc(),
+                "end-time": now_utc(),
                 "reports": sorted(reports, key=lambda x: x["executable"]),
                 "start-time": start_time,
                 "test-runner-description": description,
@@ -331,7 +327,7 @@ def _worker(work_queue: queue.Queue, item: BuildItem):
             return
         logging.info("%s: run: '%s'", item.uid,
                      "' '".join(job.report["command-line"]))
-        job.report["start-time"] = _now_utc()
+        job.report["start-time"] = now_utc()
         begin = time.monotonic()
         try:
             process = subprocess_run(job.report["command-line"],

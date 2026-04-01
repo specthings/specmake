@@ -26,10 +26,12 @@
 
 import os
 import logging
+import re
 
 from specware import load_config, run_command
 
-from specmake import (duration, get_build_arguments, copy_file, copy_files)
+from specmake import (duration, get_build_arguments, copy_file, copy_files,
+                      now_utc)
 
 from .util import get_and_clear_log
 
@@ -105,3 +107,10 @@ def test_duration():
     assert duration(1e-4) == "100.000μs"
     assert duration(1e-1) == "100.000ms"
     assert duration(123.456) == "123.456s"
+
+
+def test_now_utc():
+    now = now_utc()
+    assert re.match(
+        r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:"
+        r"[0-9]{2}\.[0-9]{6}\+00:00$", now) is not None
