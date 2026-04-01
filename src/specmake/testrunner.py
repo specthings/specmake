@@ -169,14 +169,11 @@ class TestRunner(BuildItem):
             assert digest
             name = Path(path).name
 
-            # Use previous report if the executable hash did not change
+            # Use previous report if the executable hash did not change.  Reuse
+            # also reports which contain an "error" attribute to avoid running
+            # them in CI jobs.  Resolving failed tests is a manual activity.
             report = previous_reports_by_hash.get(digest, None)
-            error = None if report is None else report.get("error")
-            if report is None or cannot_reuse_reports or error is not None:
-                if error is not None:
-                    logging.info(
-                        "%s: do not reuse report for %s with error: %s",
-                        self.uid, path, error)
+            if report is None or cannot_reuse_reports:
                 if name in do_not_run:
                     logging.info("%s: do not run: %s", self.uid, path)
                     report = TestRunner.run_tests(
