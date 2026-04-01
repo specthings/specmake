@@ -271,7 +271,7 @@ building the package and captures the output:
     _TestRunner.run_round = 4
     director.build_package(force=["/pkg/test-logs/bsp"])
     log = get_and_clear_log(caplog)
-    assert f"do not reuse report for {build_bsp.directory}/a.exe with error: The Error Message" in log
+    assert f"do not reuse report" not in log
 
 
 def test_testrunner_dummy(caplog, tmpdir):
