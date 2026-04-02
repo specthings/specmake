@@ -56,7 +56,7 @@ spec-info:
         spec-type: any
       patterns:
         description: null
-        spec-type: pkg-directory-state-pattern-list
+        spec-type: pkg-directory-state-pattern-definition
     description: |
       This set of attributes specifies a workspace directory.
     mandatory-attributes:

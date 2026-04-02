@@ -197,18 +197,69 @@ class DirectoryStateBase(BuildItem):
                 [os.path.join(base, path) for path in sorted(exclude_files)])
             files.difference_update(exclude_files)
 
-    def _load_from_patterns(
-            self, base: str, patterns: list[dict[str,
-                                                 str | list[str]]]) -> None:
+    def _load_from_patterns(self, base: str, patterns: Any) -> None:
+        """
+        Load the files of the directory state according to the pattern
+        definition.
+
+        String patterns, whether given directly or in a list, are treated as
+        include patterns.  For dictionary patterns, ``include`` must be
+        specified explicitly, while ``exclude`` is optional.  The following
+        pattern variants are supported:
+
+        .. code-block:: yaml
+
+            patterns: a.b
+
+        .. code-block:: yaml
+
+            patterns:
+              - a.b
+              - c.d
+
+        .. code-block:: yaml
+
+            patterns:
+              exclude:
+                - a.b
+                - c.d
+              include: e.f
+
+        .. code-block:: yaml
+
+            patterns:
+              exclude:
+                - a.b
+                - c.d
+              include:
+                - e.f
+                - g.h
+
+        .. code-block:: yaml
+
+            patterns:
+              - exclude: []
+                include: a.b
+              - include:
+                  - c.d
+                  - e.f
+        """
         logging.info("%s: load pattern defined directory state: %s", self.uid,
                      base)
         files: set[str] = set()
         base_path = Path(base)
+        if isinstance(patterns, (dict, str)):
+            patterns = (patterns, )
         for include_exclude in patterns:
             more: set[str] = set()
-            includes = include_exclude["include"]
+            if isinstance(include_exclude, str):
+                includes: Iterable[str] | str = include_exclude
+                excludes: Iterable[str] = tuple()
+            else:
+                includes = include_exclude["include"]
+                excludes = include_exclude.get("exclude", tuple())
             if isinstance(includes, str):
-                includes = [includes]
+                includes = (includes, )
             for include in includes:
                 logging.info("%s: add files matching '%s' in: %s", self.uid,
                              include, base)
@@ -216,7 +267,7 @@ class DirectoryStateBase(BuildItem):
                     os.path.relpath(path, base)
                     for path in base_path.glob(include)
                     if path.is_symlink() or not path.is_dir())
-            for exclude in include_exclude["exclude"]:
+            for exclude in excludes:
                 exclude_files = set(
                     path for path in more
                     if fnmatch.fnmatch(os.path.join("/", path), exclude))

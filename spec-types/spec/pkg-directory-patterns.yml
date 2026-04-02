@@ -16,7 +16,7 @@ spec-info:
     attributes:
       patterns:
         description: null
-        spec-type: pkg-directory-state-pattern-list
+        spec-type: pkg-directory-state-pattern-definition
     description: |
       This set of attributes specifies a pattern defined directory state.
     mandatory-attributes: all

@@ -10,10 +10,7 @@ links:
   name: component
   role: input
   uid: ../component
-patterns:
-- exclude: []
-  include:
-  - '**/*'
+patterns: '**/*'
 pkg-type: workspace
 type: pkg
 workspace-type: directory

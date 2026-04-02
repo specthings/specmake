@@ -17,7 +17,6 @@ links:
   role: input
   uid: ../repo/a
 patterns:
-- exclude: []
   include: '**/*'
 spec-paths:
 - .
