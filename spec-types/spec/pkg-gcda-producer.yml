@@ -20,7 +20,7 @@ spec-info:
         spec-type: str
       patterns:
         description: null
-        spec-type: pkg-directory-state-pattern-list
+        spec-type: pkg-directory-state-pattern-definition
       symbolic-links:
         description: |
           It shall the list of symbolic links to create.

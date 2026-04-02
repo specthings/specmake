@@ -1,6 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
-- Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
+- Copyright (C) 2023, 2026 embedded brains GmbH & Co. KG
 enabled-by: true
 links:
 - role: spec-member
@@ -32,11 +32,14 @@ spec-info:
       list of the directory state.
     mandatory-attributes:
     - include
+  list:
+    description: null
+    spec-type: pkg-directory-state-patterns
   str:
     description: |
       It shall be a Python ``fnmatch`` pattern.  If a file path relative to
       the base directory of the directory state matches with the pattern,
       then the file is added to the directory state.
-spec-name: Directory State Patterns
-spec-type: pkg-directory-state-patterns
+spec-name: Directory State Pattern Definition
+spec-type: pkg-directory-state-pattern-definition
 type: spec

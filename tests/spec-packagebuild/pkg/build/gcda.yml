@@ -22,10 +22,8 @@ links:
   role: input
   uid: ../test-logs/coverage
 patterns:
-- exclude: []
-  include:
-  - '**/*.gc??'
-  - ../gcda-symbolic-link-name
+- '**/*.gc??'
+- ../gcda-symbolic-link-name
 pkg-type: directory-state
 symbolic-links:
 - link-name: ${.:/component/build-directory}/gcda-symbolic-link-name

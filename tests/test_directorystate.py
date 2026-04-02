@@ -308,6 +308,22 @@ type: pkg
     overall_hash = dir_state.load()
     assert overall_hash == "SrJDe4-ewVrM9BV9ttASllPsrXz2r_-ts9urtVeBa9s7JuBORQrvuPyW-hvsef80a8HvKvfeNSOmAh2eQ2_aag=="
 
+    item["patterns"] = "**/doc.rst"
+    overall_hash = dir_state.load()
+    assert overall_hash == "XD9kB5A1Gz2zhJYzx5mh8Fm5EuRjqvFXyKe6bw7d0xBAx3fC2KFivARrnH-PXLZ0ezIo_eE2O8nglaQX-_pKmA=="
+
+    item["patterns"] = ["**/doc.rst", "**/t.yml"]
+    overall_hash = dir_state.load()
+    assert overall_hash == "SrJDe4-ewVrM9BV9ttASllPsrXz2r_-ts9urtVeBa9s7JuBORQrvuPyW-hvsef80a8HvKvfeNSOmAh2eQ2_aag=="
+
+    item["patterns"] = {"include": "**/doc.rst", "exclude": []}
+    overall_hash = dir_state.load()
+    assert overall_hash == "XD9kB5A1Gz2zhJYzx5mh8Fm5EuRjqvFXyKe6bw7d0xBAx3fC2KFivARrnH-PXLZ0ezIo_eE2O8nglaQX-_pKmA=="
+
+    item["patterns"] = [{"include": "**/doc.rst", "exclude": []}]
+    overall_hash = dir_state.load()
+    assert overall_hash == "XD9kB5A1Gz2zhJYzx5mh8Fm5EuRjqvFXyKe6bw7d0xBAx3fC2KFivARrnH-PXLZ0ezIo_eE2O8nglaQX-_pKmA=="
+
     item["patterns"] = [{"include": "**/foo", "exclude": []}]
     overall_hash = dir_state.load()
     assert overall_hash == "YtmDhTiLc9q20OthwE35dnsoPQz5gkQqajQQC2K3h5_yzY67hX35LlnhuR_kEx-_blEsjQlT1ijdP5YwUwb3bw=="

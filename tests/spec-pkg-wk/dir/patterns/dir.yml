@@ -37,8 +37,7 @@ links:
 params:
   k: ${.:/component/deployment-directory}
 patterns:
-- exclude: []
-  include: '**/*'
+- include: '**/*'
 pkg-type: workspace
 type: pkg
 workspace-type: directory
