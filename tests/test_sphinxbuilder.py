@@ -262,6 +262,239 @@ Initial release.
 
     copy-and-substitute
     glossary
+
+.. begin specdoc
+.. _SpecificationItems:
+
+Specification items
+===================
+
+.. _SpecificationItemHierarchy:
+
+Specification item hierarchy
+----------------------------
+
+The specification item types have the following hierarchy:
+
+- :ref:`SpecTypeRootItemType`
+
+.. _SpecificationItemTypes:
+
+Specification item types
+------------------------
+
+.. _SpecTypeRootItemType:
+
+Root Item Type
+^^^^^^^^^^^^^^
+
+This is the root specification item type.
+
+Specification items consist of a defined set of key-value pairs called
+attributes.  Each attribute key name shall be a :ref:`SpecTypeName`.  Item
+attributes may have dictionary, list, integer, floating-point number, and
+string values or a combination of them.  The format of items is defined by the
+type hierarchy rooting in this type.
+
+The ``type`` attribute allows a specialization into domain-specific type
+hierarchies.  For example, for a software specification possible type
+refinements may be created to specify requirements, specializations of
+requirements, interfaces, test suites, test cases, and requirement validations.
+
+The specification items may be stored in or loaded from files in JSON or YAML
+format. All explicit attributes shall be specified. The explicit attributes for
+this type are:
+
+SPDX-License-Identifier
+    The attribute value shall be a :ref:`SpecTypeSPDXLicenseIdentifier`. It
+    shall be the license of the item.
+
+copyrights
+    The attribute value shall be a list. Each list element shall be a
+    :ref:`SpecTypeCopyright`. It shall be the list of copyright statements of
+    the item.
+
+enabled-by
+    The attribute value shall be an :ref:`SpecTypeEnabledByExpression`. It
+    shall define the conditions under which the item is enabled.
+
+links
+    The attribute value shall be a list. Each list element shall be a
+    :ref:`SpecTypeLink`.
+
+type
+    The attribute value shall be a :ref:`SpecTypeName`. It shall be the item
+    type.  The selection of types and the level of detail depends on a
+    particular standard and product model.  We need enough flexibility to be in
+    line with the European Cooperation for Space Standardization standard
+    ECSS-E-ST-10-06 and possible future applications of other standards.  This
+    attribute is used for type refinements.
+
+.. _SpecificationAttributeSetsAndValueTypes:
+
+Specification attribute sets and value types
+--------------------------------------------
+
+.. _SpecTypeCopyright:
+
+Copyright
+^^^^^^^^^
+
+The value shall be a string. It shall be a copyright statement of a copyright
+holder of the specification item. The value
+
+- shall match with the regular expression
+  "``^\s*Copyright\s+\(C\)\s+[0-9]+,\s*[0-9]+\s+.+\s*$``",
+
+- or, shall match with the regular expression
+  "``^\s*Copyright\s+\(C\)\s+[0-9]+\s+.+\s*$``",
+
+- or, shall match with the regular expression
+  "``^\s*Copyright\s+\(C\)\s+.+\s*$``".
+
+This type is used by the following types:
+
+- :ref:`SpecTypeRootItemType`
+
+.. _SpecTypeEnabledByExpression:
+
+Enabled-By Expression
+^^^^^^^^^^^^^^^^^^^^^
+
+A value of this type shall be an expression which defines under which
+conditions the specification item or parts of it are enabled.  The expression
+is evaluated with the use of an *enabled set*.  This is a set of strings which
+indicate enabled features.
+
+A value of this type shall be of one of the following variants:
+
+- The value may be a boolean. This expression evaluates directly to the boolean
+  value.
+
+- The value may be a set of attributes. Each attribute defines an operator.
+  Exactly one of the explicit attributes shall be specified. The explicit
+  attributes for this type are:
+
+  and
+      The attribute value shall be a list. Each list element shall be an
+      :ref:`SpecTypeEnabledByExpression`. The **and** operator evaluates to the
+      **logical and** of the evaluation results of the expressions in the list.
+
+  eq
+      The attribute value shall be a list of strings. The **eq** operator
+      evaluates a list of strings with at least one element.  If all strings
+      are equal, then the evaluation result is true, otherwise false.
+
+  not
+      The attribute value shall be an :ref:`SpecTypeEnabledByExpression`. The
+      **not** operator evaluates to the **logical not** of the evaluation
+      results of the expression.
+
+  or
+      The attribute value shall be a list. Each list element shall be an
+      :ref:`SpecTypeEnabledByExpression`. The **or** operator evaluates to the
+      **logical or** of the evaluation results of the expressions in the list.
+
+- The value may be a list. Each list element shall be an
+  :ref:`SpecTypeEnabledByExpression`. This list of expressions evaluates to the
+  **logical or** of the evaluation results of the expressions in the list.
+
+- The value may be a string. If the value is in the *enabled set*, this
+  expression evaluates to true, otherwise to false.
+
+This type is used by the following types:
+
+- :ref:`SpecTypeEnabledByExpression`
+
+- :ref:`SpecTypeRootItemType`
+
+Please have a look at the following example:
+
+.. code-block:: yaml
+
+    enabled-by:
+      and:
+      - SOME_FEATURE
+      - not: ANOTHER_FEATURE
+
+.. _SpecTypeLink:
+
+Link
+^^^^
+
+This set of attributes specifies a link from one specification item to another
+specification item.  The links in a list are ordered.  The first link in the
+list is processed first. All explicit attributes shall be specified. The
+explicit attributes for this type are:
+
+role
+    The attribute value shall be a :ref:`SpecTypeName`. It shall be the role of
+    the link.
+
+uid
+    The attribute value shall be an :ref:`SpecTypeUID`. It shall be the
+    absolute or relative UID of the link target item.
+
+This type is used by the following types:
+
+- :ref:`SpecTypeRootItemType`
+
+.. _SpecTypeName:
+
+Name
+^^^^
+
+The value shall be a string. It shall be an attribute name. The value shall
+match with the regular expression
+"``^([a-z][a-z0-9-]*|SPDX-License-Identifier)$``".
+
+This type is used by the following types:
+
+- :ref:`SpecTypeLink`
+
+- :ref:`SpecTypeRootItemType`
+
+.. _SpecTypeSPDXLicenseIdentifier:
+
+SPDX License Identifier
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The value shall be a string. It defines the license of the item expressed
+though an SPDX License Identifier. The value
+
+- shall be equal to "``CC-BY-SA-4.0``",
+
+- or, shall be equal to "``CC-BY-SA-4.0 OR BSD-2-Clause``",
+
+- or, shall be equal to "``CC-BY-SA-4.0 OR BSD-2-Clause OR MIT``",
+
+- or, shall be equal to "``CC-BY-SA-4.0 OR MIT``",
+
+- or, shall be equal to "``BSD-2-Clause``",
+
+- or, shall be equal to "``BSD-2-Clause OR MIT``",
+
+- or, shall be equal to "``ECSS``",
+
+- or, shall be equal to "``ESA UNCLASSIFIED - For Official Use``",
+
+- or, shall be equal to "``MIT``".
+
+This type is used by the following types:
+
+- :ref:`SpecTypeRootItemType`
+
+.. _SpecTypeUID:
+
+UID
+^^^
+
+The value shall be a string. It shall be a valid absolute or relative item UID.
+
+This type is used by the following types:
+
+- :ref:`SpecTypeLink`
+.. end specdoc
 """
     doc_glossary = doc_build / "source" / "glossary.rst"
     with open(doc_glossary, "r", encoding="utf-8") as src:

@@ -27,3 +27,7 @@ ${.:/document-release-sections}
 ${.:/document-contributors}
 
 ${.:/document-index}
+
+.. begin specdoc
+${.:/specdoc:0:specitems,ignore=^\(citation|glossary|proxy|reference|spec\)}
+.. end specdoc

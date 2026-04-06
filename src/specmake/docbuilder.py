@@ -30,6 +30,7 @@ from .pkgitems import PackageBuildDirector
 from .linkhub import SpecMapper
 from .sourcecompare import CompareSourcesProvider
 from .speccompare import CompareSpecsProvider
+from .specdoc import SpecDocProvider
 from .sphinxbuilder import SphinxBuilder
 from .stdtailoring import StandardTailoringProvider
 
@@ -43,4 +44,5 @@ class DocumentBuilder(SphinxBuilder):
         self.mapper: SpecMapper
         CompareSourcesProvider(self)
         CompareSpecsProvider(self)
+        SpecDocProvider(self)
         StandardTailoringProvider(self)
