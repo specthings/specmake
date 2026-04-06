@@ -24,8 +24,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from specitems import (EmptyItemCache, ItemGetValueContext, ItemValueProvider,
-                       SpecDocumentConfig, SpecTypeProvider, TextMapper,
+from specitems import (EmptyItemCache, Item, ItemCache, ItemGetValueContext,
+                       ItemTypeProvider, ItemValueProvider, SpecDocumentConfig,
+                       SpecTypeProvider, TextMapper,
                        add_specification_documentation, create_config,
                        unpack_args)
 from specware import SpecWareTypeProvider
@@ -38,6 +39,17 @@ _SPEC_TYPES = {
     "specmake": BuildItemTypeProvider,
     "specware": SpecWareTypeProvider,
 }
+
+
+class _SpecDocItemCache(EmptyItemCache):
+
+    def __init__(self, item_cache: ItemCache,
+                 type_provider: ItemTypeProvider) -> None:
+        super().__init__(type_provider=type_provider)
+        self._item_cache = item_cache
+
+    def __missing__(self, uid: str) -> Item:
+        return self._item_cache[uid]
 
 
 class SpecDocProvider(ItemValueProvider):
@@ -60,7 +72,8 @@ class SpecDocProvider(ItemValueProvider):
             content = self.mapper.create_content(
                 section_level=builder.section_level)
             type_provider = _SPEC_TYPES[args[0]]({})
-            item_cache = EmptyItemCache(type_provider=type_provider)
+            item_cache = _SpecDocItemCache(self._builder.item.cache,
+                                           type_provider=type_provider)
             add_specification_documentation(content, config, item_cache,
                                             self.mapper)
             return content.join()

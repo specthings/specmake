@@ -93,6 +93,8 @@ def test_sphinxbuilder(caplog, tmpdir, monkeypatch):
     assert not (doc_build / "source" / "copy.rst").exists()
     with pytest.raises(ValueError):
         doc.substitute("${.:/subprocess:args=error}}")
+    assert "Interface" in doc.substitute("${.:/specdoc:0:specware}")
+    assert "Package" in doc.substitute("${.:/specdoc:0:specmake}")
     director.build_package()
     assert (doc_build / "source" / "copy.rst").is_file()
     doc_result = doc_build / "source" / "copy-and-substitute.rst"
