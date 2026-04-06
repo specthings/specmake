@@ -35,12 +35,12 @@ import logging
 import subprocess
 from typing import Any, Callable, Iterable, Iterator, Optional, Type, Union
 
-from specitems import (augment_glossary_terms, data_digest, EnabledSet,
-                       is_enabled, Item, ItemCache, ItemDataByUID,
+from specitems import (EnabledSet, Item, ItemCache, ItemDataByUID,
                        ItemGetValueContext, ItemGetValue, ItemMapper,
-                       ItemSelection, ItemView, Link, link_is_enabled,
-                       pickle_load_data_by_uid, SphinxContent, SphinxMapper,
-                       to_iterable)
+                       ItemSelection, ItemView, Link, MarkdownContent,
+                       SphinxContent, SphinxMapper, TextContent,
+                       link_is_enabled, augment_glossary_terms, data_digest,
+                       is_enabled, pickle_load_data_by_uid, to_iterable)
 from specware import SpecWareTypeProvider, run_command
 
 
@@ -82,6 +82,12 @@ def build_item_input(item: Item, name: str) -> Item:
     raise KeyError
 
 
+_CREATE_CONTENT: dict[str, Type[TextContent]] = {
+    ".md": MarkdownContent,
+    ".rst": SphinxContent,
+}
+
+
 def _get_spec(ctx: ItemGetValueContext) -> Any:
     return ctx.item.spec
 
@@ -114,12 +120,26 @@ class BuildItemMapper(SphinxMapper):
 
     def __init__(self, item: Item):
         super().__init__(item)
+        self.content_constructor: Type[TextContent] = SphinxContent
+        self.format = ".rst"
         self.add_default_get_value("spec", _get_spec)
         self.add_value_transformer("basename", _basename)
         self.add_value_transformer("dirname", _dirname)
         self.add_value_transformer("dash", _dash)
         self.add_value_transformer("relpath", _relpath)
         self.add_value_transformer("slash", _slash)
+
+    def set_format(self, path: str) -> None:
+        """ Set the content format. """
+        the_format = os.path.splitext(path)[1]
+        self.content_constructor = _CREATE_CONTENT[the_format]
+        self.format = the_format
+
+    def create_content(
+            self,
+            section_level: int = 0,
+            the_license: str | set[str] | None = None) -> TextContent:
+        return self.content_constructor(section_level, the_license)
 
     def get_link(self, item: Item, document_key: None | str = None) -> str:
         """

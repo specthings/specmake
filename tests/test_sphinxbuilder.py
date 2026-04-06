@@ -97,8 +97,9 @@ def test_sphinxbuilder(caplog, tmpdir, monkeypatch):
     assert "Package" in doc.substitute("${.:/specdoc:0:specmake}")
     director.build_package()
     assert (doc_build / "source" / "copy.rst").is_file()
-    doc_result = doc_build / "source" / "copy-and-substitute.rst"
-    with open(doc_result, "r", encoding="utf-8") as src:
+
+    copy_and_substitute = doc_build / "source" / "copy-and-substitute.rst"
+    with open(copy_and_substitute, "r", encoding="utf-8") as src:
         assert src.read() == f""".. SPDX-License-Identifier: CC-BY-SA-4.0
 
 .. Copyright (C) 2023 embedded brains GmbH & Co. KG
@@ -170,6 +171,79 @@ text
 }}
 text
 """
+
+    copy_and_substitute_2 = doc_build / "source" / "copy-and-substitute-2.md"
+    with open(copy_and_substitute_2, "r", encoding="utf-8") as src:
+        assert src.read() == f"""% SPDX-License-Identifier: CC-BY-SA-4.0
+
+% Copyright (C) 2023 embedded brains GmbH & Co. KG
+
+footer
+2020 embedded brains GmbH \\& Co. KG
+footer right
+geometry
+header left
+sphinxsetup
+The Title
+The Title
+2
+The \\break \\break Title
+{{term}}`Term`
+{{term}}`Terms <Term>`
+text
+`spec:/​rtems/​if/​func <https://embedded-brains.de/qdp-support>`__
+text
+``DISABLED``
+text
+`spec:/​pkg/​deployment/​doc <https://embedded-brains.de/qdp-support>`__
+(SectionHeader)=
+
+Section content: sub-arch
+
+(PkgSourceDocSubsection)=
+
+#### Subsection Header
+
+Subsection content: sparc
+
+
+Push component content: sub-arch
+
+(subsection 2 Header)=
+
+#### subsection 2 Header
+
+Subsection content: sub-arch
+
+subsection 2 Header
+text
+{{ref}}`SectionHeader`
+text
+{{ref}}`PkgSourceDocSubsection`
+text
+  Element content: sparc
+- Element 2 Header
+
+  Element 2 content: sparc
+
+- Element 3 Header
+
+  Element 3 content: sub-arch
+text
+{{cite}}`PkgDeploymentDoc`
+text
+_The Title_ {{cite}}`PkgDeploymentDoc`
+text
+@manual{{PkgDeploymentDoc,
+  author = {{{{Bar, Foo and Doe, John and Long Name, This is a}}}},
+  organization = {{{{Bár Organization, Short, Some Organization}}}},
+  title = {{{{The Title}}}},
+  url = {{{tmp_dir}/pkg/doc/doc.pdf}},
+  year = {{2020}},
+}}
+text
+"""
+
     doc_index = doc_build / "source" / "index.rst"
     with open(doc_index, "r", encoding="utf-8") as src:
         assert src.read() == """.. SPDX-License-Identifier: CC-BY-SA-4.0
@@ -189,7 +263,7 @@ sub and sub-b
 embedded brains GmbH & Co. KG
 
 | © 2023 Alice
-| © 2020, 2025 embedded brains GmbH & Co. KG
+| © 2020, 2026 embedded brains GmbH & Co. KG
 
 | © 2023 Bob
 | © 2023 embedded brains GmbH & Co. KG
@@ -263,6 +337,7 @@ Initial release.
     :numbered:
 
     copy-and-substitute
+    copy-and-substitute-2
     glossary
 
 .. begin specdoc

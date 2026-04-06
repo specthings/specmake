@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-""" Builds documents for the Sphinx documentation framework. """
+""" Builds documents for the Sphinx or MyST documentation framework. """
 
 # Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 #
@@ -35,8 +35,8 @@ import yaml
 from specitems import (BibTeXCitationProvider, Copyrights,
                        DocumentGlossaryConfig, GlossaryConfig, Item,
                        ItemGetValueContext, ItemMapper, SphinxContent,
-                       generate_glossary, get_value_subprocess, is_enabled,
-                       list_terms, to_iterable)
+                       TextContent, generate_glossary, get_value_subprocess,
+                       is_enabled, list_terms, to_iterable)
 from specware import BSD_2_CLAUSE_LICENSE, run_command
 
 from .directorystate import DirectoryState
@@ -50,9 +50,20 @@ _PUSH_ENABLED_BY = re.compile(r"^\${\.:/push-enabled-by:(.+)}$")
 
 _POP_ENABLED_BY = re.compile(r"^\${\.:/pop-enabled-by")
 
-_RST_HEADERS = re.compile(
-    r"^\.\. SPDX-License-Identifier: (.+)\n\n((\.\. Copyright \(C\).*\n)+)\n",
-    flags=re.MULTILINE)
+_EXTENSIONS = (".md", ".rst")
+
+_HEADERS = {
+    ".md":
+    re.compile(
+        r"^% SPDX-License-Identifier: (.+)\n\n"
+        r"((% Copyright \(C\).*\n)+)\n",
+        flags=re.MULTILINE),
+    ".rst":
+    re.compile(
+        r"^\.\. SPDX-License-Identifier: (.+)\n\n"
+        r"((\.\. Copyright \(C\).*\n)+)\n",
+        flags=re.MULTILINE)
+}
 
 _INVISIBLE_SPACES_AT = re.compile(r"([\/_-]+)")
 
@@ -71,7 +82,9 @@ def _get_normal_title(ctx: ItemGetValueContext) -> str:
 
 
 def _get_sphinx_title(ctx: ItemGetValueContext) -> str:
-    content = SphinxContent()
+    mapper = ctx.mapper
+    assert isinstance(mapper, BuildItemMapper)
+    content = mapper.create_content()
     content.add_header(_get_normal_title(ctx), level=1)
     return content.join().rstrip()
 
@@ -96,6 +109,7 @@ def _row(row: tuple[str, ...], maxi: tuple[int, ...]) -> str:
 
 
 def _get_contributors(ctx: ItemGetValueContext) -> str:
+    # pylint: disable=too-many-locals
     rows = [("Action", "Name", "Organization", "Signature")]
     maxi = tuple(map(len, rows[0]))
     for action in ctx.mapper.substitute_data(
@@ -125,7 +139,9 @@ def _get_contributors(ctx: ItemGetValueContext) -> str:
             last_action = row[0]
         lines.append(_row(row, maxi))
     lines.append(sep_0)
-    content = SphinxContent()
+    mapper = ctx.mapper
+    assert isinstance(mapper, BuildItemMapper)
+    content = mapper.create_content()
     with content.directive(
             "table", options=[":class: longtable", ":widths: 16 26 30 28"]):
         content.add(lines)
@@ -417,7 +433,7 @@ class SphinxBuilder(DirectoryState):
         """ Adds a component action. """
         self._actions[name] = action
 
-    def wrap(self, content: SphinxContent, item: Item, text: str) -> None:
+    def wrap(self, content: TextContent, item: Item, text: str) -> None:
         """ Substitute the text and wrap the text to the content. """
         content.wrap(self.mapper.substitute(text, item))
 
@@ -431,7 +447,9 @@ class SphinxBuilder(DirectoryState):
 
     def _get_releases(self, ctx: ItemGetValueContext, scope: Callable) -> str:
         with self.section_level_scope(ctx):
-            content = SphinxContent(self.section_level)
+            mapper = ctx.mapper
+            assert isinstance(mapper, BuildItemMapper)
+            content = mapper.create_content(self.section_level)
             releases = ctx.item["document-releases"]
             count = len(releases)
             for idx, release in enumerate(reversed(releases)):
@@ -448,7 +466,7 @@ class SphinxBuilder(DirectoryState):
     def _get_release_topics(self, ctx: ItemGetValueContext) -> str:
 
         @contextmanager
-        def _scope(content: SphinxContent, header: str) -> Iterator[None]:
+        def _scope(content: TextContent, header: str) -> Iterator[None]:
             with content.directive("topic", header):
                 yield
 
@@ -457,7 +475,7 @@ class SphinxBuilder(DirectoryState):
     def _get_release_sections(self, ctx: ItemGetValueContext) -> str:
 
         @contextmanager
-        def _scope(content: SphinxContent, header: str) -> Iterator[None]:
+        def _scope(content: TextContent, header: str) -> Iterator[None]:
             with content.section(header):
                 yield
 
@@ -466,10 +484,12 @@ class SphinxBuilder(DirectoryState):
     def _add_to_index(self, component: dict[str, Any]) -> None:
         if component.get("add-to-index", False):
             for file in to_iterable(component["file"]):
-                self._index.append(os.path.basename(file).replace(".rst", ""))
+                self._index.append(os.path.splitext(os.path.basename(file))[0])
 
     def _get_index(self, ctx: ItemGetValueContext) -> str:
-        content = SphinxContent()
+        mapper = ctx.mapper
+        assert isinstance(mapper, BuildItemMapper)
+        content = mapper.create_content()
         maxdepth = f":maxdepth: {ctx.item['document-toctree-maxdepth']}"
         with content.directive("toctree", options=[maxdepth, ":numbered:"]):
             content.add(self._index)
@@ -531,7 +551,7 @@ class SphinxBuilder(DirectoryState):
         yield args
         self._section_level_stack.pop()
 
-    def _add_section_content(self, content: SphinxContent,
+    def _add_section_content(self, content: TextContent,
                              section: BuildItem) -> None:
         lines = self._push_pop_enabled_by(
             section.item["content"].strip().splitlines())
@@ -564,7 +584,9 @@ class SphinxBuilder(DirectoryState):
 
     def _get_sections(self, ctx: ItemGetValueContext) -> str:
         with self.section_level_scope(ctx) as section_key:
-            content = SphinxContent(self.section_level)
+            mapper = ctx.mapper
+            assert isinstance(mapper, BuildItemMapper)
+            content = mapper.create_content(self.section_level)
             assert section_key
             links_sections = [
                 (link, section)
@@ -596,12 +618,17 @@ class SphinxBuilder(DirectoryState):
     def _get_section_ref(self, ctx: ItemGetValueContext) -> str:
         section = self.director[ctx.item.uid]
         with self.component_scope(section.component):
-            return f":ref:`{self._get_section_label(section.item)}`"
+            mapper = ctx.mapper
+            assert isinstance(mapper, BuildItemMapper)
+            return mapper.create_content().get_reference(
+                self._get_section_label(section.item))
 
     def _get_document_elements(self, ctx: ItemGetValueContext) -> str:
         assert ctx.args
         indent, element_key = ctx.args.split(":")
-        content = SphinxContent()
+        mapper = ctx.mapper
+        assert isinstance(mapper, BuildItemMapper)
+        content = mapper.create_content()
         content.push_indent(int(indent) * " ")
         elements = [
             element for element in self.inputs("document-element")
@@ -630,17 +657,18 @@ class SphinxBuilder(DirectoryState):
 
     def _get_build_description(self, ctx: ItemGetValueContext) -> str:
         with self.section_level_scope(ctx) as args:
-            assert args
             content = SphinxContent(self.section_level)
+            assert args
             self.director.add_build_description(content, args.split(":"))
             return content.join()
 
-    def _register_text_copyrights(self, text: str) -> None:
-        match = _RST_HEADERS.match(text)
+    def _register_text_copyrights(self, path: str, text: str) -> None:
+        match = _HEADERS[os.path.splitext(path)[1]].match(text)
         assert match
         the_license = match.group(1)
         statements = [
-            statement[3:] for statement in match.group(2).split("\n")[:-1]
+            statement.partition(" ")[2]
+            for statement in match.group(2).split("\n")[:-1]
         ]
         logging.info("%s: register license %s with copyrights %s", self.uid,
                      the_license, statements)
@@ -651,11 +679,11 @@ class SphinxBuilder(DirectoryState):
         src_file = os.path.join(source_dir, file)
         dst_file = os.path.join(build_dir, file)
         os.makedirs(os.path.dirname(dst_file), exist_ok=True)
-        if dst_file.endswith(".rst"):
+        if dst_file.endswith(_EXTENSIONS):
             logging.info("%s: read: %s", self.uid, src_file)
             with open(src_file, "r", encoding="utf-8") as src:
                 text = src.read()
-                self._register_text_copyrights(text)
+                self._register_text_copyrights(src_file, text)
                 logging.info("%s: write: %s", self.uid, dst_file)
                 with open(dst_file, "w+", encoding="utf-8") as dst:
                     dst.write(text)
@@ -697,8 +725,9 @@ class SphinxBuilder(DirectoryState):
             with open(src_path, "r", encoding="utf-8") as src:
                 component_depth = self.component_depth
                 text = "".join(self._push_pop_enabled_by(src.readlines()))
-                if dst_path.endswith(".rst"):
-                    self._register_text_copyrights(text)
+                if dst_path.endswith(_EXTENSIONS):
+                    self.mapper.set_format(dst_path)
+                    self._register_text_copyrights(src_path, text)
                 logging.info("%s: substitute", self.uid)
                 text = self.mapper.substitute(text)
                 logging.info("%s: write: %s", self.uid, dst_path)
@@ -709,8 +738,9 @@ class SphinxBuilder(DirectoryState):
 
     def _glossary(self, _source_dir: str, build_dir: str,
                   component: dict[str, Any]) -> None:
+        target = str(os.path.join(build_dir, component["file"]))
         document_config = DocumentGlossaryConfig(
-            target=str(os.path.join(build_dir, component["file"])),
+            target=target,
             header="Terms, definitions and abbreviated terms",
             rest_source_paths=[
                 str(os.path.join(build_dir, "source")),
@@ -718,4 +748,6 @@ class SphinxBuilder(DirectoryState):
             ])
         config = GlossaryConfig(project_groups=component["glossary-groups"],
                                 documents=[document_config])
-        generate_glossary(config, self.item.cache, self.mapper, SphinxContent)
+        self.mapper.set_format(target)
+        generate_glossary(config, self.item.cache, self.mapper,
+                          self.mapper.content_constructor)
