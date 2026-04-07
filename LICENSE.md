@@ -1,4 +1,4 @@
-Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
+Copyright (C) 2019, 2026 embedded brains GmbH & Co. KG
 
 Copyright (C) 2020, 2021 EDISOFT
 
