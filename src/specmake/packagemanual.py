@@ -380,12 +380,12 @@ class PackageManualBuilder(DocumentBuilder):
                     dest = os.path.relpath(repo["directory"], prefix)
                     with content.section(f"Git Repository: {dest}"):
                         content.add(repo["description"])
-                        content.add(f"""The ``{repo["branch"]}`` branch with
-commit ``{repo["commit"]}``
-was used to build the package.  This branch is checked out after unpacking the
-archive.  It is based on
-commit `{origin_commit} <{repo['origin-commit-url']}>`_
-of the ``{origin_branch}`` branch of the ``origin`` remote repository.""")
+                        content.add(f"""The {content.code(repo['branch'])}
+branch with commit {content.code(repo['commit'])} was used to build the
+package.  This branch is checked out after unpacking the archive.  It is based
+on commit {content.link(origin_commit, repo['origin-commit-url'])} of the
+{content.code(origin_branch)} branch of the {content.code('origin')} remote
+repository.""")
             return content.join()
 
     def _get_object_size(self, ctx: ItemGetValueContext) -> str:

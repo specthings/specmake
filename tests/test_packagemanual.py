@@ -439,12 +439,12 @@ Git Repository: build/src/b
 
 B
 
-The ``pkg`` branch with
-commit ``52f06822b8921ad825cb593b792eab7640e26cde``
-was used to build the package.  This branch is checked out after unpacking the
-archive.  It is based on
-commit `bcef89f2360b97005e490c92fe624ab9dec789e6 <https://git.rtems.org/rtems/commit/?id=bcef89f2360b97005e490c92fe624ab9dec789e6>`_
-of the ``master`` branch of the ``origin`` remote repository.
+The ``pkg``
+branch with commit ``52f06822b8921ad825cb593b792eab7640e26cde`` was used to build the
+package.  This branch is checked out after unpacking the archive.  It is based
+on commit `bcef89f2360b97005e490c92fe624ab9dec789e6 <https://git.rtems.org/rtems/commit/?id=bcef89f2360b97005e490c92fe624ab9dec789e6>`__ of the
+``master`` branch of the ``origin`` remote
+repository.
 .. pre-qualified-interfaces
 .. _SparcGr712rcSmp4Blub:
 
