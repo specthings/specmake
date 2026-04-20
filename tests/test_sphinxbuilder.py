@@ -117,11 +117,11 @@ The \\break \\break Title
 :term:`Term`
 :term:`Terms <Term>`
 text
-`spec:/​rtems/​if/​func <https://embedded-brains.de/qdp-support>`__
+``blub()``
 text
 ``DISABLED``
 text
-`spec:/​pkg/​deployment/​doc <https://embedded-brains.de/qdp-support>`__
+``spec:/​pkg/​deployment/​doc``
 .. _SectionHeader:
 
 Section content: sub-arch
@@ -191,11 +191,11 @@ The \\break \\break Title
 {{term}}`Term`
 {{term}}`Terms <Term>`
 text
-`spec:/​rtems/​if/​func <https://embedded-brains.de/qdp-support>`__
+`blub()`
 text
-``DISABLED``
+`DISABLED`
 text
-`spec:/​pkg/​deployment/​doc <https://embedded-brains.de/qdp-support>`__
+`spec:/​pkg/​deployment/​doc`
 (SectionHeader)=
 
 Section content: sub-arch

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Provides links from items to documents. """
 
-# Copyright (C) 2022, 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2022, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -37,8 +37,6 @@ from specitems import Item, ItemGetValueContext, make_label
 from .directorystate import DirectoryState
 from .pkgitems import BuildItem, BuildItemMapper, PackageBuildDirector
 from .rtems import RTEMSItemCache
-
-_EB_PKG_SUPPORT = "https://embedded-brains.de/qdp-support"
 
 # Sorted by expected frequency
 _ELEMENT_KINDS = ("function", "define", "group", "file", "type", "enum",
@@ -304,108 +302,62 @@ def _name_info_key_type(item: Item) -> str:
     return f"type/{item['name']}"
 
 
-def _link_default(item: Item, _link: str) -> str:
-    raise ValueError(f"no link for: {item.uid}")
-
-
-def _link_design_group(item: Item, link: str) -> str:
-    return f"`{item.view['sdd-info']['name']} <{link}>`__"
-
-
-def _link_name(item: Item, link: str) -> str:
-    return f"`{item['name']} <{link}>`__"
-
-
-def _link_forward_decl(item: Item, link: str) -> str:
-    return _link_name(item.parent("interface-target"), link)
-
-
-def _link_function(item: Item, link: str) -> str:
-    return f"`{item['name']}() <{link}>`__"
-
-
-def _link_header_file(item: Item, link: str) -> str:
-    return f"`<{item['path']}> <{link}>`__"
-
-
-def _link_unspecified_type(item: Item, link: str) -> str:
-    return f"`{item['interface-type'][12:]} {item['name']} <{link}>`__"
-
-
 def spec_label(item: Item) -> str:
     """ Returns the specification label of the item. """
     return make_label(item.spec)
 
 
-def _ref_default(item: Item) -> str:
-    raise ValueError(f"no reference for: {item.uid}")
+def _name_name(item: Item) -> str:
+    return item['name']
 
 
-def _ref_name(item: Item) -> str:
-    return f":ref:`{item['name']} <{spec_label(item)}>`"
+def _name_forward_decl(item: Item) -> str:
+    return item.parent("interface-target")["name"]
 
 
-def _ref_forward_decl(item: Item) -> str:
-    return _ref_name(item.parent("interface-target"))
+def _name_function(item: Item) -> str:
+    return f"{item['name']}()"
 
 
-def _ref_function(item: Item) -> str:
-    return f":ref:`{item['name']}() <{spec_label(item)}>`"
+def _name_header_file(item: Item) -> str:
+    return f"<{item['path']}>"
 
 
-def _ref_header_file(item: Item) -> str:
-    return f":ref:`<{item['path']}> <{spec_label(item)}>`"
+def _name_unspecified_type(item: Item) -> str:
+    return f"{item['interface-type'][12:]} {item['name']}"
 
 
-def _ref_unspecified_type(item: Item) -> str:
-    return (f":ref:`{item['interface-type'][12:]} "
-            f"{item['name']} <{spec_label(item)}>`")
-
-
-def _ref_spec(item: Item) -> str:
-    return f":ref:`{item.spec_2} <{spec_label(item)}>`"
-
-
-def _ref_disabled_name(item: Item) -> str:
-    return f"``{item['name']}``"
-
-
-def _ref_disabled_forward_decl(item: Item) -> str:
-    return _ref_disabled_name(item.parent("interface-target"))
-
-
-def _ref_disabled_function(item: Item) -> str:
-    return f"``{item['name']}()``"
-
-
-def _ref_disabled_header_file(item: Item) -> str:
-    return f"``<{item['path']}>``"
-
-
-def _ref_disabled_spec(item: Item) -> str:
+def _name_spec(item: Item) -> str:
     return item.spec_2
 
 
-def _spec_link(item: Item, link: str) -> str:
-    return f"`{item.spec_2} <{link}>`__"
+def _set_name_and_defaults(item: Item, default_key: str,
+                           default_path: str) -> None:
+    item.view["name"] = _ITEM_SPECIFICS[item.type][2](item)
+    item.view["default-document-key"] = default_key
+    item.view["default-document-path"] = default_path
+    item.view["document-paths"] = {}
 
 
-def _augment_default(item: Item, _name_info: dict[str, Any]) -> None:
-    item.view["default-document"] = "none"
-    item.view["document-links"] = {"none": f"``{item.spec_2}``"}
+def _augment_default(_item: Item, _name_info: dict[str, Any]) -> None:
+    pass
 
 
-def _add_doxygen_info(item: Item, name_info: dict[str, Any]) -> None:
+def _add_sdd_info(item: Item, name_info: dict[str, Any],
+                  name: Optional[str]) -> None:
     try:
-        elem_info = name_info[_ITEM_SPECIFICS[item.type][5](item)]
+        elem_info = name_info[_ITEM_SPECIFICS[item.type][3](item)]
     except KeyError:
         return
     item.view["sdd-info"] = elem_info
+    if name is None:
+        item.view["sdd-name"] = item.view["name"]
+    else:
+        item.view["sdd-name"] = elem_info[name]
     path = elem_info.get("file", None)
     if path is not None:
         item.view["source-file"] = path
-    get_link = _ITEM_SPECIFICS[item.type][4]
-    item.view["document-links"]["sdd"] = get_link(item, f"{elem_info['link']}")
+    item.view["document-paths"]["sdd"] = elem_info["link"]
 
 
 def _anchor(item: Item) -> str:
@@ -413,56 +365,36 @@ def _anchor(item: Item) -> str:
 
 
 def _augment_interface(item: Item, name_info: dict[str, Any]) -> None:
-    item.view["default-document"] = "icd"
-    link = (f"{name_info['dir/icd']}/"
-            f"requirements-and-design.html{_anchor(item)}")
-    get_link = _ITEM_SPECIFICS[item.type][4]
-    item.view["document-links"] = {
-        "default": _spec_link(item, link),
-        "url": link,
-        "icd": get_link(item, link),
-        "self": _ITEM_SPECIFICS[item.type][2](item),
-    }
-    _add_doxygen_info(item, name_info)
+    _set_name_and_defaults(
+        item, "icd", f"{name_info['dir/icd']}/"
+        f"requirements-and-design.html{_anchor(item)}")
+    _add_sdd_info(item, name_info, None)
 
 
 def _augment_requirement(item: Item, name_info: dict[str, Any]) -> None:
-    item.view["default-document"] = "srs"
-    link = f"{name_info['dir/srs']}/requirements.html{_anchor(item)}"
-    spec_link = _spec_link(item, link)
-    item.view["document-links"] = {
-        "default": spec_link,
-        "url": link,
-        "srs": spec_link,
-        "self": _ITEM_SPECIFICS[item.type][2](item),
-    }
+    _set_name_and_defaults(
+        item, "srs", f"{name_info['dir/srs']}/"
+        f"requirements.html{_anchor(item)}")
 
 
 def _augment_design_group(item: Item, name_info: dict[str, Any]) -> None:
     _augment_requirement(item, name_info)
-    _add_doxygen_info(item, name_info)
+    _add_sdd_info(item, name_info, "name")
 
 
 def _augment_requirement_self_test(item: Item, name_info: dict[str,
                                                                Any]) -> None:
     _augment_requirement(item, name_info)
-    item.view["document-links"]["test-plan"] = _spec_link(
-        item, f"{name_info['dir/svs']}/"
+    item.view["document-paths"]["test-plan"] = (
+        f"{name_info['dir/svs']}/"
         f"test-case-specification.html{_anchor(item)}")
 
 
 def _augment_interface_requirement(item: Item, name_info: dict[str,
                                                                Any]) -> None:
-    item.view["default-document"] = "icd"
-    link = (f"{name_info['dir/icd']}/"
-            f"requirements-and-design.html{_anchor(item)}")
-    spec_link = _spec_link(item, link)
-    item.view["document-links"] = {
-        "default": spec_link,
-        "url": link,
-        "icd": spec_link,
-        "self": _ITEM_SPECIFICS[item.type][2](item),
-    }
+    _set_name_and_defaults(
+        item, "icd", f"{name_info['dir/icd']}/"
+        f"requirements-and-design.html{_anchor(item)}")
 
 
 def _augment_test_case(item: Item, name_info: dict[str, Any]) -> None:
@@ -477,32 +409,16 @@ def _augment_test_case(item: Item, name_info: dict[str, Any]) -> None:
                          "requirement-refinement link for (likely cause is "
                          f"that no build item is enabled): {item.uid} -> "
                          f"{[item.uid for item in item.parents()]}") from err
-    item.view["default-document"] = key
     prefix = name_info[f"dir/{key}"]
-    link = f"{prefix}/test-case-specification.html{_anchor(item)}"
-    spec_link = _spec_link(item, link)
-    item.view["document-links"] = {
-        "default": spec_link,
-        "url": link,
-        key: spec_link,
-        "test-plan": spec_link,
-        "self": _ITEM_SPECIFICS[item.type][2](item),
-    }
+    _set_name_and_defaults(
+        item, key, f"{prefix}/test-case-specification.html{_anchor(item)}")
 
 
 def _augment_test_suite_for_document(item: Item, name_info: dict[str, Any],
                                      document: str) -> None:
-    item.view["default-document"] = document
     prefix = name_info[f"dir/{document}"]
-    link = f"{prefix}/test-design.html{_anchor(item)}"
-    spec_link = _spec_link(item, link)
-    item.view["document-links"] = {
-        "default": spec_link,
-        "url": link,
-        document: spec_link,
-        "test-plan": spec_link,
-        "self": _ITEM_SPECIFICS[item.type][2](item),
-    }
+    _set_name_and_defaults(item, document,
+                           f"{prefix}/test-design.html{_anchor(item)}")
 
 
 def _augment_test_suite(item: Item, name_info: dict[str, Any]) -> None:
@@ -518,461 +434,343 @@ def _augment_memory_benchmark(item: Item, name_info: dict[str, Any]) -> None:
 
 
 def _augment_other_validation(item: Item, name_info: dict[str, Any]) -> None:
-    item.view["default-document"] = "svs"
     prefix = name_info["dir/svs"]
-    link = f"{prefix}/validation-other.html{_anchor(item)}"
-    spec_link = _spec_link(item, link)
-    item.view["document-links"] = {
-        "default": spec_link,
-        "url": link,
-        "svs": spec_link,
-        "test-plan": spec_link,
-        "self": _ITEM_SPECIFICS[item.type][2](item),
-    }
+    _set_name_and_defaults(item, "svs",
+                           f"{prefix}/validation-other.html{_anchor(item)}")
 
 
-_ITEM_DEFAULT = ("unknown", _augment_default, _ref_default, _ref_disabled_spec,
-                 _link_default, _name_info_key_default)
+_ITEM_DEFAULT = ("unknown", _augment_default, _name_spec,
+                 _name_info_key_default)
 
 _ITEM_SPECIFICS = {
     "constraint": (
         "constraint",
         _augment_requirement,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "glossary/group": (
         "glossary group",
         _augment_requirement,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "glossary/term": (
         "glossary term",
         _augment_default,
-        _ref_default,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "interface/appl-config-group": (
         "application configuration group",
         _augment_interface,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_appl_config_group,
     ),
     "interface/appl-config-option/feature": (
         "application configuration option",
         _augment_interface,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_define,
     ),
     "interface/appl-config-option/feature-enable": (
         "application configuration option",
         _augment_interface,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_define,
     ),
     "interface/appl-config-option/initializer": (
         "application configuration option",
         _augment_interface,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_define,
     ),
     "interface/appl-config-option/integer": (
         "application configuration option",
         _augment_interface,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_define,
     ),
     "interface/define": (
         "define",
         _augment_interface,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_define,
     ),
     "interface/domain": (
         "interface domain",
         _augment_interface_requirement,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_group,
     ),
     "interface/enum": (
         "enumeration",
         _augment_interface,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_enum,
     ),
     "interface/enumerator": (
         "enumerator",
         _augment_interface,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_enumerator,
     ),
     "interface/forward-declaration": (
         "forward declaration",
         _augment_interface,
-        _ref_forward_decl,
-        _ref_disabled_forward_decl,
-        _link_forward_decl,
+        _name_forward_decl,
         _name_info_key_forward_decl,
     ),
     "interface/function": (
         "directive",
         _augment_interface,
-        _ref_function,
-        _ref_disabled_function,
-        _link_function,
+        _name_function,
         _name_info_key_function,
     ),
     "interface/group": (
         "interface group",
         _augment_interface,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_group,
     ),
     "interface/header-file": (
         "header file",
         _augment_interface,
-        _ref_header_file,
-        _ref_disabled_header_file,
-        _link_header_file,
+        _name_header_file,
         _name_info_key_header_file,
     ),
     "interface/macro": (
         "macro",
         _augment_interface,
-        _ref_function,
-        _ref_disabled_function,
-        _link_function,
+        _name_function,
         _name_info_key_define,
     ),
     "interface/register-block": (
         "register block",
         _augment_interface,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_type,
     ),
     "interface/struct": (
         "structure",
         _augment_interface,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_type,
     ),
     "interface/typedef": (
         "type definition",
         _augment_interface,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_type,
     ),
     "interface/union": (
         "union",
         _augment_interface,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_type,
     ),
     "interface/unspecified-define": (
         "define",
         _augment_interface,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_define,
     ),
     "interface/unspecified-enum": (
         "enumeration",
         _augment_interface,
-        _ref_unspecified_type,
-        _ref_disabled_name,
-        _link_unspecified_type,
+        _name_unspecified_type,
         _name_info_key_enum,
     ),
     "interface/unspecified-enumerator": (
         "enumerator",
         _augment_interface,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_enumerator,
     ),
     "interface/unspecified-function": (
         "directive",
         _augment_interface,
-        _ref_function,
-        _ref_disabled_function,
-        _link_function,
+        _name_function,
         _name_info_key_function,
     ),
     "interface/unspecified-group": (
         "group",
         _augment_interface,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_group,
     ),
     "interface/unspecified-header-file": (
         "header file",
         _augment_interface,
-        _ref_header_file,
-        _ref_disabled_header_file,
-        _link_header_file,
+        _name_header_file,
         _name_info_key_header_file,
     ),
     "interface/unspecified-macro": (
         "macro",
         _augment_interface,
-        _ref_function,
-        _ref_disabled_function,
-        _link_function,
+        _name_function,
         _name_info_key_define,
     ),
     "interface/unspecified-object": (
         "object",
         _augment_interface,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_object,
     ),
     "interface/unspecified-struct": (
         "type",
         _augment_interface,
-        _ref_unspecified_type,
-        _ref_disabled_name,
-        _link_unspecified_type,
+        _name_unspecified_type,
         _name_info_key_type,
     ),
     "interface/unspecified-typedef": (
         "type definition",
         _augment_interface,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_type,
     ),
     "interface/unspecified-union": (
         "type",
         _augment_interface,
-        _ref_unspecified_type,
-        _ref_disabled_name,
-        _link_unspecified_type,
+        _name_unspecified_type,
         _name_info_key_type,
     ),
     "interface/variable": (
         "object",
         _augment_interface,
-        _ref_name,
-        _ref_disabled_name,
-        _link_name,
+        _name_name,
         _name_info_key_object,
     ),
     "memory-benchmark": (
         "memory benchmark",
         _augment_memory_benchmark,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "requirement/functional/action": (
         "action requirement",
         _augment_requirement_self_test,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "requirement/functional/capability": (
         "capability requirement",
         _augment_requirement,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "requirement/functional/interface-define-not-defined": (
         "interface define requirement",
         _augment_requirement,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "requirement/functional/fatal-error": (
         "fatal error",
         _augment_requirement,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "requirement/functional/function": (
         "function requirement",
         _augment_requirement,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "requirement/non-functional/design": (
         "design requirement",
         _augment_requirement,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "requirement/non-functional/design-group": (
         "design group",
         _augment_design_group,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_design_group,
+        _name_spec,
         _name_info_key_group,
     ),
     "requirement/non-functional/design-target": (
         "design target",
         _augment_requirement,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "requirement/non-functional/interface": (
         "interface requirement",
         _augment_requirement,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "requirement/non-functional/interface-requirement": (
         "interface requirement",
         _augment_interface_requirement,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "requirement/non-functional/performance": (
         "performance requirement",
         _augment_requirement,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "requirement/non-functional/performance-runtime": (
         "runtime performance requirement",
         _augment_requirement_self_test,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "requirement/non-functional/performance-runtime-environment": (
         "runtime performance measurement environment",
         _augment_requirement,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "requirement/non-functional/quality": (
         "quality requirement",
         _augment_requirement,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "runtime-measurement-test": (
         "runtime measurement test",
         _augment_test_case,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "spec": (
         "specification specification",
         _augment_default,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "test-case": (
         "test case",
         _augment_test_case,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "test-suite": (
         "test suite",
         _augment_test_suite,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "validation/by-analysis": (
         "validation by analysis",
         _augment_other_validation,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "validation/by-inspection": (
         "validation by inspection",
         _augment_other_validation,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
     "validation/by-review-of-design": (
         "validation by review of design",
         _augment_other_validation,
-        _ref_spec,
-        _ref_disabled_spec,
-        _link_default,
+        _name_spec,
         _name_info_key_default,
     ),
 }
@@ -1226,17 +1024,19 @@ class SpecMapper(BuildItemMapper):
         return self.format_reference(name, spec_label(item))
 
     def get_link(self, item: Item, document_key: Optional[str] = None) -> str:
-        if not item.enabled:
-            return _ITEM_SPECIFICS.get(item.type, _ITEM_DEFAULT)[3](item)
         try:
-            if document_key not in item.view["document-links"]:
-                document_key = item.view["default-document"]
-            if document_key == self._whoami:
-                document_key = "self"
-            return item.view["document-links"][document_key]
+            default_key = item.view["default-document-key"]
         except KeyError:
-            assert "RTEMS_QUAL" not in item.cache.enabled_set
-            return _spec_link(item, _EB_PKG_SUPPORT)
+            name = _ITEM_SPECIFICS.get(item.type, _ITEM_DEFAULT)[2](item)
+            return self.format_code(name)
+        if document_key is None:
+            document_key = default_key
+        name = item.view["name"]
+        if document_key == self._whoami:
+            return self.format_reference(name, spec_label(item))
+        path = item.view["document-paths"].get(
+            document_key, item.view["default-document-path"])
+        return self.format_link(name, path)
 
     def _get_value_link(self, ctx: ItemGetValueContext) -> str:
         return self.get_link(ctx.item)

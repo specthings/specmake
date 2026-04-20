@@ -40,7 +40,7 @@ def _add_variant(content: CContent, variant: dict) -> None:
         for group in variant.get("groups", []):
             content.add(f"@ingroup {group[group.find('/') + 1:]}")
         links = [
-            f"[{item.spec}]({item.view['document-links']['url']})"
+            f"[{item.spec}]({item.view['default-document-path']})"
             for item in sorted(variant["items"])
         ]
         line = "This design element is related to"

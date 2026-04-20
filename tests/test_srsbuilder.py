@@ -44,10 +44,10 @@ pre-qualified* if and only if at least one of the following conditions is met:
 * *N1*: It has the `spec:/​acfg/​constraint/​option-not-pre-qualified </pkg/doc-ts-srs/html/requirements.html#specacfgconstraintoptionnotprequalified>`__ usage
   constraint.
 
-* *N2*: It has the spec:/​constraint/​constant-not-pre-qualified usage
+* *N2*: It has the ``spec:/​constraint/​constant-not-pre-qualified`` usage
   constraint.
 
-* *N3*: It has the spec:/​constraint/​directive-not-pre-qualified usage
+* *N3*: It has the ``spec:/​constraint/​directive-not-pre-qualified`` usage
   constraint.
 
 * *N4*: It is an interface container and all interfaces placed into this
@@ -154,7 +154,7 @@ validations, so the corresponding table entries are N/A.
     + + +-+-+
     | | | `/req/usage-constraints`_ | validated refinement |
     + + +-+-+
-    | | | `/​rtems/​if/​domain </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdomain>`__ | **not validated** refinement |
+    | | | `Domain </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdomain>`__ | **not validated** refinement |
     + + +-+-+
     | | | `Something Configuration </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroupacfg>`__ | not pre-qualified refinement |
     + + +-+-+
@@ -1106,7 +1106,7 @@ This design requirement is refined by the following items:
 - `spec:/​req/​usage-constraints
   </pkg/doc-ts-srs/html/requirements.html#specrequsageconstraints>`__
 
-- `spec:/​rtems/​if/​domain
+- `Domain
   </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdomain>`__
 
 - `Something Configuration
@@ -1152,7 +1152,7 @@ following items:
   </pkg/doc-ts-srs/html/requirements.html#specrequsageconstraints>`__
   (validated refinement)
 
-- `spec:/​rtems/​if/​domain
+- `Domain
   </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdomain>`__
   (**not validated** refinement)
 

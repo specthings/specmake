@@ -107,7 +107,7 @@ class SVRBuilder(SpecDocumentBuilder):
             req: str | int = self.mapper.get_link(item)
             for component in sorted(set(components)):
                 try:
-                    link = component.view["document-links"]["sdd"]
+                    path = component.view["document-paths"]["sdd"]
                 except KeyError:
                     group = "requirement/non-functional/design-group"
                     if item.type == _DEFINE_NOT_DEFINED:
@@ -116,6 +116,9 @@ class SVRBuilder(SpecDocumentBuilder):
                         link = "N/A (external design)"
                     else:
                         link = "**no reference to SDD**"
+                else:
+                    link = self.mapper.format_link(component.view["sdd-name"],
+                                                   path)
                 rows.append((req, link))
                 req = COL_SPAN
             if isinstance(req, str) and req:
@@ -144,7 +147,7 @@ class SVRBuilder(SpecDocumentBuilder):
                     file_link = format_link(spacify(file_path), file_link)
                     name = f"{name} in {file_link}"
                 for item in sorted(variant["items"]):
-                    path = item.view["document-links"]["url"]
+                    path = item.view["default-document-path"]
                     rows.append((name, format_link(item.spec_2, path)))
         content.add_grid_table(rows, [60, 40], font_size=-4)
         return str(content)
