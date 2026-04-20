@@ -271,13 +271,15 @@ def _add_perf_measurement(ctx: _Context,
         test_case = measurement_data["test-case"]
         test_suite = test_case["test-suite"]
         config_data = test_suite["config"]
-        test_case_item = ctx.item.cache[test_case["uid"]]
-        test_suite_item = ctx.item.cache[test_suite["uid"]]
+        test_case_link = ctx.mapper.format_link(
+            ctx.item.cache[test_case["uid"]].spec_2, test_case["link"])
+        test_suite_link = ctx.mapper.format_link(
+            ctx.item.cache[test_suite["uid"]].spec_2, test_suite["link"])
+        measurements_link = ctx.mapper.format_link(
+            "runtime performance measurements", measurement_data["link"])
         ctx.content.wrap(f"""For the configuration
-{ctx.content.code(config_data['name'])}, the test case `{test_case_item.spec_2}
-<{test_suite['link']}>`__ of the test suite `{test_suite_item.spec_2}
-<{test_case['link']}>`__ reported the following `runtime performance
-measurements <{measurement_data['link']}>`__:""")
+{ctx.content.code(config_data['name'])}, the test case {test_case_link} of the
+test suite {test_suite_link} reported the following {measurements_link}:""")
         ctx.content.add_image(
             os.path.relpath(f"{measurement_data['boxplot']}.*",
                             os.path.dirname(ctx.file_path)), "50%")
@@ -978,6 +980,14 @@ class SpecDocumentBuilder(DocumentBuilder):
                                                      self.file_path))
                 self.add_item_changes(content, item)
 
+    def _validation_status(self, item: Item) -> str:
+        validation_status = item.view.get("validation-status", "N/A")
+        if isinstance(validation_status, str):
+            return validation_status
+        validation_status = self.mapper.format_link(validation_status[0],
+                                                    validation_status[1])
+        return f"N/A ({validation_status})"
+
     def _add_validation_table(self, content: SphinxContent) -> None:
         """ Add the document item validation table to the content. """
         get_link = self.mapper.get_link
@@ -1003,7 +1013,8 @@ class SpecDocumentBuilder(DocumentBuilder):
                 item_2 = item_cache[validation[0]]
                 role = _validation_role(item_2, validation[1])
                 if role == "validation by test":
-                    role = f"{role} {get_test_result_status(item_2)}"
+                    role = (f"{role} "
+                            f"{get_test_result_status(item_2, self.mapper)}")
                 if item != item_2 and item_2 in items:
                     item_2_ref = f"`{item_2.uid}`_"
                 elif item_2.type == "memory-benchmark":
@@ -1017,8 +1028,8 @@ class SpecDocumentBuilder(DocumentBuilder):
                 req = COL_SPAN
                 status = COL_SPAN
             if isinstance(req, str) and req:
-                rows.append((req, status, "N/A",
-                             item.view.get("validation-status", "N/A")))
+                rows.append(
+                    (req, status, "N/A", self._validation_status(item)))
         content.add_grid_table(rows, [32, 14, 32, 22], font_size=-4)
 
     def _validation_verification(self, ctx: ItemGetValueContext) -> str:

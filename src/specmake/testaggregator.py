@@ -36,7 +36,7 @@ from specitems import (COL_SPAN, Item, link_is_enabled, make_label,
 from specware import CodeMapper
 
 from .directorystate import DirectoryState
-from .pkgitems import BuildItem, PackageBuildDirector
+from .pkgitems import BuildItem, BuildItemMapper, PackageBuildDirector
 from .rtems import RTEMSItemCache
 from .sphinxbuilder import spacify
 
@@ -77,23 +77,23 @@ def _test_status(target_data: dict, target: Item, info: dict,
     else:
         target.view["no-unexpected-test-failures"] = False
         target.view["validation-status"] = (
-            "N/A "
-            f"(`at least one unexpected test failure <{link}>`__)")
+            "at least one unexpected test failure", link)
         return "F"
     target.view.setdefault("no-unexpected-test-failures", True)
     target.view.setdefault("validation-status",
-                           f"N/A (`no unexpected test failures <{link}>`__)")
+                           ("no unexpected test failures", link))
     return status
 
 
 def get_test_result_status(item: Item,
+                           mapper: BuildItemMapper,
                            prefix: str = "(",
                            postfix: str = ")") -> str:
     """ Gets the test result status of the item. """
     results: list[str] = []
     for test_results in item.view.get("test-results", {}).values():
         for data in test_results:
-            results.append(f"`{data['status']} <{data['link']}>`__")
+            results.append(mapper.format_link(data["status"], data["link"]))
     if not results:
         return "**no test results**"
     return f"{prefix}{', '.join(results)}{postfix}"
@@ -157,7 +157,8 @@ def _gather_coverage_gap_verifications(
                 verifications.setdefault(scope_name, {})[file_path] = gaps
 
 
-def _add_coverage_table(content: SphinxContent, none: str, some: str,
+def _add_coverage_table(content: SphinxContent, mapper: BuildItemMapper,
+                        none: str, some: str,
                         stats_of_files: list[dict]) -> None:
     if not stats_of_files:
         content.add(none)
@@ -167,7 +168,9 @@ def _add_coverage_table(content: SphinxContent, none: str, some: str,
         "File", "Functions", "Status", "Lines", "Status", "Branches", "Status"
     ]]
     for stats in stats_of_files:
-        row = [stats["file-link"]]
+        row = [
+            mapper.format_link(spacify(stats["file-path"]), stats["file-link"])
+        ]
         for kind in _COVERAGE_KINDS:
             row.append(stats[f"{kind}-info"])
             row.append(stats[f"{kind}-status"])
@@ -182,7 +185,7 @@ class _CoverageSummary:
     # pylint: disable=too-many-instance-attributes
 
     def __init__(self, test_aggregator: "TestAggregator",
-                 coverage: dict) -> None:
+                 mapper: BuildItemMapper, coverage: dict) -> None:
         self.test_aggregator = test_aggregator
         self.scope = coverage["scope"]
         self.verifications = copy.deepcopy(coverage["verifications"])
@@ -198,12 +201,12 @@ class _CoverageSummary:
             self.overall[f"{kind}-justified"] = 0
             self.overall[f"{kind}-total"] = 0
         for file_coverage in coverage["files"]:
-            self._add_coverage_of_file(file_coverage)
+            self._add_coverage_of_file(mapper, file_coverage)
         limits = self.limits_by_area["overall"]
         for kind in _COVERAGE_KINDS:
             self.overall[f"{kind}-justified-covered"] = self.overall[
                 f"{kind}-covered"]
-            self._add_coverage_status(self.overall,
+            self._add_coverage_status(mapper, self.overall,
                                       limits[f"{kind}-min-percent"], True,
                                       kind)
         if self.verifications:
@@ -223,29 +226,33 @@ class _CoverageSummary:
         for key, items in self.issues.items():
             issues.setdefault(key, set()).update(items)
 
-    def add_coverage_section(self, content: SphinxContent) -> None:
+    def add_coverage_section(self, content: SphinxContent,
+                             mapper: BuildItemMapper) -> None:
         """ Add a coverage section to the content. """
         with content.section(f"Scope - {self.scope}"):
             if any((self.good_files, self.justified_files, self.bad_files)):
                 _add_coverage_table(
-                    content,
+                    content, mapper,
                     "There are no files with unjustified coverage issues.",
                     "The following table lists files "
                     "with unjustified coverage issues.", self.bad_files)
                 _add_coverage_table(
-                    content,
+                    content, mapper,
                     "There are no files with justified coverage issues.",
                     "The following table lists files "
                     "with justified coverage issues.", self.justified_files)
                 _add_coverage_table(
-                    content, "There are no files without coverage issues.",
+                    content, mapper,
+                    "There are no files without coverage issues.",
                     "The following table lists files "
                     "having the expected coverage.", self.good_files)
             else:
                 content.add("There is no coverage information available.")
 
-    def _add_coverage_status(self, stats: dict, limit: float, overall: bool,
-                             kind: str) -> None:
+    def _add_coverage_status(self, mapper: BuildItemMapper, stats: dict,
+                             limit: float, overall: bool, kind: str) -> None:
+        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-positional-arguments
         total = stats[f"{kind}-total"]
         if not total:
             stats[f"{kind}-info"] = "N/A"
@@ -287,12 +294,14 @@ class _CoverageSummary:
                                        set()).add(f"Scope - {self.scope}")
             else:
                 self.issues.setdefault(
-                    f"Insufficient file-specific {kind} coverage",
-                    set()).add(stats["file-link"])
+                    f"Insufficient file-specific {kind} coverage", set()).add(
+                        mapper.format_link(spacify(stats["file-path"]),
+                                           stats["file-link"]))
         stats[f"{kind}-info"] = f"{info} ({percent:.1f}%)"
         stats[f"{kind}-status"] = status
 
-    def _add_file_stats(self, stats: dict[str, int | str], file_path: str,
+    def _add_file_stats(self, mapper: BuildItemMapper,
+                        stats: dict[str, int | str], file_path: str,
                         spot_to_justification: _SpotToJustification) -> None:
         limits = self.limits_by_area.get(f"file-{file_path}",
                                          self.limits_by_area["per-file"])
@@ -300,8 +309,9 @@ class _CoverageSummary:
             for what in ("covered", "justified", "total"):
                 key = f"{kind}-{what}"
                 self.overall[key] += stats[key]
-            self._add_coverage_status(stats, limits[f"{kind}-min-percent"],
-                                      False, kind)
+            self._add_coverage_status(mapper, stats,
+                                      limits[f"{kind}-min-percent"], False,
+                                      kind)
         if spot_to_justification:
             unrelated: list[str] = sorted(
                 set(justification[0]
@@ -424,13 +434,13 @@ class _CoverageSummary:
                 stats["justified"] = True
                 stats["function-justified"] += 1
 
-    def _add_coverage_of_file(self, file_coverage: dict) -> None:
+    def _add_coverage_of_file(self, mapper: BuildItemMapper,
+                              file_coverage: dict) -> None:
         file_path = file_coverage["file"]
         digest = hashlib.md5(file_path.encode("utf-8"),
                              usedforsecurity=False).hexdigest()
-        link = f"{os.path.basename(file_path)}.{digest}"
-        link = f"{self.html_directory}/index.{link}.html"
-        file_link = f"`{spacify(file_path)} <{link}>`__"
+        file_link = f"{os.path.basename(file_path)}.{digest}"
+        file_link = f"{self.html_directory}/index.{file_link}.html"
         spot_to_justification = self.verifications.pop(file_path, {})
         stats = {
             "file-path": file_path,
@@ -453,7 +463,7 @@ class _CoverageSummary:
                                        spot_to_justification)
         for function in file_coverage["functions"]:
             self._add_function_stats(stats, function, spot_to_justification)
-        self._add_file_stats(stats, file_path, spot_to_justification)
+        self._add_file_stats(mapper, stats, file_path, spot_to_justification)
 
 
 class TestAggregator(BuildItem):
@@ -719,20 +729,22 @@ class TestAggregator(BuildItem):
             if no_spec_for_test_case:
                 unspec_test_cases.append(test_case)
 
-    def add_coverage_achievement(self, content: SphinxContent) -> None:
+    def add_coverage_achievement(self, content: SphinxContent,
+                                 mapper: BuildItemMapper) -> None:
         """ Add the code/branch coverage achievement to the content. """
         rows: list[list[str | int]] = [[
             "Target", "Configuration", "Scope", "Functions", "Status", "Lines",
             "Status", "Branches", "Status"
         ]]
         for target_data in self.targets.values():
-            target: str | int = (f"`{target_data['name']} "
-                                 f"<{target_data['link']}>`__")
+            target: str | int = mapper.format_link(target_data["name"],
+                                                   target_data["link"])
             for config_data in target_data["configs"]:
                 key = config_data["config-key"]
-                config: str | int = f"`{key} <{config_data['link']}>`__"
+                config: str | int = mapper.format_link(key,
+                                                       config_data["link"])
                 for coverage in config_data.get("coverage", []):
-                    summary = _CoverageSummary(self, coverage)
+                    summary = _CoverageSummary(self, mapper, coverage)
                     row = [target, config, coverage["scope"]]
                     for kind in _COVERAGE_KINDS:
                         row.append(summary.overall[f"{kind}-info"])
@@ -744,7 +756,7 @@ class TestAggregator(BuildItem):
                                font_size=-3)
 
     def add_coverage_of_config(self, content: SphinxContent,
-                               config_data: _Data,
+                               mapper: BuildItemMapper, config_data: _Data,
                                issues: dict[str, set[str]]) -> None:
         """
         Add the code/branch coverage data associated with the configuration
@@ -759,7 +771,7 @@ class TestAggregator(BuildItem):
                 "Status"
             ]]
             for coverage in config_data.get("coverage", []):
-                summary = _CoverageSummary(self, coverage)
+                summary = _CoverageSummary(self, mapper, coverage)
                 summaries.append(summary)
                 summary.get_issues(issues)
                 row = [summary.scope]
@@ -770,4 +782,4 @@ class TestAggregator(BuildItem):
             content.add_grid_table(rows, [34, 13, 7, 13, 7, 13, 7],
                                    font_size=-3)
         for summary in summaries:
-            summary.add_coverage_section(content)
+            summary.add_coverage_section(content, mapper)

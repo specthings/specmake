@@ -866,7 +866,7 @@ items.""")
     def get_sdd_link(self, kind: str, name: str) -> str:
         """ Return the SDD link for the name by kind. """
         elem_info = self.name_info[f"{kind}/{name}"]
-        return f"`{elem_info['name']} <{elem_info['link']}>`__"
+        return self.mapper.format_link(elem_info["name"], elem_info["link"])
 
     def get_file_sdd_link(self, path: str) -> str:
         """ Return the SDD link for the file path. """
@@ -883,8 +883,8 @@ items.""")
             if elem_info is not None:
                 break
         if elem_info is None:
-            raise ValueError("there is no SDD element with this name: {name}")
-        return f"`{elem_info['name']} <{elem_info['link']}>`__"
+            raise ValueError(f"there is no SDD element with this name: {name}")
+        return self.mapper.format_link(elem_info["name"], elem_info["link"])
 
 
 class SpecMapper(BuildItemMapper):
@@ -950,7 +950,7 @@ class SpecMapper(BuildItemMapper):
         assert item.enabled
         if name is None:
             name = item.spec_2
-        return f":ref:`{name} <{spec_label(item)}>`"
+        return self.format_reference(name, spec_label(item))
 
     def get_link(self, item: Item, document_key: None | str = None) -> str:
         if not item.enabled:

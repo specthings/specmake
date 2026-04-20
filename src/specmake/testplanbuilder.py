@@ -39,26 +39,6 @@ def _get_test_case_function(item: Item, ident: str) -> str:
     return f"{ident}_Run"
 
 
-def _add_test_results(content: SphinxContent, kind: str, item: Item) -> None:
-    content.add_rubric("TEST RESULTS:")
-    lines: list[str] = []
-    for test_results in item.view.get("test-results", {}).values():
-        for data in test_results:
-            config_data = data["config"]
-            target_data = config_data["target"]
-            name = f"Target - {target_data['name']}"
-            name = f"{name} / Configuration - {config_data['name']}"
-            test_suite = data.get("test-suite", None)
-            if test_suite is not None:
-                spec = item.cache[test_suite['uid']].spec_2
-                name = f"{name} / Test suite - {spec}"
-            lines.append(f"`{name} <{data['link']}>`__")
-    content.add_list(lines,
-                     f"""For this {kind}, the following test results are
-available:""",
-                     empty="There are no test results available.")
-
-
 class TestPlanBuilder(SpecDocumentBuilder):
     """ Builds a test plan document such as SVS or SUITP. """
 
@@ -98,6 +78,25 @@ class TestPlanBuilder(SpecDocumentBuilder):
             test_suites.sort()
         return test_suites
 
+    def _add_test_results(self, content: SphinxContent, kind: str,
+                          item: Item) -> None:
+        content.add_rubric("TEST RESULTS:")
+        lines: list[str] = []
+        for test_results in item.view.get("test-results", {}).values():
+            for data in test_results:
+                config_data = data["config"]
+                target_data = config_data["target"]
+                name = f"Target - {target_data['name']}"
+                name = f"{name} / Configuration - {config_data['name']}"
+                test_suite = data.get("test-suite", None)
+                if test_suite is not None:
+                    spec = item.cache[test_suite["uid"]].spec_2
+                    name = f"{name} / Test suite - {spec}"
+                lines.append(self.mapper.format_link(name, data["link"]))
+        content.add_list(lines, f"For this {kind}, "
+                         "the following test results are available:",
+                         empty="There are no test results available.")
+
     def _add_test_suite(self, content: SphinxContent, item: Item) -> None:
         with content.directive("raw", "latex"):
             content.add("\\clearpage")
@@ -107,7 +106,7 @@ class TestPlanBuilder(SpecDocumentBuilder):
                 self.wrap(content, item, item["test-brief"])
                 self.wrap(content, item, item["test-description"])
                 if item.type != "memory-benchmark":
-                    _add_test_results(content, "test suite", item)
+                    self._add_test_results(content, "test suite", item)
                 self.add_item_changes(content, item)
             with content.section("Features to be tested"):
                 gathered_test_cases: list[Item] = []
@@ -264,7 +263,7 @@ in the file {link_hub.get_file_sdd_link(item['test-target'])}.""")
                 ident = to_camel_case(item.uid[1:])
                 self._documenter[item.type](content, link_hub, item, ident)
                 self._add_test_suite_memberships(content, item)
-                _add_test_results(content, "test case", item)
+                self._add_test_results(content, "test case", item)
                 self.add_item_changes(content, item)
             with content.section("Input specifications"):
                 content.add("""The test case starts execution in the
