@@ -98,7 +98,8 @@ component.
     ]
     related_items = rtems_item_cache.get_related_requirements()
     assert [item.uid for item in related_items] == [
-        "/req/perf-runtime", "/req/perf-runtime-environment",
+        "/glossary/group", "/req/glossary", "/req/perf-runtime",
+        "/req/perf-runtime-environment",
         "/req/perf-runtime-environment-dirty-cache",
         "/req/perf-runtime-environment-full-cache",
         "/req/perf-runtime-environment-hot-cache",
@@ -112,8 +113,8 @@ component.
     ]
     related_items = rtems_item_cache.get_related_interfaces_and_requirements()
     assert [item.uid for item in related_items] == [
-        "/c/if/uint32_t", "/req/api", "/req/perf-runtime",
-        "/req/perf-runtime-environment",
+        "/c/if/uint32_t", "/glossary/group", "/req/api", "/req/glossary",
+        "/req/perf-runtime", "/req/perf-runtime-environment",
         "/req/perf-runtime-environment-dirty-cache",
         "/req/perf-runtime-environment-full-cache",
         "/req/perf-runtime-environment-hot-cache",

@@ -144,11 +144,11 @@ validations, so the corresponding table entries are N/A.
     +-+-+-+-+
     | Interface / Requirement | Status | Refinement / Validation | Role |
     +=+=+=+=+
-    | _`/req/root` | **not validated** | ``/​glossary/​group`` | validated refinement |
+    | _`/req/root` | **not validated** | `/glossary/group`_ | validated refinement |
     + + +-+-+
     | | | `/​req/​api </pkg/doc-ts-icd/html/requirements-and-design.html#specreqapi>`__ | **not validated** refinement |
     + + +-+-+
-    | | | ``/​req/​glossary`` | **not validated** refinement |
+    | | | `/req/glossary`_ | **not validated** refinement |
     + + +-+-+
     | | | `/req/perf-runtime`_ | **not validated** refinement |
     + + +-+-+
@@ -169,6 +169,10 @@ validations, so the corresponding table entries are N/A.
     | | | `/testsuites/unit`_ | **not validated** refinement |
     + + +-+-+
     | | | `/testsuites/validation`_ | **not validated** refinement |
+    +-+-+-+-+
+    | _`/glossary/group` | validated | N/A | N/A |
+    +-+-+-+-+
+    | _`/req/glossary` | **not validated** | N/A | N/A |
     +-+-+-+-+
     | _`/req/perf-runtime` | **not validated** | `/req/perf-runtime-environment`_ | **not validated** refinement |
     +-+-+-+-+
@@ -1022,6 +1026,58 @@ Design requirements and implementation constraints
 
     \\clearpage
 
+.. _SpecGlossaryGroup:
+
+spec:/glossary/group
+====================
+
+.. rubric:: REQUIREMENT:
+
+The system shall have a general glossary of terms.
+
+.. rubric:: REFINEMENT:
+
+This glossary group refines the design requirement `spec:/​req/​root
+</pkg/doc-ts-srs/html/requirements.html#specreqroot>`__.
+
+.. rubric:: VALIDATION:
+
+This glossary group is validated.
+
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
+
+.. raw:: latex
+
+    \clearpage
+
+.. _SpecReqGlossary:
+
+spec:/req/glossary
+==================
+
+.. rubric:: REQUIREMENT:
+
+The system shall have a glossary of specification-specific terms.
+
+.. rubric:: REFINEMENT:
+
+This glossary group refines the design requirement `spec:/​req/​root
+</pkg/doc-ts-srs/html/requirements.html#specreqroot>`__.
+
+.. rubric:: VALIDATION:
+
+This glossary group is **not validated**.
+
+.. rubric:: CHANGES:
+
+There are no changes since Name v1.
+
+.. raw:: latex
+
+    \clearpage
+
 .. _SpecReqRoot:
 
 spec:/req/root
@@ -1035,12 +1091,14 @@ The software product shall be a real-time operating system.
 
 This design requirement is refined by the following items:
 
-- ``spec:/​glossary/​group``
+- `spec:/​glossary/​group
+  </pkg/doc-ts-srs/html/requirements.html#specglossarygroup>`__
 
 - `spec:/​req/​api
   </pkg/doc-ts-icd/html/requirements-and-design.html#specreqapi>`__
 
-- ``spec:/​req/​glossary``
+- `spec:/​req/​glossary
+  </pkg/doc-ts-srs/html/requirements.html#specreqglossary>`__
 
 - `spec:/​req/​perf-runtime
   </pkg/doc-ts-srs/html/requirements.html#specreqperfruntime>`__
@@ -1074,13 +1132,17 @@ This design requirement is refined by the following items:
 The validation of this **not validated** design requirement depends on the
 following items:
 
-- ``spec:/​glossary/​group`` (validated refinement)
+- `spec:/​glossary/​group
+  </pkg/doc-ts-srs/html/requirements.html#specglossarygroup>`__
+  (validated refinement)
 
 - `spec:/​req/​api
   </pkg/doc-ts-icd/html/requirements-and-design.html#specreqapi>`__
   (**not validated** refinement)
 
-- ``spec:/​req/​glossary`` (**not validated** refinement)
+- `spec:/​req/​glossary
+  </pkg/doc-ts-srs/html/requirements.html#specreqglossary>`__
+  (**not validated** refinement)
 
 - `spec:/​req/​perf-runtime
   </pkg/doc-ts-srs/html/requirements.html#specreqperfruntime>`__
