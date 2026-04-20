@@ -27,7 +27,7 @@
 import functools
 import itertools
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 from xml.etree import ElementTree
 
 from specitems import Item, ItemGetValueContext, make_label
@@ -58,7 +58,7 @@ def _type(elem: Any) -> str:
     return elem.find('type').text
 
 
-def _sdd_link(name_info: Dict[str, Any], link: str) -> str:
+def _sdd_link(name_info: dict[str, Any], link: str) -> str:
     return f"{name_info['dir/sdd']}/{link}"
 
 
@@ -69,8 +69,8 @@ def _get_file_path(elem: Any) -> str:
     return f"{path}{elem.find('name').text}"
 
 
-def _add_doxygen_item(name_info: Dict[str, Any], elem: Any, parent: Any,
-                      name: str, elem_info: Dict[str, Any]) -> None:
+def _add_doxygen_item(name_info: dict[str, Any], elem: Any, parent: Any,
+                      name: str, elem_info: dict[str, Any]) -> None:
     parent_kind = parent.attrib.get("kind", "")
     if parent_kind == "class":
         return
@@ -87,7 +87,7 @@ def _add_doxygen_item(name_info: Dict[str, Any], elem: Any, parent: Any,
         elem_info_2.setdefault("groups", set()).add(parent.find("name").text)
 
 
-def _doxygen_define(name_info: Dict[str, Any], elem: Any, parent: Any) -> None:
+def _doxygen_define(name_info: dict[str, Any], elem: Any, parent: Any) -> None:
     name = elem.find("name").text
     arglist = _arglist(elem)
     elem_info = {
@@ -98,7 +98,7 @@ def _doxygen_define(name_info: Dict[str, Any], elem: Any, parent: Any) -> None:
     _add_doxygen_item(name_info, elem, parent, f"define/{name}", elem_info)
 
 
-def _doxygen_enumeration(name_info: Dict[str, Any], elem: Any,
+def _doxygen_enumeration(name_info: dict[str, Any], elem: Any,
                          parent: Any) -> None:
     name = elem.find("name").text
     elem_info = {
@@ -109,7 +109,7 @@ def _doxygen_enumeration(name_info: Dict[str, Any], elem: Any,
     _add_doxygen_item(name_info, elem, parent, f"enum/{name}", elem_info)
 
 
-def _doxygen_enumvalue(name_info: Dict[str, Any], elem: Any,
+def _doxygen_enumvalue(name_info: dict[str, Any], elem: Any,
                        parent: Any) -> None:
     name = elem.find("name").text
     elem_info = {
@@ -120,7 +120,7 @@ def _doxygen_enumvalue(name_info: Dict[str, Any], elem: Any,
     _add_doxygen_item(name_info, elem, parent, f"enumerator/{name}", elem_info)
 
 
-def _doxygen_file(name_info: Dict[str, Any], elem: Any, parent: Any) -> None:
+def _doxygen_file(name_info: dict[str, Any], elem: Any, parent: Any) -> None:
     prefix = f"{name_info['dir/source']}"
     name = _get_file_path(elem)
     name_info[f"file-key/{name}"] = name
@@ -136,7 +136,7 @@ def _doxygen_file(name_info: Dict[str, Any], elem: Any, parent: Any) -> None:
 
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-positional-arguments
-def _doxygen_decl(name_info: Dict[str, Any],
+def _doxygen_decl(name_info: dict[str, Any],
                   elem: Any,
                   parent: Any,
                   kind: str,
@@ -151,16 +151,16 @@ def _doxygen_decl(name_info: Dict[str, Any],
     _add_doxygen_item(name_info, elem, parent, f"{kind}/{name}", elem_info)
 
 
-def _doxygen_function(name_info: Dict[str, Any], elem: Any,
+def _doxygen_function(name_info: dict[str, Any], elem: Any,
                       parent: Any) -> None:
     _doxygen_decl(name_info, elem, parent, "function", "fn", "()")
 
 
-def _doxygen_group(name_info: Dict[str, Any], elem: Any, parent: Any) -> None:
-    file_keys: List[str] = []
+def _doxygen_group(name_info: dict[str, Any], elem: Any, parent: Any) -> None:
+    file_keys: list[str] = []
     for key in elem.findall("file"):
         file_keys.append(f"{key.attrib.get('path', '')}{key.text}")
-    subgroups: List[str] = []
+    subgroups: list[str] = []
     for key in elem.findall("subgroup"):
         subgroups.append(key.text)
     group = elem.find("name").text
@@ -176,7 +176,7 @@ def _doxygen_group(name_info: Dict[str, Any], elem: Any, parent: Any) -> None:
     _add_doxygen_item(name_info, elem, parent, f"group/{group}", elem_info)
 
 
-def _doxygen_type(name_info: Dict[str, Any], elem: Any, parent: Any,
+def _doxygen_type(name_info: dict[str, Any], elem: Any, parent: Any,
                   kind: str) -> None:
     if elem.tag == "compound":
         name = elem.find("name").text
@@ -194,20 +194,20 @@ def _doxygen_type(name_info: Dict[str, Any], elem: Any, parent: Any,
     _add_doxygen_item(name_info, elem, parent, f"type/{name}", elem_info)
 
 
-def _doxygen_struct(name_info: Dict[str, Any], elem: Any, parent: Any) -> None:
+def _doxygen_struct(name_info: dict[str, Any], elem: Any, parent: Any) -> None:
     _doxygen_type(name_info, elem, parent, "struct")
 
 
-def _doxygen_typedef(name_info: Dict[str, Any], elem: Any,
+def _doxygen_typedef(name_info: dict[str, Any], elem: Any,
                      parent: Any) -> None:
     _doxygen_decl(name_info, elem, parent, "type", "typedef")
 
 
-def _doxygen_union(name_info: Dict[str, Any], elem: Any, parent: Any) -> None:
+def _doxygen_union(name_info: dict[str, Any], elem: Any, parent: Any) -> None:
     _doxygen_type(name_info, elem, parent, "union")
 
 
-def _doxygen_variable(name_info: Dict[str, Any], elem: Any,
+def _doxygen_variable(name_info: dict[str, Any], elem: Any,
                       parent: Any) -> None:
     if parent.attrib.get("kind", "") in ("struct", "union"):
         return
@@ -218,7 +218,7 @@ def _doxygen_variable(name_info: Dict[str, Any], elem: Any,
     _doxygen_decl(name_info, elem, parent, "object", "var")
 
 
-def _doxygen_nop(_name_info: Dict[str, Any], _elem: Any, _parent: Any) -> None:
+def _doxygen_nop(_name_info: dict[str, Any], _elem: Any, _parent: Any) -> None:
     pass
 
 
@@ -247,7 +247,7 @@ def _depth_iter(element):
             yield (element_2, stack[-2][1])
 
 
-def _gather_name_info(name_info: Dict[str, Any], tagfile: str) -> None:
+def _gather_name_info(name_info: dict[str, Any], tagfile: str) -> None:
     tree = ElementTree.parse(tagfile)
     for elem, parent in _depth_iter(tree.getroot()):
         try:
@@ -388,12 +388,12 @@ def _spec_link(item: Item, link: str) -> str:
     return f"`{item.spec_2} <{link}>`__"
 
 
-def _augment_default(item: Item, _name_info: Dict[str, Any]) -> None:
+def _augment_default(item: Item, _name_info: dict[str, Any]) -> None:
     item.view["default-document"] = "none"
     item.view["document-links"] = {"none": f"``{item.spec_2}``"}
 
 
-def _add_doxygen_info(item: Item, name_info: Dict[str, Any]) -> None:
+def _add_doxygen_info(item: Item, name_info: dict[str, Any]) -> None:
     try:
         elem_info = name_info[_ITEM_SPECIFICS[item.type][5](item)]
     except KeyError:
@@ -410,7 +410,7 @@ def _anchor(item: Item) -> str:
     return f"#spec{item.ident.lower()}"
 
 
-def _augment_interface(item: Item, name_info: Dict[str, Any]) -> None:
+def _augment_interface(item: Item, name_info: dict[str, Any]) -> None:
     item.view["default-document"] = "icd"
     link = (f"{name_info['dir/icd']}/"
             f"requirements-and-design.html{_anchor(item)}")
@@ -424,7 +424,7 @@ def _augment_interface(item: Item, name_info: Dict[str, Any]) -> None:
     _add_doxygen_info(item, name_info)
 
 
-def _augment_requirement(item: Item, name_info: Dict[str, Any]) -> None:
+def _augment_requirement(item: Item, name_info: dict[str, Any]) -> None:
     item.view["default-document"] = "srs"
     link = f"{name_info['dir/srs']}/requirements.html{_anchor(item)}"
     spec_link = _spec_link(item, link)
@@ -436,12 +436,12 @@ def _augment_requirement(item: Item, name_info: Dict[str, Any]) -> None:
     }
 
 
-def _augment_design_group(item: Item, name_info: Dict[str, Any]) -> None:
+def _augment_design_group(item: Item, name_info: dict[str, Any]) -> None:
     _augment_requirement(item, name_info)
     _add_doxygen_info(item, name_info)
 
 
-def _augment_requirement_self_test(item: Item, name_info: Dict[str,
+def _augment_requirement_self_test(item: Item, name_info: dict[str,
                                                                Any]) -> None:
     _augment_requirement(item, name_info)
     item.view["document-links"]["test-plan"] = _spec_link(
@@ -449,7 +449,7 @@ def _augment_requirement_self_test(item: Item, name_info: Dict[str,
         f"test-case-specification.html{_anchor(item)}")
 
 
-def _augment_interface_requirement(item: Item, name_info: Dict[str,
+def _augment_interface_requirement(item: Item, name_info: dict[str,
                                                                Any]) -> None:
     item.view["default-document"] = "icd"
     link = (f"{name_info['dir/icd']}/"
@@ -463,7 +463,7 @@ def _augment_interface_requirement(item: Item, name_info: Dict[str,
     }
 
 
-def _augment_test_case(item: Item, name_info: Dict[str, Any]) -> None:
+def _augment_test_case(item: Item, name_info: dict[str, Any]) -> None:
     try:
         if "validation" in item.parent("test-case").parent(
                 "requirement-refinement").uid:
@@ -488,7 +488,7 @@ def _augment_test_case(item: Item, name_info: Dict[str, Any]) -> None:
     }
 
 
-def _augment_test_suite_for_document(item: Item, name_info: Dict[str, Any],
+def _augment_test_suite_for_document(item: Item, name_info: dict[str, Any],
                                      document: str) -> None:
     item.view["default-document"] = document
     prefix = name_info[f"dir/{document}"]
@@ -503,7 +503,7 @@ def _augment_test_suite_for_document(item: Item, name_info: Dict[str, Any],
     }
 
 
-def _augment_test_suite(item: Item, name_info: Dict[str, Any]) -> None:
+def _augment_test_suite(item: Item, name_info: dict[str, Any]) -> None:
     if "validation" in item.parent("requirement-refinement").uid:
         document = "svs"
     else:
@@ -511,11 +511,11 @@ def _augment_test_suite(item: Item, name_info: Dict[str, Any]) -> None:
     _augment_test_suite_for_document(item, name_info, document)
 
 
-def _augment_memory_benchmark(item: Item, name_info: Dict[str, Any]) -> None:
+def _augment_memory_benchmark(item: Item, name_info: dict[str, Any]) -> None:
     _augment_test_suite_for_document(item, name_info, "svs")
 
 
-def _augment_other_validation(item: Item, name_info: Dict[str, Any]) -> None:
+def _augment_other_validation(item: Item, name_info: dict[str, Any]) -> None:
     item.view["default-document"] = "svs"
     prefix = name_info["dir/svs"]
     link = f"{prefix}/validation-other.html{_anchor(item)}"
@@ -710,8 +710,8 @@ def get_kind(item: Item) -> str:
     return _ITEM_SPECIFICS[item.type][0]
 
 
-def _get_group_items(name_info: Dict[str, Any], spec: RTEMSItemCache,
-                     info: Dict[str, Any]) -> List[Item]:
+def _get_group_items(name_info: dict[str, Any], spec: RTEMSItemCache,
+                     info: dict[str, Any]) -> list[Item]:
     items = []
     try:
         for group in info["groups"]:
@@ -732,8 +732,8 @@ def _get_group_items(name_info: Dict[str, Any], spec: RTEMSItemCache,
     return items
 
 
-def _get_associated_items(name_info: Dict[str, Any], spec: RTEMSItemCache,
-                          name: str, info: Dict[str, Any]) -> List[Item]:
+def _get_associated_items(name_info: dict[str, Any], spec: RTEMSItemCache,
+                          name: str, info: dict[str, Any]) -> list[Item]:
     item = spec.name_to_item.get(name, None)
     if item is not None:
         return [item]
@@ -751,15 +751,15 @@ def _get_associated_items(name_info: Dict[str, Any], spec: RTEMSItemCache,
     return _get_group_items(name_info, spec, file_info)
 
 
-def _augment_name_info_default(name_info: Dict[str, Any], spec: RTEMSItemCache,
-                               name: str, info: Dict[str, Any]) -> None:
+def _augment_name_info_default(name_info: dict[str, Any], spec: RTEMSItemCache,
+                               name: str, info: dict[str, Any]) -> None:
     for variant in itertools.chain([info], info.get("variants", [])):
         items = _get_associated_items(name_info, spec, name, variant)
         variant["items"] = set(items)
 
 
-def _augment_name_info_group(name_info: Dict[str, Any], spec: RTEMSItemCache,
-                             name: str, info: Dict[str, Any]) -> None:
+def _augment_name_info_group(name_info: dict[str, Any], spec: RTEMSItemCache,
+                             name: str, info: dict[str, Any]) -> None:
     try:
         items = [spec.name_to_item[name]]
     except KeyError:
@@ -767,8 +767,8 @@ def _augment_name_info_group(name_info: Dict[str, Any], spec: RTEMSItemCache,
     info["items"] = set(items)
 
 
-def _augment_name_info_nop(_name_info: Dict[str, Any], _spec: RTEMSItemCache,
-                           _name: str, _info: Dict[str, Any]) -> None:
+def _augment_name_info_nop(_name_info: dict[str, Any], _spec: RTEMSItemCache,
+                           _name: str, _info: dict[str, Any]) -> None:
     pass
 
 
@@ -789,12 +789,12 @@ def _check_mapping_completeness(spec: RTEMSItemCache) -> None:
         raise ValueError(f"groups without items: {' '.join(sorted(without))}")
 
 
-def _augment_name_info(name_info: Dict[str, Any],
+def _augment_name_info(name_info: dict[str, Any],
                        spec: RTEMSItemCache) -> None:
     # Associate files and groups with groups
     for group in name_info["groups/all"]:
         info = name_info[f"group/{group}"]
-        files: List[str] = []
+        files: list[str] = []
         for key in sorted(info["file-keys"]):
             file_key = name_info[f"file-key/{key}"]
             files.append(file_key)
@@ -834,7 +834,7 @@ class LinkHub(BuildItem):
 
     def __init__(self, director: PackageBuildDirector, item: Item):
         super().__init__(director, item)
-        self.name_info = {}  # type: Dict[str, Any]
+        self.name_info: dict[str, Any] = {}
         for link in self.item.links_to_parents("document"):
             target = self.director[link.item.uid]
             assert isinstance(target, DirectoryState)
@@ -952,7 +952,7 @@ class SpecMapper(BuildItemMapper):
             name = item.spec_2
         return self.format_reference(name, spec_label(item))
 
-    def get_link(self, item: Item, document_key: None | str = None) -> str:
+    def get_link(self, item: Item, document_key: Optional[str] = None) -> str:
         if not item.enabled:
             return _ITEM_SPECIFICS.get(item.type, _ITEM_DEFAULT)[3](item)
         try:
