@@ -535,7 +535,7 @@ _ITEM_DEFAULT = ("unknown", _augment_default, _ref_default, _ref_disabled_spec,
 _ITEM_SPECIFICS = {
     "constraint": ("constraint", _augment_requirement, _ref_spec,
                    _ref_disabled_spec, _link_default, _name_info_key_default),
-    "glossary/group": ("glossary group", _augment_default, _ref_default,
+    "glossary/group": ("glossary group", _augment_requirement, _ref_spec,
                        _ref_disabled_spec, _link_default,
                        _name_info_key_default),
     "glossary/term": ("glossary term", _augment_default, _ref_default,

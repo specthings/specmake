@@ -127,7 +127,7 @@ class SRSBuilder(SpecDocumentBuilder):
                 self._add_requirements(
                     content,
                     "Design requirements and implementation constraints",
-                    ("requirement/non-functional/design",
+                    ("glossary/group", "requirement/non-functional/design",
                      "requirement/non-functional/design-group",
                      "requirement/non-functional/design-target"))
                 with content.section("Security and privacy requirements"):

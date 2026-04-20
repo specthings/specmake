@@ -35,7 +35,7 @@ def test_svrbuilder(caplog, tmpdir):
         ["aggregate-test-results", "link-hub", "djf-svr"])
     svr_builder = package.director["/pkg/deployment/doc-djf-svr"]
     assert isinstance(svr_builder, SVRBuilder)
-    assert len(svr_builder.get_items_of_document()) == 62
+    assert len(svr_builder.get_items_of_document()) == 64
     assert text == """.. SPDX-License-Identifier: CC-BY-SA-4.0
 
 .. Copyright (C) 2026 embedded brains GmbH & Co. KG
@@ -1307,6 +1307,10 @@ driver, no Newlib reentrancy support, and no file system.
     +-+-+
     | Requirement | Design Component |
     +=+=+
+    | `spec:/​glossary/​group </pkg/doc-ts-srs/html/requirements.html#specglossarygroup>`__ | N/A (no directly associated design components) |
+    +-+-+
+    | `spec:/​req/​glossary </pkg/doc-ts-srs/html/requirements.html#specreqglossary>`__ | N/A (no directly associated design components) |
+    +-+-+
     | `spec:/​req/​perf-runtime </pkg/doc-ts-srs/html/requirements.html#specreqperfruntime>`__ | N/A (no directly associated design components) |
     +-+-+
     | `spec:/​req/​perf-runtime-environment </pkg/doc-ts-srs/html/requirements.html#specreqperfruntimeenvironment>`__ | N/A (no directly associated design components) |
