@@ -1,0 +1,45 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: sub-sub-t-link-hub
+links:
+- hash: null
+  name: component
+  role: input
+  uid: component
+- role: link-hub
+  uid: component
+- hash: null
+  name: spec
+  role: input
+  uid: ../../steps/rtems-item-cache
+- hash: null
+  name: tagfile
+  role: input
+  uid: ../../source/tagfile
+- directory: html
+  name: icd
+  role: document
+  uid: ../../deployment/doc-ts-icd-dummy
+- directory: html
+  name: sdd
+  role: document
+  uid: ../../deployment/doc-ddf-sdd
+- directory: html
+  name: srs
+  role: document
+  uid: ../../deployment/doc-ts-srs-dummy
+- directory: html
+  name: suitp
+  role: document
+  uid: ../../deployment/doc-djf-suitp
+- directory: html
+  name: svs
+  role: document
+  uid: ../../deployment/doc-djf-svs-dummy
+- directory: .
+  name: source
+  role: document
+  uid: ../../source/repo
+pkg-type: link-hub
+type: pkg
