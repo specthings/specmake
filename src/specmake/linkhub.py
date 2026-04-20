@@ -32,7 +32,7 @@ import os
 from typing import Any, Optional
 from xml.etree import ElementTree
 
-from specitems import Item, ItemGetValueContext, make_label
+from specitems import Item, ItemGetValueContext, list_terms, make_label
 
 from .directorystate import DirectoryState
 from .pkgitems import BuildItem, BuildItemMapper, PackageBuildDirector
@@ -965,43 +965,28 @@ class SpecMapper(BuildItemMapper):
         super().__init__(item)
         self._build_item = build_item
         self._whoami = whoami
-        self.add_get_value("interface/appl-config-option/feature-enable:/name",
-                           self._get_value_link)
-        self.add_get_value("interface/appl-config-option/feature:/name",
-                           self._get_value_link)
-        self.add_get_value("interface/appl-config-option/initializer:/name",
-                           self._get_value_link)
-        self.add_get_value("interface/appl-config-option/integer:/name",
-                           self._get_value_link)
-        self.add_get_value("interface/define:/name", self._get_value_link)
-        self.add_get_value("interface/enum:/name", self._get_value_link)
-        self.add_get_value("interface/enumerator:/name", self._get_value_link)
-        self.add_get_value("interface/function:/name", self._get_value_link)
-        self.add_get_value("interface/group:/name", self._get_value_link)
-        self.add_get_value("interface/header-file:/path", self._get_value_link)
-        self.add_get_value("interface/macro:/name", self._get_value_link)
-        self.add_get_value("interface/struct:/name", self._get_value_link)
-        self.add_get_value("interface/typedef:/name", self._get_value_link)
-        self.add_get_value("interface/union:/name", self._get_value_link)
-        self.add_get_value("interface/unspecified-define:/name",
-                           self._get_value_link)
-        self.add_get_value("interface/unspecified-enumerator:/name",
-                           self._get_value_link)
-        self.add_get_value("interface/unspecified-function:/name",
-                           self._get_value_link)
-        self.add_get_value("interface/unspecified-group:/name",
-                           self._get_value_link)
-        self.add_get_value("interface/unspecified-enum:/name",
-                           self._get_value_link)
-        self.add_get_value("interface/unspecified-struct:/name",
-                           self._get_value_link)
-        self.add_get_value("interface/unspecified-typedef:/name",
-                           self._get_value_link)
-        self.add_get_value("interface/unspecified-union:/name",
-                           self._get_value_link)
-        self.add_get_value("interface/variable:/name", self._get_value_link)
-        self.add_get_value("requirement/non-functional/design-group:/name",
-                           self._get_value_link)
+        for type_path_key in (
+                "interface/appl-config-option/feature-enable:/name",
+                "interface/appl-config-option/feature:/name",
+                "interface/appl-config-option/initializer:/name",
+                "interface/appl-config-option/integer:/name",
+                "interface/define:/name", "interface/enum:/name",
+                "interface/enumerator:/name", "interface/function:/name",
+                "interface/group:/name", "interface/header-file:/path",
+                "interface/macro:/name", "interface/struct:/name",
+                "interface/typedef:/name", "interface/union:/name",
+                "interface/unspecified-define:/name",
+                "interface/unspecified-enum:/name",
+                "interface/unspecified-enumerator:/name",
+                "interface/unspecified-function:/name",
+                "interface/unspecified-group:/name",
+                "interface/unspecified-macro:/name",
+                "interface/unspecified-struct:/name",
+                "interface/unspecified-typedef:/name",
+                "interface/unspecified-union:/name",
+                "interface/variable:/name",
+                "requirement/non-functional/design-group:/name"):
+            self.add_get_value(type_path_key, self._get_value_link)
         for type_name in self.item.cache.items_by_type.keys():
             self.add_get_value(f"{type_name}:/spec", self._get_value_link)
         for kind in ("define", "enum", "enumerator", "file", "function",
@@ -1027,8 +1012,31 @@ class SpecMapper(BuildItemMapper):
         try:
             default_key = item.view["default-document-key"]
         except KeyError:
-            name = _ITEM_SPECIFICS.get(item.type, _ITEM_DEFAULT)[2](item)
-            return self.format_code(name)
+            build_item = self._build_item
+            component_links: list[str] = []
+            for component in build_item.component.components():
+                with build_item.component_scope(component):
+                    try:
+                        default_key = item.view["default-document-key"]
+                    except KeyError:
+                        continue
+                    if document_key is None:
+                        component_key = default_key
+                    else:
+                        component_key = document_key
+                    assert component_key != self._whoami
+                    name = item.view["name"]
+                    path = item.view["document-paths"].get(
+                        component_key, item.view["default-document-path"])
+                    component_links.append(
+                        self.format_link(component.item.spec_2, path))
+            if not component_links:
+                name = _ITEM_SPECIFICS.get(item.type, _ITEM_DEFAULT)[2](item)
+                return self.format_code(name)
+            if len(component_links) == 1:
+                return self.format_link(name, path)
+            return (f"{self.format_code(name)} "
+                    f"(for {list_terms(component_links)})")
         if document_key is None:
             document_key = default_key
         name = item.view["name"]

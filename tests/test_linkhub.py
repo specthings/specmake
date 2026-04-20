@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Tests for the linkhub module. """
 
-# Copyright (C) 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2025, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -32,8 +32,8 @@ from specmake.linkhub import (_name_info_key_default, get_kind, SpecMapper)
 from .util import create_package, get_and_clear_log
 
 
-def test_linkhub(caplog, tmpdir):
-    package = create_package(caplog, Path(tmpdir), Path("spec-packagebuild"),
+def test_linkhub(caplog, tmp_path):
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
                              ["djf-svs", "link-hub"])
     item_cache = package.item.cache
     director = package.director
@@ -45,43 +45,43 @@ def test_linkhub(caplog, tmpdir):
     link_hub = director["/pkg/steps/link-hub"]
     assert link_hub.get_sdd_link(
         "function", "blub"
-    ) == f"`blub() <{tmpdir}/pkg/doc-ddf-sdd/html/group__Blub.html#ga754ccc677acbd87ede8b3c082bb9ff6b>`__"
+    ) == f"`blub() <{tmp_path}/pkg/doc-ddf-sdd/html/group__Blub.html#ga754ccc677acbd87ede8b3c082bb9ff6b>`__"
     assert link_hub.get_file_sdd_link(
-        "a.c") == f"`a.c <{tmpdir}/pkg/doc-ddf-sdd/html/a_8c.html>`__"
+        "a.c") == f"`a.c <{tmp_path}/pkg/doc-ddf-sdd/html/a_8c.html>`__"
     assert link_hub.get_function_sdd_link(
         "blub"
-    ) == f"`blub() <{tmpdir}/pkg/doc-ddf-sdd/html/group__Blub.html#ga754ccc677acbd87ede8b3c082bb9ff6b>`__"
+    ) == f"`blub() <{tmp_path}/pkg/doc-ddf-sdd/html/group__Blub.html#ga754ccc677acbd87ede8b3c082bb9ff6b>`__"
 
     mapper = SpecMapper("icd", link_hub, link_hub.item)
     assert mapper.substitute(
         "${.:/sdd-define:DISABLED}"
-    ) == f"`DISABLED <{tmpdir}/pkg/doc-ddf-sdd/html/group__Blub.html#gabd5c8ab57c190a6522ccdbf0ed7577da>`__"
+    ) == f"`DISABLED <{tmp_path}/pkg/doc-ddf-sdd/html/group__Blub.html#gabd5c8ab57c190a6522ccdbf0ed7577da>`__"
     assert mapper.substitute(
         "${.:/sdd-enum:the_enum}"
-    ) == f"`the_enum <{tmpdir}/pkg/doc-ddf-sdd/html/group__Blub.html#ga582a1afc79f3b607104a52d7aa268624>`__"
+    ) == f"`the_enum <{tmp_path}/pkg/doc-ddf-sdd/html/group__Blub.html#ga582a1afc79f3b607104a52d7aa268624>`__"
     assert mapper.substitute(
         "${.:/sdd-enumerator:ENUMERATOR}"
-    ) == f"`ENUMERATOR <{tmpdir}/pkg/doc-ddf-sdd/html/group__Blub.html#gga582a1afc79f3b607104a52d7aa268624a183cf8edbca25c5db49f6fda4224f87a>`__"
+    ) == f"`ENUMERATOR <{tmp_path}/pkg/doc-ddf-sdd/html/group__Blub.html#gga582a1afc79f3b607104a52d7aa268624a183cf8edbca25c5db49f6fda4224f87a>`__"
     assert mapper.substitute(
         "${.:/sdd-file:a.c}"
-    ) == f"`a.c <{tmpdir}/pkg/doc-ddf-sdd/html/a_8c.html>`__"
+    ) == f"`a.c <{tmp_path}/pkg/doc-ddf-sdd/html/a_8c.html>`__"
     assert mapper.substitute(
         "${.:/sdd-function:blub}"
-    ) == f"`blub() <{tmpdir}/pkg/doc-ddf-sdd/html/group__Blub.html#ga754ccc677acbd87ede8b3c082bb9ff6b>`__"
+    ) == f"`blub() <{tmp_path}/pkg/doc-ddf-sdd/html/group__Blub.html#ga754ccc677acbd87ede8b3c082bb9ff6b>`__"
     assert mapper.substitute(
         "${.:/sdd-group:GroupA}"
-    ) == f"`A <{tmpdir}/pkg/doc-ddf-sdd/html/group__GroupA.html>`__"
+    ) == f"`A <{tmp_path}/pkg/doc-ddf-sdd/html/group__GroupA.html>`__"
     assert mapper.substitute(
         "${.:/sdd:GroupA}"
-    ) == f"`A <{tmpdir}/pkg/doc-ddf-sdd/html/group__GroupA.html>`__"
+    ) == f"`A <{tmp_path}/pkg/doc-ddf-sdd/html/group__GroupA.html>`__"
     with pytest.raises(ValueError):
         mapper.substitute("${.:/sdd:DoesNotExist}")
     assert mapper.substitute(
         "${.:/sdd-object:obj}"
-    ) == f"`obj <{tmpdir}/pkg/doc-ddf-sdd/html/group__Blub.html#gafc83d933ee990064a19b6b66ccad1800>`__"
+    ) == f"`obj <{tmp_path}/pkg/doc-ddf-sdd/html/group__Blub.html#gafc83d933ee990064a19b6b66ccad1800>`__"
     assert mapper.substitute(
         "${.:/sdd-type:Union}"
-    ) == f"`Union <{tmpdir}/pkg/doc-ddf-sdd/html/unionUnion.html>`__"
+    ) == f"`Union <{tmp_path}/pkg/doc-ddf-sdd/html/unionUnion.html>`__"
 
     assert mapper.substitute(
         "${/rtems/if/func:/spec}") == ":ref:`blub() <SpecRtemsIfFunc>`"
@@ -98,7 +98,7 @@ def test_linkhub(caplog, tmpdir):
                            "icd") == ":ref:`blub() <SpecRtemsIfFunc>`"
     assert mapper.get_link(
         item_cache["/req/root"], "foobar"
-    ) == f"`spec:/​req/​root <{tmpdir}/pkg/doc-ts-srs/html/requirements.html#specreqroot>`__"
+    ) == f"`spec:/​req/​root <{tmp_path}/pkg/doc-ts-srs/html/requirements.html#specreqroot>`__"
     assert mapper.get_link(item_cache["/req/disabled"],
                            "foobar") == "``spec:/​req/​disabled``"
     assert mapper.get_link(item_cache["/rtems/if/forward-decl-disabled"],
@@ -111,8 +111,8 @@ def test_linkhub(caplog, tmpdir):
     assert get_kind(item_cache["/rtems/if/func"]) == "directive"
 
 
-def test_linkhub_no_test_to_req(caplog, tmpdir):
-    package = create_package(caplog, Path(tmpdir), Path("spec-packagebuild"),
+def test_linkhub_no_test_to_req(caplog, tmp_path):
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
                              ["djf-svs", "link-hub"])
     item_cache = package.item.cache
     item_cache.remove_item("/build/test-suite")
@@ -122,31 +122,31 @@ def test_linkhub_no_test_to_req(caplog, tmpdir):
         package.director.build_package()
 
 
-def test_linkhub_files_without_group(caplog, tmpdir):
+def test_linkhub_files_without_group(caplog, tmp_path):
     package = create_package(
-        caplog, Path(tmpdir), Path("spec-packagebuild"),
+        caplog, tmp_path, Path("spec-packagebuild"),
         ["djf-svs", "link-hub", "link-hub-files-without-group"])
     with pytest.raises(ValueError, match="files without group"):
         package.director.build_package()
 
 
-def test_linkhub_groups_without_items(caplog, tmpdir):
+def test_linkhub_groups_without_items(caplog, tmp_path):
     package = create_package(
-        caplog, Path(tmpdir), Path("spec-packagebuild"),
+        caplog, tmp_path, Path("spec-packagebuild"),
         ["djf-svs", "link-hub", "link-hub-groups-without-items"])
     with pytest.raises(ValueError, match="groups without items"):
         package.director.build_package()
 
 
-def test_linkhub_no_file(caplog, tmpdir):
-    package = create_package(caplog, Path(tmpdir), Path("spec-packagebuild"),
+def test_linkhub_no_file(caplog, tmp_path):
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
                              ["djf-svs", "link-hub", "link-hub-no-file"])
     with pytest.raises(ValueError, match="not associated with a file"):
         package.director.build_package()
 
 
-def test_linkhub_no_tagfile(caplog, tmpdir):
-    package = create_package(caplog, Path(tmpdir), Path("spec-packagebuild"),
+def test_linkhub_no_tagfile(caplog, tmp_path):
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
                              ["djf-svs", "link-hub", "link-hub-no-tagfile"])
     package.director.build_package()
     link_hub = package.director["/pkg/steps/link-hub"]
@@ -155,9 +155,39 @@ def test_linkhub_no_tagfile(caplog, tmpdir):
                            "icd") == "``blub()``"
 
 
-def test_linkhub_no_tagfile_qual(caplog, tmpdir):
+def test_linkhub_no_tagfile_qual(caplog, tmp_path):
     package = create_package(
-        caplog, Path(tmpdir), Path("spec-packagebuild"),
+        caplog, tmp_path, Path("spec-packagebuild"),
         ["djf-svs", "link-hub", "link-hub-no-tagfile", "RTEMS_QUAL"])
     with pytest.raises(ValueError, match="there is no associated tagfile"):
         package.director.build_package()
+
+
+def test_linkhub_get_link(caplog, tmp_path):
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
+                             ["sub-sub-s-link-hub", "sub-sub-t-link-hub"])
+    package.director.build_package()
+    subcomponent = package.director["/pkg/sub/component"]
+    mapper = SpecMapper("other", subcomponent, subcomponent.item)
+    assert mapper.substitute(
+        "${/rtems/if/define-disabled:/name}") == "``DISABLED``"
+    assert mapper.substitute("${/rtems/if/unspec-define:/name}") == (
+        f"`UnspecDefine <{tmp_path}"
+        "/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecdefine>`__"
+    )
+    assert mapper.substitute("${/rtems/if/unspec-macro:/name}") == (
+        "``UnspecMacro()`` "
+        f"(for `spec:/​pkg/​sub/​s/​component <{tmp_path}"
+        "/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecmacro>`__ and "
+        f"`spec:/​pkg/​sub/​t/​component <{tmp_path}"
+        "/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecmacro>`__)"
+    )
+    assert mapper.get_link(
+        subcomponent.item.cache["/rtems/if/unspec-macro"], "icd"
+    ) == (
+        "``UnspecMacro()`` "
+        f"(for `spec:/​pkg/​sub/​s/​component <{tmp_path}"
+        "/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecmacro>`__ and "
+        f"`spec:/​pkg/​sub/​t/​component <{tmp_path}"
+        "/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecmacro>`__)"
+    )
