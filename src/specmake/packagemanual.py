@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Builds a package manual. """
 
-# Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 # Copyright (C) 2021 EDISOFT
 #
 # Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ from .archiver import Archiver
 from .directorystate import DirectoryState, RepositoryState
 from .docbuilder import DocumentBuilder
 from .membench import generate, generate_variants_table, MembenchVariant
-from .pkgitems import PackageBuildDirector, PackageComponent
+from .pkgitems import PackageBuildDirector
 from .packagechanges import PackageChanges
 from .testaggregator import TestAggregator
 from .testrunner import TestLog
@@ -114,15 +114,6 @@ def _get_performance_environments(
         for env_to_stats in item_to_env_stats.values():
             all_envs.update(env_to_stats.keys())
     return sorted(all_envs, key=_environment_order)
-
-
-def _gather_targets(component: PackageComponent, targets: set[str]) -> None:
-    with component.item.cache.selection(component.selection):
-        targets.update(item.uid
-                       for item in component.item.parents("design-target"))
-    for child in component.item.children("input"):
-        if child.type.startswith("pkg/component"):
-            _gather_targets(component.director[child.uid], targets)
 
 
 class PackageManualBuilder(DocumentBuilder):
@@ -435,7 +426,11 @@ relative to {content.path(deployment_directory)}.""")
         with self.section_level_scope(ctx):
             content = SphinxContent(section_level=self.section_level)
             targets: set[str] = set()
-            _gather_targets(self.component, targets)
+            for component in self.component.components():
+                with component.item.cache.selection(component.selection):
+                    targets.update(
+                        item.uid
+                        for item in component.item.parents("design-target"))
             for uid in sorted(targets):
                 target = self.item.cache[uid]
                 with content.section(target["name"], label=self.label(target)):
