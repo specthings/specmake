@@ -709,6 +709,20 @@ class PackageComponent(BuildItem):
                     f"{self.uid}: "
                     f"cannot get component value for '{key}': {err}") from err
 
+    def components(self) -> Iterator["PackageComponent"]:
+        """ Yield the component and all its subcomponents. """
+        yield self
+        yield from self.subcomponents()
+
+    def subcomponents(self) -> Iterator["PackageComponent"]:
+        """ Yield the subcomponents of the component. """
+        for child in self.item.children("input"):
+            if child.type.startswith("pkg/component"):
+                subcomponent = self.director[child.uid]
+                assert isinstance(subcomponent, PackageComponent)
+                yield subcomponent
+                yield from subcomponent.subcomponents()
+
     def run(self) -> None:
         self.description.add("Provide settings for the component.")
 
