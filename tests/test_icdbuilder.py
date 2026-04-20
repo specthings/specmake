@@ -44,10 +44,10 @@ pre-qualified* if and only if at least one of the following conditions is met:
 * *N1*: It has the `spec:/​acfg/​constraint/​option-not-pre-qualified </pkg/doc-ts-srs/html/requirements.html#specacfgconstraintoptionnotprequalified>`__ usage
   constraint.
 
-* *N2*: It has the spec:/​constraint/​constant-not-pre-qualified usage
+* *N2*: It has the ``spec:/​constraint/​constant-not-pre-qualified`` usage
   constraint.
 
-* *N3*: It has the spec:/​constraint/​directive-not-pre-qualified usage
+* *N3*: It has the ``spec:/​constraint/​directive-not-pre-qualified`` usage
   constraint.
 
 * *N4*: It is an interface container and all interfaces placed into this
@@ -505,7 +505,7 @@ spec:/rtems/if/acfg-integer
 
 .. rubric:: REQUIREMENT:
 
-The `spec:/​rtems/​if/​domain
+The `Domain
 </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdomain>`__
 interface domain shall provide the application configuration option
 ``CONFIGURE_INTEGER``.
@@ -541,7 +541,7 @@ configuration group `Something Configuration
 .. rubric:: INTERFACE PLACEMENT:
 
 This application configuration option is placed into the interface domain
-`spec:/​rtems/​if/​domain
+`Domain
 </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdomain>`__.
 
 .. rubric:: VALIDATION:
@@ -1398,7 +1398,7 @@ This application configuration group contains application configuration option
 .. rubric:: INTERFACE PLACEMENT:
 
 This application configuration group is placed into the interface domain
-`spec:/​rtems/​if/​domain
+`Domain
 </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdomain>`__.
 
 .. rubric:: VALIDATION:
@@ -1462,7 +1462,7 @@ spec:/rtems/if/header
 
 .. rubric:: REQUIREMENT:
 
-The `spec:/​rtems/​if/​domain
+The `Domain
 </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdomain>`__
 interface domain shall provide the header file ``<blub.h>``.
 
@@ -1487,7 +1487,7 @@ This header file is a member of the interface group `Blub
 
 .. rubric:: INTERFACE PLACEMENTS:
 
-This header file is placed into the interface domain `spec:/​rtems/​if/​domain
+This header file is placed into the interface domain `Domain
 </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdomain>`__.
 
 This header file contains the following items:
@@ -1618,7 +1618,7 @@ spec:/rtems/if/header-2
 
 .. rubric:: REQUIREMENT:
 
-The `spec:/​rtems/​if/​domain
+The `Domain
 </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdomain>`__
 interface domain shall provide the header file ``<blub-2.h>``.
 
@@ -1643,7 +1643,7 @@ This header file is a member of the interface group `Blub2
 
 .. rubric:: INTERFACE PLACEMENTS:
 
-This header file is placed into the interface domain `spec:/​rtems/​if/​domain
+This header file is placed into the interface domain `Domain
 </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdomain>`__.
 
 This header file contains the following items:
@@ -2544,7 +2544,7 @@ spec:/rtems/if/unspec-header
 
 .. rubric:: REQUIREMENT:
 
-The `spec:/​rtems/​if/​domain
+The `Domain
 </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdomain>`__
 interface domain shall provide the header file ``<bar/more/unspec.h>``.
 
@@ -2561,7 +2561,7 @@ This header file is a member of the group `UnspecGroup
 
 .. rubric:: INTERFACE PLACEMENTS:
 
-This header file is placed into the interface domain `spec:/​rtems/​if/​domain
+This header file is placed into the interface domain `Domain
 </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdomain>`__.
 
 This header file contains the following items:

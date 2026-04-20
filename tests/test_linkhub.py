@@ -27,8 +27,7 @@
 from pathlib import Path
 import pytest
 
-from specmake.linkhub import (_name_info_key_default, _link_default,
-                              _ref_default, get_kind, SpecMapper)
+from specmake.linkhub import (_name_info_key_default, get_kind, SpecMapper)
 
 from .util import create_package, get_and_clear_log
 
@@ -40,14 +39,8 @@ def test_linkhub(caplog, tmpdir):
     director = package.director
     director.build_package()
 
-    with pytest.raises(ValueError, match="no name information"):
+    with pytest.raises(ValueError, match="no name information for:"):
         _name_info_key_default(package.item)
-
-    with pytest.raises(ValueError, match="no link"):
-        _link_default(package.item, "unused")
-
-    with pytest.raises(ValueError, match="no reference"):
-        _ref_default(package.item)
 
     link_hub = director["/pkg/steps/link-hub"]
     assert link_hub.get_sdd_link(
@@ -107,7 +100,7 @@ def test_linkhub(caplog, tmpdir):
         item_cache["/req/root"], "foobar"
     ) == f"`spec:/​req/​root <{tmpdir}/pkg/doc-ts-srs/html/requirements.html#specreqroot>`__"
     assert mapper.get_link(item_cache["/req/disabled"],
-                           "foobar") == "spec:/​req/​disabled"
+                           "foobar") == "``spec:/​req/​disabled``"
     assert mapper.get_link(item_cache["/rtems/if/forward-decl-disabled"],
                            "foobar") == "``StructOnly``"
     assert mapper.get_link(item_cache["/rtems/if/func-disabled"],
@@ -158,9 +151,8 @@ def test_linkhub_no_tagfile(caplog, tmpdir):
     package.director.build_package()
     link_hub = package.director["/pkg/steps/link-hub"]
     mapper = SpecMapper("icd", link_hub, link_hub.item)
-    assert mapper.get_link(
-        package.item.cache["/rtems/if/func"], "icd"
-    ) == "`spec:/​rtems/​if/​func <https://embedded-brains.de/qdp-support>`__"
+    assert mapper.get_link(package.item.cache["/rtems/if/func"],
+                           "icd") == "``blub()``"
 
 
 def test_linkhub_no_tagfile_qual(caplog, tmpdir):

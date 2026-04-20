@@ -648,8 +648,7 @@ This report was produced by the
 :file:`ts-performance-no-clock-0.exe`
 executable.  The executable file had an SHA512 digest of
 1​2​0​a​9​7​6​2​6​4​1​3​2​9​3​f​1​a​9​c​9​8​d​0​0​a​c​e​c​e​5​b​8​4​b​9​d​4​a​b​4​a​7​3​8​7​a​8​1​a​2​e​4​6​e​b​2​f​1​0​f​d​9​6​a​4​5​5​6​1​8​2​c​b​f​6​1​f​d​9​5​b​b​1​3​2​0​2​1​5​0​c​6​7​a​5​8​f​2​a​e​1​8​a​7​e​f​a​0​8​d​a​6​9​4​a​0​f​d​3​f​d​8​f​a​9​9​7.
-This test suite is specified by `spec:/​testsuites/​performance-no-clock-0
-<https://embedded-brains.de/qdp-support>`__.
+This test suite is specified by ``spec:/​testsuites/​performance-no-clock-0``.
 There is a valid begin of test message at line :ref:`85
 <ABuildConfigKeyTestsuitesPerformanceNoClock0Output0>`.
 There is a valid end of test message at line :ref:`2444
@@ -745,10 +744,9 @@ following sections.
 Runtime measurement - spec:/​rtems/​req/​perf
 *********************************************
 
-For the runtime performance requirement `spec:/​rtems/​req/​perf
-<https://embedded-brains.de/qdp-support>`__, the following runtime values were
-measured on this target and configuration in the listed measurement
-environments.
+For the runtime performance requirement ``spec:/​rtems/​req/​perf``, the
+following runtime values were measured on this target and configuration in the
+listed measurement environments.
 
 .. image:: ../../../perf-images/a-build-config-key-rtems-req-perf.*
     :align: center
@@ -896,7 +894,7 @@ Test case - spec:/​score/​cpu/​val/​perf
 ****************************************
 
 This test case is specified by
-`spec:/​score/​cpu/​val/​perf <https://embedded-brains.de/qdp-support>`__.
+``spec:/​score/​cpu/​val/​perf``.
 
 The following table lists an evaluation of
 the test case information reported in lines :ref:`102 <ABuildConfigKeyTestsuitesPerformanceNoClock0Output100>` up to and including :ref:`223 <ABuildConfigKeyTestsuitesPerformanceNoClock0Output200>`
@@ -1045,8 +1043,7 @@ This report was produced by the
 :file:`ts-fail.exe`
 executable.  The executable file had an SHA512 digest of
 6​4​3​b​3​4​5​9​e​e​1​9​d​9​b​7​f​2​b​a​4​f​a​2​3​2​e​b​a​a​c​f​6​d​5​d​d​d​9​a​e​a​0​a​6​9​0​c​1​e​4​d​d​5​5​a​9​5​6​c​e​d​d​5​5​1​2​7​7​4​3​d​c​f​b​e​8​6​3​6​b​f​b​f​8​8​9​8​0​e​f​9​4​9​7​0​0​4​f​1​2​b​8​c​f​a​2​e​2​0​c​0​2​1​3​7​c​f​6​d​d​8​a​9​d​0​a​0.
-This test suite is specified by `spec:/​testsuites/​test-suite-fail
-<https://embedded-brains.de/qdp-support>`__.
+This test suite is specified by ``spec:/​testsuites/​test-suite-fail``.
 There is a valid begin of test message at line :ref:`10
 <ABuildConfigKeyTestsuitesTestSuiteFailOutput0>`.
 The test output contains no end of test message.
@@ -1139,14 +1136,14 @@ Test case - spec:/​rtems/​val/​test-case-fail
 *********************************************
 
 This test case is specified by
-`spec:/​rtems/​val/​test-case-fail <https://embedded-brains.de/qdp-support>`__.
+``spec:/​rtems/​val/​test-case-fail``.
 It runs the following parameterized test cases:
 
-- `spec:/​req/​root <https://embedded-brains.de/qdp-support>`__ reported in
-  line :ref:`31 <ABuildConfigKeyTestsuitesTestSuiteFailOutput0>`
+- ``spec:/​req/​root`` reported in line :ref:`31
+  <ABuildConfigKeyTestsuitesTestSuiteFailOutput0>`
 
-- `spec:/​rtems/​req/​func <https://embedded-brains.de/qdp-support>`__ reported
-  in line :ref:`32 <ABuildConfigKeyTestsuitesTestSuiteFailOutput0>`
+- ``spec:/​rtems/​req/​func`` reported in line :ref:`32
+  <ABuildConfigKeyTestsuitesTestSuiteFailOutput0>`
 
 The following table lists an evaluation of
 the test case information reported in lines :ref:`29 <ABuildConfigKeyTestsuitesTestSuiteFailOutput0>` up to and including :ref:`34 <ABuildConfigKeyTestsuitesTestSuiteFailOutput0>`
@@ -1244,8 +1241,7 @@ This report was produced by the
 :file:`ts-pass.exe`
 executable.  The executable file had an SHA512 digest of
 c​5​7​9​3​5​d​c​e​6​5​e​7​b​e​4​8​0​8​3​1​c​6​a​b​b​e​0​3​8​d​0​6​f​e​6​c​7​9​d​d​0​b​d​d​6​b​1​e​f​1​1​8​8​c​9​1​6​9​5​b​8​9​b​f​e​2​9​7​3​d​e​1​f​7​d​0​b​a​0​2​0​5​8​f​7​8​d​f​b​3​1​c​6​f​1​c​c​f​2​7​4​6​d​0​0​0​b​4​8​7​f​5​7​9​6​5​3​4​c​2​9​9​c​9​e​b​a.
-This test suite is specified by `spec:/​testsuites/​test-suite-pass
-<https://embedded-brains.de/qdp-support>`__.
+This test suite is specified by ``spec:/​testsuites/​test-suite-pass``.
 There is a valid begin of test message at line :ref:`10
 <ABuildConfigKeyTestsuitesTestSuitePassOutput0>`.
 There is a valid end of test message at line :ref:`33
@@ -1341,9 +1337,9 @@ Test case - spec:/​rtems/​val/​test-case-pass
 *********************************************
 
 This test case is specified by
-`spec:/​rtems/​val/​test-case-pass <https://embedded-brains.de/qdp-support>`__.
+``spec:/​rtems/​val/​test-case-pass``.
 It runs the parameterized test case
-`spec:/​rtems/​req/​func <https://embedded-brains.de/qdp-support>`__ reported in line :ref:`28 <ABuildConfigKeyTestsuitesTestSuitePassOutput0>`.
+``spec:/​rtems/​req/​func`` reported in line :ref:`28 <ABuildConfigKeyTestsuitesTestSuitePassOutput0>`.
 
 The following table lists an evaluation of
 the test case information reported in lines :ref:`27 <ABuildConfigKeyTestsuitesTestSuitePassOutput0>` up to and including :ref:`29 <ABuildConfigKeyTestsuitesTestSuitePassOutput0>`
@@ -1439,8 +1435,7 @@ This report was produced by the
 :file:`ts-xfail.exe`
 executable.  The executable file had an SHA512 digest of
 2​4​3​2​3​d​d​6​0​5​d​2​5​c​3​3​4​7​4​2​e​e​7​d​a​e​c​a​6​2​9​b​2​5​e​7​6​0​c​3​d​2​2​1​8​c​2​e​b​a​a​d​a​6​8​8​c​5​c​2​d​4​1​1​c​3​b​5​9​d​3​0​2​b​a​0​f​a​3​2​e​3​8​3​6​6​6​e​5​e​5​b​d​1​e​5​3​e​4​9​8​2​a​2​b​9​d​8​d​c​8​d​0​c​3​8​1​5​9​3​1​6​0​4​1​5​1​d.
-This test suite is specified by `spec:/​testsuites/​test-suite-xfail
-<https://embedded-brains.de/qdp-support>`__.
+This test suite is specified by ``spec:/​testsuites/​test-suite-xfail``.
 There is a valid begin of test message at line :ref:`10
 <ABuildConfigKeyTestsuitesTestSuiteXfailOutput0>`.
 The test output contains no end of test message.
@@ -1534,7 +1529,7 @@ Test case - spec:/​rtems/​val/​test-case-xfail
 **********************************************
 
 This test case is specified by
-`spec:/​rtems/​val/​test-case-xfail <https://embedded-brains.de/qdp-support>`__.
+``spec:/​rtems/​val/​test-case-xfail``.
 
 The following table lists an evaluation of
 the test case information reported in lines :ref:`27 <ABuildConfigKeyTestsuitesTestSuiteXfailOutput0>` up to and including :ref:`29 <ABuildConfigKeyTestsuitesTestSuiteXfailOutput0>`

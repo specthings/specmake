@@ -66,12 +66,14 @@ def _add_text(ctx: _Context, key: str, name: str) -> None:
 
 
 def _add_sdd_link(ctx: _Context) -> None:
-    link = ctx.item.view["document-links"].get("sdd", None)
-    if link:
+    path = ctx.item.view["document-paths"].get("sdd", None)
+    if path:
         ctx.content.add_rubric("SOFTWARE DESIGN:")
         kind = get_kind(ctx.item)
-        ctx.content.add(
-            f"This {kind} is realised by the software design element {link}.")
+        name = ctx.item.view["sdd-name"]
+        ctx.content.add(f"This {kind} is realised by the "
+                        "software design element "
+                        f"{ctx.mapper.format_link(name, path)}.")
 
 
 def _add_links(
