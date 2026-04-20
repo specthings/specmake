@@ -620,7 +620,7 @@ class SphinxBuilder(DirectoryState):
         with self.component_scope(section.component):
             mapper = ctx.mapper
             assert isinstance(mapper, BuildItemMapper)
-            return mapper.create_content().get_reference(
+            return mapper.create_content().reference(
                 self._get_section_label(section.item))
 
     def _get_document_elements(self, ctx: ItemGetValueContext) -> str:

@@ -315,7 +315,7 @@ class BuildItem():
 
     def reference(self) -> str:
         """ Get a reference to the build item description. """
-        return self.description.get_reference(self.label(), self.item.spec)
+        return self.description.reference(self.label(), self.item.spec)
 
     def clear_description(self) -> None:
         """ Clear the build item description. """
