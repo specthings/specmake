@@ -192,11 +192,11 @@ def _document_unspecified(ctx: _Context,
                           postfix: str = "") -> None:
     ctx.content.add_rubric("REQUIREMENT:")
     kind = get_kind(ctx.item)
+    name = f"{prefix}{ctx.item['name']}{postfix}"
     container = ctx.item.parent('interface-placement')
     container_kind = get_kind(container)
-    ctx.content.wrap(
-        f"The {ctx.mapper.get_link(container)} {container_kind} "
-        f"shall provide the {kind} ``{prefix}{ctx.item['name']}{postfix}``.")
+    ctx.content.wrap(f"The {ctx.mapper.get_link(container)} {container_kind} "
+                     f"shall provide the {kind} {ctx.content.code(name)}.")
 
 
 def _document_unspecified_type(ctx: _Context) -> None:
@@ -274,7 +274,7 @@ def _add_perf_measurement(ctx: _Context,
         test_case_item = ctx.item.cache[test_case["uid"]]
         test_suite_item = ctx.item.cache[test_suite["uid"]]
         ctx.content.wrap(f"""For the configuration
-``{config_data['name']}``, the test case `{test_case_item.spec_2}
+{ctx.content.code(config_data['name'])}, the test case `{test_case_item.spec_2}
 <{test_suite['link']}>`__ of the test suite `{test_suite_item.spec_2}
 <{test_case['link']}>`__ reported the following `runtime performance
 measurements <{measurement_data['link']}>`__:""")
@@ -330,7 +330,7 @@ def _document_perf_runtime_env(ctx: _Context) -> None:
     _document_requirement(ctx)
     ctx.content.add_rubric("NAME:")
     ctx.content.wrap(f"""The RTEMS Test Framework name of this runtime
-measurement environment is ``{ctx.item['name']}``.""")
+measurement environment is {ctx.content.code(ctx.item['name'])}.""")
 
 
 _UPPER = re.compile(r"[A-Z]+")
@@ -485,8 +485,8 @@ def _document_acfg_option(ctx: _Context) -> None:
     container_kind = get_kind(container)
     ctx.content.wrap(
         f"The {ctx.mapper.get_link(container)} {container_kind} shall "
-        f"provide the application configuration option ``{ctx.item['name']}``."
-    )
+        "provide the application configuration option "
+        f"{ctx.content.code(ctx.item['name'])}.")
     document_option(ctx.content, ctx.mapper, ctx.item, ctx.spec.enabled_set)
     _add_default_links(ctx)
     _add_validations(ctx)
@@ -605,7 +605,7 @@ def _document_enumerator(ctx: _Context) -> None:
     name = ctx.item["name"]
     enum = ctx.item.child('interface-enumerator')
     ctx.content.wrap(f"The {ctx.mapper.get_link(enum)} enumeration "
-                     f"shall provide the enumerator ``{name}``.")
+                     f"shall provide the enumerator {ctx.content.code(name)}.")
     _add_text(ctx, "brief", "BRIEF DESCRIPTION")
     enumerator = [
         "  ...",
@@ -634,8 +634,8 @@ def _document_define(ctx: _Context) -> None:
 
 def _document_domain(ctx: _Context) -> None:
     ctx.content.add_rubric("REQUIREMENT:")
-    ctx.content.wrap(
-        f"There shall be the interface domain ``{ctx.item['name']}``.")
+    ctx.content.wrap("There shall be the interface domain "
+                     f"{ctx.content.code(ctx.item['name'])}.")
     _add_text(ctx, "description", "DESCRIPTION")
     _add_default_links(ctx)
     _add_validations(ctx)
@@ -643,7 +643,7 @@ def _document_domain(ctx: _Context) -> None:
 
 def _document_group(ctx: _Context) -> None:
     ctx.content.add_rubric("REQUIREMENT:")
-    what = f"the interface group ``{ctx.item['name']}``"
+    what = f"the interface group {ctx.content.code(ctx.item['name'])}"
     try:
         parent = ctx.item.parent("interface-ingroup")
         parent_kind = get_kind(parent)
@@ -660,10 +660,11 @@ def _document_group(ctx: _Context) -> None:
 def _document_header_file(ctx: _Context) -> None:
     ctx.content.add_rubric("REQUIREMENT:")
     path = ctx.item["path"]
+    formatted_path = ctx.content.code(f"<{path}>")
     container = ctx.item.parent('interface-placement')
     container_kind = get_kind(container)
     ctx.content.wrap(f"The {ctx.mapper.get_link(container)} {container_kind} "
-                     f"shall provide the header file ``<{path}>``.")
+                     f"shall provide the header file {formatted_path}.")
     _add_text(ctx, "brief", "BRIEF DESCRIPTION")
     _add_code_block(ctx.content, f"#include <{path}>")
     _add_default_links(ctx)
