@@ -30,10 +30,11 @@ import pytest
 from pathlib import Path
 
 import specitems
-from specitems import EmptyItem, Item, ItemGetValueContext
+from specitems import EmptyItem, EmptyItemCache, Item, ItemGetValueContext
 
 import specmake
-from specmake import (BuildItem, BuildItemMapper, build_item_input,
+from specmake import (BuildItem, BuildItemFactory, BuildItemMapper,
+                      BuildItemTypeProvider, build_item_input,
                       PackageBuildDirector, PackageComponent)
 
 from .util import create_package, get_and_clear_log
@@ -426,3 +427,42 @@ def test_build_item_run(caplog, tmp_path):
     make_link["hash"] = None
     with pytest.raises(ValueError):
         director.build_package()
+
+
+def test_builditemmapper():
+    item_cache = EmptyItemCache(type_provider=BuildItemTypeProvider({}))
+    factory = BuildItemFactory()
+    director = PackageBuildDirector(item_cache, "?", factory)
+    data = {
+        "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+        "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        "copyrights-by-license": {},
+        "directory": "",
+        "directory-state-type": "explicit",
+        "enabled-by": True,
+        "files": [],
+        "hash": None,
+        "links": [],
+        "pkg-type": "directory-state",
+        "type": "pkg",
+    }
+    item = item_cache.add_item("/item", data)
+    build_item = director["/item"]
+    mapper = build_item.mapper
+
+    assert mapper.format == ".rst"
+    assert mapper.format_code("code") == "``code``"
+    assert mapper.format_link("name", "target") == "`name <target>`__"
+    assert mapper.format_reference("name", "label") == ":ref:`name <label>`"
+
+    mapper.set_format("foobar.md")
+    assert mapper.format == ".md"
+    assert mapper.format_code("code") == "`code`"
+    assert mapper.format_link("name", "target") == "[name](target)"
+    assert mapper.format_reference("name", "label") == "{ref}`name <label>`"
+
+    mapper.set_format("foobar.rst")
+    assert mapper.format == ".rst"
+    assert mapper.format_code("code") == "``code``"
+    assert mapper.format_link("name", "target") == "`name <target>`__"
+    assert mapper.format_reference("name", "label") == ":ref:`name <label>`"

@@ -666,7 +666,8 @@ presented in the following sections.""")
                                         continue
                                     coverage_count += 1
                                     test_aggregator.add_coverage_of_config(
-                                        ctx.content, config_data, issues)
+                                        ctx.content, self.mapper, config_data,
+                                        issues)
                             if issues:
                                 ctx.unexpected_failures.setdefault(
                                     target_uid, {})[failure_key] = issues

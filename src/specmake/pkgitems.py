@@ -25,6 +25,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# pylint: disable=too-many-lines
+
 from contextlib import contextmanager
 import copy
 import fnmatch
@@ -82,9 +84,36 @@ def build_item_input(item: Item, name: str) -> Item:
     raise KeyError
 
 
-_CREATE_CONTENT: dict[str, Type[TextContent]] = {
-    ".md": MarkdownContent,
-    ".rst": SphinxContent,
+def _code_markdown(text: str) -> str:
+    return f"`{text}`"
+
+
+def _code_sphinx(text: str) -> str:
+    return f"``{text}``"
+
+
+def _link_markdown(name: str, target: str) -> str:
+    return f"[{name}]({target})"
+
+
+def _link_sphinx(name: str, target: str) -> str:
+    return f"`{name} <{target}>`__"
+
+
+def _ref_markdown(name: str, label: str) -> str:
+    return f"{{ref}}`{name} <{label}>`"
+
+
+def _ref_sphinx(name: str, label: str) -> str:
+    return f":ref:`{name} <{label}>`"
+
+
+_Formatter = tuple[Type[TextContent], Callable[[str], str],
+                   Callable[[str, str], str], Callable[[str, str], str]]
+
+_FORMATTER: dict[str, _Formatter] = {
+    ".md": (MarkdownContent, _code_markdown, _link_markdown, _ref_markdown),
+    ".rst": (SphinxContent, _code_sphinx, _link_sphinx, _ref_sphinx),
 }
 
 
@@ -120,8 +149,9 @@ class BuildItemMapper(SphinxMapper):
 
     def __init__(self, item: Item):
         super().__init__(item)
-        self.content_constructor: Type[TextContent] = SphinxContent
         self.format = ".rst"
+        (self.content_constructor, self.format_code, self.format_link,
+         self.format_reference) = _FORMATTER[self.format]
         self.add_default_get_value("spec", _get_spec)
         self.add_value_transformer("basename", _basename)
         self.add_value_transformer("dirname", _dirname)
@@ -132,8 +162,9 @@ class BuildItemMapper(SphinxMapper):
     def set_format(self, path: str) -> None:
         """ Set the content format. """
         the_format = os.path.splitext(path)[1]
-        self.content_constructor = _CREATE_CONTENT[the_format]
         self.format = the_format
+        (self.content_constructor, self.format_code, self.format_link,
+         self.format_reference) = _FORMATTER[self.format]
 
     def create_content(
             self,

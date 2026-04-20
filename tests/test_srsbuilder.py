@@ -878,9 +878,9 @@ target, the following runtime performance limits shall apply:
 
 For the configuration ``Build Configuration Name``, the test case
 `spec:/​score/​cpu/​val/​perf
-</a-build-config-key-testsuites-performance-no-clock-0.html#abuildconfigkeytestsuitesperformancenoclock0>`__
-of the test suite `spec:/​testsuites/​performance-no-clock-0
 </a-build-config-key-testsuites-performance-no-clock-0.html#abuildconfigkeytestsuitesperformancenoclock0scorecpuvalperf>`__
+of the test suite `spec:/​testsuites/​performance-no-clock-0
+</a-build-config-key-testsuites-performance-no-clock-0.html#abuildconfigkeytestsuitesperformancenoclock0>`__
 reported the following `runtime performance measurements
 </a-build-config-key-testsuites-performance-no-clock-0.html#abuildconfigkeytestsuitesperformancenoclock0rtemsreqperf>`__:
 

@@ -31,8 +31,7 @@ import logging
 import os
 from typing import Callable, Iterable
 
-from specitems import (EnabledSet, Item, ItemGetValueContext, ItemMapper,
-                       is_enabled, Link)
+from specitems import EnabledSet, Item, ItemGetValueContext, is_enabled, Link
 from specware import (augment_with_test_case_links, augment_with_test_links,
                       get_items_by_type_map, get_item_types_by_prefix,
                       get_items_by_types, get_interface_items,
@@ -40,9 +39,9 @@ from specware import (augment_with_test_case_links, augment_with_test_links,
                       get_requirement_items, is_validation_by_test,
                       recursive_is_enabled, validate)
 
-from .pkgitems import (BuildItem, BuildItemFactory, build_item_input,
-                       GenericPackageComponent, PackageBuildDirector,
-                       PackageComponent)
+from .pkgitems import (BuildItem, BuildItemFactory, BuildItemMapper,
+                       build_item_input, GenericPackageComponent,
+                       PackageBuildDirector, PackageComponent)
 
 
 def _add_unique_name(name_to_item: dict[str, Item], item: Item,
@@ -180,11 +179,12 @@ _NAME: dict[str, Callable[[dict[str, Item], Item], None]] = {
 
 
 def _get_issue(ctx: ItemGetValueContext) -> str:
+    mapper = ctx.mapper
+    assert isinstance(mapper, BuildItemMapper)
     database = ctx.item.parent("issue-member")
-    mapper = ItemMapper(ctx.item)
-    url = mapper.substitute(database["url"])
-    identifier = mapper.substitute(database["format-identifier"])
-    return f"`{database['name']} {identifier} <{url}>`__"
+    url = mapper.substitute(database["url"], ctx.item)
+    identifier = mapper.substitute(database["format-identifier"], ctx.item)
+    return mapper.format_link(f"{database['name']} {identifier}", url)
 
 
 class RTEMSItemCache(BuildItem):

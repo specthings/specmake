@@ -129,6 +129,7 @@ class SVRBuilder(SpecDocumentBuilder):
         content = SphinxContent(section_level=2)
         link_hub = self.input("link-hub")
         assert isinstance(link_hub, LinkHub)
+        format_link = self.mapper.format_link
         rows = [("Design Component", "Requirement")]
         for _, info in sorted(link_hub.name_info.items(),
                               key=lambda x: _get_name(x[0])):
@@ -136,14 +137,15 @@ class SVRBuilder(SpecDocumentBuilder):
                 continue
             variants = info.get("variants", [])
             for variant in itertools.chain([info], variants):
-                name = f"`{spacify(variant['name'])} <{variant['link']}>`__"
+                name = format_link(spacify(variant["name"]), variant["link"])
                 if variants:
                     file_path = variant["file"]
                     file_link = link_hub.name_info[f"file/{file_path}"]["link"]
-                    name = f"{name} in `{spacify(file_path)} <{file_link}>`__"
+                    file_link = format_link(spacify(file_path), file_link)
+                    name = f"{name} in {file_link}"
                 for item in sorted(variant["items"]):
-                    url = item.view["document-links"]["url"]
-                    rows.append((name, f"`{item.spec_2} <{url}>`__"))
+                    path = item.view["document-links"]["url"]
+                    rows.append((name, format_link(item.spec_2, path)))
         content.add_grid_table(rows, [60, 40], font_size=-4)
         return str(content)
 
@@ -152,6 +154,7 @@ class SVRBuilder(SpecDocumentBuilder):
             return self._design_to_code
         link_hub = self.input("link-hub")
         assert isinstance(link_hub, LinkHub)
+        format_link = self.mapper.format_link
         design_to_code: list[tuple[str, str]] = []
         for kind_name, info in sorted(link_hub.name_info.items(),
                                       key=lambda x: _get_name(x[0])):
@@ -161,19 +164,19 @@ class SVRBuilder(SpecDocumentBuilder):
             if kind == "file":
                 continue
             if kind == "group":
-                name = f"`{spacify(info['name'])} <{info['link']}>`__"
+                name = format_link(spacify(info["name"]), info["link"])
                 for file_path in info["files"]:
                     file_link = link_hub.name_info[f"file/{file_path}"]["link"]
-                    file = f"`{spacify(file_path)} <{file_link}>`__"
-                    design_to_code.append((name, file))
+                    design_to_code.append(
+                        (name, format_link(spacify(file_path), file_link)))
                 continue
             variants = info.get("variants", [])
             for variant in itertools.chain([info], variants):
-                name = f"`{spacify(variant['name'])} <{variant['link']}>`__"
+                name = format_link(spacify(variant["name"]), variant["link"])
                 file_path = variant["file"]
                 file_link = link_hub.name_info[f"file/{file_path}"]["link"]
-                file = f"`{spacify(file_path)} <{file_link}>`__"
-                design_to_code.append((name, file))
+                design_to_code.append(
+                    (name, format_link(spacify(file_path), file_link)))
         self._design_to_code = design_to_code
         return design_to_code
 
@@ -204,18 +207,21 @@ class SVRBuilder(SpecDocumentBuilder):
         test_suites: list[Item] = []
         gather_benchmarks_and_test_suites(self.item.cache["/testsuites/unit"],
                                           test_suites)
+        get_link = self.mapper.get_link
+        format_link = self.mapper.format_link
         rows = [("Test Case", "Status")]
         unspecified: dict[str, list[str]] = {}
         for test_suite in sorted(test_suites):
             for test_case in test_suite.children("test-case"):
-                rows.append((self.mapper.get_link(test_case),
-                             get_test_result_status(test_case, "", "")))
+                rows.append((get_link(test_case),
+                             get_test_result_status(test_case, self.mapper, "",
+                                                    "")))
             for test_results in test_suite.view.get("test-results",
                                                     {}).values():
                 for data in test_results:
                     for test_case in data["unspecified-test-cases"]:
                         unspecified.setdefault(test_case["name"], []).append(
-                            f"`{data['status']} <{data['link']}>`__")
+                            format_link(data["status"], data["link"]))
         rows_2 = [["Test Case without Specification", "Status"]]
         for name, status in sorted(unspecified.items()):
             rows_2.append([name, ", ".join(status)])
@@ -227,7 +233,7 @@ class SVRBuilder(SpecDocumentBuilder):
         content = SphinxContent(section_level=2)
         test_aggregator = self.input("test-aggregation")
         assert isinstance(test_aggregator, TestAggregator)
-        test_aggregator.add_coverage_achievement(content)
+        test_aggregator.add_coverage_achievement(content, self.mapper)
         return str(content)
 
     def _performance_summary(self, _ctx: ItemGetValueContext) -> str:
@@ -236,7 +242,7 @@ class SVRBuilder(SpecDocumentBuilder):
         rows = [("Requirement", "Status")]
         for item in self.spec.get_related_items_by_type(types):
             rows.append((self.mapper.get_link(item),
-                         get_test_result_status(item, "", "")))
+                         get_test_result_status(item, self.mapper, "", "")))
         content.add_grid_table(rows, [80, 20], font_size=-1)
         return str(content)
 

@@ -26,9 +26,9 @@
 
 import itertools
 
-from specitems import Item, ItemMapper, SphinxContent
+from specitems import Item, TextContent
 
-from .pkgitems import BuildItem
+from .pkgitems import BuildItem, BuildItemMapper
 
 
 def _issue_prologue(status: str) -> str:
@@ -36,8 +36,9 @@ def _issue_prologue(status: str) -> str:
             f"the following {status} were present.")
 
 
-def _add_issues(content: SphinxContent, mapper: ItemMapper, issues: set[Item],
-                header: str, prologue: str, which: str) -> None:
+def _add_issues(content: TextContent, mapper: BuildItemMapper,
+                issues: set[Item], header: str, prologue: str,
+                which: str) -> None:
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-positional-arguments
     with content.section(header):
@@ -48,7 +49,7 @@ def _add_issues(content: SphinxContent, mapper: ItemMapper, issues: set[Item],
             for item in sorted(issues):
                 database = item.parent("issue-member")
                 url = mapper.substitute(database["url"], item=item)
-                identifier = f"`{item['identifier']} <{url}>`_"
+                identifier = mapper.format_link(item["identifier"], url)
                 subject = item["subject"].replace("`", "\\`")
                 rows.append((database["name"], identifier, subject))
             content.add_grid_table(rows, widths=[27, 14, 59], font_size=-2)
@@ -70,10 +71,10 @@ class PackageChanges(BuildItem):
                 issues[int(status == "open")].add(link.item)
         return issues
 
-    def _get_change_list(self, mapper: ItemMapper, section_level: int,
-                         with_description: bool) -> list[SphinxContent]:
+    def _get_change_list(self, mapper: BuildItemMapper, section_level: int,
+                         with_description: bool) -> list[TextContent]:
         # pylint: disable=too-many-locals
-        change_list: list[SphinxContent] = []
+        change_list: list[TextContent] = []
         past_issues: tuple[set[Item], set[Item]] = (set(), set())
         previous_issues: tuple[set[Item], set[Item]] = (set(), set())
         for index, change in enumerate(
@@ -81,7 +82,7 @@ class PackageChanges(BuildItem):
                                        item=self.item)):
             for past, previous in zip(past_issues, previous_issues):
                 past.update(previous)
-            content = SphinxContent(section_level=section_level)
+            content = mapper.create_content(section_level=section_level)
             if with_description:
                 content.add_blank_line()
                 content.open_section(change["name"])
@@ -117,14 +118,16 @@ class PackageChanges(BuildItem):
             previous_issues = current_issues
         return change_list
 
-    def get_change_list(self, mapper: ItemMapper, section_level: int) -> str:
+    def get_change_list(self, mapper: BuildItemMapper,
+                        section_level: int) -> str:
         """ Get the change list using the section level. """
         change_list = self._get_change_list(mapper, section_level, True)
         return "\n".join(itertools.chain.from_iterable(change_list))
 
-    def get_open_issues(self, mapper: ItemMapper, section_level: int) -> str:
+    def get_open_issues(self, mapper: BuildItemMapper,
+                        section_level: int) -> str:
         """ Get the open issues using the section level. """
-        content = SphinxContent(section_level=section_level)
+        content = mapper.create_content(section_level=section_level)
         _, open_issues = self._get_issues(
             mapper.substitute_data(self.item["change-list"][-1],
                                    item=self.item))
@@ -132,12 +135,12 @@ class PackageChanges(BuildItem):
                     _issue_prologue("open issues"), "open")
         return "\n".join(content)
 
-    def get_current_changes(self, mapper: ItemMapper) -> str:
+    def get_current_changes(self, mapper: BuildItemMapper) -> str:
         """ Get the current changes. """
         return mapper.substitute(self.item["change-list"][-1]["description"],
                                  item=self.item)
 
-    def get_current_issues(self, mapper: ItemMapper,
+    def get_current_issues(self, mapper: BuildItemMapper,
                            section_level: int) -> str:
         """ Get the current issues using the section level. """
         change_list = self._get_change_list(mapper, section_level, False)

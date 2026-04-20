@@ -284,7 +284,7 @@ class PackageManualBuilder(DocumentBuilder):
         info_spec: str | int = self.mapper.get_link(item)
         for env in envs:
             env_link = env_links[env.split("/")[0]]
-            info_env: str | int = f"`{env} <{env_link}>`__"
+            info_env: str | int = self.mapper.format_link(env, env_link)
             for index, (link, test_log) in enumerate(
                     self._yield_benchmark_variants()):
                 stats = measurements_by_variant[index].get(item.ident,
@@ -487,4 +487,4 @@ class PackageSummary(DirectoryState):
             assert isinstance(test_aggregator, TestAggregator)
             ident = test_aggregator.substitute("${.:/component/ident}")
             with content.section(f"Component - {ident}"):
-                test_aggregator.add_coverage_achievement(content)
+                test_aggregator.add_coverage_achievement(content, self.mapper)
