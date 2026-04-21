@@ -265,11 +265,15 @@ class _CitationProvider(BibTeXCitationProvider):
                 last = contributor["last-name"]
                 authors.add(f"{last}, {first}")
                 organizations.add(contributor["organization"])
+        mapper = self.mapper
+        assert isinstance(mapper, BuildItemMapper)
+        url = mapper.relpath(
+            mapper.substitute(f"{item['directory']}/{item['output-pdf']}"))
         fields: dict[str, str | list[str]] = {
             "author": sorted(authors),
             "organization": ", ".join(sorted(organizations)),
             "title": _normal_title(item),
-            "url": f"{item['directory']}/{item['output-pdf']}",
+            "url": url,
             "year": _document_year(item, self.mapper)
         }
         return "manual", fields

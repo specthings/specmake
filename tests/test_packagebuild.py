@@ -454,7 +454,10 @@ def test_builditemmapper():
     assert mapper.format == ".rst"
     assert mapper.format_code("code") == "``code``"
     assert mapper.format_link("name", "target") == "`name <target>`__"
+    assert mapper.relpath("/foo/bar") == "/foo/bar"
     mapper.base_path = "/foo"
+    assert mapper.relpath("/foo/bar") == "bar"
+    assert mapper.relpath("foo/bar") == "foo/bar"
     assert mapper.format_link("name", "/foo/bar") == "`name <bar>`__"
     assert mapper.format_link("name",
                               "https://x.y") == "`name <https://x.y>`__"
