@@ -4,6 +4,7 @@ copyrights:
 copyrights-by-license: {}
 directory: ${.:/component/deployment-directory}/doc
 directory-state-type: sphinx
+document-base-path: /
 document-components: []
 document-contributors: []
 document-copyrights:

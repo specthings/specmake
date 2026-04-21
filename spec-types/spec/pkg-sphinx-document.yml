@@ -1,6 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
-- Copyright (C) 2020, 2023 embedded brains GmbH & Co. KG
+- Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 enabled-by: true
 links:
 - role: spec-member
@@ -24,6 +24,12 @@ spec-example: null
 spec-info:
   dict:
     attributes:
+      document-base-path:
+        description: |
+          It shall be the document base path.  Links to other documents will be
+          relative to this path.  Use ``/`` to disable the use of relative
+          paths.
+        spec-type: str
       document-components:
         description: null
         spec-type: pkg-sphinx-component-list

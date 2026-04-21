@@ -6,6 +6,7 @@ copyrights-by-license:
   - Copyright (C) 2026 embedded brains GmbH & Co. KG
 directory: ${.:/component/deployment-directory}/doc-djf-tr-dummy
 directory-state-type: sphinx
+document-base-path: /
 document-components: []
 document-contributors: []
 document-copyrights:

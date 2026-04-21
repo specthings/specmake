@@ -291,6 +291,7 @@ class SphinxBuilder(DirectoryState):
                  item: Item,
                  mapper: Optional[BuildItemMapper] = None) -> None:
         super().__init__(director, item, mapper)
+        self.mapper.base_path = self["document-base-path"]
         _CitationProvider(self)
         self._index: list[str] = []
         self._section_level_stack: list[int] = [2]
