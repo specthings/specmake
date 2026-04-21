@@ -311,7 +311,7 @@ class PackageManualBuilder(DocumentBuilder):
             envs = _get_performance_environments(measurements_by_variant)
             req_path = test_log.substitute(
                 "${.:/component/deployment-directory}/doc/ts/srs/"
-                "html/requirements.html#spec-req-perf-runtime-environment-")
+                "requirements.html#spec-req-perf-runtime-environment-")
             env_links = {
                 "HotCache": f"{req_path}hot-cache",
                 "FullCache": f"{req_path}full-cache",

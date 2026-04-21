@@ -2,8 +2,9 @@ SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
 - Copyright (C) 2025 embedded brains GmbH & Co. KG
 copyrights-by-license: {}
-directory: ${.:/component/deployment-directory}/doc-package-manual -2
+directory: ${.:/component/deployment-directory}/doc-package-manual-2
 directory-state-type: sphinx
+document-base-path: ${.:/component/deployment-directory}
 document-components:
 - action: copy-and-substitute
   add-to-index: false

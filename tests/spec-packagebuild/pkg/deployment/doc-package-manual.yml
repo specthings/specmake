@@ -4,6 +4,7 @@ copyrights:
 copyrights-by-license: {}
 directory: ${.:/component/deployment-directory}/doc-package-manual
 directory-state-type: sphinx
+document-base-path: ${.:/component/deployment-directory}
 document-components:
 - action: add-to-index
   add-to-index: true

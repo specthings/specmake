@@ -4,6 +4,7 @@ copyrights:
 copyrights-by-license: {}
 directory: ${.:/component/deployment-directory}/doc-djf-tr-2
 directory-state-type: sphinx
+document-base-path: /
 document-components:
 - action: copy-and-substitute
   add-to-index: false
