@@ -182,12 +182,13 @@ def test_linkhub_get_link(caplog, tmp_path):
         f"`spec:/​pkg/​sub/​t/​component <{tmp_path}"
         "/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecmacro>`__)"
     )
+    mapper.base_path = str(tmp_path)
     assert mapper.get_link(
         subcomponent.item.cache["/rtems/if/unspec-macro"], "icd"
     ) == (
         "``UnspecMacro()`` "
-        f"(for `spec:/​pkg/​sub/​s/​component <{tmp_path}"
-        "/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecmacro>`__ and "
-        f"`spec:/​pkg/​sub/​t/​component <{tmp_path}"
-        "/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecmacro>`__)"
+        "(for `spec:/​pkg/​sub/​s/​component "
+        "<pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecmacro>`__ and "
+        "`spec:/​pkg/​sub/​t/​component "
+        "<pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecmacro>`__)"
     )

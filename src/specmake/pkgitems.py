@@ -30,6 +30,7 @@
 from contextlib import contextmanager
 import copy
 import fnmatch
+import functools
 import graphlib
 import itertools
 import os
@@ -92,11 +93,17 @@ def _code_sphinx(text: str) -> str:
     return f"``{text}``"
 
 
-def _link_markdown(name: str, target: str) -> str:
+def _link_markdown(mapper: "BuildItemMapper", name: str, target: str) -> str:
+    base_path = mapper.base_path
+    if base_path != "/" and target.startswith("/"):
+        target = os.path.relpath(target, base_path)
     return f"[{name}]({target})"
 
 
-def _link_sphinx(name: str, target: str) -> str:
+def _link_sphinx(mapper: "BuildItemMapper", name: str, target: str) -> str:
+    base_path = mapper.base_path
+    if base_path != "/" and target.startswith("/"):
+        target = os.path.relpath(target, base_path)
     return f"`{name} <{target}>`__"
 
 
@@ -109,7 +116,8 @@ def _ref_sphinx(name: str, label: str) -> str:
 
 
 _Formatter = tuple[Type[TextContent], Callable[[str], str],
-                   Callable[[str, str], str], Callable[[str, str], str]]
+                   Callable[["BuildItemMapper", str, str],
+                            str], Callable[[str, str], str]]
 
 _FORMATTER: dict[str, _Formatter] = {
     ".md": (MarkdownContent, _code_markdown, _link_markdown, _ref_markdown),
@@ -147,11 +155,10 @@ class BuildItemMapper(SphinxMapper):
     documentation place of the item.
     """
 
-    def __init__(self, item: Item):
+    def __init__(self, item: Item) -> None:
         super().__init__(item)
-        self.format = ".rst"
-        (self.content_constructor, self.format_code, self.format_link,
-         self.format_reference) = _FORMATTER[self.format]
+        self.base_path = "/"
+        self.set_format("x.rst")
         self.add_default_get_value("spec", _get_spec)
         self.add_value_transformer("basename", _basename)
         self.add_value_transformer("dirname", _dirname)
@@ -163,8 +170,9 @@ class BuildItemMapper(SphinxMapper):
         """ Set the content format. """
         the_format = os.path.splitext(path)[1]
         self.format = the_format
-        (self.content_constructor, self.format_code, self.format_link,
+        (self.content_constructor, self.format_code, format_link,
          self.format_reference) = _FORMATTER[self.format]
+        self.format_link = functools.partial(format_link, self)
 
     def create_content(
             self,
