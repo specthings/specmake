@@ -94,17 +94,11 @@ def _code_sphinx(text: str) -> str:
 
 
 def _link_markdown(mapper: "BuildItemMapper", name: str, target: str) -> str:
-    base_path = mapper.base_path
-    if base_path != "/" and target.startswith("/"):
-        target = os.path.relpath(target, base_path)
-    return f"[{name}]({target})"
+    return f"[{name}]({mapper.relpath(target)})"
 
 
 def _link_sphinx(mapper: "BuildItemMapper", name: str, target: str) -> str:
-    base_path = mapper.base_path
-    if base_path != "/" and target.startswith("/"):
-        target = os.path.relpath(target, base_path)
-    return f"`{name} <{target}>`__"
+    return f"`{name} <{mapper.relpath(target)}>`__"
 
 
 def _ref_markdown(name: str, label: str) -> str:
@@ -188,6 +182,17 @@ class BuildItemMapper(SphinxMapper):
         available for item, then the default document will be the link target.
         """
         raise NotImplementedError
+
+    def relpath(self, path: str) -> str:
+        """
+        If the base path of the mapper is not equal to "/" and the path starts
+        with "/", then return the path relative to the base path of the mapper,
+        otherwise return the path.
+        """
+        base_path = self.base_path
+        if base_path != "/" and path.startswith("/"):
+            return os.path.relpath(path, base_path)
+        return path
 
 
 def _get_input_or_output(ctx: ItemGetValueContext,

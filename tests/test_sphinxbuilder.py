@@ -62,10 +62,9 @@ def _run_command(args, cwd=None, stdout=None):
     return 1
 
 
-def test_sphinxbuilder(caplog, tmpdir, monkeypatch):
+def test_sphinxbuilder(caplog, tmp_path, monkeypatch):
     monkeypatch.setattr(specmake.sphinxbuilder, "run_command", _run_command)
-    tmp_dir = Path(tmpdir)
-    package = create_package(caplog, tmp_dir, Path("spec-packagebuild"),
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
                              ["sphinx-builder"])
     director = package.director
     doc = director["/pkg/deployment/doc"]
@@ -100,7 +99,7 @@ def test_sphinxbuilder(caplog, tmpdir, monkeypatch):
 
     copy_and_substitute = doc_build / "source" / "copy-and-substitute.rst"
     with open(copy_and_substitute, "r", encoding="utf-8") as src:
-        assert src.read() == f""".. SPDX-License-Identifier: CC-BY-SA-4.0
+        assert src.read() == """.. SPDX-License-Identifier: CC-BY-SA-4.0
 
 .. Copyright (C) 2023 embedded brains GmbH & Co. KG
 
@@ -162,19 +161,19 @@ text
 text
 *The Title* :cite:`PkgDeploymentDoc`
 text
-@manual{{PkgDeploymentDoc,
-  author = {{{{Bar, Foo and Doe, John and Long Name, This is a}}}},
-  organization = {{{{Bár Organization, Short, Some Organization}}}},
-  title = {{{{The Title}}}},
-  url = {{{tmp_dir}/pkg/doc/doc.pdf}},
-  year = {{2020}},
-}}
+@manual{PkgDeploymentDoc,
+  author = {{Bar, Foo and Doe, John and Long Name, This is a}},
+  organization = {{Bár Organization, Short, Some Organization}},
+  title = {{The Title}},
+  url = {pkg/doc/doc.pdf},
+  year = {2020},
+}
 text
 """
 
     copy_and_substitute_2 = doc_build / "source" / "copy-and-substitute-2.md"
     with open(copy_and_substitute_2, "r", encoding="utf-8") as src:
-        assert src.read() == f"""% SPDX-License-Identifier: CC-BY-SA-4.0
+        assert src.read() == """% SPDX-License-Identifier: CC-BY-SA-4.0
 
 % Copyright (C) 2023 embedded brains GmbH & Co. KG
 
@@ -188,8 +187,8 @@ The Title
 The Title
 2
 The \\break \\break Title
-{{term}}`Term`
-{{term}}`Terms <Term>`
+{term}`Term`
+{term}`Terms <Term>`
 text
 `blub()`
 text
@@ -217,9 +216,9 @@ Subsection content: sub-arch
 
 subsection 2 Header
 text
-{{ref}}`SectionHeader`
+{ref}`SectionHeader`
 text
-{{ref}}`PkgSourceDocSubsection`
+{ref}`PkgSourceDocSubsection`
 text
   Element content: sparc
 - Element 2 Header
@@ -230,17 +229,17 @@ text
 
   Element 3 content: sub-arch
 text
-{{cite}}`PkgDeploymentDoc`
+{cite}`PkgDeploymentDoc`
 text
-_The Title_ {{cite}}`PkgDeploymentDoc`
+_The Title_ {cite}`PkgDeploymentDoc`
 text
-@manual{{PkgDeploymentDoc,
-  author = {{{{Bar, Foo and Doe, John and Long Name, This is a}}}},
-  organization = {{{{Bár Organization, Short, Some Organization}}}},
-  title = {{{{The Title}}}},
-  url = {{{tmp_dir}/pkg/doc/doc.pdf}},
-  year = {{2020}},
-}}
+@manual{PkgDeploymentDoc,
+  author = {{Bar, Foo and Doe, John and Long Name, This is a}},
+  organization = {{Bár Organization, Short, Some Organization}},
+  title = {{The Title}},
+  url = {pkg/doc/doc.pdf},
+  year = {2020},
+}
 text
 """
 
@@ -648,7 +647,7 @@ Terms, definitions and abbreviated terms
 .. Copyright (C) 2024 embedded brains GmbH & Co. KG
 
 bar
-{tmp_dir}/pkg/build/src/doc
-{tmp_dir}/pkg/build/doc-make
+{tmp_path}/pkg/build/src/doc
+{tmp_path}/pkg/build/doc-make
 sparc/gr712rc/smp/4
 """
