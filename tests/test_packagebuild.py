@@ -450,19 +450,36 @@ def test_builditemmapper():
     build_item = director["/item"]
     mapper = build_item.mapper
 
+    assert mapper.base_path == "/"
     assert mapper.format == ".rst"
     assert mapper.format_code("code") == "``code``"
     assert mapper.format_link("name", "target") == "`name <target>`__"
+    mapper.base_path = "/foo"
+    assert mapper.format_link("name", "/foo/bar") == "`name <bar>`__"
+    assert mapper.format_link("name",
+                              "https://x.y") == "`name <https://x.y>`__"
+    mapper.base_path = "/"
     assert mapper.format_reference("name", "label") == ":ref:`name <label>`"
 
     mapper.set_format("foobar.md")
+    assert mapper.base_path == "/"
     assert mapper.format == ".md"
     assert mapper.format_code("code") == "`code`"
     assert mapper.format_link("name", "target") == "[name](target)"
+    mapper.base_path = "/foo"
+    assert mapper.format_link("name", "/foo/bar") == "[name](bar)"
+    assert mapper.format_link("name", "https://x.y") == "[name](https://x.y)"
+    mapper.base_path = "/"
     assert mapper.format_reference("name", "label") == "{ref}`name <label>`"
 
     mapper.set_format("foobar.rst")
+    assert mapper.base_path == "/"
     assert mapper.format == ".rst"
     assert mapper.format_code("code") == "``code``"
     assert mapper.format_link("name", "target") == "`name <target>`__"
+    mapper.base_path = "/foo"
+    assert mapper.format_link("name", "/foo/bar") == "`name <bar>`__"
+    assert mapper.format_link("name",
+                              "https://x.y") == "`name <https://x.y>`__"
+    mapper.base_path = "/"
     assert mapper.format_reference("name", "label") == ":ref:`name <label>`"
