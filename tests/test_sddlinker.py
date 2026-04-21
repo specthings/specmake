@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Tests for the sddlinker module. """
 
-# Copyright (C) 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2025, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -29,22 +29,21 @@ from pathlib import Path
 from .util import create_package
 
 
-def test_sddlinker(caplog, tmpdir):
-    tmp_dir = Path(tmpdir)
-    package = create_package(caplog, tmp_dir, Path("spec-packagebuild"),
+def test_sddlinker(caplog, tmp_path):
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
                              ["djf-svs", "link-hub", "sdd-linker"])
     director = package.director
     director.build_package()
     spec_links = director["/pkg/deployment/sdd-linker"].file
     with open(spec_links, "r", encoding="utf-8") as src:
-        assert src.read() == f"""/**
+        assert src.read() == """/**
  * @def BLUB
  *
  * @ingroup Blub
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/define-real]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdefinereal).
+ * [spec:/rtems/if/define-real](doc-ts-icd/html/requirements-and-design.html#specrtemsifdefinereal).
  */
 
 /**
@@ -54,7 +53,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/define-real]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdefinereal).
+ * [spec:/rtems/if/define-real](doc-ts-icd/html/requirements-and-design.html#specrtemsifdefinereal).
  */
 
 /**
@@ -64,7 +63,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/mem-basic]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
+ * [spec:/rtems/val/mem-basic](doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
  */
 
 /**
@@ -74,7 +73,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/mem-basic]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
+ * [spec:/rtems/val/mem-basic](doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
  */
 
 /**
@@ -84,7 +83,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/mem-basic]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
+ * [spec:/rtems/val/mem-basic](doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
  */
 
 /**
@@ -94,7 +93,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/mem-basic]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
+ * [spec:/rtems/val/mem-basic](doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
  */
 
 /**
@@ -104,7 +103,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/mem-basic]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
+ * [spec:/rtems/val/mem-basic](doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
  */
 
 /**
@@ -114,7 +113,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/mem-basic]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
+ * [spec:/rtems/val/mem-basic](doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
  */
 
 /**
@@ -124,7 +123,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/mem-basic]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
+ * [spec:/rtems/val/mem-basic](doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
  */
 
 /**
@@ -134,7 +133,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/mem-basic]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
+ * [spec:/rtems/val/mem-basic](doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
  */
 
 /**
@@ -144,7 +143,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/acfg-integer]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifacfginteger).
+ * [spec:/rtems/if/acfg-integer](doc-ts-icd/html/requirements-and-design.html#specrtemsifacfginteger).
  */
 
 /**
@@ -154,7 +153,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/mem-basic]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
+ * [spec:/rtems/val/mem-basic](doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
  */
 
 /**
@@ -164,7 +163,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/mem-basic]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
+ * [spec:/rtems/val/mem-basic](doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
  */
 
 /**
@@ -174,7 +173,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/mem-basic]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
+ * [spec:/rtems/val/mem-basic](doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
  */
 
 /**
@@ -184,7 +183,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/group-a]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroupa).
+ * [spec:/rtems/if/group-a](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroupa).
  */
 
 /**
@@ -194,7 +193,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/group]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
+ * [spec:/rtems/if/group](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
  */
 
 /**
@@ -204,9 +203,9 @@ def test_sddlinker(caplog, tmpdir):
  * @parblock
  * This design element is related to:
  *
- * - [spec:/rtems/if/group]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup)
+ * - [spec:/rtems/if/group](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup)
  *
- * - [spec:/rtems/if/group-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup2)
+ * - [spec:/rtems/if/group-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup2)
  * @endparblock
  */
 
@@ -215,7 +214,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/group-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup2).
+ * [spec:/rtems/if/group-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup2).
  */
 
 /**
@@ -225,7 +224,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/reg-block-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
+ * [spec:/rtems/if/reg-block-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
  */
 
 /**
@@ -235,7 +234,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/reg-block-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
+ * [spec:/rtems/if/reg-block-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
  */
 
 /**
@@ -245,7 +244,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/reg-block-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
+ * [spec:/rtems/if/reg-block-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
  */
 
 /**
@@ -255,7 +254,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/reg-block-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
+ * [spec:/rtems/if/reg-block-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
  */
 
 /**
@@ -265,7 +264,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/reg-block-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
+ * [spec:/rtems/if/reg-block-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
  */
 
 /**
@@ -275,7 +274,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/reg-block-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
+ * [spec:/rtems/if/reg-block-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
  */
 
 /**
@@ -285,7 +284,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/reg-block-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
+ * [spec:/rtems/if/reg-block-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
  */
 
 /**
@@ -295,7 +294,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/reg-block-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
+ * [spec:/rtems/if/reg-block-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
  */
 
 /**
@@ -305,7 +304,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/reg-block-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
+ * [spec:/rtems/if/reg-block-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
  */
 
 /**
@@ -315,7 +314,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/reg-block-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
+ * [spec:/rtems/if/reg-block-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
  */
 
 /**
@@ -325,7 +324,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/reg-block]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock).
+ * [spec:/rtems/if/reg-block](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock).
  */
 
 /**
@@ -335,7 +334,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/mem-basic]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
+ * [spec:/rtems/val/mem-basic](doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
  */
 
 /**
@@ -345,7 +344,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/mem-basic]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
+ * [spec:/rtems/val/mem-basic](doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
  */
 
 /**
@@ -355,7 +354,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/unspec-define]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecdefine).
+ * [spec:/rtems/if/unspec-define](doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecdefine).
  */
 
 /**
@@ -365,7 +364,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/unspec-macro]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecmacro).
+ * [spec:/rtems/if/unspec-macro](doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecmacro).
  */
 
 /**
@@ -375,7 +374,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -385,7 +384,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -395,7 +394,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -405,7 +404,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -415,7 +414,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -425,7 +424,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -435,7 +434,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -445,7 +444,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/unspec-enum]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecenum).
+ * [spec:/rtems/if/unspec-enum](doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecenum).
  */
 
 /**
@@ -455,7 +454,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/enum-real]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifenumreal).
+ * [spec:/rtems/if/enum-real](doc-ts-icd/html/requirements-and-design.html#specrtemsifenumreal).
  */
 
 /**
@@ -465,7 +464,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/enumerator]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifenumerator).
+ * [spec:/rtems/if/enumerator](doc-ts-icd/html/requirements-and-design.html#specrtemsifenumerator).
  */
 
 /**
@@ -475,7 +474,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/enumerator-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifenumerator2).
+ * [spec:/rtems/if/enumerator-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifenumerator2).
  */
 
 /**
@@ -485,7 +484,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -495,7 +494,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -505,7 +504,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -515,7 +514,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -525,7 +524,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -535,7 +534,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -545,7 +544,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -555,7 +554,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -565,7 +564,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -575,7 +574,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -585,7 +584,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -595,7 +594,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -605,7 +604,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -615,7 +614,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -625,7 +624,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -635,7 +634,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -645,7 +644,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -655,7 +654,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -665,7 +664,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -675,7 +674,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -685,7 +684,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -695,7 +694,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/unspec-enumerator]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecenumerator).
+ * [spec:/rtems/if/unspec-enumerator](doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecenumerator).
  */
 
 /**
@@ -709,9 +708,9 @@ def test_sddlinker(caplog, tmpdir):
  * @parblock
  * This design element is related to:
  *
- * - [spec:/rtems/if/group]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup)
+ * - [spec:/rtems/if/group](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup)
  *
- * - [spec:/rtems/if/group-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup2)
+ * - [spec:/rtems/if/group-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup2)
  * @endparblock
  */
 
@@ -722,7 +721,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/group]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
+ * [spec:/rtems/if/group](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
  */
 
 /**
@@ -732,7 +731,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/group-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup2).
+ * [spec:/rtems/if/group-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup2).
  */
 
 /**
@@ -742,7 +741,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/header-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifheader2).
+ * [spec:/rtems/if/header-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifheader2).
  */
 
 /**
@@ -752,7 +751,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/header]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifheader).
+ * [spec:/rtems/if/header](doc-ts-icd/html/requirements-and-design.html#specrtemsifheader).
  */
 
 /**
@@ -762,7 +761,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/unspec-header]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecheader).
+ * [spec:/rtems/if/unspec-header](doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecheader).
  */
 
 /**
@@ -772,7 +771,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/group]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
+ * [spec:/rtems/if/group](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
  */
 
 /**
@@ -782,7 +781,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/group]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
+ * [spec:/rtems/if/group](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
  */
 
 /**
@@ -792,7 +791,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/group]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
+ * [spec:/rtems/if/group](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
  */
 
 /**
@@ -802,7 +801,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/mem-basic]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
+ * [spec:/rtems/val/mem-basic](doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
  */
 
 /**
@@ -812,7 +811,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -822,7 +821,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -832,7 +831,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcase).
+ * [spec:/rtems/val/test-case](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcase).
  */
 
 /**
@@ -842,7 +841,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-fail]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcasefail).
+ * [spec:/rtems/val/test-case-fail](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcasefail).
  */
 
 /**
@@ -852,7 +851,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-pass]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcasepass).
+ * [spec:/rtems/val/test-case-pass](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcasepass).
  */
 
 /**
@@ -862,7 +861,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/score/cpu/val/perf]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
+ * [spec:/score/cpu/val/perf](doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
  */
 
 /**
@@ -872,7 +871,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-unit]({tmpdir}/pkg/doc-djf-suitp/html/test-case-specification.html#specrtemsvaltestcaseunit).
+ * [spec:/rtems/val/test-case-unit](doc-djf-suitp/html/test-case-specification.html#specrtemsvaltestcaseunit).
  */
 
 /**
@@ -882,7 +881,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-xfail]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcasexfail).
+ * [spec:/rtems/val/test-case-xfail](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcasexfail).
  */
 
 /**
@@ -892,7 +891,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-run]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun).
+ * [spec:/rtems/val/test-case-run](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun).
  */
 
 /**
@@ -902,7 +901,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-run]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun).
+ * [spec:/rtems/val/test-case-run](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun).
  */
 
 /**
@@ -912,7 +911,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/testsuites/performance-no-clock-0]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#spectestsuitesperformancenoclock0).
+ * [spec:/testsuites/performance-no-clock-0](doc-djf-svs/html/test-design.html#spectestsuitesperformancenoclock0).
  */
 
 /**
@@ -922,7 +921,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/testsuites/test-suite-empty]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#spectestsuitestestsuiteempty).
+ * [spec:/testsuites/test-suite-empty](doc-djf-svs/html/test-design.html#spectestsuitestestsuiteempty).
  */
 
 /**
@@ -932,7 +931,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/testsuites/test-suite-fail]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#spectestsuitestestsuitefail).
+ * [spec:/testsuites/test-suite-fail](doc-djf-svs/html/test-design.html#spectestsuitestestsuitefail).
  */
 
 /**
@@ -942,7 +941,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/testsuites/test-suite-pass]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#spectestsuitestestsuitepass).
+ * [spec:/testsuites/test-suite-pass](doc-djf-svs/html/test-design.html#spectestsuitestestsuitepass).
  */
 
 /**
@@ -952,7 +951,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/testsuites/unit-0]({tmpdir}/pkg/doc-djf-suitp/html/test-design.html#spectestsuitesunit0).
+ * [spec:/testsuites/unit-0](doc-djf-suitp/html/test-design.html#spectestsuitesunit0).
  */
 
 /**
@@ -962,7 +961,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/testsuites/test-suite-xfail]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#spectestsuitestestsuitexfail).
+ * [spec:/testsuites/test-suite-xfail](doc-djf-svs/html/test-design.html#spectestsuitestestsuitexfail).
  */
 
 /**
@@ -972,7 +971,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/mem-basic]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
+ * [spec:/rtems/val/mem-basic](doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
  */
 
 /**
@@ -982,7 +981,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -992,7 +991,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1002,7 +1001,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1012,7 +1011,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1022,7 +1021,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1032,7 +1031,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1042,7 +1041,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1052,7 +1051,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1062,7 +1061,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1072,7 +1071,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1082,7 +1081,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -1092,7 +1091,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -1102,7 +1101,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -1112,7 +1111,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -1122,7 +1121,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -1132,7 +1131,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -1142,7 +1141,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/score/cpu/val/perf]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
+ * [spec:/score/cpu/val/perf](doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
  */
 
 /**
@@ -1152,7 +1151,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/score/cpu/val/perf]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
+ * [spec:/score/cpu/val/perf](doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
  */
 
 /**
@@ -1162,7 +1161,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/score/cpu/val/perf]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
+ * [spec:/score/cpu/val/perf](doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
  */
 
 /**
@@ -1172,7 +1171,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/score/cpu/val/perf]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
+ * [spec:/score/cpu/val/perf](doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
  */
 
 /**
@@ -1182,7 +1181,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-run]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun).
+ * [spec:/rtems/val/test-case-run](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun).
  */
 
 /**
@@ -1192,7 +1191,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-run]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun).
+ * [spec:/rtems/val/test-case-run](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun).
  */
 
 /**
@@ -1202,7 +1201,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcase).
+ * [spec:/rtems/val/test-case](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcase).
  */
 
 /**
@@ -1212,7 +1211,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/score/cpu/val/perf]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
+ * [spec:/score/cpu/val/perf](doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
  */
 
 /**
@@ -1222,7 +1221,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/score/cpu/val/perf]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
+ * [spec:/score/cpu/val/perf](doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
  */
 
 /**
@@ -1232,7 +1231,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -1242,7 +1241,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1252,7 +1251,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcase).
+ * [spec:/rtems/val/test-case](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcase).
  */
 
 /**
@@ -1262,7 +1261,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-fail]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcasefail).
+ * [spec:/rtems/val/test-case-fail](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcasefail).
  */
 
 /**
@@ -1272,7 +1271,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-pass]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcasepass).
+ * [spec:/rtems/val/test-case-pass](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcasepass).
  */
 
 /**
@@ -1282,7 +1281,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-unit]({tmpdir}/pkg/doc-djf-suitp/html/test-case-specification.html#specrtemsvaltestcaseunit).
+ * [spec:/rtems/val/test-case-unit](doc-djf-suitp/html/test-case-specification.html#specrtemsvaltestcaseunit).
  */
 
 /**
@@ -1292,7 +1291,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-xfail]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcasexfail).
+ * [spec:/rtems/val/test-case-xfail](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcasexfail).
  */
 
 /**
@@ -1302,7 +1301,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/score/cpu/val/perf]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
+ * [spec:/score/cpu/val/perf](doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
  */
 
 /**
@@ -1312,7 +1311,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/unspec-function]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecfunction).
+ * [spec:/rtems/if/unspec-function](doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecfunction).
  */
 
 /**
@@ -1322,7 +1321,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/func]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsiffunc).
+ * [spec:/rtems/if/func](doc-ts-icd/html/requirements-and-design.html#specrtemsiffunc).
  */
 
 /**
@@ -1330,7 +1329,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/group]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
+ * [spec:/rtems/if/group](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
  */
 
 /**
@@ -1338,7 +1337,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/group-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup2).
+ * [spec:/rtems/if/group-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup2).
  */
 
 /**
@@ -1348,7 +1347,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/group]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqgroup).
+ * [spec:/rtems/req/group](doc-ts-srs/html/requirements.html#specrtemsreqgroup).
  */
 
 /**
@@ -1358,7 +1357,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/group-a]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroupa).
+ * [spec:/rtems/if/group-a](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroupa).
  */
 
 /**
@@ -1368,7 +1367,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/group-b]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroupb).
+ * [spec:/rtems/if/group-b](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroupb).
  */
 
 /**
@@ -1378,7 +1377,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/group]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
+ * [spec:/rtems/if/group](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
  */
 
 /**
@@ -1388,7 +1387,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/group]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
+ * [spec:/rtems/if/group](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
  */
 
 /**
@@ -1398,7 +1397,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/group-acfg]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroupacfg).
+ * [spec:/rtems/if/group-acfg](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroupacfg).
  */
 
 /**
@@ -1408,7 +1407,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/group]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
+ * [spec:/rtems/if/group](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
  */
 
 /**
@@ -1418,7 +1417,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/reg-block]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock).
+ * [spec:/rtems/if/reg-block](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock).
  */
 
 /**
@@ -1428,7 +1427,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/reg-block-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
+ * [spec:/rtems/if/reg-block-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
  */
 
 /**
@@ -1438,7 +1437,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/reg-block-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
+ * [spec:/rtems/if/reg-block-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
  */
 
 /**
@@ -1448,7 +1447,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/reg-block-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
+ * [spec:/rtems/if/reg-block-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
  */
 
 /**
@@ -1458,7 +1457,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/reg-block]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock).
+ * [spec:/rtems/if/reg-block](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock).
  */
 
 /**
@@ -1468,7 +1467,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/reg-block]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock).
+ * [spec:/rtems/if/reg-block](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock).
  */
 
 /**
@@ -1478,7 +1477,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -1488,7 +1487,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1498,7 +1497,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/score/cpu/val/perf]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
+ * [spec:/score/cpu/val/perf](doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
  */
 
 /**
@@ -1508,7 +1507,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/score/cpu/val/perf]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
+ * [spec:/score/cpu/val/perf](doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
  */
 
 /**
@@ -1516,7 +1515,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/mem-basic]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
+ * [spec:/rtems/val/mem-basic](doc-djf-svs/html/test-design.html#specrtemsvalmembasic).
  */
 
 /**
@@ -1526,7 +1525,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcase).
+ * [spec:/rtems/val/test-case](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcase).
  */
 
 /**
@@ -1536,7 +1535,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-fail]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcasefail).
+ * [spec:/rtems/val/test-case-fail](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcasefail).
  */
 
 /**
@@ -1546,7 +1545,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-pass]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcasepass).
+ * [spec:/rtems/val/test-case-pass](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcasepass).
  */
 
 /**
@@ -1556,7 +1555,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-run]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun).
+ * [spec:/rtems/val/test-case-run](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun).
  */
 
 /**
@@ -1566,7 +1565,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-unit]({tmpdir}/pkg/doc-djf-suitp/html/test-case-specification.html#specrtemsvaltestcaseunit).
+ * [spec:/rtems/val/test-case-unit](doc-djf-suitp/html/test-case-specification.html#specrtemsvaltestcaseunit).
  */
 
 /**
@@ -1576,7 +1575,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-xfail]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcasexfail).
+ * [spec:/rtems/val/test-case-xfail](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcasexfail).
  */
 
 /**
@@ -1586,7 +1585,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/score/cpu/val/perf]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
+ * [spec:/score/cpu/val/perf](doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
  */
 
 /**
@@ -1594,7 +1593,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/testsuites/performance-no-clock-0]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#spectestsuitesperformancenoclock0).
+ * [spec:/testsuites/performance-no-clock-0](doc-djf-svs/html/test-design.html#spectestsuitesperformancenoclock0).
  */
 
 /**
@@ -1602,7 +1601,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/testsuites/test-suite-empty]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#spectestsuitestestsuiteempty).
+ * [spec:/testsuites/test-suite-empty](doc-djf-svs/html/test-design.html#spectestsuitestestsuiteempty).
  */
 
 /**
@@ -1610,7 +1609,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/testsuites/test-suite-fail]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#spectestsuitestestsuitefail).
+ * [spec:/testsuites/test-suite-fail](doc-djf-svs/html/test-design.html#spectestsuitestestsuitefail).
  */
 
 /**
@@ -1618,7 +1617,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/testsuites/test-suite-pass]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#spectestsuitestestsuitepass).
+ * [spec:/testsuites/test-suite-pass](doc-djf-svs/html/test-design.html#spectestsuitestestsuitepass).
  */
 
 /**
@@ -1626,7 +1625,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/testsuites/test-suite-xfail]({tmpdir}/pkg/doc-djf-svs/html/test-design.html#spectestsuitestestsuitexfail).
+ * [spec:/testsuites/test-suite-xfail](doc-djf-svs/html/test-design.html#spectestsuitestestsuitexfail).
  */
 
 /**
@@ -1634,7 +1633,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/testsuites/unit-0]({tmpdir}/pkg/doc-djf-suitp/html/test-design.html#spectestsuitesunit0).
+ * [spec:/testsuites/unit-0](doc-djf-suitp/html/test-design.html#spectestsuitesunit0).
  */
 
 /**
@@ -1644,7 +1643,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/group]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
+ * [spec:/rtems/if/group](doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup).
  */
 
 /**
@@ -1654,7 +1653,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1664,7 +1663,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1674,7 +1673,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1684,7 +1683,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1694,7 +1693,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1704,7 +1703,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1714,7 +1713,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1724,7 +1723,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1734,7 +1733,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -1744,7 +1743,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -1754,7 +1753,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -1764,7 +1763,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -1774,7 +1773,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -1784,7 +1783,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -1794,7 +1793,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-run]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun).
+ * [spec:/rtems/val/test-case-run](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun).
  */
 
 /**
@@ -1804,7 +1803,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-run]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun).
+ * [spec:/rtems/val/test-case-run](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun).
  */
 
 /**
@@ -1814,7 +1813,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/score/cpu/val/perf]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
+ * [spec:/score/cpu/val/perf](doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
  */
 
 /**
@@ -1824,7 +1823,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/score/cpu/val/perf]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
+ * [spec:/score/cpu/val/perf](doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
  */
 
 /**
@@ -1834,7 +1833,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/unspec-object]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecobject).
+ * [spec:/rtems/if/unspec-object](doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecobject).
  */
 
 /**
@@ -1844,7 +1843,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/obj]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifobj).
+ * [spec:/rtems/if/obj](doc-ts-icd/html/requirements-and-design.html#specrtemsifobj).
  */
 
 /**
@@ -1854,7 +1853,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/obj]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifobj).
+ * [spec:/rtems/if/obj](doc-ts-icd/html/requirements-and-design.html#specrtemsifobj).
  */
 
 /**
@@ -1864,7 +1863,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/obj]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifobj).
+ * [spec:/rtems/if/obj](doc-ts-icd/html/requirements-and-design.html#specrtemsifobj).
  */
 
 /**
@@ -1874,7 +1873,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1884,7 +1883,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action-2]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2).
+ * [spec:/rtems/req/action-2](doc-ts-srs/html/requirements.html#specrtemsreqaction2).
  */
 
 /**
@@ -1894,7 +1893,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -1904,7 +1903,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/req/action]({tmpdir}/pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction).
+ * [spec:/rtems/req/action](doc-ts-srs/html/requirements.html#specrtemsreqaction).
  */
 
 /**
@@ -1914,7 +1913,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/val/test-case-run]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun).
+ * [spec:/rtems/val/test-case-run](doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun).
  */
 
 /**
@@ -1924,7 +1923,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/score/cpu/val/perf]({tmpdir}/pkg/doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
+ * [spec:/score/cpu/val/perf](doc-djf-svs/html/test-case-specification.html#specscorecpuvalperf).
  */
 
 /**
@@ -1934,7 +1933,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/struct]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifstruct).
+ * [spec:/rtems/if/struct](doc-ts-icd/html/requirements-and-design.html#specrtemsifstruct).
  */
 
 /**
@@ -1944,7 +1943,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/struct-both]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifstructboth).
+ * [spec:/rtems/if/struct-both](doc-ts-icd/html/requirements-and-design.html#specrtemsifstructboth).
  */
 
 /**
@@ -1954,7 +1953,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/struct-only]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifstructonly).
+ * [spec:/rtems/if/struct-only](doc-ts-icd/html/requirements-and-design.html#specrtemsifstructonly).
  */
 
 /**
@@ -1964,7 +1963,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/typedef]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsiftypedef).
+ * [spec:/rtems/if/typedef](doc-ts-icd/html/requirements-and-design.html#specrtemsiftypedef).
  */
 
 /**
@@ -1974,7 +1973,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/union]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunion).
+ * [spec:/rtems/if/union](doc-ts-icd/html/requirements-and-design.html#specrtemsifunion).
  */
 
 /**
@@ -1984,7 +1983,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/union-both]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunionboth).
+ * [spec:/rtems/if/union-both](doc-ts-icd/html/requirements-and-design.html#specrtemsifunionboth).
  */
 
 /**
@@ -1994,7 +1993,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/union-only]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifuniononly).
+ * [spec:/rtems/if/union-only](doc-ts-icd/html/requirements-and-design.html#specrtemsifuniononly).
  */
 
 /**
@@ -2004,7 +2003,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/unspec-struct]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecstruct).
+ * [spec:/rtems/if/unspec-struct](doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecstruct).
  */
 
 /**
@@ -2014,7 +2013,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/unspec-typedef]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspectypedef).
+ * [spec:/rtems/if/unspec-typedef](doc-ts-icd/html/requirements-and-design.html#specrtemsifunspectypedef).
  */
 
 /**
@@ -2024,7 +2023,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/unspec-union]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecunion).
+ * [spec:/rtems/if/unspec-union](doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecunion).
  */
 
 /**
@@ -2034,7 +2033,7 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/reg-block]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock).
+ * [spec:/rtems/if/reg-block](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock).
  */
 
 /**
@@ -2044,6 +2043,6 @@ def test_sddlinker(caplog, tmpdir):
  *
  * @par Traceability
  * This design element is related to
- * [spec:/rtems/if/reg-block-2]({tmpdir}/pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
+ * [spec:/rtems/if/reg-block-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
  */
 """

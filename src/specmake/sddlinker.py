@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Links SDD elements to other documents. """
 
-# Copyright (C) 2022 embedded brains GmbH & Co. KG
+# Copyright (C) 2022, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -34,13 +34,14 @@ from .linkhub import LinkHub, SpecMapper
 from .pkgitems import PackageBuildDirector
 
 
-def _add_variant(content: CContent, variant: dict) -> None:
+def _add_variant(content: CContent, mapper: SpecMapper, variant: dict) -> None:
     with content.doxygen_block():
         content.add(variant["doxygen"])
         for group in variant.get("groups", []):
             content.add(f"@ingroup {group[group.find('/') + 1:]}")
         links = [
-            f"[{item.spec}]({item.view['default-document-path']})"
+            f"[{item.spec}]"
+            f"({mapper.relpath(item.view['default-document-path'])})"
             for item in sorted(variant["items"])
         ]
         line = "This design element is related to"
@@ -58,16 +59,18 @@ class SDDLinker(DirectoryState):
 
     def __init__(self, director: PackageBuildDirector, item: Item) -> None:
         super().__init__(director, item, SpecMapper("sdd", self, item))
+        self.mapper.base_path = self.directory
 
     def run(self):
         content = CContent()
         link_hub = self.input("link-hub")
         assert isinstance(link_hub, LinkHub)
+        mapper = self.mapper
         for _, info in sorted(link_hub.name_info.items()):
             if not isinstance(info, dict):
                 continue
             for variant in itertools.chain([info], info.get("variants", [])):
-                _add_variant(content, variant)
+                _add_variant(content, mapper, variant)
         content.write(self.file)
 
         self.description.add(f"""Produce the header file
