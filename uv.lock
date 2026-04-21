@@ -1715,7 +1715,7 @@ wheels = [
 
 [[package]]
 name = "specitems"
-version = "1.1.21"
+version = "1.1.22"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "mdformat" },
@@ -1726,9 +1726,9 @@ dependencies = [
     { name = "mdformat-tables" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/1a/77/a9b39591ffc4a7efde5b2381e58ec730958e958954abd24236b3634d4f53/specitems-1.1.21.tar.gz", hash = "sha256:b5f074c190e244bcdbf6a10338b0a1c3109c29be1f1f55966283fcbc707d4338", size = 55380, upload-time = "2026-04-20T02:37:22.065Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/84/22/85b5debccb23fa96c418074647755d300a31e43018307bc1827006c16b0d/specitems-1.1.22.tar.gz", hash = "sha256:e50ce35b67d1ebfea4562310714675f23bf0f46e9de0214727185996b2082a86", size = 55411, upload-time = "2026-04-21T09:24:08.708Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/70/ad/ef8b9cf51951069b3b28a14ca50b033a0c78b6cd6e12d64279e1212e477d/specitems-1.1.21-py3-none-any.whl", hash = "sha256:586a79116b20131f6a8ef18e3101de7e114bd3b41a7a6f53bf60631d3791b0d2", size = 77065, upload-time = "2026-04-20T02:37:20.733Z" },
+    { url = "https://files.pythonhosted.org/packages/8b/8b/c476b806308690ed971496f12e0d172fe567324a2ae259f8accaa909bee0/specitems-1.1.22-py3-none-any.whl", hash = "sha256:328d836b4c4c4ab11ecd6861fd5a597cf57afe38b74c1652be7d5692f322669b", size = 77097, upload-time = "2026-04-21T09:24:07.756Z" },
 ]
 
 [[package]]
@@ -1777,9 +1777,9 @@ dev = [
 requires-dist = [
     { name = "gcovr", specifier = ">=8.6" },
     { name = "matplotlib", specifier = ">=3.10.1" },
-    { name = "specitems", specifier = ">=1.1.21" },
+    { name = "specitems", specifier = ">=1.1.22" },
     { name = "spectestrunner", specifier = ">=0.9.2" },
-    { name = "specware", specifier = ">=1.1.15" },
+    { name = "specware", specifier = ">=1.1.16" },
     { name = "sphinx", specifier = ">=8.2.3" },
     { name = "sphinx-better-subsection", specifier = ">=0.2" },
     { name = "sphinx-rtd-theme", specifier = ">=3.0.2" },
@@ -1827,15 +1827,12 @@ wheels = [
 
 [[package]]
 name = "specware"
-version = "1.1.15"
+version = "1.1.16"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "specitems" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7d/2e/1d41125869d16bfbdb0f059f95746fc768868cb799c7148061ca2c7c68f6/specware-1.1.15.tar.gz", hash = "sha256:faeffb855a0611ffa3cfb61c4106a7cc259938f61915c4096802d31b46a8b062", size = 81177, upload-time = "2026-04-20T03:22:45.02Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/df/f3/fcdb92cab2b8233ed65f39b5095f9dcd966011b31948325afb76f7fb7797/specware-1.1.15-py3-none-any.whl", hash = "sha256:c946817bcb2e7aebd8e7cdd6439c5bd7acc12252e34738e78cacc95bef17a642", size = 96788, upload-time = "2026-04-20T03:22:43.967Z" },
-]
+sdist = { url = "https://files.pythonhosted.org/packages/99/fe/fd85ddff612ff0f54eebd3e8bb27be7d40922aed2d7957b7249e2656afc5/specware-1.1.16.tar.gz", hash = "sha256:5904b4fe4cd28a0226b429a52e18a7948d0133333eb5242024af38cf905fe8a9", size = 81170, upload-time = "2026-04-21T09:25:24.893Z" }
 
 [[package]]
 name = "sphinx"
