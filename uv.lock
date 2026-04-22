@@ -1733,7 +1733,7 @@ wheels = [
 
 [[package]]
 name = "specmake"
-version = "1.2.4.dev1"
+version = "1.2.4"
 source = { editable = "." }
 dependencies = [
     { name = "gcovr" },
@@ -1833,6 +1833,9 @@ dependencies = [
     { name = "specitems" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/99/fe/fd85ddff612ff0f54eebd3e8bb27be7d40922aed2d7957b7249e2656afc5/specware-1.1.16.tar.gz", hash = "sha256:5904b4fe4cd28a0226b429a52e18a7948d0133333eb5242024af38cf905fe8a9", size = 81170, upload-time = "2026-04-21T09:25:24.893Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a1/ed/8f13f0c6266aeeb99e09062d4c3e2480a3fcf6576ab99025698e61cdd3f9/specware-1.1.16-py3-none-any.whl", hash = "sha256:71d0109e545f94b520340c9d32d998d34ac34ba389ceb73f78a0d04bb2defa95", size = 96788, upload-time = "2026-04-21T09:25:25.84Z" },
+]
 
 [[package]]
 name = "sphinx"
