@@ -661,11 +661,18 @@ class BuildItem():
             assert status == 0
 
     def _get_component(self, ctx: ItemGetValueContext) -> Any:
-        if isinstance(self, PackageComponent):
-            component = self
+        # pylint: disable=protected-access
+        uid = ctx.item.uid
+        if uid == self.uid:
+            # This avoids a recursive construction of this build item
+            build_item = self
         else:
-            assert self._component_stack[-1] is not None
-            component = self._component_stack[-1]
+            build_item = self.director[uid]
+        if isinstance(build_item, PackageComponent):
+            component = build_item
+        else:
+            assert build_item._component_stack[-1] is not None
+            component = build_item._component_stack[-1]
         while True:
             try:
                 args = "" if ctx.args is None else f":{ctx.args}"

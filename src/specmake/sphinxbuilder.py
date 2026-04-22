@@ -268,7 +268,8 @@ class _CitationProvider(BibTeXCitationProvider):
         mapper = self.mapper
         assert isinstance(mapper, BuildItemMapper)
         url = mapper.relpath(
-            mapper.substitute(f"{item['directory']}/{item['output-pdf']}"))
+            mapper.substitute(f"{item['directory']}/{item['output-pdf']}",
+                              item))
         fields: dict[str, str | list[str]] = {
             "author": sorted(authors),
             "organization": ", ".join(sorted(organizations)),
