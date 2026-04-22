@@ -16,4 +16,5 @@ links:
   uid: ../component
 pkg-type: workspace
 type: pkg
+whoami: sub
 workspace-type: component

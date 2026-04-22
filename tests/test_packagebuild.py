@@ -297,6 +297,11 @@ def test_packagebuild(caplog, tmpdir, monkeypatch):
     assert c.substitute(
         "${/pkg/issue/rtems/2189:/name}"
     ) == "`RTEMS Ticket #2189 <https://devel.rtems.org/ticket/2189>`__"
+    assert c.substitute("${/pkg/component:/component/whoami}") == "pkg"
+    assert c.substitute("${/pkg/sub/component:/component/whoami}") == "pkg"
+    assert c.substitute("${/pkg/sub/s/component:/component/whoami}") == "pkg"
+    assert c.substitute("${/pkg/sub/s/link-hub:/component/whoami}") == "pkg"
+    assert c.substitute("${/pkg/sub/t/link-hub:/component/whoami}") == "pkg"
     with c.component_scope(subcomponent):
         assert c.component["arch"] == "sub-arch"
         c.component = None

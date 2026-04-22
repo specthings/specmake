@@ -32,4 +32,5 @@ prefix-directory: ${.:/tmpdir}
 pkg-type: workspace
 rtems-version: '6'
 type: pkg
+whoami: pkg
 workspace-type: component
