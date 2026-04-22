@@ -1,10 +1,10 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 content: |
-  Subsection content: ${.:/component/arch}
+  Subsection content: ${*:/component/arch}
 
-  ${.:/push-component:/pkg/sub/component}
-  Push component content: ${.:/component/arch}
-  ${.:/pop-component}
+  ${*:/push-component:/pkg/sub/component}
+  Push component content: ${*:/component/arch}
+  ${*:/pop-component}
 copyrights:
 - Copyright (C) 2023 embedded brains GmbH & Co. KG
 enabled-by: true
