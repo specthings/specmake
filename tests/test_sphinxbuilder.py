@@ -47,7 +47,10 @@ def _set_enabled_set(item: PackageComponent, enabled_set: list[str]) -> None:
             _set_enabled_set(child, enabled_set)
 
 
-def _run_command(args, cwd=None, stdout=None):
+def _run_command(args, cwd=None, stdout=None, env=None):
+    if env is not None:
+        assert "latexpdf" in args
+        assert env["LATEXOPTS"] == "-halt-on-error"
     logging.info("run command: %s", " ".join(args))
     if args == ["python3", "-msphinx", "-M", "clean", "source", "build"]:
         return 0
