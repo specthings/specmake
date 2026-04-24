@@ -36,12 +36,32 @@ def test_stdtailoring(caplog, tmpdir):
     director = package.director
     builder = director["/pkg/doc"]
     assert isinstance(builder, DocumentBuilder)
+    builder_2 = director["/pkg/doc-2"]
+    assert isinstance(builder_2, DocumentBuilder)
 
+    # Check standard and clause references
     assert builder.substitute(
         "${/standard/clause-0:/clause}") == ":ref:`4.3.1.1x <StandardClause0>`"
     assert builder.substitute(
         "${/standard/clause-0:/standard-and-clause}"
     ) == ":ref:`ABCD-X-ST-01Y Rev. 42 4.3.1.1x <StandardClause0>`"
+
+    # Check standard and clause links
+    assert builder_2.substitute(
+        "${/standard/clause-0:/clause}"
+    ) == "`4.3.1.1x <../doc/path/to/ecss/tailoring#standardclause0>`__"
+    assert builder_2.substitute(
+        "${/standard/clause-0:/standard-and-clause}"
+    ) == "`ABCD-X-ST-01Y Rev. 42 4.3.1.1x <../doc/path/to/ecss/tailoring#standardclause0>`__"
+    with builder_2.component_scope(director["/pkg/component-2"]):
+        assert builder_2.substitute(
+            "${/standard/clause-0:/clause}"
+        ) == "`4.3.1.1x <../doc/path/to/ecss/tailoring-2#standardclause0>`__"
+        assert builder_2.substitute(
+            "${/standard/clause-0:/standard-and-clause}"
+        ) == "`ABCD-X-ST-01Y Rev. 42 4.3.1.1x <../doc/path/to/ecss/tailoring-2#standardclause0>`__"
+
+    # Check standard tailoring
     assert builder.substitute(
         "${.:/standard-tailoring}") == """.. _StandardStandard:
 
