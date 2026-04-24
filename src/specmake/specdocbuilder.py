@@ -45,7 +45,7 @@ from .linkhub import get_kind, spec_label, SpecMapper
 from .perfimages import environment_order
 from .rtems import RTEMSItemCache
 from .speccompare import CompareSpecsRegistry
-from .testaggregator import get_test_result_status
+from .testaggregator import get_test_result_status, TestAggregator
 from .util import duration
 
 
@@ -954,6 +954,8 @@ class SpecDocumentBuilder(DocumentBuilder):
             spec_compare_registry = None
         self.spec_compare_registry = spec_compare_registry
         my_type = self.item.type
+        self.mapper.add_get_value(f"{my_type}:/code-coverage-achievement",
+                                  self._code_coverage_achievement)
         self.mapper.add_get_value(f"{my_type}:/validation-verification",
                                   self._validation_verification)
 
@@ -981,6 +983,15 @@ class SpecDocumentBuilder(DocumentBuilder):
                                                      self.spec,
                                                      self.file_path))
                 self.add_item_changes(content, item)
+
+    def _code_coverage_achievement(self, ctx: ItemGetValueContext) -> str:
+        with self.section_level_scope(ctx):
+            content = self.mapper.create_content(
+                section_level=self.section_level)
+            for test_aggregator in self.inputs("test-aggregation"):
+                assert isinstance(test_aggregator, TestAggregator)
+                test_aggregator.add_coverage_achievement(content, self.mapper)
+            return str(content)
 
     def _validation_status(self, item: Item) -> str:
         validation_status = item.view.get("validation-status", "N/A")

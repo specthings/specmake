@@ -32,7 +32,7 @@ import os
 from typing import Any
 
 from specitems import (COL_SPAN, Item, link_is_enabled, make_label,
-                       SphinxContent)
+                       SphinxContent, TextContent)
 from specware import CodeMapper
 
 from .directorystate import DirectoryState
@@ -729,7 +729,7 @@ class TestAggregator(BuildItem):
             if no_spec_for_test_case:
                 unspec_test_cases.append(test_case)
 
-    def add_coverage_achievement(self, content: SphinxContent,
+    def add_coverage_achievement(self, content: TextContent,
                                  mapper: BuildItemMapper) -> None:
         """ Add the code/branch coverage achievement to the content. """
         rows: list[list[str | int]] = [[
