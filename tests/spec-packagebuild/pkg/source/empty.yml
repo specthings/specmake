@@ -12,6 +12,14 @@ links:
   name: component
   role: input
   uid: ../component
+- directory: path/to/bar
+  name: bar
+  role: document
+  uid: ../sub/component
+- directory: path/to/blub
+  name: blub
+  role: document
+  uid: ../component
 - hash: null
   output-name: output-name
   params: {}

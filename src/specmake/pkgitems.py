@@ -743,6 +743,28 @@ class PackageComponent(BuildItem):
                 yield subcomponent
                 yield from subcomponent.subcomponents()
 
+    def get_document(self, name: str) -> tuple[BuildItem, str]:
+        """
+        Get the document item and the path to the document content associated
+        with the name.
+
+        If the current component has no document associated with the name, the
+        parent component is queried, continuing up the component chain until a
+        matching document is found.
+        """
+        component = self
+        while True:
+            for link in component.item.links_to_children("document"):
+                if link["name"] == name:
+                    target = self.director[link.item.uid]
+                    return target, os.path.normpath(
+                        os.path.join(target.directory, link["directory"]))
+            try:
+                component = component.component
+            except StopIteration as err:
+                raise KeyError(f"{self.uid}: there is no document "
+                               f"associated with name: {name}") from err
+
     def run(self) -> None:
         self.description.add("Provide settings for the component.")
 

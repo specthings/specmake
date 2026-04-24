@@ -152,6 +152,11 @@ def test_packagebuild(caplog, tmpdir, monkeypatch):
         subcomponent.substitute("${.:/component/does-not-exist}")
     assert package.substitute("${.:/component/arch}") == "sparc"
     assert subcomponent.substitute("${.:/component/arch}") == "sub-arch"
+    with pytest.raises(KeyError, match="there is no document"):
+        subcomponent.get_document("foo")
+    doc = director["/pkg/source/empty"]
+    assert subcomponent.get_document("bar") == (doc, f"{tmpdir}/path/to/bar")
+    assert subcomponent.get_document("blub") == (doc, f"{tmpdir}/path/to/blub")
 
     # Test BuildItem methods
     c = director["/pkg/steps/c"]
