@@ -404,10 +404,13 @@ class SphinxBuilder(DirectoryState):
         output = self["output-pdf"]
         if output:
             stdout: list[str] = []
+            env = os.environ.copy()
+            env["LATEXOPTS"] = "-halt-on-error"
             status = run_command(
                 ["python3", "-msphinx", "-M", "latexpdf", "source", "build"],
                 build_dir,
-                stdout=stdout)
+                stdout=stdout,
+                env=env)
             unstable = ("Latexmk: Maximum runs of pdflatex reached"
                         " without getting stable files")
             assert status == 0 or unstable in stdout
