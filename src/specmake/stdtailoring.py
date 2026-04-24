@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Provides an item value provider for standard tailoring. """
 
-# Copyright (C) 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2025, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -31,20 +31,7 @@ from specitems import (Item, ItemGetValueContext, ItemValueProvider,
                        TextContent, TextMapper)
 
 from .sphinxbuilder import SphinxBuilder
-from .pkgitems import BuildItem, BuildItemFactory, export_data
-
-
-def _get_ecss_standard_and_clause(ctx: ItemGetValueContext) -> str:
-    item = ctx.item
-    standard = item.parent("requirement-refinement")["name"]
-    clause = f"{item['section']}{item['bullet']}"
-    return f":ref:`{standard} {clause} <{item.ident}>`"
-
-
-def _get_ecss_clause(ctx: ItemGetValueContext) -> str:
-    item = ctx.item
-    clause = f"{item['section']}{item['bullet']}"
-    return f":ref:`{clause} <{item.ident}>`"
+from .pkgitems import BuildItem, BuildItemFactory, BuildItemMapper, export_data
 
 
 def _add_compliance_matrix(content: TextContent, name: str,
@@ -116,15 +103,17 @@ class StandardTailoringProvider(ItemValueProvider):
     def __init__(self, builder: SphinxBuilder) -> None:
         super().__init__(builder.mapper)
         self._builder = builder
+        self._whoami = builder["document-key"]
+        self._tailoring: dict[str, tuple[str, str]] = {}
         mapper = builder.mapper
         for name in [builder.item.type, "pkg/sphinx-section"]:
             mapper.add_get_value(f"{name}:/standard-tailoring",
                                  self._get_standard_tailoring)
         mapper.add_get_value("requirement/non-functional/ecss:/clause",
-                             _get_ecss_clause)
+                             self._get_ecss_clause)
         mapper.add_get_value(
             "requirement/non-functional/ecss:/standard-and-clause",
-            _get_ecss_standard_and_clause)
+            self._get_ecss_standard_and_clause)
 
     def _get_standard_tailoring(self, ctx: ItemGetValueContext) -> str:
         builder = self._builder
@@ -142,6 +131,31 @@ class StandardTailoringProvider(ItemValueProvider):
                     for clause in clauses:
                         _add_clause(content, builder, name, clause)
             return content.join()
+
+    def _get_link(self, ctx: ItemGetValueContext, name: str) -> str:
+        component = self._builder.component
+        tailoring = self._tailoring.get(component.uid)
+        if tailoring is None:
+            document, path = component.get_document("ecss-tailoring")
+            tailoring = (document["document-key"], path)
+            self._tailoring[component.uid] = tailoring
+        mapper = ctx.mapper
+        assert isinstance(mapper, BuildItemMapper)
+        if self._whoami == tailoring[0]:
+            return mapper.format_reference(name, ctx.item.ident)
+        return mapper.format_link(name,
+                                  f"{tailoring[1]}#{ctx.item.ident.lower()}")
+
+    def _get_ecss_standard_and_clause(self, ctx: ItemGetValueContext) -> str:
+        item = ctx.item
+        name = item.parent("requirement-refinement")["name"]
+        name = f"{name} {item['section']}{item['bullet']}"
+        return self._get_link(ctx, name)
+
+    def _get_ecss_clause(self, ctx: ItemGetValueContext) -> str:
+        item = ctx.item
+        name = f"{item['section']}{item['bullet']}"
+        return self._get_link(ctx, name)
 
 
 def _export_data(item: Item, present: bool, built_later: bool) -> Any:
