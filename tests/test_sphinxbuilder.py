@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Tests for the sphinxbuilder module. """
 
-# Copyright (C) 2023, 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2023, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -654,3 +654,17 @@ bar
 {tmp_path}/pkg/build/doc-make
 sparc/gr712rc/smp/4
 """
+
+
+def test_document_references(caplog, tmp_path):
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
+                             ["sphinx-builder", "sphinx-builder-2"])
+    doc = package.director["/pkg/deployment/doc"]
+    assert doc.substitute(
+        "${.:/ref:this is a name,document=doc,label=Label,text}"
+    ) == ":ref:`this is a name text <Label>`"
+    assert doc.substitute("${.:/ref:name,document=doc-2,label=Label2}"
+                          ) == "`name <pkg/doc-2/path/to/doc-2#label2>`__"
+    assert doc.substitute(
+        "${.:/ref:name,document=doc-2,label=Label3,path=/more}"
+    ) == "`name <pkg/doc-2/path/to/doc-2/more#label3>`__"

@@ -283,6 +283,7 @@ class _CitationProvider(BibTeXCitationProvider):
 class SphinxBuilder(DirectoryState):
     """ Base class for Sphinx document builds. """
 
+    # pylint: disable=too-many-instance-attributes
     @classmethod
     def prepare_factory(cls, factory: BuildItemFactory,
                         type_name: str) -> None:
@@ -297,7 +298,8 @@ class SphinxBuilder(DirectoryState):
                  mapper: Optional[BuildItemMapper] = None) -> None:
         super().__init__(director, item, mapper)
         self.mapper.base_path = self["document-base-path"]
-        _CitationProvider(self)
+        self._whoami = self["document-key"]
+        self._refs: dict[str, tuple[str, str]] = {}
         self._index: list[str] = []
         self._section_level_stack: list[int] = [2]
         self._section_stack: list[BuildItem] = [self]
@@ -340,6 +342,7 @@ class SphinxBuilder(DirectoryState):
                                   self._get_release_sections)
         self.mapper.add_get_value(f"{my_type}:/document-contributors",
                                   _get_contributors)
+        self.mapper.add_get_value(f"{my_type}:/ref", self._get_ref)
         for name in [my_type, "pkg/sphinx-section"]:
             self.mapper.add_get_value(f"{name}:/build-description",
                                       self._get_build_description)
@@ -360,6 +363,7 @@ class SphinxBuilder(DirectoryState):
             "copy-and-substitute": self._copy_and_substitute,
             "glossary": self._glossary
         }
+        _CitationProvider(self)
 
     def _run_actions(self, source: DirectoryState, build_dir: str) -> None:
         source_dir = source.directory
@@ -631,6 +635,26 @@ class SphinxBuilder(DirectoryState):
             assert isinstance(mapper, BuildItemMapper)
             return mapper.create_content().reference(
                 self._get_section_label(section.item))
+
+    def _get_ref(self, ctx: ItemGetValueContext) -> str:
+        args, kwargs = ctx.unpack_args_dict(ctx.mapper.substitute)
+        assert args
+        document = kwargs["document"]
+        component = self.component
+        component_document = f"{component.uid}/{document}"
+        ref = self._refs.get(component_document)
+        if ref is None:
+            target, path = component.get_document(document)
+            ref = (target["document-key"], path)
+            self._refs[component_document] = ref
+        mapper = ctx.mapper
+        assert isinstance(mapper, BuildItemMapper)
+        name = " ".join(args)
+        label = kwargs["label"]
+        if self._whoami == ref[0]:
+            return mapper.format_reference(name, label)
+        return mapper.format_link(
+            name, f"{ref[1]}{kwargs.get('path', '')}#{label.lower()}")
 
     def _get_document_elements(self, ctx: ItemGetValueContext) -> str:
         assert ctx.args
