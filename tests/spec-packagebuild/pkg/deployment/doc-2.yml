@@ -28,6 +28,10 @@ enabled-by: sphinx-builder-2
 files: []
 hash: null
 links:
+- directory: path/to/doc-2
+  name: doc-2
+  role: document
+  uid: ../component
 - hash: null
   name: component
   role: input

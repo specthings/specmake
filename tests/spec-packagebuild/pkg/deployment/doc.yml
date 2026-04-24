@@ -75,6 +75,10 @@ enabled-by: sphinx-builder
 files: []
 hash: null
 links:
+- directory: path/to/doc
+  name: doc
+  role: document
+  uid: ../component
 - hash: null
   name: component
   role: input
