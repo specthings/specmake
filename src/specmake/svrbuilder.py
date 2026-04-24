@@ -36,7 +36,7 @@ from .pkgitems import PackageBuildDirector
 from .linkhub import LinkHub
 from .sphinxbuilder import spacify
 from .specdocbuilder import SpecDocumentBuilder
-from .testaggregator import get_test_result_status, TestAggregator
+from .testaggregator import get_test_result_status
 
 _DEFINE_NOT_DEFINED = "requirement/functional/interface-define-not-defined"
 
@@ -84,8 +84,6 @@ class SVRBuilder(SpecDocumentBuilder):
                                   self._traceability_code_to_design)
         self.mapper.add_get_value(f"{my_type}:/unit-verification",
                                   self._unit_verification)
-        self.mapper.add_get_value(f"{my_type}:/code-coverage-achievement",
-                                  self._code_coverage_achievement)
         self.mapper.add_get_value(f"{my_type}:/performance-summary",
                                   self._performance_summary)
         self.mapper.add_get_value(f"{my_type}:/memory-benchmarks",
@@ -230,13 +228,6 @@ class SVRBuilder(SpecDocumentBuilder):
             rows_2.append([name, ", ".join(status)])
         content.add_grid_table(rows, [80, 20], font_size=-1)
         content.add_grid_table(rows_2, [80, 20], font_size=-1)
-        return str(content)
-
-    def _code_coverage_achievement(self, _ctx: ItemGetValueContext) -> str:
-        content = SphinxContent(section_level=2)
-        test_aggregator = self.input("test-aggregation")
-        assert isinstance(test_aggregator, TestAggregator)
-        test_aggregator.add_coverage_achievement(content, self.mapper)
         return str(content)
 
     def _performance_summary(self, _ctx: ItemGetValueContext) -> str:
