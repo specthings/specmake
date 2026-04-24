@@ -65,6 +65,44 @@ def test_svrbuilder(caplog, tmpdir):
 
 .. code-coverage-achievement end
 
+.. code-coverage-limits begin
+.. _CoverageLimitsPkgComponent:
+
+Component - spec:/pkg/component
+-------------------------------
+
+.. raw:: latex
+
+    \\begin{scriptsize}
+
+.. table::
+    :class: longtable
+    :widths: 20,10,10,15,15,15,15
+
+    +-+-+-+-+-+-+-+
+    | Target | Configuration | Scope | Area | Functions | Lines | Branches |
+    +=+=+=+=+=+=+=+
+    | `Name Target A <reports.html#a>`__ | `build-config-key <reports.html#abuildconfigkey>`__ | Scope | overall | 100.0% | 100.0% | 100.0% |
+    + + +-+-+-+-+-+
+    | | | Scope | per-file | 100.0% | 100.0% | 80.0% |
+    + + +-+-+-+-+-+
+    | | | Scope | cpukit/score/src/threadqenqueue.c | 100.0% | 100.0% | 80.0% |
+    + + +-+-+-+-+-+
+    | | | Empty | overall | 100.0% | 100.0% | 100.0% |
+    + + +-+-+-+-+-+
+    | | | Empty | per-file | 100.0% | 100.0% | 100.0% |
+    + + +-+-+-+-+-+
+    | | | Good | overall | 100.0% | 100.0% | 100.0% |
+    + + +-+-+-+-+-+
+    | | | Good | per-file | 100.0% | 100.0% | 80.0% |
+    +-+-+-+-+-+-+-+
+
+.. raw:: latex
+
+    \\end{scriptsize}
+
+.. code-coverage-limits end
+
 .. memory-benchmarks begin
 .. _BenchmarksBasedOnSpecRtemsValMemBasic:
 

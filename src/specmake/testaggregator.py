@@ -466,6 +466,15 @@ class _CoverageSummary:
         self._add_file_stats(mapper, stats, file_path, spot_to_justification)
 
 
+def _limits_order(area_and_limits: tuple) -> str:
+    area = area_and_limits[0]
+    if area == "overall":
+        return "a"
+    if area == "per-file":
+        return "b"
+    return f"c{area}"
+
+
 class TestAggregator(BuildItem):
     """ Aggregates test results. """
 
@@ -753,6 +762,36 @@ class TestAggregator(BuildItem):
                     config = COL_SPAN
                     target = COL_SPAN
         content.add_grid_table(rows, [18, 8, 8, 13, 7, 13, 7, 13, 7],
+                               font_size=-3)
+
+    def add_coverage_limits(self, content: TextContent,
+                            mapper: BuildItemMapper) -> None:
+        """ Add the code/branch coverage limits to the content. """
+        rows: list[list[str | int]] = [[
+            "Target", "Configuration", "Scope", "Area", "Functions", "Lines",
+            "Branches"
+        ]]
+        for target_data in self.targets.values():
+            target: str | int = mapper.format_link(target_data["name"],
+                                                   target_data["link"])
+            for config_data in target_data["configs"]:
+                key = config_data["config-key"]
+                config: str | int = mapper.format_link(key,
+                                                       config_data["link"])
+                for coverage in config_data.get("coverage", []):
+                    for area, limits in sorted(
+                            coverage["limits-by-area"].items(),
+                            key=_limits_order):
+                        rows.append([
+                            target, config, coverage["scope"],
+                            area.removeprefix("file-")
+                        ] + [
+                            f"{limits[f'{kind}-min-percent']:.1f}%"
+                            for kind in _COVERAGE_KINDS
+                        ])
+                        config = COL_SPAN
+                        target = COL_SPAN
+        content.add_grid_table(rows, [20, 10, 10, 15, 15, 15, 15],
                                font_size=-3)
 
     def add_coverage_of_config(self, content: SphinxContent,

@@ -6,6 +6,10 @@
 ${.:/code-coverage-achievement}
 .. code-coverage-achievement end
 
+.. code-coverage-limits begin
+${.:/code-coverage-limits}
+.. code-coverage-limits end
+
 .. memory-benchmarks begin
 ${.:/memory-benchmarks}
 .. memory-benchmarks end

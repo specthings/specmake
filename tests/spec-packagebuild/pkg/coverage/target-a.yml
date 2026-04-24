@@ -18,6 +18,10 @@ limits:
     branch-min-percent: 80.0
     function-min-percent: 100.0
     line-min-percent: 100.0
+  file-cpukit/score/src/threadqenqueue.c:
+    branch-min-percent: 80.0
+    function-min-percent: 100.0
+    line-min-percent: 100.0
 links:
 - hash: null
   name: component
