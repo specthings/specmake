@@ -956,6 +956,8 @@ class SpecDocumentBuilder(DocumentBuilder):
         my_type = self.item.type
         self.mapper.add_get_value(f"{my_type}:/code-coverage-achievement",
                                   self._code_coverage_achievement)
+        self.mapper.add_get_value(f"{my_type}:/code-coverage-limits",
+                                  self._code_coverage_limits)
         self.mapper.add_get_value(f"{my_type}:/validation-verification",
                                   self._validation_verification)
 
@@ -991,6 +993,18 @@ class SpecDocumentBuilder(DocumentBuilder):
             for test_aggregator in self.inputs("test-aggregation"):
                 assert isinstance(test_aggregator, TestAggregator)
                 test_aggregator.add_coverage_achievement(content, self.mapper)
+            return str(content)
+
+    def _code_coverage_limits(self, ctx: ItemGetValueContext) -> str:
+        with self.section_level_scope(ctx):
+            content = self.mapper.create_content(
+                section_level=self.section_level)
+            for test_aggregator in self.inputs("test-aggregation"):
+                assert isinstance(test_aggregator, TestAggregator)
+                item = test_aggregator.component.item
+                with content.section(f"Component - {item.spec}",
+                                     label=f"CoverageLimits{item.ident}"):
+                    test_aggregator.add_coverage_limits(content, self.mapper)
             return str(content)
 
     def _validation_status(self, item: Item) -> str:
