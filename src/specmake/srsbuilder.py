@@ -24,13 +24,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from specitems import Item, ItemGetValueContext, SphinxContent
+from specitems import Item, ItemGetValueContext, TextContent
 
 from .pkgitems import PackageBuildDirector
 from .specdocbuilder import SpecDocumentBuilder
 
 
-def _add_no_requirements(content: SphinxContent, which: str) -> None:
+def _add_no_requirements(content: TextContent, which: str) -> None:
     content.add(f"""At the time of pre-qualification, no specific {which}
 requirements have been identified, but they shall be determined as
 appropriate for each individual mission or system in which RTEMS is
@@ -66,9 +66,7 @@ class SRSBuilder(SpecDocumentBuilder):
         return self.spec.get_related_requirements()
 
     def _get_constraints(self, ctx: ItemGetValueContext) -> str:
-        with self.section_level_scope(ctx):
-            content = SphinxContent(section_level=self.section_level,
-                                    the_license=self.content_license)
+        with self.section_content(ctx) as (content, _):
             for item in self.spec.get_related_items_by_type("constraint"):
                 self.add_item(content, item)
             return content.join()
@@ -92,16 +90,14 @@ class SRSBuilder(SpecDocumentBuilder):
     def _get_count(self, ctx: ItemGetValueContext) -> str:
         return str(ctx.value[ctx.key])
 
-    def _add_requirements(self, content: SphinxContent, section: str,
+    def _add_requirements(self, content: TextContent, section: str,
                           types: tuple[str, ...]) -> None:
         with content.section(section):
             for item in self.spec.get_related_items_by_type(types):
                 self.add_item(content, item)
 
     def _get_requirements(self, ctx: ItemGetValueContext) -> str:
-        with self.section_level_scope(ctx):
-            content = SphinxContent(section_level=self.section_level,
-                                    the_license=self.content_license)
+        with self.section_content(ctx) as (content, _):
             content.add(".. include:: ../include/abbreviations.rst")
             with content.section("Requirements"):
                 self._add_requirements(

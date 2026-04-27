@@ -117,10 +117,8 @@ class StandardTailoringProvider(ItemValueProvider):
 
     def _get_standard_tailoring(self, ctx: ItemGetValueContext) -> str:
         builder = self._builder
-        with builder.section_level_scope(ctx):
+        with builder.section_content(ctx) as (content, _):
             assert isinstance(self.mapper, TextMapper)
-            content = self.mapper.create_content(
-                section_level=builder.section_level)
             for std in builder.item.parents("standard-tailoring"):
                 name = builder.substitute(std["name"], std)
                 with content.section(f"Tailoring of {name}", label=std.ident):

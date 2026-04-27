@@ -459,10 +459,9 @@ class SphinxBuilder(DirectoryState):
         return list_terms(sorted(component_list))
 
     def _get_releases(self, ctx: ItemGetValueContext, scope: Callable) -> str:
-        with self.section_level_scope(ctx):
+        with self.section_content(ctx) as (content, _):
             mapper = ctx.mapper
             assert isinstance(mapper, BuildItemMapper)
-            content = mapper.create_content(self.section_level)
             releases = ctx.item["document-releases"]
             count = len(releases)
             for idx, release in enumerate(reversed(releases)):
@@ -546,9 +545,9 @@ class SphinxBuilder(DirectoryState):
         return self._section_level_stack[-1]
 
     @contextmanager
-    def section_level_scope(
-            self, ctx: ItemGetValueContext) -> Iterator[Optional[str]]:
-        """ Opens a section level scope with optional additional arguments. """
+    def section_level_scope(self,
+                            ctx: ItemGetValueContext) -> Iterator[str | None]:
+        """ Open a section level scope with optional additional arguments. """
         if ctx.args:
             colon = ctx.args.find(":")
             if colon >= 0:
@@ -561,8 +560,23 @@ class SphinxBuilder(DirectoryState):
             level_change = 1
             args = None
         self._section_level_stack.append(self.section_level + level_change)
-        yield args
-        self._section_level_stack.pop()
+        try:
+            yield args
+        finally:
+            self._section_level_stack.pop()
+
+    @contextmanager
+    def section_content(
+            self, ctx: ItemGetValueContext
+    ) -> Iterator[tuple[TextContent, str | None]]:
+        """
+        Open a section level scope with a section content and optional
+        additional arguments.
+        """
+        with self.section_level_scope(ctx) as args:
+            yield (self.mapper.create_content(
+                section_level=self.section_level,
+                the_license=self.content_license), args)
 
     def _add_section_content(self, content: TextContent,
                              section: BuildItem) -> None:
@@ -596,11 +610,10 @@ class SphinxBuilder(DirectoryState):
         return self.substitute(label, item)
 
     def _get_sections(self, ctx: ItemGetValueContext) -> str:
-        with self.section_level_scope(ctx) as section_key:
+        with self.section_content(ctx) as (content, section_key):
+            assert section_key
             mapper = ctx.mapper
             assert isinstance(mapper, BuildItemMapper)
-            content = mapper.create_content(self.section_level)
-            assert section_key
             links_sections = [
                 (link, section)
                 for link, section in self._section_stack[-1].input_links(

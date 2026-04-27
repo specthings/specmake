@@ -279,7 +279,7 @@ class CompareSourcesProvider(specitems.ItemValueProvider):
 
     def _get_compare_sources(self, ctx: specitems.ItemGetValueContext) -> str:
         builder = self._builder
-        with builder.section_level_scope(ctx) as key:
+        with builder.section_content(ctx) as (content, key):
             assert key
             current_link, current_sources = builder.input_link_by_key(
                 "source-compare-current", "source-compare-key", key)
@@ -297,7 +297,5 @@ class CompareSourcesProvider(specitems.ItemValueProvider):
                 renamed=current_data["renamed"],
                 label=current_data["label"])
             assert isinstance(self.mapper, specitems.TextMapper)
-            content = self.mapper.create_content(
-                section_level=builder.section_level)
             compare_sources(content, config)
             return content.join()

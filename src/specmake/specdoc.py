@@ -65,12 +65,10 @@ class SpecDocProvider(ItemValueProvider):
 
     def _get_specdoc(self, ctx: ItemGetValueContext) -> str:
         builder = self._builder
-        with builder.section_level_scope(ctx) as optional_args:
+        with builder.section_content(ctx) as (content, optional_args):
             args, kwargs = unpack_args(optional_args, self.mapper.substitute)
             config = create_config(kwargs, SpecDocumentConfig)
             assert isinstance(self.mapper, TextMapper)
-            content = self.mapper.create_content(
-                section_level=builder.section_level)
             type_provider = _SPEC_TYPES[args[0]]({})
             item_cache = _SpecDocItemCache(self._builder.item.cache,
                                            type_provider=type_provider)
