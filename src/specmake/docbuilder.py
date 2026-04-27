@@ -26,6 +26,7 @@
 
 from specitems import Item
 
+from .codecoverage import CodeCoverageProvider
 from .pkgitems import PackageBuildDirector
 from .linkhub import SpecMapper
 from .sourcecompare import CompareSourcesProvider
@@ -42,6 +43,7 @@ class DocumentBuilder(SphinxBuilder):
         super().__init__(director, item,
                          SpecMapper(item["document-key"], self, item))
         self.mapper: SpecMapper
+        CodeCoverageProvider(self)
         CompareSourcesProvider(self)
         CompareSpecsProvider(self)
         SpecDocProvider(self)

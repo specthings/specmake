@@ -791,7 +791,7 @@ class TestAggregator(BuildItem):
                         ])
                         config = COL_SPAN
                         target = COL_SPAN
-        content.add_grid_table(rows, [20, 10, 10, 15, 15, 15, 15],
+        content.add_grid_table(rows, [22, 12, 10, 17, 13, 13, 13],
                                font_size=-3)
 
     def add_coverage_of_config(self, content: SphinxContent,
