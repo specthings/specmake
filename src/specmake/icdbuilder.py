@@ -26,7 +26,7 @@
 
 import itertools
 
-from specitems import Item, ItemGetValueContext, SphinxContent
+from specitems import Item, ItemGetValueContext, TextContent
 
 from .pkgitems import PackageBuildDirector
 from .specdocbuilder import SpecDocumentBuilder
@@ -51,12 +51,12 @@ class ICDBuilder(SpecDocumentBuilder):
     def get_items_of_document(self) -> list[Item]:
         return self.spec.get_related_interfaces()
 
-    def _add_interface_requirements(self, content: SphinxContent) -> None:
+    def _add_interface_requirements(self, content: TextContent) -> None:
         types = ("requirement/non-functional/interface-requirement", )
         for item in self.spec.get_related_items_by_type(types):
             self.add_item(content, item)
 
-    def _add_interface_design(self, content: SphinxContent) -> None:
+    def _add_interface_design(self, content: TextContent) -> None:
         types = ("interface/domain", )
         for domain in self.spec.get_related_items_by_type(types):
             with content.section(domain["name"]):
@@ -67,9 +67,7 @@ class ICDBuilder(SpecDocumentBuilder):
                     self.add_item(content, item)
 
     def _get_requirements_and_design(self, ctx: ItemGetValueContext) -> str:
-        with self.section_level_scope(ctx):
-            content = SphinxContent(section_level=self.section_level,
-                                    the_license=self.content_license)
+        with self.section_content(ctx) as (content, _):
             with content.section("Requirements and design"):
                 with content.section(
                         "General provisions to the requirements in the IRD"):

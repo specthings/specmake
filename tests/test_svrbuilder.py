@@ -62,7 +62,6 @@ def test_svrbuilder(caplog, tmpdir):
 .. raw:: latex
 
     \\end{scriptsize}
-
 .. code-coverage-achievement end
 
 .. code-coverage-limits begin
@@ -100,7 +99,6 @@ Component - spec:/pkg/component
 .. raw:: latex
 
     \\end{scriptsize}
-
 .. code-coverage-limits end
 
 .. memory-benchmarks begin

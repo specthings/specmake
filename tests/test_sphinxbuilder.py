@@ -615,10 +615,24 @@ Terms, definitions and abbreviated terms
             assert doc_2.section_level == 2
             assert args == None
         assert doc_2.section_level == 3
+        with doc_2.section_content(
+                ItemGetValueContext(doc_2.item, "", "-1", None, None,
+                                    {})) as (content, args):
+            assert doc_2.section_level == 2
+            assert content.section_level == 2
+            assert args == None
+        assert doc_2.section_level == 3
     with doc_2.section_level_scope(
             ItemGetValueContext(doc_2.item, "", "2:mo:re", None, None,
                                 {})) as args:
         assert doc_2.section_level == 4
+        assert args == "mo:re"
+    assert doc_2.section_level == 2
+    with doc_2.section_content(
+            ItemGetValueContext(doc_2.item, "", "2:mo:re", None, None,
+                                {})) as (content, args):
+        assert doc_2.section_level == 4
+        assert content.section_level == 4
         assert args == "mo:re"
     assert doc_2.section_level == 2
 

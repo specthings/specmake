@@ -30,7 +30,7 @@ import os
 import re
 from typing import Any, NamedTuple
 
-from specitems import (COL_SPAN, Item, ItemCache, ItemMapper, SphinxContent,
+from specitems import (COL_SPAN, Item, ItemCache, ItemMapper, TextContent,
                        get_reference)
 from specware import run_command
 
@@ -376,7 +376,7 @@ def _make_label(scope: str, item: Item) -> str:
     return f"{scope}BenchmarkSpec{item.ident}"
 
 
-def _generate_table(content: SphinxContent, sections_by_uid: SectionsByUID,
+def _generate_table(content: TextContent, sections_by_uid: SectionsByUID,
                     items: list[Item]) -> None:
     scope = content.label
     rows: list[tuple[str, ...]] = []
@@ -418,9 +418,8 @@ _WARNING_NO_MEMBENCH = """.. topic:: WARNING
 """
 
 
-def _generate_paragraphs(content: SphinxContent,
-                         sections_by_uid: SectionsByUID, mapper: ItemMapper,
-                         items: list[Item]) -> None:
+def _generate_paragraphs(content: TextContent, sections_by_uid: SectionsByUID,
+                         mapper: ItemMapper, items: list[Item]) -> None:
     for item in items:
         with content.section(f"Benchmark: {item.spec}"):
             content.wrap(mapper.substitute(item["test-brief"], item))
@@ -435,7 +434,7 @@ def _generate_paragraphs(content: SphinxContent,
                 content.add(_WARNING_NO_MEMBENCH)
 
 
-def _generate_tables(content: SphinxContent, sections_by_uid: SectionsByUID,
+def _generate_tables(content: TextContent, sections_by_uid: SectionsByUID,
                      root: Item, table_pivots: list[str]) -> list[Item]:
     root_items = _gather_benchmarks(root)
     _generate_table(content, sections_by_uid, root_items)
@@ -448,13 +447,13 @@ def _generate_tables(content: SphinxContent, sections_by_uid: SectionsByUID,
     return root_items
 
 
-def generate_tables(content: SphinxContent, sections_by_uid: SectionsByUID,
+def generate_tables(content: TextContent, sections_by_uid: SectionsByUID,
                     root: Item, table_pivots: list[str]) -> None:
     """ Generate memory benchmark tables. """
     _generate_tables(content, sections_by_uid, root, table_pivots)
 
 
-def generate_variants_table(content: SphinxContent,
+def generate_variants_table(content: TextContent,
                             sections_by_build_label: dict[str,
                                                           dict[str,
                                                                SectionsByUID]],
@@ -485,8 +484,8 @@ def generate_variants_table(content: SphinxContent,
     content.add_grid_table(rows, [35, 20, 9, 9, 9, 9, 9], font_size=-3)
 
 
-def generate(content: SphinxContent, sections_by_uid: SectionsByUID,
-             root: Item, table_pivots: list[str], mapper: ItemMapper) -> None:
+def generate(content: TextContent, sections_by_uid: SectionsByUID, root: Item,
+             table_pivots: list[str], mapper: ItemMapper) -> None:
     """
     Generate memory benchmark documentation for items dependent on the root
     item and executables in the path.

@@ -241,8 +241,7 @@ class SVRBuilder(SpecDocumentBuilder):
         return str(content)
 
     def _get_membench(self, ctx: ItemGetValueContext) -> str:
-        with self.section_level_scope(ctx):
-            content = SphinxContent(section_level=self.section_level)
+        with self.section_content(ctx) as (content, _):
             link, membench = self.input_link("membench-results")
             assert isinstance(membench, DirectoryState)
             label = membench.substitute(link["build-label"])

@@ -87,8 +87,7 @@ def _repository_state_lazy_verify(self):
 
 def _package_manual_generate(content, sections_by_uid, root, table_pivots,
                              mapper):
-    content.add([root.uid, mapper.item.uid] + table_pivots +
-                list(sections_by_uid.keys()))
+    content.add([root.uid] + table_pivots + list(sections_by_uid.keys()))
 
 
 def _subprocess_run(args, stdin, stdout, stderr, shell, cwd, check, encoding):
@@ -335,7 +334,6 @@ Name 2
 Name 3
     Description 3
 .. memory-benchmarks
-/rtems/req/mem-basic
 /rtems/req/mem-basic
 /rtems/req/mem-smp-1
 /rtems/val/mem-basic

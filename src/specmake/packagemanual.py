@@ -31,7 +31,7 @@ import os
 from typing import Iterator
 
 from specitems import (COL_SPAN, Copyrights, Item, ItemGetValueContext,
-                       make_label, Link, SphinxContent, SphinxMapper)
+                       make_label, Link, TextContent)
 from specware import (BSD_2_CLAUSE_LICENSE, MIT_LICENSE, gather_api_items,
                       run_command)
 
@@ -50,7 +50,7 @@ _ItemToEnvStats = dict[str, _EnvToStats]
 _LICENSE_LISTING = {"BSD-2-Clause": BSD_2_CLAUSE_LICENSE, "MIT": MIT_LICENSE}
 
 
-def _run_pkg_config(content: SphinxContent, cmd: list[str]) -> None:
+def _run_pkg_config(content: TextContent, cmd: list[str]) -> None:
     cmd = ["pkg-config"] + cmd
     content.add(f"$ {' '.join(cmd)}")
     stdout: list[str] = []
@@ -76,7 +76,7 @@ def _environment_order(name: str) -> int:
     return int(name[5:]) + 2
 
 
-def _add_licenses(content: SphinxContent, deployment_directory: str,
+def _add_licenses(content: TextContent, deployment_directory: str,
                   member: DirectoryState,
                   license_listing: dict[str, Copyrights]) -> None:
     copyrights_by_license = member["copyrights-by-license"]
@@ -165,8 +165,7 @@ class PackageManualBuilder(DocumentBuilder):
         super().run()
 
     def _get_benchmark_variants_list(self, ctx: ItemGetValueContext) -> str:
-        with self.section_level_scope(ctx):
-            content = SphinxContent(section_level=self.section_level)
+        with self.section_content(ctx) as (content, _):
             for link, test_log in self._yield_benchmark_variants():
                 content.add_definition_item(
                     test_log.substitute(link["variant-name"]),
@@ -177,16 +176,14 @@ class PackageManualBuilder(DocumentBuilder):
         return self.substitute("${.:/component/membench-build-label}")
 
     def _get_membench(self, ctx: ItemGetValueContext) -> str:
-        with self.section_level_scope(ctx):
-            content = SphinxContent(section_level=self.section_level)
+        with self.section_content(ctx) as (content, _):
             content.push_label(
                 make_label(self.substitute("${.:/component/ident}")))
             label = self._get_membench_build_label()
             sections_by_uid = self._membench[label]["membench"]
             root = self.item.cache["/rtems/req/mem-basic"]
             table_pivots = ["/rtems/req/mem-smp-1"]
-            generate(content, sections_by_uid, root, table_pivots,
-                     SphinxMapper(root))
+            generate(content, sections_by_uid, root, table_pivots, self.mapper)
             return content.join()
 
     def _get_membench_section(self, ctx: ItemGetValueContext) -> str:
@@ -229,8 +226,7 @@ class PackageManualBuilder(DocumentBuilder):
             yield link, test_log
 
     def _get_membench_variants_table(self, ctx: ItemGetValueContext) -> str:
-        with self.section_level_scope(ctx):
-            content = SphinxContent(section_level=self.section_level)
+        with self.section_content(ctx) as (content, _):
             root = self.item.cache["/rtems/req/mem-basic"]
             variants: list[MembenchVariant] = []
             for link, test_log in self._yield_benchmark_variants():
@@ -300,7 +296,7 @@ class PackageManualBuilder(DocumentBuilder):
         return rows
 
     def _get_performance_variants_table(self, ctx: ItemGetValueContext) -> str:
-        with self.section_level_scope(ctx):
+        with self.section_content(ctx) as (content, _):
             measurements_by_variant = self._get_measurements_by_variant()
             if not measurements_by_variant:
                 return "There is no performance variants table available."
@@ -326,7 +322,6 @@ class PackageManualBuilder(DocumentBuilder):
                 rows.extend(
                     self._make_performance_variants_rows(
                         item, envs, env_links, measurements_by_variant))
-            content = SphinxContent(section_level=self.section_level)
             content.add_grid_table(rows, [31, 14, 19, 12, 12, 12],
                                    font_size=-3)
             return content.join()
@@ -337,7 +332,7 @@ class PackageManualBuilder(DocumentBuilder):
             "${.:/component/arch}-rtems${.:/component/rtems-version}-"
             "${.:/component/bsp}${.:/component/config:dash}"
             "${.:/component/bsp-qual-only:dash}.pc")
-        content = SphinxContent()
+        content = self.mapper.create_content()
         with content.directive("code-block", value="none"):
             _run_pkg_config(content, ["--variable=ABI_FLAGS", pkg])
             _run_pkg_config(content, ["--cflags", pkg])
@@ -345,8 +340,7 @@ class PackageManualBuilder(DocumentBuilder):
         return content.join()
 
     def _get_pre_qualified_interfaces(self, ctx: ItemGetValueContext) -> str:
-        with self.section_level_scope(ctx):
-            content = SphinxContent(section_level=self.section_level)
+        with self.section_content(ctx) as (content, _):
             content.push_label(
                 make_label(self.substitute("${.:/component/ident}")))
             items: dict[str, list[Item]] = {}
@@ -358,8 +352,7 @@ class PackageManualBuilder(DocumentBuilder):
             return content.join()
 
     def _get_repos(self, ctx: ItemGetValueContext) -> str:
-        with self.section_level_scope(ctx):
-            content = SphinxContent(section_level=self.section_level)
+        with self.section_content(ctx) as (content, _):
             prefix = self.substitute("${.:/component/deployment-directory}")
             for item in self.component.item.children("repository"):
                 repo = self.director[item.uid]
@@ -399,8 +392,7 @@ repository.""")
     def _get_license_info(self, ctx: ItemGetValueContext) -> str:
         archiver = self.input("archive")
         assert isinstance(archiver, Archiver)
-        with self.section_level_scope(ctx):
-            content = SphinxContent(section_level=self.section_level)
+        with self.section_content(ctx) as (content, _):
             license_listing = {
                 "BSD-2-Clause": Copyrights(),
                 "MIT": Copyrights()
@@ -423,8 +415,7 @@ relative to {content.path(deployment_directory)}.""")
             return content.join()
 
     def _get_targets(self, ctx: ItemGetValueContext) -> str:
-        with self.section_level_scope(ctx):
-            content = SphinxContent(section_level=self.section_level)
+        with self.section_content(ctx) as (content, _):
             targets: set[str] = set()
             for component in self.component.components():
                 with component.item.cache.selection(component.selection):
@@ -444,7 +435,7 @@ class PackageSummary(DirectoryState):
 
     def run(self) -> None:
         package_manual = self.input("source")
-        content = SphinxContent(section_level=0)
+        content = self.mapper.create_content(section_level=0)
         with content.section(f"Package Summary - {self.component['ident']}"):
             with content.section("Unexpected Test Failures"):
                 for item in self.item.cache.items_by_type.get(
@@ -477,7 +468,7 @@ class PackageSummary(DirectoryState):
         self.description.add(f"""Produce the package summary file
 {content.path(self.file)}.""")
 
-    def _add_coverage_achievement(self, content: SphinxContent) -> None:
+    def _add_coverage_achievement(self, content: TextContent) -> None:
         for test_aggregator in self.inputs("test-aggregation"):
             assert isinstance(test_aggregator, TestAggregator)
             ident = test_aggregator.substitute("${.:/component/ident}")

@@ -34,7 +34,7 @@ from typing import Any, Callable, Iterable, NamedTuple
 
 from specitems import (COL_SPAN, EnabledSet, GenericContent, Item,
                        ItemGetValueContext, ItemMapper, ROW_SPAN, is_enabled,
-                       Link, link_is_enabled, make_label, SphinxContent)
+                       Link, link_is_enabled, make_label, TextContent)
 from specware import (CodeMapper, TransitionMap, PreCondsOfPostCond,
                       align_declarations, document_directive, document_option,
                       forward_declaration)
@@ -50,7 +50,7 @@ from .util import duration
 
 
 class _Context(NamedTuple):
-    content: SphinxContent
+    content: TextContent
     item: Item
     mapper: SpecMapper
     code_mapper: ItemMapper
@@ -152,15 +152,14 @@ def _add_validated_items(ctx: _Context) -> None:
     _add_links(ctx, "validation", "VALIDATED ITEM", "validates", "oops")
 
 
-def _add_code_block(content: SphinxContent, code: GenericContent) -> None:
+def _add_code_block(content: TextContent, code: GenericContent) -> None:
     content.add_rubric("INTERFACE:")
     with content.directive("code-block", "c"):
         content.add(code)
 
 
-def _add_type_definition(content: SphinxContent, name: str,
-                         definition_kind: str, type_name: str,
-                         code: list[str]) -> None:
+def _add_type_definition(content: TextContent, name: str, definition_kind: str,
+                         type_name: str, code: list[str]) -> None:
     if definition_kind == f"{type_name}-only":
         code.insert(0, f"{type_name} {name} {{")
         code.append("};")
@@ -965,14 +964,14 @@ class SpecDocumentBuilder(DocumentBuilder):
         """ Get the items of this document. """
         return self.spec.get_related_interfaces_and_requirements()
 
-    def add_item_changes(self, content: SphinxContent, item: Item) -> None:
+    def add_item_changes(self, content: TextContent, item: Item) -> None:
         """ Add the item changes to the content. """
         spec_compare_registry = self.spec_compare_registry
         if spec_compare_registry is not None:
             content.add_rubric("CHANGES:")
             spec_compare_registry.add_item_changes(content, item.uid)
 
-    def add_item(self, content: SphinxContent, item: Item) -> None:
+    def add_item(self, content: TextContent, item: Item) -> None:
         """ Add the item documentation to the content. """
         content.register_license_and_copyrights_of_item(item)
         with self.mapper.scope(item):
@@ -987,16 +986,16 @@ class SpecDocumentBuilder(DocumentBuilder):
                 self.add_item_changes(content, item)
 
     def _code_coverage_achievement(self, ctx: ItemGetValueContext) -> str:
-        with self.section_level_scope(ctx):
+        with self.section_content(ctx) as (content, _):
             content = self.mapper.create_content(
                 section_level=self.section_level)
             for test_aggregator in self.inputs("test-aggregation"):
                 assert isinstance(test_aggregator, TestAggregator)
                 test_aggregator.add_coverage_achievement(content, self.mapper)
-            return str(content)
+            return content.join()
 
     def _code_coverage_limits(self, ctx: ItemGetValueContext) -> str:
-        with self.section_level_scope(ctx):
+        with self.section_content(ctx) as (content, _):
             content = self.mapper.create_content(
                 section_level=self.section_level)
             for test_aggregator in self.inputs("test-aggregation"):
@@ -1005,7 +1004,7 @@ class SpecDocumentBuilder(DocumentBuilder):
                 with content.section(f"Component - {item.spec}",
                                      label=f"CoverageLimits{item.ident}"):
                     test_aggregator.add_coverage_limits(content, self.mapper)
-            return str(content)
+            return content.join()
 
     def _validation_status(self, item: Item) -> str:
         validation_status = item.view.get("validation-status", "N/A")
@@ -1015,7 +1014,7 @@ class SpecDocumentBuilder(DocumentBuilder):
                                                     validation_status[1])
         return f"N/A ({validation_status})"
 
-    def _add_validation_table(self, content: SphinxContent) -> None:
+    def _add_validation_table(self, content: TextContent) -> None:
         """ Add the document item validation table to the content. """
         get_link = self.mapper.get_link
         item_cache = self.item.cache
@@ -1060,7 +1059,6 @@ class SpecDocumentBuilder(DocumentBuilder):
         content.add_grid_table(rows, [32, 14, 32, 22], font_size=-4)
 
     def _validation_verification(self, ctx: ItemGetValueContext) -> str:
-        with self.section_level_scope(ctx):
-            content = SphinxContent(section_level=self.section_level)
+        with self.section_content(ctx) as (content, _):
             self._add_validation_table(content)
-        return content.join()
+            return content.join()

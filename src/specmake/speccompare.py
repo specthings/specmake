@@ -524,10 +524,8 @@ class CompareSpecsProvider(ItemValueProvider):
                            None]) -> str:
         builder = self._builder
         director = builder.director
-        with builder.section_level_scope(ctx) as args:
+        with builder.section_content(ctx) as (content, args):
             assert isinstance(self.mapper, TextMapper)
-            content = self.mapper.create_content(
-                section_level=builder.section_level)
             registry = director[ctx.item.uid]
             assert isinstance(registry, CompareSpecsRegistry)
             assert args
