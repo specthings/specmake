@@ -76,7 +76,7 @@ Component - spec:/pkg/component
 
 .. table::
     :class: longtable
-    :widths: 20,10,10,15,15,15,15
+    :widths: 22,12,10,17,13,13,13
 
     +-+-+-+-+-+-+-+
     | Target | Configuration | Scope | Area | Functions | Lines | Branches |

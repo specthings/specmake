@@ -25,6 +25,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from .archiver import *  # noqa: F401, F403
+from .codecoverage import *  # noqa: F401, F403
 from .dirstatebase import *  # noqa: F401, F403
 from .directorystate import *  # noqa: F401, F403
 from .doxyfile import *  # noqa: F401, F403
