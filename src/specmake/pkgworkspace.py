@@ -723,7 +723,7 @@ def _delete_buildspace_items(director: PackageBuildDirector,
                              deleted_uids: list[str],
                              item_files: list[str]) -> None:
     for uid in deleted_uids:
-        buildspace_item = director[uid]
+        buildspace_item = director.create_with_dependencies(uid)
         logging.info("%s: discard buildspace state", uid)
         buildspace_item.discard()
         buildspace_item.clear()
@@ -749,7 +749,7 @@ def _add_buildspace_submodules(
 def _discard_buildspace_items(director: PackageBuildDirector,
                               discard_uids: list[str]) -> None:
     for uid in discard_uids:
-        buildspace_item = director[uid]
+        buildspace_item = director.create_with_dependencies(uid)
         logging.info("%s: discard buildspace state", uid)
         buildspace_item.discard()
         buildspace_item.clear()

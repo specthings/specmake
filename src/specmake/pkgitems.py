@@ -915,6 +915,18 @@ class PackageBuildDirector(dict):
         return self.setdefault(uid,
                                self.factory.create(self, self.item_cache[uid]))
 
+    def create_with_dependencies(self,
+                                 uid: str,
+                                 seen: Optional[set[str]] = None) -> BuildItem:
+        """ Create the build item with all its input dependencies. """
+        if seen is None:
+            seen = set()
+        if uid not in seen:
+            seen.add(uid)
+            for link in _get_input_links(self.item_cache[uid]):
+                self.create_with_dependencies(link.uid, seen)
+        return self[uid]
+
     @property
     def package(self) -> PackageComponent:
         """ Is the package component. """
