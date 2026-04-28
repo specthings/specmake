@@ -1,0 +1,26 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: name
+  spec-value: enabled-set-extension
+  uid: pkg-input-role
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      enabled-set-extension:
+        description: |
+          It shall be the list of optionally enabled elements.  The additional
+          elements extend the enabled set associated with the link target.
+        spec-type: pkg-enabled-set-extension-list
+    description: null
+    mandatory-attributes: all
+spec-name: Enabled Set Extension Link Role
+spec-type: pkg-input-enabled-set-extension-role
+type: spec
