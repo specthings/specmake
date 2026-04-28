@@ -172,6 +172,51 @@ text
   year = {2020},
 }
 text
+- `spec:/​pkg/​component <pkg/component.extension>`__
+text
+Prologue
+
+- `spec:/​pkg/​component <pkg/component.extension>`__
+
+- `spec:/​pkg/​sub-b/​component <pkg/sub-b/component.extension>`__
+
+- `spec:/​pkg/​sub/​component <pkg/sub/component.extension>`__
+
+- `spec:/​pkg/​sub/​s/​component <pkg/sub/s/component.extension>`__
+
+- `spec:/​pkg/​sub/​t/​component <pkg/sub/t/component.extension>`__
+
+Epilogue
+text
+`spec:/​pkg/​sub-b/​component <pkg/sub-b/component.extension>`__, `spec:/​pkg/​sub/​component <pkg/sub/component.extension>`__, `spec:/​pkg/​sub/​s/​component <pkg/sub/s/component.extension>`__, and `spec:/​pkg/​sub/​t/​component <pkg/sub/t/component.extension>`__
+text
+Empty
+text
+
+text
+- `spec:/​pkg/​source/​doc-element-3 <pkg/source/doc-element-3.extension>`__
+
+- `spec:/​pkg/​source/​doc-section <pkg/source/doc-section.extension>`__
+
+- `spec:/​pkg/​source/​doc-subsection-2
+  <pkg/source/doc-subsection-2.extension>`__
+
+- `spec:/​pkg/​source/​empty <pkg/source/empty.extension>`__
+
+- `spec:/​pkg/​sub/​s/​component <pkg/sub/s/component.extension>`__
+
+- `spec:/​pkg/​sub/​t/​component <pkg/sub/t/component.extension>`__
+text
+- `spec:/​pkg/​sub/​component <pkg/sub/component.extension>`__
+text
+- `spec:/​pkg/​sub-b/​component <pkg/sub-b/component.extension>`__
+
+- `spec:/​pkg/​sub/​component <pkg/sub/component.extension>`__
+text
+- `spec:/​pkg/​component <pkg/component.extension>`__
+text
+- `spec:/​spec/​root <spec/root.extension>`__
+text
 """
 
     copy_and_substitute_2 = doc_build / "source" / "copy-and-substitute-2.md"
@@ -243,6 +288,50 @@ text
   url = {pkg/doc/doc.pdf},
   year = {2020},
 }
+text
+- [spec:/​pkg/​component](pkg/component.extension)
+text
+Prologue
+
+- [spec:/​pkg/​component](pkg/component.extension)
+
+- [spec:/​pkg/​sub-b/​component](pkg/sub-b/component.extension)
+
+- [spec:/​pkg/​sub/​component](pkg/sub/component.extension)
+
+- [spec:/​pkg/​sub/​s/​component](pkg/sub/s/component.extension)
+
+- [spec:/​pkg/​sub/​t/​component](pkg/sub/t/component.extension)
+
+Epilogue
+text
+[spec:/​pkg/​sub-b/​component](pkg/sub-b/component.extension), [spec:/​pkg/​sub/​component](pkg/sub/component.extension), [spec:/​pkg/​sub/​s/​component](pkg/sub/s/component.extension), and [spec:/​pkg/​sub/​t/​component](pkg/sub/t/component.extension)
+text
+Empty
+text
+
+text
+- [spec:/​pkg/​source/​doc-element-3](pkg/source/doc-element-3.extension)
+
+- [spec:/​pkg/​source/​doc-section](pkg/source/doc-section.extension)
+
+- [spec:/​pkg/​source/​doc-subsection-2](pkg/source/doc-subsection-2.extension)
+
+- [spec:/​pkg/​source/​empty](pkg/source/empty.extension)
+
+- [spec:/​pkg/​sub/​s/​component](pkg/sub/s/component.extension)
+
+- [spec:/​pkg/​sub/​t/​component](pkg/sub/t/component.extension)
+text
+- [spec:/​pkg/​sub/​component](pkg/sub/component.extension)
+text
+- [spec:/​pkg/​sub-b/​component](pkg/sub-b/component.extension)
+
+- [spec:/​pkg/​sub/​component](pkg/sub/component.extension)
+text
+- [spec:/​pkg/​component](pkg/component.extension)
+text
+- [spec:/​spec/​root](spec/root.extension)
 text
 """
 

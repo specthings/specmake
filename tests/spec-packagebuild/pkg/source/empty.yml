@@ -22,6 +22,14 @@ links:
   resource-key: blub
   role: resource
   uid: a
+- path: .extension
+  resource-key: item-files
+  role: resource
+  uid: ../component
+- path: other/path/to/blub
+  resource-key: blub
+  role: resource
+  uid: a
 - hash: null
   name: component
   role: input

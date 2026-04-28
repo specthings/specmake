@@ -25,15 +25,18 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from contextlib import contextmanager
+import fnmatch
+import itertools
 import logging
 import os
+import posixpath
 import re
 import shutil
 from typing import Any, Callable, Iterator, Optional
 import yaml
 
 from specitems import (BibTeXCitationProvider, Copyrights,
-                       DocumentGlossaryConfig, GlossaryConfig, Item,
+                       DocumentGlossaryConfig, GlossaryConfig, Item, ItemCache,
                        ItemGetValueContext, ItemMapper, ItemValueProvider,
                        SphinxContent, TextContent, generate_glossary,
                        get_value_subprocess, is_enabled, list_terms,
@@ -42,7 +45,8 @@ from specware import BSD_2_CLAUSE_LICENSE, run_command
 
 from .directorystate import DirectoryState
 from .pkgitems import (BuildItem, BuildItemFactory, BuildItemMapper,
-                       PackageBuildDirector, PackageComponent)
+                       PackageBuildDirector, PackageComponent,
+                       build_item_input)
 from .testoutputparser import augment_report
 
 _BREAK = "\\break"
@@ -72,6 +76,12 @@ _INVISIBLE_SPACES_AT = re.compile(r"([\/_-]+)")
 def spacify(text: str) -> str:
     """ Add invisible spaces to enable line breaks. """
     return _INVISIBLE_SPACES_AT.sub("\u200b\\1", text)
+
+
+def _kwargs_split(kwargs: dict[str, str], key: str) -> frozenset[str]:
+    if key in kwargs:
+        return frozenset(kwargs[key].split("+"))
+    return frozenset()
 
 
 def _normal_title(item: Item) -> str:
@@ -361,6 +371,8 @@ class SphinxBuilder(DirectoryState):
                                   self._get_release_sections)
         self.mapper.add_get_value(f"{my_type}:/document-contributors",
                                   _get_contributors)
+        self.mapper.add_get_value(f"{my_type}:/item-files",
+                                  self._get_item_files)
         self.mapper.add_get_value(f"{my_type}:/ref", self._get_ref)
         for name in [my_type, "pkg/sphinx-section"]:
             self.mapper.add_get_value(f"{name}:/build-description",
@@ -667,6 +679,61 @@ class SphinxBuilder(DirectoryState):
             assert isinstance(mapper, BuildItemMapper)
             return mapper.create_content().reference(
                 self._get_section_label(section.item))
+
+    def _get_matching_uids(self, item_cache: ItemCache, args: list[str],
+                           kwargs: dict[str, str]) -> list[str]:
+        matching: set[str] = set()
+        uids = list(item_cache.keys())
+        for pattern in args:
+            matching.update(fnmatch.filter(uids, pattern))
+        child_roles: frozenset[str] = _kwargs_split(kwargs, "children")
+        parent_roles: frozenset[str] = _kwargs_split(kwargs, "parents")
+        if child_roles or parent_roles:
+            anchors = matching
+            matching = set()
+            for uid in anchors:
+                item = item_cache[uid]
+                if item.type.startswith("pkg/component"):
+                    component = self.director[item.uid]
+                else:
+                    try:
+                        component_item = build_item_input(item, "component")
+                    except KeyError:
+                        component = self.director.package
+                    else:
+                        component = self.director[component_item.uid]
+                with item_cache.selection(component.selection):
+                    matching.update(item_2.uid
+                                    for item_2 in itertools.chain(
+                                        item.parents(parent_roles),
+                                        item.children(child_roles)))
+        types: frozenset[str] = _kwargs_split(kwargs, "types")
+        if types:
+            return sorted(
+                filter(lambda x: item_cache[x].type in types, matching))
+        return sorted(matching)
+
+    def _get_item_files(self, ctx: ItemGetValueContext) -> str:
+        args, kwargs = ctx.unpack_args_dict(ctx.mapper.substitute)
+        item_cache = self.item.cache
+        _, path, *_ = self.get_resource("item-files")
+        extension = posixpath.basename(path)
+        path = posixpath.dirname(path)
+        mapper = ctx.mapper
+        assert isinstance(mapper, BuildItemMapper)
+        uids = [
+            mapper.format_link(item_cache[uid].spec_2,
+                               posixpath.join(path, f"{uid[1:]}{extension}"))
+            for uid in self._get_matching_uids(item_cache, args, kwargs)
+        ]
+        if int(kwargs.get("flat", 0)):
+            return list_terms(uids)
+        content = mapper.create_content()
+        content.add_list(uids,
+                         prologue=kwargs.get("prologue"),
+                         epilogue=kwargs.get("epilogue"),
+                         empty=kwargs.get("empty"))
+        return content.join()
 
     def _get_ref(self, ctx: ItemGetValueContext) -> str:
         args, kwargs = ctx.unpack_args_dict(ctx.mapper.substitute)
