@@ -152,11 +152,39 @@ def test_packagebuild(caplog, tmpdir, monkeypatch):
         subcomponent.substitute("${.:/component/does-not-exist}")
     assert package.substitute("${.:/component/arch}") == "sparc"
     assert subcomponent.substitute("${.:/component/arch}") == "sub-arch"
-    with pytest.raises(KeyError, match="there is no document"):
-        subcomponent.get_document("foo")
+    with pytest.raises(KeyError, match="there is no resource"):
+        subcomponent.get_resource("foo")
     doc = director["/pkg/source/empty"]
-    assert subcomponent.get_document("bar") == (doc, f"{tmpdir}/path/to/bar")
-    assert subcomponent.get_document("blub") == (doc, f"{tmpdir}/path/to/blub")
+    assert director.package.get_resource("blub") == (
+        doc,
+        f"{tmpdir}/path/to/blub",
+        None,
+        None,
+    )
+    assert subcomponent.get_resource("bar") == (
+        doc,
+        f"{tmpdir}/path/to/bar",
+        "Label",
+        "Name",
+    )
+    assert subcomponent.get_resource("blub") == (
+        doc,
+        f"{tmpdir}/path/to/blub",
+        None,
+        None,
+    )
+    assert director["/pkg/source/a"].get_resource("blub") == (
+        doc,
+        f"{tmpdir}/other/path/to/blub",
+        None,
+        None,
+    )
+    assert director["/pkg/source/b"].get_resource("blub") == (
+        doc,
+        f"{tmpdir}/path/to/blub",
+        None,
+        None,
+    )
 
     # Test BuildItem methods
     c = director["/pkg/steps/c"]

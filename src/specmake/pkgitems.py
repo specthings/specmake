@@ -35,8 +35,10 @@ import graphlib
 import itertools
 import os
 import logging
+import posixpath
 import subprocess
-from typing import Any, Callable, Iterable, Iterator, Optional, Type, Union
+from typing import (Any, Callable, Iterable, Iterator, NamedTuple, Optional,
+                    Type, Union)
 
 from specitems import (EnabledSet, Item, ItemCache, ItemDataByUID,
                        ItemGetValueContext, ItemGetValue, ItemMapper,
@@ -202,6 +204,13 @@ def _get_input_or_output(ctx: ItemGetValueContext,
     return ctx.reset(build_item.item, ctx.remaining_path[name_end + 1:])
 
 
+class _Resource(NamedTuple):
+    item: "BuildItem"
+    path: str
+    label: str | None
+    name: str | None
+
+
 class BuildItem():
     """ Represents a package build item. """
 
@@ -217,6 +226,7 @@ class BuildItem():
                  mapper: Optional[BuildItemMapper] = None) -> None:
         self.director = director
         self.item = item
+        self._resources: dict[str, _Resource] = {}
         if mapper is None:
             mapper = BuildItemMapper(item)
         self.mapper = mapper
@@ -697,6 +707,42 @@ class BuildItem():
     def _get_output(self, ctx: ItemGetValueContext) -> Any:
         return _get_input_or_output(ctx, self.output)
 
+    def get_resource(self, resource_key: str) -> _Resource:
+        """
+        Get the resource item, path, label, and name of the resource area
+        associated with the resource key.
+
+        If the current item has no resource associated with the resource key,
+        the parent component is queried, continuing up the component chain
+        until a matching resource is found.
+        """
+        try:
+            component: BuildItem = self.component
+        except StopIteration:
+            component = self
+        cache_key = f"{component.uid}/{resource_key}"
+        resource = self._resources.get(cache_key)
+        if resource is not None:
+            return resource
+        build_item = self
+        while True:
+            for link in build_item.item.links_to_children("resource"):
+                if link["resource-key"] == resource_key:
+                    target = self.director[link.item.uid]
+                    resource = _Resource(
+                        target,
+                        posixpath.normpath(
+                            posixpath.join(target.directory, link["path"])),
+                        link.data.get("label"), link.data.get("name"))
+                    self._resources[cache_key] = resource
+                    return resource
+            try:
+                build_item = build_item.component
+            except StopIteration as err:
+                raise KeyError(
+                    f"{self.uid}: there is no resource "
+                    f"associated with resource key: {resource_key}") from err
+
 
 class PackageComponent(BuildItem):
     """ Represents a package component. """
@@ -742,28 +788,6 @@ class PackageComponent(BuildItem):
                 assert isinstance(subcomponent, PackageComponent)
                 yield subcomponent
                 yield from subcomponent.subcomponents()
-
-    def get_document(self, name: str) -> tuple[BuildItem, str]:
-        """
-        Get the document item and the path to the document content associated
-        with the name.
-
-        If the current component has no document associated with the name, the
-        parent component is queried, continuing up the component chain until a
-        matching document is found.
-        """
-        component = self
-        while True:
-            for link in component.item.links_to_children("document"):
-                if link["name"] == name:
-                    target = self.director[link.item.uid]
-                    return target, os.path.normpath(
-                        os.path.join(target.directory, link["directory"]))
-            try:
-                component = component.component
-            except StopIteration as err:
-                raise KeyError(f"{self.uid}: there is no document "
-                               f"associated with name: {name}") from err
 
     def run(self) -> None:
         self.description.add("Provide settings for the component.")

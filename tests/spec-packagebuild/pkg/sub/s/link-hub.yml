@@ -17,29 +17,29 @@ links:
   name: tagfile
   role: input
   uid: ../../source/tagfile
-- directory: html
-  name: icd
-  role: document
+- resource-key: icd
+  path: html
+  role: resource
   uid: ../../deployment/doc-ts-icd-dummy
-- directory: html
-  name: sdd
-  role: document
+- resource-key: sdd
+  path: html
+  role: resource
   uid: ../../deployment/doc-ddf-sdd
-- directory: html
-  name: srs
-  role: document
+- resource-key: srs
+  path: html
+  role: resource
   uid: ../../deployment/doc-ts-srs-dummy
-- directory: html
-  name: suitp
-  role: document
+- resource-key: suitp
+  path: html
+  role: resource
   uid: ../../deployment/doc-djf-suitp
-- directory: html
-  name: svs
-  role: document
+- resource-key: svs
+  path: html
+  role: resource
   uid: ../../deployment/doc-djf-svs-dummy
-- directory: .
-  name: source
-  role: document
+- resource-key: source
+  path: .
+  role: resource
   uid: ../../source/repo
 pkg-type: link-hub
 type: pkg

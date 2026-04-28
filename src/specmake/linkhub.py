@@ -906,12 +906,12 @@ class LinkHub(BuildItem):
     def __init__(self, director: PackageBuildDirector, item: Item):
         super().__init__(director, item)
         self.name_info: dict[str, Any] = {}
-        for link in self.item.links_to_parents("document"):
+        for link in self.item.links_to_parents("resource"):
             target = self.director[link.item.uid]
             assert isinstance(target, DirectoryState)
-            name = f"dir/{link['name']}"
+            name = f"dir/{link['resource-key']}"
             self.name_info[name] = os.path.normpath(
-                os.path.join(target.directory, link["directory"]))
+                os.path.join(target.directory, link["path"]))
         try:
             tagfile = self.input("tagfile")
         except KeyError as err:

@@ -104,7 +104,6 @@ class StandardTailoringProvider(ItemValueProvider):
         super().__init__(builder.mapper)
         self._builder = builder
         self._whoami = builder["document-key"]
-        self._tailoring: dict[str, tuple[str, str]] = {}
         mapper = builder.mapper
         for name in [builder.item.type, "pkg/sphinx-section"]:
             mapper.add_get_value(f"{name}:/standard-tailoring",
@@ -131,18 +130,12 @@ class StandardTailoringProvider(ItemValueProvider):
             return content.join()
 
     def _get_link(self, ctx: ItemGetValueContext, name: str) -> str:
-        component = self._builder.component
-        tailoring = self._tailoring.get(component.uid)
-        if tailoring is None:
-            document, path = component.get_document("ecss-tailoring")
-            tailoring = (document["document-key"], path)
-            self._tailoring[component.uid] = tailoring
+        document, path, *_ = self._builder.get_resource("ecss-tailoring")
         mapper = ctx.mapper
         assert isinstance(mapper, BuildItemMapper)
-        if self._whoami == tailoring[0]:
+        if self._whoami == document.item["document-key"]:
             return mapper.format_reference(name, ctx.item.ident)
-        return mapper.format_link(name,
-                                  f"{tailoring[1]}#{ctx.item.ident.lower()}")
+        return mapper.format_link(name, f"{path}#{ctx.item.ident.lower()}")
 
     def _get_ecss_standard_and_clause(self, ctx: ItemGetValueContext) -> str:
         item = ctx.item

@@ -8,17 +8,23 @@ enabled-by: true
 files: []
 hash: null
 links:
+- path: path/to/bar
+  label: Label
+  name: Name
+  resource-key: bar
+  role: resource
+  uid: ../sub/component
+- path: path/to/blub
+  resource-key: blub
+  role: resource
+  uid: ../component
+- path: other/path/to/blub
+  resource-key: blub
+  role: resource
+  uid: a
 - hash: null
   name: component
   role: input
-  uid: ../component
-- directory: path/to/bar
-  name: bar
-  role: document
-  uid: ../sub/component
-- directory: path/to/blub
-  name: blub
-  role: document
   uid: ../component
 - hash: null
   output-name: output-name
