@@ -26,5 +26,12 @@ links:
   name: source
   role: input
   uid: test-files
+- enabled-set-extension:
+  - enable: bar
+    enabled-by: true
+  hash: null
+  name: enabled-set-extension
+  role: input-to
+  uid: sub-repo
 pkg-type: directory-state
 type: pkg

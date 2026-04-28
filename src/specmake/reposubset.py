@@ -2,7 +2,7 @@
 """ Produces a directory state which is subset of a repository. """
 
 # Copyright (C) 2021 EDISOFT
-# Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -25,9 +25,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import itertools
 import logging
 import os
 import tempfile
+from typing import Iterator
 
 from specitems import ItemCache, ItemCacheConfig, is_enabled
 from specware import gather_build_files
@@ -41,11 +43,17 @@ class RepositorySubset(DirectoryState):
     repository.
     """
 
+    def _input_enabled_set_extensions(self) -> Iterator[dict]:
+        for link, item in self.input_links("enabled-set-extension"):
+            yield from item.substitute(link["enabled-set-extension"])
+
     def gather_files(self) -> list[str]:
         """ Gather the files of the repository subset. """
         logging.info("%s: gather repository subset", self.uid)
         enabled_set = list(self.enabled_set)
-        for enable_enabled_by in self["enabled-set-extension"]:
+        for enable_enabled_by in itertools.chain(
+                self["enabled-set-extension"],
+                self._input_enabled_set_extensions()):
             if is_enabled(enabled_set, enable_enabled_by["enabled-by"]):
                 enabled_set.append(enable_enabled_by["enable"])
         build_spec_directories = self["build-spec-directories"]

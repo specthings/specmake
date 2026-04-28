@@ -15,8 +15,6 @@ enabled-by: true
 enabled-set-extension:
 - enable: foo
   enabled-by: false
-- enable: bar
-  enabled-by: true
 extra-files:
 - extra.c
 files: []
