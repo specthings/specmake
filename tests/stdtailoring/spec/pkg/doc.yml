@@ -29,18 +29,18 @@ hash: null
 links:
 - role: standard-tailoring
   uid: /standard/standard
+- path: path/to/ecss/tailoring
+  resource-key: ecss-tailoring
+  role: resource
+  uid: component
+- path: path/to/ecss/tailoring-2
+  resource-key: ecss-tailoring
+  role: resource
+  uid: component-2
 - hash: null
   name: component
   role: input
   uid: component
-- directory: path/to/ecss/tailoring
-  name: ecss-tailoring
-  role: document
-  uid: component
-- directory: path/to/ecss/tailoring-2
-  name: ecss-tailoring
-  role: document
-  uid: component-2
 output-html: null
 output-pdf: null
 pkg-type: directory-state

@@ -1,0 +1,51 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2022, 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: resource
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      label:
+        description: |
+          It shall be the label to the associated resource area.  The label
+          format is specific to the associated resource.  An example is a label
+          of a document location.
+        spec-type: str
+      name:
+        description: |
+          It shall be the name of the associated resource or resource area.
+          The name format is specific to the resource.  An example is the name
+          of a document, a chapter, or a section.
+        spec-type: str
+      path:
+        description: |
+          It shall be the path of the associated resource or resource area.
+          The path format is specific to the associated resource.  An example
+          is the path to a page or a part of resource locator.  The path should
+          be relative to the base location of the resource.
+        spec-type: str
+      resource-key:
+        description: |
+          It shall be the resource key to identify the resource.
+        spec-type: str
+    description: |
+      It defines the resource role of links and is used to associate a resource
+      or resource area with a key.  The resource is identified by the mandatory
+      `resource-key` attribute.  Resource links may reference a specific area
+      of the resource identified by the optional `label` attribute.  The area
+      may be named through the optional `name` attribute.
+    mandatory-attributes:
+    - path
+    - resource-key
+spec-name: Resource Link Role
+spec-type: pkg-resource-role
+type: spec

@@ -29,41 +29,41 @@ links:
   name: tagfile
   role: input
   uid: ../source/tagfile-no-file
-- directory: html
-  name: icd
-  role: document
+- path: html
+  resource-key: icd
+  role: resource
   uid: ../deployment/doc-ts-icd
-- directory: html
-  name: icd
-  role: document
+- path: html
+  resource-key: icd
+  role: resource
   uid: ../deployment/doc-ts-icd-dummy
-- directory: html
-  name: sdd
-  role: document
+- path: html
+  resource-key: sdd
+  role: resource
   uid: ../deployment/doc-ddf-sdd
-- directory: html
-  name: srs
-  role: document
+- path: html
+  resource-key: srs
+  role: resource
   uid: ../deployment/doc-ts-srs
-- directory: html
-  name: srs
-  role: document
+- path: html
+  resource-key: srs
+  role: resource
   uid: ../deployment/doc-ts-srs-dummy
-- directory: html
-  name: suitp
-  role: document
+- path: html
+  resource-key: suitp
+  role: resource
   uid: ../deployment/doc-djf-suitp
-- directory: html
-  name: svs
-  role: document
+- path: html
+  resource-key: svs
+  role: resource
   uid: ../deployment/doc-djf-svs
-- directory: html
-  name: svs
-  role: document
+- path: html
+  resource-key: svs
+  role: resource
   uid: ../deployment/doc-djf-svs-dummy
-- directory: .
-  name: source
-  role: document
+- path: .
+  resource-key: source
+  role: resource
   uid: ../source/repo
 pkg-type: link-hub
 type: pkg

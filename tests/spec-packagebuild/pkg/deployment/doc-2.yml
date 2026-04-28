@@ -28,9 +28,9 @@ enabled-by: sphinx-builder-2
 files: []
 hash: null
 links:
-- directory: path/to/doc-2
-  name: doc-2
-  role: document
+- path: path/to/doc-2
+  resource-key: doc-2
+  role: resource
   uid: ../component
 - hash: null
   name: component

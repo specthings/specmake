@@ -299,7 +299,6 @@ class SphinxBuilder(DirectoryState):
         super().__init__(director, item, mapper)
         self.mapper.base_path = self["document-base-path"]
         self._whoami = self["document-key"]
-        self._refs: dict[str, tuple[str, str]] = {}
         self._index: list[str] = []
         self._section_level_stack: list[int] = [2]
         self._section_stack: list[BuildItem] = [self]
@@ -651,23 +650,16 @@ class SphinxBuilder(DirectoryState):
 
     def _get_ref(self, ctx: ItemGetValueContext) -> str:
         args, kwargs = ctx.unpack_args_dict(ctx.mapper.substitute)
-        assert args
-        document = kwargs["document"]
-        component = self.component
-        component_document = f"{component.uid}/{document}"
-        ref = self._refs.get(component_document)
-        if ref is None:
-            target, path = component.get_document(document)
-            ref = (target["document-key"], path)
-            self._refs[component_document] = ref
+        document, path, *_ = self.get_resource(kwargs["document"])
+        name = " ".join(args)
+        assert name
+        label = kwargs["label"]
         mapper = ctx.mapper
         assert isinstance(mapper, BuildItemMapper)
-        name = " ".join(args)
-        label = kwargs["label"]
-        if self._whoami == ref[0]:
+        if self._whoami == document["document-key"]:
             return mapper.format_reference(name, label)
         return mapper.format_link(
-            name, f"{ref[1]}{kwargs.get('path', '')}#{label.lower()}")
+            name, f"{path}{kwargs.get('path', '')}#{label.lower()}")
 
     def _get_document_elements(self, ctx: ItemGetValueContext) -> str:
         assert ctx.args
