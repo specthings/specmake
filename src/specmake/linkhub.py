@@ -32,7 +32,7 @@ import os
 from typing import Any, Optional
 from xml.etree import ElementTree
 
-from specitems import Item, ItemGetValueContext, list_terms, make_label
+from specitems import Item, ItemGetValueContext, list_terms
 
 from .directorystate import DirectoryState
 from .pkgitems import BuildItem, BuildItemMapper, PackageBuildDirector
@@ -303,8 +303,8 @@ def _name_info_key_type(item: Item) -> str:
 
 
 def spec_label(item: Item) -> str:
-    """ Returns the specification label of the item. """
-    return make_label(item.spec)
+    """ Return the specification label of the item. """
+    return f"Spec{item.ident}"
 
 
 def _name_name(item: Item) -> str:
