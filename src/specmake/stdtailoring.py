@@ -105,9 +105,14 @@ class StandardTailoringProvider(DocumentBuilderValueProvider):
                                  self._get_standard_tailoring)
         mapper.add_get_value("requirement/non-functional/ecss:/clause",
                              self._get_ecss_clause)
+        mapper.add_get_value("requirement/non-functional/ecss:/clause-long",
+                             self._get_ecss_clause_long)
         mapper.add_get_value(
             "requirement/non-functional/ecss:/standard-and-clause",
             self._get_ecss_standard_and_clause)
+        mapper.add_get_value(
+            "requirement/non-functional/ecss:/standard-and-clause-long",
+            self._get_ecss_standard_and_clause_long)
 
     def _get_standard_tailoring(self, ctx: ItemGetValueContext) -> str:
         builder = self.builder
@@ -129,10 +134,22 @@ class StandardTailoringProvider(DocumentBuilderValueProvider):
         name = f"{item['section']}{item['bullet']}"
         return self.get_reference(ctx, "ecss-tailoring", name, item.ident)
 
+    def _get_ecss_clause_long(self, ctx: ItemGetValueContext) -> str:
+        item = ctx.item
+        name = f"{item['section']}{item['bullet']} ({item['name']})"
+        return self.get_reference(ctx, "ecss-tailoring", name, item.ident)
+
     def _get_ecss_standard_and_clause(self, ctx: ItemGetValueContext) -> str:
         item = ctx.item
         name = item.parent("requirement-refinement")["name"]
         name = f"{name} - {item['section']}{item['bullet']}"
+        return self.get_reference(ctx, "ecss-tailoring", name, item.ident)
+
+    def _get_ecss_standard_and_clause_long(self,
+                                           ctx: ItemGetValueContext) -> str:
+        item = ctx.item
+        name = item.parent("requirement-refinement")["name"]
+        name = f"{name} - {item['section']}{item['bullet']} ({item['name']})"
         return self.get_reference(ctx, "ecss-tailoring", name, item.ident)
 
 

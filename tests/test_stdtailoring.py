@@ -43,8 +43,14 @@ def test_stdtailoring(caplog, tmpdir):
     assert builder.substitute(
         "${/standard/clause-0:/clause}") == ":ref:`4.3.1.1x <StandardClause0>`"
     assert builder.substitute(
+        "${/standard/clause-0:/clause-long}"
+    ) == ":ref:`4.3.1.1x (Clause 0 name) <StandardClause0>`"
+    assert builder.substitute(
         "${/standard/clause-0:/standard-and-clause}"
     ) == ":ref:`ABCD-X-ST-01Y Rev. 42 - 4.3.1.1x <StandardClause0>`"
+    assert builder.substitute(
+        "${/standard/clause-0:/standard-and-clause-long}"
+    ) == ":ref:`ABCD-X-ST-01Y Rev. 42 - 4.3.1.1x (Clause 0 name) <StandardClause0>`"
 
     # Check standard and clause links
     assert builder_2.substitute(
