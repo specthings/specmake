@@ -124,15 +124,15 @@ class StandardTailoringProvider(DocumentBuilderValueProvider):
                         _add_clause(content, builder, name, clause)
             return content.join()
 
-    def _get_ecss_standard_and_clause(self, ctx: ItemGetValueContext) -> str:
-        item = ctx.item
-        name = item.parent("requirement-refinement")["name"]
-        name = f"{name} {item['section']}{item['bullet']}"
-        return self.get_reference(ctx, "ecss-tailoring", name, item.ident)
-
     def _get_ecss_clause(self, ctx: ItemGetValueContext) -> str:
         item = ctx.item
         name = f"{item['section']}{item['bullet']}"
+        return self.get_reference(ctx, "ecss-tailoring", name, item.ident)
+
+    def _get_ecss_standard_and_clause(self, ctx: ItemGetValueContext) -> str:
+        item = ctx.item
+        name = item.parent("requirement-refinement")["name"]
+        name = f"{name} - {item['section']}{item['bullet']}"
         return self.get_reference(ctx, "ecss-tailoring", name, item.ident)
 
 

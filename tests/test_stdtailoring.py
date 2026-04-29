@@ -44,7 +44,7 @@ def test_stdtailoring(caplog, tmpdir):
         "${/standard/clause-0:/clause}") == ":ref:`4.3.1.1x <StandardClause0>`"
     assert builder.substitute(
         "${/standard/clause-0:/standard-and-clause}"
-    ) == ":ref:`ABCD-X-ST-01Y Rev. 42 4.3.1.1x <StandardClause0>`"
+    ) == ":ref:`ABCD-X-ST-01Y Rev. 42 - 4.3.1.1x <StandardClause0>`"
 
     # Check standard and clause links
     assert builder_2.substitute(
@@ -52,14 +52,14 @@ def test_stdtailoring(caplog, tmpdir):
     ) == "`4.3.1.1x <../doc/path/to/ecss/tailoring#standardclause0>`__"
     assert builder_2.substitute(
         "${/standard/clause-0:/standard-and-clause}"
-    ) == "`ABCD-X-ST-01Y Rev. 42 4.3.1.1x <../doc/path/to/ecss/tailoring#standardclause0>`__"
+    ) == "`ABCD-X-ST-01Y Rev. 42 - 4.3.1.1x <../doc/path/to/ecss/tailoring#standardclause0>`__"
     with builder_2.component_scope(director["/pkg/component-2"]):
         assert builder_2.substitute(
             "${/standard/clause-0:/clause}"
         ) == "`4.3.1.1x <../doc/path/to/ecss/tailoring-2#standardclause0>`__"
         assert builder_2.substitute(
             "${/standard/clause-0:/standard-and-clause}"
-        ) == "`ABCD-X-ST-01Y Rev. 42 4.3.1.1x <../doc/path/to/ecss/tailoring-2#standardclause0>`__"
+        ) == "`ABCD-X-ST-01Y Rev. 42 - 4.3.1.1x <../doc/path/to/ecss/tailoring-2#standardclause0>`__"
 
     # Check standard tailoring
     assert builder.substitute(
