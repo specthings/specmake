@@ -21,13 +21,22 @@ document-license: CC-BY-SA-4.0
 document-license-map:
   BSD-2-Clause: CC-BY-SA-4.0 OR BSD-2-Clause
 document-releases: []
-document-title: The Title
+document-title: The Title 2
 document-toctree-maxdepth: 4
 document-type: generic
 enabled-by: sphinx-builder-2
 files: []
 hash: null
 links:
+- citation-group-key: the-group
+  role: citation-group-member
+  uid: ../component
+- citation-group-key: the-group-2
+  role: citation-group-member
+  uid: ../component
+- citation-group-key: the-doc-2-only
+  role: citation-group-member
+  uid: ../component
 - path: path/to/doc-2
   resource-key: doc-2
   role: resource

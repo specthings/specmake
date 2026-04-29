@@ -770,6 +770,8 @@ def test_document_references(caplog, tmp_path):
     package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
                              ["sphinx-builder", "sphinx-builder-2"])
     doc = package.director["/pkg/deployment/doc"]
+
+    # Check references
     assert doc.substitute(
         "${.:/ref:this is a name,document=doc,label=Label,text}"
     ) == ":ref:`this is a name text <Label>`"
@@ -778,3 +780,50 @@ def test_document_references(caplog, tmp_path):
     assert doc.substitute(
         "${.:/ref:name,document=doc-2,label=Label3,path=/more}"
     ) == "`name <pkg/doc-2/path/to/doc-2/more#label3>`__"
+
+    # Check cite groups
+    assert doc.substitute("${/pkg/component:/cite-group:does-not-exist}") == ""
+    assert doc.substitute(
+        "${/pkg/component:/cite-group:does-not-exist,flat=0,prologue=Prologue,epilogue=Epilogue,empty=Empty}"
+    ) == "Empty"
+    assert doc.substitute(
+        "${/pkg/component:/cite-group:the-,group}"
+    ) == "*The Title* :cite:`PkgDeploymentDoc`, :cite:`PkgDeploymentDoc2`, and :cite:`RefMisc`"
+    assert doc.substitute("${/pkg/component:/cite-group:the-misc}"
+                          ) == ":cite:`RefMisc` and :cite:`RefMisc2`"
+    assert doc.substitute("${/pkg/component:/cite-group:the-doc-2-only}"
+                          ) == "*The Title 2* :cite:`PkgDeploymentDoc2`"
+    assert doc.substitute(
+        "${/pkg/component:/cite-group:the-doc-2-only,label=Label}"
+    ) == "`The Title 2 <pkg/doc-2#label>`__ :cite:`PkgDeploymentDoc2`"
+    assert doc.substitute(
+        "${/pkg/component:/cite-group:the-doc-extra}"
+    ) == "`The Title, LinkName <pkg/doc/LinkPath#linklabel>`__ :cite:`PkgDeploymentDoc`"
+    assert doc.substitute(
+        "${/pkg/component:/cite-group:the-doc-extra,name=Name,label=Label,path=/Path}"
+    ) == "`The Title, Name <pkg/doc/Path#label>`__ :cite:`PkgDeploymentDoc`"
+    assert doc.substitute(
+        "${/pkg/component:/cite-group:the-group,flat=0,prologue=Prologue,epilogue=Epilogue,empty=Empty}"
+    ) == """Prologue
+
+- **The Title** :cite:`PkgDeploymentDoc`
+
+- **The Title 2** :cite:`PkgDeploymentDoc2`
+
+- **The Title - More** :cite:`RefMisc`
+
+Epilogue"""
+    assert doc.substitute(
+        "${/pkg/component:/cite-group:the-group,flat=0,label=Label,path=/path}"
+    ) == """- `The Title <pkg/doc/path#label>`__ :cite:`PkgDeploymentDoc`
+
+- `The Title 2 <pkg/doc-2/path#label>`__ :cite:`PkgDeploymentDoc2`
+
+- **The Title - More** :cite:`RefMisc`"""
+    assert doc.substitute(
+        "${/pkg/component:/cite-group:the-group,flat=0,label=Label,path=/path,name=Name}"
+    ) == """- `The Title, Name <pkg/doc/path#label>`__ :cite:`PkgDeploymentDoc`
+
+- `The Title 2, Name <pkg/doc-2/path#label>`__ :cite:`PkgDeploymentDoc2`
+
+- **The Title - More** :cite:`RefMisc`"""

@@ -38,7 +38,7 @@ import yaml
 from specitems import (BibTeXCitationProvider, Copyrights,
                        DocumentGlossaryConfig, GlossaryConfig, Item, ItemCache,
                        ItemGetValueContext, ItemMapper, ItemValueProvider,
-                       SphinxContent, TextContent, generate_glossary,
+                       Link, SphinxContent, TextContent, generate_glossary,
                        get_value_subprocess, is_enabled, list_terms,
                        to_iterable)
 from specware import BSD_2_CLAUSE_LICENSE, run_command
@@ -82,6 +82,11 @@ def _kwargs_split(kwargs: dict[str, str], key: str) -> frozenset[str]:
     if key in kwargs:
         return frozenset(kwargs[key].split("+"))
     return frozenset()
+
+
+def _kwargs_get(kwargs: dict[str, str], key: str, link: Link,
+                default: str | None) -> str | None:
+    return kwargs.get(key, link.data.get(key, default))
 
 
 def _normal_title(item: Item) -> str:
@@ -308,6 +313,56 @@ class _CitationProvider(BibTeXCitationProvider):
             "year": _document_year(item, self.mapper)
         }
         return "manual", fields
+
+    def get_cite_group(self, ctx: ItemGetValueContext) -> str:
+        # pylint: disable=too-many-locals
+        args, kwargs = ctx.unpack_args_dict(ctx.mapper.substitute)
+        group = "".join(args)
+        flat = int(kwargs.get("flat", 1))
+        use_common_title = True
+        citations: list[str] = []
+        titles: list[str] = []
+        mapper = ctx.mapper
+        assert isinstance(mapper, BuildItemMapper)
+        content = mapper.create_content()
+        for link in ctx.item.links_to_children("citation-group-member"):
+            if link["citation-group-key"] != group:
+                continue
+            _, fields = self.get_fields(link.item)
+            title = ctx.substitute(fields["title"])
+            cite = ctx.substitute(f"${{{link.uid}:/cite}}")
+            if link.item.type.startswith("pkg/directory-state/sphinx"):
+                label = _kwargs_get(kwargs, "label", link, None)
+                if label is None:
+                    if not flat:
+                        title = f"{content.emphasize(title)} {cite}"
+                else:
+                    use_common_title = False
+                    name = _kwargs_get(kwargs, "name", link, "")
+                    path = mapper.substitute(link.item['directory'], link.item)
+                    path = f"{path}{_kwargs_get(kwargs, 'path', link, '')}"
+                    title = mapper.format_link(
+                        f"{title}{', ' if name else ''}{name}",
+                        f"{path}#{label.lower()}")
+                    title = f"{title} {cite}"
+                    cite = title
+            else:
+                if not flat:
+                    title = f"{content.emphasize(title)} {cite}"
+            titles.append(title)
+            citations.append(cite)
+        if flat:
+            if use_common_title:
+                title = os.path.commonprefix(titles)
+                if title:
+                    return (f"{content.emphasize(title)} "
+                            f"{list_terms(citations)}")
+            return list_terms(citations)
+        content.add_list(titles,
+                         prologue=kwargs.get("prologue"),
+                         epilogue=kwargs.get("epilogue"),
+                         empty=kwargs.get("empty"))
+        return content.join()
 
 
 class SphinxBuilder(DirectoryState):
