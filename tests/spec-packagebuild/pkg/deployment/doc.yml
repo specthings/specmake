@@ -79,6 +79,10 @@ links:
   resource-key: doc
   role: resource
   uid: ../component
+- path: index.html
+  resource-key: spec-types
+  role: resource
+  uid: ../component
 - hash: null
   name: component
   role: input

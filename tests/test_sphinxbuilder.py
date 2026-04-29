@@ -459,8 +459,8 @@ Root Item Type
 This is the root specification item type.
 
 Specification items consist of a defined set of key-value pairs called
-attributes.  Each attribute key name shall be a :ref:`SpecTypeName`.  Item
-attributes may have dictionary, list, integer, floating-point number, and
+attributes.  Each attribute key name shall be a :ref:`Name <SpecTypeName>`.
+Item attributes may have dictionary, list, integer, floating-point number, and
 string values or a combination of them.  The format of items is defined by the
 type hierarchy rooting in this type.
 
@@ -512,13 +512,13 @@ The value shall be a string. It shall be a copyright statement of a copyright
 holder of the specification item. The value
 
 - shall match with the regular expression
-  "``^\s*Copyright\s+\(C\)\s+[0-9]+,\s*[0-9]+\s+.+\s*$``",
+  "``^\\s*Copyright\\s+\(C\)\\s+[0-9]+,\\s*[0-9]+\\s+.+\\s*$``",
 
 - or, shall match with the regular expression
-  "``^\s*Copyright\s+\(C\)\s+[0-9]+\s+.+\s*$``",
+  "``^\\s*Copyright\\s+\(C\)\\s+[0-9]+\\s+.+\\s*$``",
 
 - or, shall match with the regular expression
-  "``^\s*Copyright\s+\(C\)\s+.+\s*$``".
+  "``^\\s*Copyright\\s+\(C\)\\s+.+\\s*$``".
 
 This type is used by the following types:
 
@@ -663,6 +663,10 @@ This type is used by the following types:
 
 - :ref:`SpecTypeLink`
 .. end specdoc
+
+.. begin spec-name
+:ref:`Root Item Type <SpecTypeRootItemType>`
+.. end spec-name
 """
     doc_glossary = doc_build / "source" / "glossary.rst"
     with open(doc_glossary, "r", encoding="utf-8") as src:
@@ -691,7 +695,10 @@ Terms, definitions and abbreviated terms
 
     _set_enabled_set(package, ["sphinx-builder-2"])
     doc_2 = director["/pkg/deployment/doc-2"]
-    doc_2.substitute("${.:/document-bsd-2-clause-copyrights}") == "\n"
+    assert doc_2.substitute("${.:/document-bsd-2-clause-copyrights}") == ""
+    assert doc_2.substitute(
+        "${/spec/root:/spec-name}"
+    ) == f"`Root Item Type <{tmp_path}/pkg/doc/index.html#spectyperootitemtype>`__"
 
     assert doc_2.section_level == 2
     with doc_2.section_level_scope(

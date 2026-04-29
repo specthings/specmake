@@ -27,7 +27,7 @@
 from specitems import (EmptyItemCache, Item, ItemCache, ItemGetValueContext,
                        ItemTypeProvider, SpecDocumentConfig, SpecTypeProvider,
                        TextMapper, add_specification_documentation,
-                       create_config, unpack_args)
+                       create_config, make_label, unpack_args)
 from specware import SpecWareTypeProvider
 
 from .pkgitems import BuildItemTypeProvider
@@ -58,6 +58,7 @@ class SpecDocProvider(DocumentBuilderValueProvider):
         super().__init__(builder)
         self.mapper.add_get_value(f"{builder.item.type}:/specdoc",
                                   self._get_specdoc)
+        self.mapper.add_get_value("spec:/spec-name", self._get_spec_name)
 
     def _get_specdoc(self, ctx: ItemGetValueContext) -> str:
         builder = self.builder
@@ -68,6 +69,11 @@ class SpecDocProvider(DocumentBuilderValueProvider):
             type_provider = _SPEC_TYPES[args[0]]({})
             item_cache = _SpecDocItemCache(self.builder.item.cache,
                                            type_provider=type_provider)
-            add_specification_documentation(content, config, item_cache,
-                                            self.mapper)
+            with self.mapper.scope(item_cache["/spec/root"]):
+                add_specification_documentation(content, config, self.mapper)
             return content.join()
+
+    def _get_spec_name(self, ctx: ItemGetValueContext) -> str:
+        name = ctx.item["spec-name"]
+        label = f"SpecType{make_label(name)}"
+        return self.get_reference(ctx, "spec-types", name, label)

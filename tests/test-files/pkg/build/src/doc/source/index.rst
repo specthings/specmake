@@ -31,3 +31,7 @@ ${.:/document-index}
 .. begin specdoc
 ${.:/specdoc:0:specitems,ignore=^\(citation|glossary|proxy|reference|spec\)}
 .. end specdoc
+
+.. begin spec-name
+${/spec/root:/spec-name}
+.. end spec-name
