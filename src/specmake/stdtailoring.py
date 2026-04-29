@@ -27,11 +27,10 @@
 import os
 from typing import Any
 
-from specitems import (Item, ItemGetValueContext, ItemValueProvider,
-                       TextContent, TextMapper)
+from specitems import Item, ItemGetValueContext, TextContent, TextMapper
 
-from .sphinxbuilder import SphinxBuilder
-from .pkgitems import BuildItem, BuildItemFactory, BuildItemMapper, export_data
+from .sphinxbuilder import SphinxBuilder, DocumentBuilderValueProvider
+from .pkgitems import BuildItem, BuildItemFactory, export_data
 
 
 def _add_compliance_matrix(content: TextContent, name: str,
@@ -95,15 +94,11 @@ def _ecss_order(item: Item) -> list:
     return [int(i) for i in item["section"].split(".")] + [item["bullet"]]
 
 
-class StandardTailoringProvider(ItemValueProvider):
+class StandardTailoringProvider(DocumentBuilderValueProvider):
     """ Provides a statement of compliance and a standard tailoring. """
 
-    # pylint: disable=too-few-public-methods
-
     def __init__(self, builder: SphinxBuilder) -> None:
-        super().__init__(builder.mapper)
-        self._builder = builder
-        self._whoami = builder["document-key"]
+        super().__init__(builder)
         mapper = builder.mapper
         for name in [builder.item.type, "pkg/sphinx-section"]:
             mapper.add_get_value(f"{name}:/standard-tailoring",
@@ -115,7 +110,7 @@ class StandardTailoringProvider(ItemValueProvider):
             self._get_ecss_standard_and_clause)
 
     def _get_standard_tailoring(self, ctx: ItemGetValueContext) -> str:
-        builder = self._builder
+        builder = self.builder
         with builder.section_content(ctx) as (content, _):
             assert isinstance(self.mapper, TextMapper)
             for std in builder.item.parents("standard-tailoring"):
@@ -129,24 +124,16 @@ class StandardTailoringProvider(ItemValueProvider):
                         _add_clause(content, builder, name, clause)
             return content.join()
 
-    def _get_link(self, ctx: ItemGetValueContext, name: str) -> str:
-        document, path, *_ = self._builder.get_resource("ecss-tailoring")
-        mapper = ctx.mapper
-        assert isinstance(mapper, BuildItemMapper)
-        if self._whoami == document.item["document-key"]:
-            return mapper.format_reference(name, ctx.item.ident)
-        return mapper.format_link(name, f"{path}#{ctx.item.ident.lower()}")
-
     def _get_ecss_standard_and_clause(self, ctx: ItemGetValueContext) -> str:
         item = ctx.item
         name = item.parent("requirement-refinement")["name"]
         name = f"{name} {item['section']}{item['bullet']}"
-        return self._get_link(ctx, name)
+        return self.get_reference(ctx, "ecss-tailoring", name, item.ident)
 
     def _get_ecss_clause(self, ctx: ItemGetValueContext) -> str:
         item = ctx.item
         name = f"{item['section']}{item['bullet']}"
-        return self._get_link(ctx, name)
+        return self.get_reference(ctx, "ecss-tailoring", name, item.ident)
 
 
 def _export_data(item: Item, present: bool, built_later: bool) -> Any:

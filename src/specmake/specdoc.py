@@ -25,14 +25,13 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from specitems import (EmptyItemCache, Item, ItemCache, ItemGetValueContext,
-                       ItemTypeProvider, ItemValueProvider, SpecDocumentConfig,
-                       SpecTypeProvider, TextMapper,
-                       add_specification_documentation, create_config,
-                       unpack_args)
+                       ItemTypeProvider, SpecDocumentConfig, SpecTypeProvider,
+                       TextMapper, add_specification_documentation,
+                       create_config, unpack_args)
 from specware import SpecWareTypeProvider
 
 from .pkgitems import BuildItemTypeProvider
-from .sphinxbuilder import SphinxBuilder
+from .sphinxbuilder import SphinxBuilder, DocumentBuilderValueProvider
 
 _SPEC_TYPES = {
     "specitems": SpecTypeProvider,
@@ -52,25 +51,22 @@ class _SpecDocItemCache(EmptyItemCache):
         return self._item_cache[uid]
 
 
-class SpecDocProvider(ItemValueProvider):
+class SpecDocProvider(DocumentBuilderValueProvider):
     """ Documents specification items. """
 
-    # pylint: disable=too-few-public-methods
-
     def __init__(self, builder: SphinxBuilder) -> None:
-        super().__init__(builder.mapper)
-        self._builder = builder
+        super().__init__(builder)
         self.mapper.add_get_value(f"{builder.item.type}:/specdoc",
                                   self._get_specdoc)
 
     def _get_specdoc(self, ctx: ItemGetValueContext) -> str:
-        builder = self._builder
+        builder = self.builder
         with builder.section_content(ctx) as (content, optional_args):
             args, kwargs = unpack_args(optional_args, self.mapper.substitute)
             config = create_config(kwargs, SpecDocumentConfig)
             assert isinstance(self.mapper, TextMapper)
             type_provider = _SPEC_TYPES[args[0]]({})
-            item_cache = _SpecDocItemCache(self._builder.item.cache,
+            item_cache = _SpecDocItemCache(self.builder.item.cache,
                                            type_provider=type_provider)
             add_specification_documentation(content, config, item_cache,
                                             self.mapper)
