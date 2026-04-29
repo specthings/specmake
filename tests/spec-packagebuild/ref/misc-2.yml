@@ -1,0 +1,20 @@
+SPDX-License-Identifier: CC-BY-SA-4.0
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+author:
+- A, B
+- C D, E
+work-hash: VwNGxnQUINYb6si6Mkr1Q6raNy3hbtJkIoZuQOlS5dw=
+work-url: https://foobar.org/doc_ument.pdf
+enabled-by: true
+howpublished: How published
+links:
+- citation-group-key: the-misc
+  role: citation-group-member
+  uid: /pkg/component
+month: January
+note: Note
+reference-type: misc
+title: Some Other Title
+type: reference
+year: '1'

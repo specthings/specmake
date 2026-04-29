@@ -75,6 +75,18 @@ enabled-by: sphinx-builder
 files: []
 hash: null
 links:
+- citation-group-key: the-group
+  role: citation-group-member
+  uid: ../component
+- citation-group-key: the-doc-only
+  role: citation-group-member
+  uid: ../component
+- citation-group-key: the-doc-extra
+  label: LinkLabel
+  name: LinkName
+  path: /LinkPath
+  role: citation-group-member
+  uid: ../component
 - path: path/to/doc
   resource-key: doc
   role: resource
