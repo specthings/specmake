@@ -34,9 +34,10 @@ import yaml
 
 from specitems import (BibTeXCitationProvider, Copyrights,
                        DocumentGlossaryConfig, GlossaryConfig, Item,
-                       ItemGetValueContext, ItemMapper, SphinxContent,
-                       TextContent, generate_glossary, get_value_subprocess,
-                       is_enabled, list_terms, to_iterable)
+                       ItemGetValueContext, ItemMapper, ItemValueProvider,
+                       SphinxContent, TextContent, generate_glossary,
+                       get_value_subprocess, is_enabled, list_terms,
+                       to_iterable)
 from specware import BSD_2_CLAUSE_LICENSE, run_command
 
 from .directorystate import DirectoryState
@@ -240,6 +241,25 @@ def _augment_report(
     report: dict = {}
     augment_report(report, lines)
     return lines, report["data-ranges"]
+
+
+class DocumentBuilderValueProvider(ItemValueProvider):
+    """ Provides values for document builders. """
+
+    def __init__(self, builder: "SphinxBuilder") -> None:
+        super().__init__(builder.mapper)
+        self.builder = builder
+        self.whoami = builder["document-key"]
+
+    def get_reference(self, ctx: ItemGetValueContext, resource_key: str,
+                      name: str, label: str) -> str:
+        """ Get a named reference to the label in the named resource. """
+        document, path, *_ = self.builder.get_resource(resource_key)
+        mapper = ctx.mapper
+        assert isinstance(mapper, BuildItemMapper)
+        if self.whoami == document.item["document-key"]:
+            return mapper.format_reference(name, label)
+        return mapper.format_link(name, f"{path}#{label.lower()}")
 
 
 class _CitationProvider(BibTeXCitationProvider):
