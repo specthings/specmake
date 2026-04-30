@@ -772,14 +772,18 @@ def test_document_references(caplog, tmp_path):
     doc = package.director["/pkg/deployment/doc"]
 
     # Check references
+    with pytest.raises(ValueError):
+        doc.substitute("${.:/ref:key=doc}}")
+    assert doc.substitute("${.:/ref:this is a name,key=doc,label=Label,text}"
+                          ) == ":ref:`this is a name text <Label>`"
     assert doc.substitute(
-        "${.:/ref:this is a name,document=doc,label=Label,text}"
-    ) == ":ref:`this is a name text <Label>`"
-    assert doc.substitute("${.:/ref:name,document=doc-2,label=Label2}"
+        "${.:/ref:key=doc-extra}") == ":ref:`LinkName <LinkLabel>`"
+    assert doc.substitute("${.:/ref:name,key=doc-2,label=Label2}"
                           ) == "`name <pkg/doc-2/path/to/doc-2#label2>`__"
-    assert doc.substitute(
-        "${.:/ref:name,document=doc-2,label=Label3,path=/more}"
-    ) == "`name <pkg/doc-2/path/to/doc-2/more#label3>`__"
+    assert doc.substitute("${.:/ref:name,key=doc-2,label=Label3,path=/more}"
+                          ) == "`name <pkg/doc-2/path/to/doc-2/more#label3>`__"
+    assert doc.substitute("${.:/ref:key=doc-2-extra}"
+                          ) == "`LinkName <pkg/doc-2/LinkPath#linklabel>`__"
 
     # Check cite groups
     assert doc.substitute("${/pkg/component:/cite-group:does-not-exist}") == ""

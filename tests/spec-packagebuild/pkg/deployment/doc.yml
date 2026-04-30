@@ -91,6 +91,12 @@ links:
   resource-key: doc
   role: resource
   uid: ../component
+- label: LinkLabel
+  name: LinkName
+  path: LinkPath
+  resource-key: doc-extra
+  role: resource
+  uid: ../component
 - path: index.html
   resource-key: spec-types
   role: resource
