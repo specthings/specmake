@@ -792,16 +792,21 @@ class SphinxBuilder(DirectoryState):
 
     def _get_ref(self, ctx: ItemGetValueContext) -> str:
         args, kwargs = ctx.unpack_args_dict(ctx.mapper.substitute)
-        document, path, *_ = self.get_resource(kwargs["document"])
-        name = " ".join(args)
-        assert name
-        label = kwargs["label"]
+        resource = self.get_resource(kwargs["key"])
+        name: str | None = " ".join(args)
+        if not name:
+            name = resource.name
+        label = kwargs.get(
+            "label", resource.label if resource.label is not None else "")
+        if not name or not label:
+            raise ValueError(
+                f"{ctx.item.uid}: no name or label specified for reference")
         mapper = ctx.mapper
         assert isinstance(mapper, BuildItemMapper)
-        if self._whoami == document["document-key"]:
+        if self._whoami == resource.item["document-key"]:
             return mapper.format_reference(name, label)
         return mapper.format_link(
-            name, f"{path}{kwargs.get('path', '')}#{label.lower()}")
+            name, f"{resource.path}{kwargs.get('path', '')}#{label.lower()}")
 
     def _get_document_elements(self, ctx: ItemGetValueContext) -> str:
         assert ctx.args

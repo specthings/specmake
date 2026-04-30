@@ -41,6 +41,12 @@ links:
   resource-key: doc-2
   role: resource
   uid: ../component
+- label: LinkLabel
+  name: LinkName
+  path: LinkPath
+  resource-key: doc-2-extra
+  role: resource
+  uid: ../component
 - hash: null
   name: component
   role: input
