@@ -945,11 +945,17 @@ class PackageBuildDirector(dict):
         """ Create the build item with all its input dependencies. """
         if seen is None:
             seen = set()
-        if uid not in seen:
-            seen.add(uid)
-            for link in _get_input_links(self.item_cache[uid]):
-                self.create_with_dependencies(link.uid, seen)
-        return self[uid]
+        if uid in seen:
+            return self[uid]
+        seen.add(uid)
+        item_cache = self.item_cache
+        item = item_cache[uid]
+        component = self._get_component(item)
+        with item_cache.selection(component.selection):
+            with item_cache.view_scope(component.view):
+                for link in _get_input_links(item):
+                    self.create_with_dependencies(link.uid, seen)
+                return self[uid]
 
     @property
     def package(self) -> PackageComponent:
