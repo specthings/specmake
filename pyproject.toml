@@ -66,6 +66,7 @@ specbuild = "specmake.clibuild:clibuild"
 specfromsource = "specmake.clifromsource:clifromsource"
 specgcovr = "specmake.cligcovr:cligcovr"
 specmake = "specmake.climake:climake"
+specmakesub = "specmake.clisubstitute:clisubstitute"
 specupdateperf = "specmake.cliupdateperf:cliupdateperf"
 specupdatetimeouts = "specmake.cliupdatetimeouts:cliupdatetimeouts"
 
