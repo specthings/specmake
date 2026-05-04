@@ -9,6 +9,10 @@ links:
   spec-key: workspace-type
   spec-value: directory
   uid: pkg-workspace
+- role: spec-refinement
+  spec-key: workspace-type
+  spec-value: directory-repository
+  uid: pkg-workspace
 spec-description: null
 spec-example: null
 spec-info:

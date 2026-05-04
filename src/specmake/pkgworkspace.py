@@ -51,6 +51,17 @@ from .pkgtemplate import (ComponentTemplate, FileItemTemplate,
                           InlineItemTemplate)
 
 
+def _git_commit(repository_directory: str,
+                commit: Optional[str] = None) -> str:
+    if commit is None:
+        commit = "HEAD"
+    stdout: list[str] = []
+    status = run_command(["git", "rev-parse", commit], repository_directory,
+                         stdout)
+    assert status == 0
+    return stdout[0].strip()
+
+
 def _verify_specification_format(item_cache: ItemCache, verify: bool):
     if verify:
         logger = logging.getLogger()
@@ -253,6 +264,49 @@ class WorkspaceDirectory(_WorkspaceItem, DirectoryState):
         self._copy_to_buildspace_actions(buildspace_item)
 
 
+class WorkspaceDirectoryRepository(WorkspaceDirectory):
+    """ Represents a workspace directory repository. """
+
+    def load_workspace_state(self) -> str:
+        self.director.package.view.setdefault("submodules",
+                                              []).append(self.uid)
+        return super().load_workspace_state()
+
+    def get_buildspace_data(self) -> dict:
+        data = _make_directory_state_data(self.item, "repository")
+        data["branch"] = "main"
+        data["commit"] = "01234567890abcdef01234567890abcdef012345"
+        data["description"] = ("This is a directory managed as a "
+                               "Git repository in the buildspace.")
+        for key in ("origin-branch", "origin-commit", "origin-commit-url",
+                    "origin-url"):
+            data[key] = None
+        self.copy_attributes(data, ("directory-state-load-before-use",
+                                    "copyrights-by-license", "params"))
+        return data
+
+    def copy_to_buildspace(self, buildspace_item: BuildItem) -> None:
+        assert isinstance(buildspace_item, RepositoryState)
+        destination_directory = buildspace_item.directory
+        try:
+            shutil.rmtree(os.path.join(destination_directory, ".git"))
+        except FileNotFoundError:
+            pass
+        super().copy_to_buildspace(buildspace_item)
+        status = run_command(["git", "init", "--initial-branch=main", "."],
+                             destination_directory)
+        assert status == 0
+        status = run_command(["git", "add", "."], destination_directory)
+        assert status == 0
+        status = run_command(
+            ["git", "commit", "--allow-empty", "-m", "Initial import"],
+            destination_directory)
+        assert status == 0
+        buildspace_item.item.data["commit"] = _git_commit(
+            destination_directory)
+        buildspace_item.git_add(destination_directory)
+
+
 class WorkspaceFile(WorkspaceDirectory):
     """ Represents a workspace file. """
 
@@ -295,17 +349,6 @@ class WorkspaceRedirect(_WorkspaceItem):
 
     def get_buildspace_data(self) -> dict:
         return self.item["redirect-data"]
-
-
-def _git_commit(repository_directory: str,
-                commit: Optional[str] = None) -> str:
-    if commit is None:
-        commit = "HEAD"
-    stdout: list[str] = []
-    status = run_command(["git", "rev-parse", commit], repository_directory,
-                         stdout)
-    assert status == 0
-    return stdout[0].strip()
 
 
 class WorkspaceRepository(_WorkspaceItem):
@@ -431,6 +474,8 @@ def create_workspace_item_factory() -> BuildItemFactory:
     factory.add_constructor("pkg/workspace/archive", WorkspaceArchive)
     factory.add_constructor("pkg/workspace/component", WorkspaceComponent)
     factory.add_constructor("pkg/workspace/directory", WorkspaceDirectory)
+    factory.add_constructor("pkg/workspace/directory-repository",
+                            WorkspaceDirectoryRepository)
     factory.add_constructor("pkg/workspace/file", WorkspaceFile)
     factory.add_constructor("pkg/workspace/redirect", WorkspaceRedirect)
     factory.add_constructor("pkg/workspace/repository", WorkspaceRepository)
