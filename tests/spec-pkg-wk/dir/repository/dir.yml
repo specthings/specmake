@@ -1,0 +1,42 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+copy-to-buildspace-actions:
+- action: copy-and-substitute
+  enabled-by: true
+  input-name: .
+  output-name: .
+  source: t.txt
+  target: t.txt
+destination-directory: ${.:/component/deployment-directory}/dir
+directory: ${.:/component/workspace-directory}/dir
+enabled-by: true
+file-mappings:
+- count: 1
+  pattern: \bc1/
+  replacement: rc1/
+- pattern: \bc1/
+  replacement: rc1/
+- pattern: \bcn/
+  replacement: rcn/
+- continue: true
+  pattern: \ba/
+  replacement: b/
+- pattern: \bb/
+  replacement: c/
+- pattern: ^s
+  replacement: rs
+- pattern: e$
+  replacement: re
+links:
+- hash: null
+  name: component
+  role: input
+  uid: /pkg/component
+params:
+  k: ${.:/component/deployment-directory}
+patterns: '**/*'
+pkg-type: workspace
+type: pkg
+workspace-type: directory-repository

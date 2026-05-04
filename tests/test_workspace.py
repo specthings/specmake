@@ -28,7 +28,7 @@ import logging
 import os
 import pytest
 
-from specware import util
+from specware import run_command
 
 from specmake import (BuildItem, BuildspaceConfig, DirectoryState,
                       PackageComponent, WorkspaceConfig,
@@ -39,7 +39,7 @@ from specmake.pkgworkspace import _WorkspaceItem
 
 def _git_commit(directory, what):
     stdout = []
-    status = util.run_command(["git", "rev-parse", what], directory, stdout)
+    status = run_command(["git", "rev-parse", what], directory, stdout)
     assert status == 0
     return stdout[0].strip()
 
@@ -82,7 +82,7 @@ def test_workspace_not_implemented():
 def test_workspace_dir_patterns(tmp_path):
     buildspace, _ = _create_buildspace(str(tmp_path),
                                        "spec-pkg-wk/dir/patterns")
-    buildspace.director["/dir"]["directory-state-type"] == "explicit"
+    assert buildspace.director["/dir"]["directory-state-type"] == "explicit"
     assert (tmp_path / "rc1" / "c1" / "c1").is_file()
     assert (tmp_path / "rcn" / "rcn" / "cn").is_file()
     assert (tmp_path / "c" / "a").is_file()
@@ -93,16 +93,34 @@ def test_workspace_dir_patterns(tmp_path):
         assert file.read() == f"{tmp_path}\n"
 
 
+def test_workspace_dir_repository(tmp_path):
+    buildspace, _ = _create_buildspace(str(tmp_path),
+                                       "spec-pkg-wk/dir/repository")
+    repo = buildspace.director["/dir"]
+    assert repo["directory-state-type"] == "repository"
+    dir_path = tmp_path / "dir"
+    assert (dir_path / "rc1" / "c1" / "c1").is_file()
+    assert (dir_path / "rcn" / "rcn" / "cn").is_file()
+    assert (dir_path / "c" / "a").is_file()
+    assert (dir_path / "rs" / "s").is_file()
+    assert (dir_path / "e" / "re").is_file()
+    assert (dir_path / "n").is_file()
+    with open(dir_path / "t.txt", "r", encoding="utf-8") as file:
+        assert file.read() == f"{tmp_path}\n"
+    assert repo["commit"] == _git_commit(repo.directory, "main")
+    assert repo.lazy_verify()
+
+
 def test_workspace_file_single(tmpdir):
     buildspace, _ = _create_buildspace(tmpdir, "spec-pkg-wk/file/single")
-    buildspace.director["/file"]["directory-state-type"] == "explicit"
+    assert buildspace.director["/file"]["directory-state-type"] == "explicit"
     with open(os.path.join(tmpdir, "file", "c.txt"), "rb") as file:
         assert file.read() == b"b\n"
 
 
 def test_workspace_file_list(tmpdir):
     buildspace, _ = _create_buildspace(tmpdir, "spec-pkg-wk/file/list")
-    buildspace.director["/file"]["directory-state-type"] == "explicit"
+    assert buildspace.director["/file"]["directory-state-type"] == "explicit"
     with open(os.path.join(tmpdir, "file", "c.txt"), "rb") as file:
         assert file.read() == b"b\n"
 
@@ -142,7 +160,7 @@ def test_workspace_repo_origin_url(tmpdir):
     assert repo["commit"] == "40abab3c7aca7f38d06f339d784fa08178588f47"
     assert repo.lazy_verify()
     stdout: list[str] = []
-    status = util.run_command(["git", "remote", "-v"], repo.directory, stdout)
+    status = run_command(["git", "remote", "-v"], repo.directory, stdout)
     assert status == 0
     assert "https://foobar.org" in "".join(stdout)
 
@@ -156,8 +174,8 @@ def test_workspace_repo_fetch(tmpdir):
     repo = buildspace.director["/repo"]
     assert repo["commit"] == "40abab3c7aca7f38d06f339d784fa08178588f47"
     assert repo.lazy_verify()
-    status = util.run_command(["git", "commit", "--amend", "-m", "message"],
-                              archive.directory)
+    status = run_command(["git", "commit", "--amend", "-m", "message"],
+                         archive.directory)
     assert status == 0
     wk_repo_2 = workspace.director["/repo-2"]
     commit = _git_commit(archive.directory, "HEAD")
@@ -170,7 +188,7 @@ def test_workspace_repo_fetch(tmpdir):
 
 def test_workspace_test_log(tmpdir):
     buildspace, _ = _create_buildspace(tmpdir, "spec-pkg-wk/test-log")
-    buildspace.director["/file"]["directory-state-type"] == "test-log"
+    assert buildspace.director["/file"]["directory-state-type"] == "test-log"
     with open(os.path.join(tmpdir, "file", "c.txt"), "rb") as file:
         assert file.read() == b"b\n"
 
@@ -244,7 +262,7 @@ def test_workspace_component(tmpdir):
                      "pkg/template-item-a.json"))
 
     deployment_directory = str(tmpdir)
-    status = util.run_command(["git", "init"], deployment_directory)
+    status = run_command(["git", "init"], deployment_directory)
     assert status == 0
     package.item["deployment-directory"] = deployment_directory
 
