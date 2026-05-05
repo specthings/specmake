@@ -102,6 +102,8 @@ _SECTION_MAP = {
     ".note.gnu.build-id": ".rodata",
     ".note.gnu.property": ".rodata",
     ".rela.dyn": ".rodata",
+    ".plt": ".text",
+    ".plt.got": ".text",
     ".riscv.attributes": None,
     ".robarrier": None,
     ".rodata": ".rodata",
