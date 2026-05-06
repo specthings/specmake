@@ -351,6 +351,10 @@ class _CitationProvider(BibTeXCitationProvider):
                     title = f"{content.emphasize(title)} {cite}"
             titles.append(title)
             citations.append(cite)
+        if not titles:
+            logging.warning(
+                "%s: the citation group associated with key '%s' is empty",
+                ctx.item.uid, group)
         if flat:
             if use_common_title:
                 title = os.path.commonprefix(titles)
