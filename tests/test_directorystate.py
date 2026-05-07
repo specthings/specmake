@@ -28,14 +28,12 @@ import logging
 import os
 import pytest
 
-from specitems import Item, EmptyItemCache, Link
+from specitems import Link
 
 import specmake
-from specmake import (DirectoryState, RepositoryState, BuildItemFactory,
-                      BuildItemTypeProvider, PackageBuildDirector,
-                      PackageComponent)
+from specmake import DirectoryState, RepositoryState
 
-from .util import get_and_clear_log
+from .util import create_test_director, get_and_clear_log
 
 
 class _TestState(DirectoryState):
@@ -71,12 +69,13 @@ _INCLUDE_ALL = [{"include": "**/*", "exclude": []}]
 
 
 def test_directorystate(caplog, tmpdir, monkeypatch, _change_cwd):
-    item_cache = EmptyItemCache(type_provider=BuildItemTypeProvider({}))
-    factory = BuildItemFactory()
-    factory.add_constructor("pkg/directory-state/explicit", _TestState)
-    factory.add_constructor("pkg/directory-state/patterns", _TestState)
-    factory.add_constructor("pkg/directory-state/repository", RepositoryState)
-    director = PackageBuildDirector(item_cache, "?", factory)
+    director = create_test_director()
+    director.factory.add_constructor("pkg/directory-state/explicit",
+                                     _TestState)
+    director.factory.add_constructor("pkg/directory-state/patterns",
+                                     _TestState)
+    director.factory.add_constructor("pkg/directory-state/repository",
+                                     RepositoryState)
     base = "spec-glossary"
 
     data = {
@@ -109,7 +108,7 @@ def test_directorystate(caplog, tmpdir, monkeypatch, _change_cwd):
         "type":
         "pkg"
     }
-    item = item_cache.add_item("/directory-state", data)
+    item = director.item_cache.add_item("/directory-state", data)
     item_file = os.path.join(tmpdir, "item.yml")
     item.file = str(item_file)
     dir_state = director["/directory-state"]
@@ -172,7 +171,7 @@ type: pkg
     assert not dir_state.is_present()
     dir_state.load()
     assert dir_state.is_present()
-    assert factory.export_data(dir_state.item, True, 0)["files"] == [{
+    assert director.factory.export_data(dir_state.item, True, 0)["files"] == [{
         "file":
         "doc.rst",
         "hash":
@@ -183,31 +182,31 @@ type: pkg
         "hash":
         None
     }]
-    assert factory.export_data(dir_state.item, True,
-                               len(dir_state.item.cache))["files"] == [{
-                                   "file":
-                                   "doc.rst",
-                                   "hash":
-                                   _DOC_RST_HASH
-                               }, {
-                                   "file":
-                                   "glossary/t.yml",
-                                   "hash":
-                                   _T_YML_HASH
-                               }]
+    assert director.factory.export_data(
+        dir_state.item, True, len(dir_state.item.cache))["files"] == [{
+            "file":
+            "doc.rst",
+            "hash":
+            _DOC_RST_HASH
+        }, {
+            "file":
+            "glossary/t.yml",
+            "hash":
+            _T_YML_HASH
+        }]
 
-    assert factory.export_data(dir_state.item, False,
-                               len(dir_state.item.cache))["files"] == [{
-                                   "file":
-                                   "doc.rst",
-                                   "hash":
-                                   None
-                               }, {
-                                   "file":
-                                   "glossary/t.yml",
-                                   "hash":
-                                   None
-                               }]
+    assert director.factory.export_data(
+        dir_state.item, False, len(dir_state.item.cache))["files"] == [{
+            "file":
+            "doc.rst",
+            "hash":
+            None
+        }, {
+            "file":
+            "glossary/t.yml",
+            "hash":
+            None
+        }]
 
     caplog.set_level(logging.DEBUG)
     data_2 = {
@@ -237,7 +236,7 @@ type: pkg
         "type":
         "pkg"
     }
-    item_2 = item_cache.add_item("/directory-state-2", data_2)
+    item_2 = director.item_cache.add_item("/directory-state-2", data_2)
     dir_state_2 = DirectoryState(director, item_2)
     dir_state_2.add_files(
         os.path.relpath(path, dir_state_2.directory) for path in dir_state)
@@ -256,7 +255,7 @@ type: pkg
     overall_hash = dir_state_2.load()
     assert overall_hash == "GA9knXEEVhdjswyhYGrY39UeEHB0FhMBF2jSpKFPi2ZTRORBOTfkqRvCYmBX02oTDR0Zfk09gEDvPsJnW_KekA=="
     assert dir_state_2.is_present()
-    assert factory.export_data(
+    assert director.factory.export_data(
         dir_state_2.item, True, len(dir_state_2.item.cache)
     )["files"] == [{
         "file":
@@ -289,7 +288,8 @@ type: pkg
         "hash":
         "98PD0tJ7qCXJifE62mKALzHIBB6MyC93M7LWQMqCZii5x58CgtvlARcD0vT2roUP3i7Viw3AAqXbW1-e6DrnKg=="
     }]
-    assert factory.export_data(dir_state_2.item, False, 0)["files"] == []
+    assert director.factory.export_data(dir_state_2.item, False,
+                                        0)["files"] == []
 
     item["patterns"] = [{
         "include": ["**/*"],
@@ -342,7 +342,7 @@ type: pkg
         "pkg-type": "directory-state",
         "type": "pkg"
     }
-    item_3 = item_cache.add_item("/directory-state-3", data_3)
+    item_3 = director.item_cache.add_item("/directory-state-3", data_3)
     item_3.type = "pkg/directory-state/patterns"
     item_3_file = os.path.join(tmpdir, "item-3.yml")
     item_3.file = str(item_3_file)
@@ -504,7 +504,7 @@ type: pkg
     assert dir_state_3.json_load() == {"foo": "bar"}
 
     # Test RepositoryState.lazy_verify()
-    repo_item = item_cache.add_item(
+    repo_item = director.item_cache.add_item(
         "/repo-state", {
             "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
             "branch": "b",
@@ -534,10 +534,9 @@ type: pkg
 
 
 def test_directorystate_glob():
-    item_cache = EmptyItemCache(type_provider=BuildItemTypeProvider({}))
-    factory = BuildItemFactory()
-    factory.add_constructor("pkg/directory-state/explicit", DirectoryState)
-    director = PackageBuildDirector(item_cache, "?", factory)
+    director = create_test_director()
+    director.factory.add_constructor("pkg/directory-state/explicit",
+                                     DirectoryState)
     base = os.path.abspath(os.path.dirname(__file__))
     data = {
         "SPDX-License-Identifier":
@@ -572,7 +571,7 @@ def test_directorystate_glob():
         "type":
         "pkg"
     }
-    item = item_cache.add_item("/directory-state", data)
+    item = director.item_cache.add_item("/directory-state", data)
     dir_state = director["/directory-state"]
 
     def _files(files):
@@ -591,10 +590,9 @@ def test_directorystate_glob():
 
 
 def test_directorystate_load_before_use():
-    item_cache = EmptyItemCache(type_provider=BuildItemTypeProvider({}))
-    factory = BuildItemFactory()
-    factory.add_constructor("pkg/directory-state/explicit", DirectoryState)
-    director = PackageBuildDirector(item_cache, "?", factory)
+    director = create_test_director()
+    director.factory.add_constructor("pkg/directory-state/explicit",
+                                     DirectoryState)
     base = os.path.abspath(os.path.dirname(__file__))
     data = {
         "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
@@ -612,7 +610,7 @@ def test_directorystate_load_before_use():
         "pkg-type": "directory-state",
         "type": "pkg"
     }
-    item = item_cache.add_item("/directory-state", data)
+    item = director.item_cache.add_item("/directory-state", data)
     dir_state = director["/directory-state"]
     assert [digest for name, digest in dir_state.files_and_hashes()] == [None]
 
@@ -625,25 +623,12 @@ def test_directorystate_load_before_use():
 
 
 def test_directorystate_input_file_list():
-    item_cache = EmptyItemCache(type_provider=BuildItemTypeProvider({}))
-    factory = BuildItemFactory()
-    factory.add_constructor("pkg/component/generic", PackageComponent)
-    factory.add_constructor("pkg/directory-state/explicit", DirectoryState)
-    director = PackageBuildDirector(item_cache, "?", factory)
+    director = create_test_director()
+    director.factory.add_constructor("pkg/directory-state/explicit",
+                                     DirectoryState)
     base = os.path.abspath(os.path.dirname(__file__))
-    item_cache.add_item(
-        "/component", {
-            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
-            "base": base,
-            "component-type": "generic",
-            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
-            "enabled-by": True,
-            "enabled-set": [],
-            "links": [],
-            "pkg-type": "component",
-            "type": "pkg",
-        })
-    item_cache.add_item(
+    director.package.item["base"] = base
+    director.item_cache.add_item(
         "/directory-state", {
             "SPDX-License-Identifier":
             "CC-BY-SA-4.0 OR BSD-2-Clause",
@@ -674,7 +659,7 @@ def test_directorystate_input_file_list():
             "type":
             "pkg",
         })
-    item_cache.add_item(
+    director.item_cache.add_item(
         "/directory-state-2", {
             "SPDX-License-Identifier":
             "CC-BY-SA-4.0 OR BSD-2-Clause",
@@ -705,7 +690,7 @@ def test_directorystate_input_file_list():
             "type":
             "pkg",
         })
-    item_cache.add_item(
+    director.item_cache.add_item(
         "/directory-state-3", {
             "SPDX-License-Identifier":
             "CC-BY-SA-4.0 OR BSD-2-Clause",
