@@ -651,8 +651,9 @@ class _UIDs:
         for uid in workspace:
             workspace_deps.setdefault(uid, set())
             item = workspace_cache[uid]
-            for parent in item.parents("input",
-                                       is_link_enabled=link_is_enabled):
+            for parent in item.parents(
+                ("input", "weak-package-build-dependency"),
+                    is_link_enabled=link_is_enabled):
                 if parent.uid in workspace:
                     workspace_deps[uid].add(parent.uid)
             for parent in item.parents("input-to",
