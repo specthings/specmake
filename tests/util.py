@@ -31,14 +31,14 @@ import re
 import shutil
 from typing import Any
 
-from specitems import (ItemCache, ItemCacheConfig, ItemGetValueContext,
-                       load_data, pickle_load_data_by_uid,
+from specitems import (EmptyItemCache, ItemCache, ItemCacheConfig,
+                       ItemGetValueContext, load_data, pickle_load_data_by_uid,
                        verify_specification_format)
 
-from specmake import (BuildItemTypeProvider, BuildPerformanceImages,
-                      BuildRTEMSTestsImages, BuildspaceConfig,
-                      PackageComponent, WorkspaceConfig, create_workspace,
-                      export_to_buildspace)
+from specmake import (BuildItemFactory, BuildItemTypeProvider,
+                      BuildPerformanceImages, BuildRTEMSTestsImages,
+                      BuildspaceConfig, PackageBuildDirector, PackageComponent,
+                      WorkspaceConfig, create_workspace, export_to_buildspace)
 
 
 class _DummyPerformanceImages(BuildPerformanceImages):
@@ -146,3 +146,22 @@ def build_document(caplog: Any, tmpdir: Any, document: str,
     dir_build = Path(director[f"/pkg/build/{document}"].directory)
     index_rst = dir_build / "source" / "index.rst"
     return package, get_document_text(tmpdir, index_rst)
+
+
+def create_test_director() -> PackageBuildDirector:
+    item_cache = EmptyItemCache(type_provider=BuildItemTypeProvider({}))
+    item_cache.add_item(
+        "/component", {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "component-type": "generic",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+            "enabled-by": True,
+            "enabled-set": [],
+            "links": [],
+            "name": "Name",
+            "pkg-type": "component",
+            "type": "pkg",
+        })
+    factory = BuildItemFactory()
+    factory.add_constructor("pkg/component/generic", PackageComponent)
+    return PackageBuildDirector(item_cache, "/component", factory)

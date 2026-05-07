@@ -37,7 +37,7 @@ from specmake import (BuildItem, BuildItemFactory, BuildItemMapper,
                       BuildItemTypeProvider, build_item_input,
                       PackageBuildDirector, PackageComponent)
 
-from .util import create_package, get_and_clear_log
+from .util import create_package, create_test_director, get_and_clear_log
 
 
 class _TestItem(BuildItem):
@@ -471,9 +471,7 @@ def test_build_item_run(caplog, tmp_path):
 
 
 def test_builditemmapper():
-    item_cache = EmptyItemCache(type_provider=BuildItemTypeProvider({}))
-    factory = BuildItemFactory()
-    director = PackageBuildDirector(item_cache, "?", factory)
+    director = create_test_director()
     data = {
         "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
         "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
@@ -487,7 +485,7 @@ def test_builditemmapper():
         "pkg-type": "directory-state",
         "type": "pkg",
     }
-    item = item_cache.add_item("/item", data)
+    item = director.item_cache.add_item("/item", data)
     build_item = director["/item"]
     mapper = build_item.mapper
 

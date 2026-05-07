@@ -29,12 +29,10 @@ import logging
 import os
 import pytest
 
-from specitems import Item, EmptyItemCache, Link
-
 import specmake
-from specmake import (BuildItemFactory, BuildItemTypeProvider, ESATestRunner,
-                      Executable, PackageComponent, PackageBuildDirector,
-                      RepositoryState)
+from specmake import ESATestRunner, Executable, RepositoryState
+
+from .util import create_test_director
 
 
 def _gethostname():
@@ -185,28 +183,10 @@ def test_testrunneresa(monkeypatch, tmp_path):
     monkeypatch.setattr(specmake.testrunneresa.time, "monotonic", _monotonic)
     monkeypatch.setattr(specmake.testrunneresa.time, "sleep", _sleep)
 
-    item_cache = EmptyItemCache(type_provider=BuildItemTypeProvider({}))
-    factory = BuildItemFactory()
-    factory.add_constructor("pkg/component/generic", PackageComponent)
-    factory.add_constructor("pkg/directory-state/repository", RepositoryState)
-    factory.add_constructor("pkg/test-runner/esa", ESATestRunner)
-    director = PackageBuildDirector(item_cache, "?", factory)
-    base = os.path.abspath(os.path.dirname(__file__))
-    item_cache.add_item(
-        "/component", {
-            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
-            "arch": "Arch",
-            "bsp": "BSP",
-            "component-type": "generic",
-            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
-            "enabled-by": True,
-            "enabled-set": [],
-            "links": [],
-            "name": "Name",
-            "pkg-type": "component",
-            "type": "pkg",
-        })
-    repo_item = item_cache.add_item(
+    director = create_test_director()
+    director.package.item["arch"] = "Arch"
+    director.package.item["bsp"] = "BSP"
+    director.item_cache.add_item(
         "/repository", {
             "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
             "branch": "b",
@@ -228,7 +208,7 @@ def test_testrunneresa(monkeypatch, tmp_path):
             "pkg-type": "directory-state",
             "type": "pkg"
         })
-    item_cache.add_item(
+    director.item_cache.add_item(
         "/runner", {
             "SPDX-License-Identifier":
             "CC-BY-SA-4.0 OR BSD-2-Clause",
@@ -287,6 +267,9 @@ def test_testrunneresa(monkeypatch, tmp_path):
             "type":
             "pkg",
         })
+    director.factory.add_constructor("pkg/directory-state/repository",
+                                     RepositoryState)
+    director.factory.add_constructor("pkg/test-runner/esa", ESATestRunner)
     runner = director["/runner"]
     assert isinstance(runner, ESATestRunner)
 
