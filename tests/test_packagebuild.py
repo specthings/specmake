@@ -340,9 +340,6 @@ def test_packagebuild(caplog, tmpdir, monkeypatch):
         "${/pkg/sub/t/link-hub:/component/whoami}") == "sub-sub-t"
     with c.component_scope(subcomponent):
         assert c.component["arch"] == "sub-arch"
-        c.component = None
-        with pytest.raises(StopIteration):
-            c.component
     assert c.component.uid == "/pkg/component"
     variant_config = c.component["config"]
     c.component["config"] = ""

@@ -79,10 +79,7 @@ def clisubstitute(argv: list[str] = sys.argv) -> None:
     if isinstance(build_item, PackageComponent):
         component = build_item
     else:
-        try:
-            component = build_item.component
-        except StopIteration:
-            component = director.package
+        component = build_item.component
     with item_cache.selection(component.selection):
         with item_cache.view_scope(component.view):
             for line in sys.stdin:

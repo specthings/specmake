@@ -234,7 +234,10 @@ class BuildItem():
             component = self.input("component")
             assert isinstance(component, PackageComponent)
         except KeyError:
-            component = None
+            if isinstance(self, PackageComponent):
+                component = self
+            else:
+                component = self.director.package
         self._component_stack = [component]
         mapper.add_default_get_value("component", self._get_component)
         director.factory.add_get_values_to_mapper(self.mapper)
@@ -291,15 +294,7 @@ class BuildItem():
     @property
     def component(self) -> "PackageComponent":
         """ Is the package component of the build item. """
-        the_component = self._component_stack[-1]
-        if the_component is None:
-            raise StopIteration
-        return the_component
-
-    @component.setter
-    def component(self, the_component: "PackageComponent") -> None:
-        """ Set the package component of the build item. """
-        self._component_stack[-1] = the_component
+        return self._component_stack[-1]
 
     @property
     def component_depth(self) -> int:
@@ -681,7 +676,6 @@ class BuildItem():
         if isinstance(build_item, PackageComponent):
             component = build_item
         else:
-            assert build_item._component_stack[-1] is not None
             component = build_item._component_stack[-1]
         while True:
             try:
@@ -696,10 +690,10 @@ class BuildItem():
                 ctx.key_index = ""
                 ctx.remaining_path = ""
                 return value
-            try:
-                component = component.component
-            except StopIteration as err:
-                raise KeyError from err
+            next_component = component.component
+            if next_component == component:
+                raise KeyError("cannot get component value")
+            component = next_component
 
     def _get_input(self, ctx: ItemGetValueContext) -> Any:
         return _get_input_or_output(ctx, self.input)
@@ -716,11 +710,7 @@ class BuildItem():
         the parent component is queried, continuing up the component chain
         until a matching resource is found.
         """
-        try:
-            component: BuildItem = self.component
-        except StopIteration:
-            component = self
-        cache_key = f"{component.uid}/{resource_key}"
+        cache_key = f"{self.component.uid}/{resource_key}"
         resource = self._resources.get(cache_key)
         if resource is not None:
             return resource
@@ -736,12 +726,11 @@ class BuildItem():
                         link.data.get("label"), link.data.get("name"))
                     self._resources[cache_key] = resource
                     return resource
-            try:
-                build_item = build_item.component
-            except StopIteration as err:
-                raise KeyError(
-                    f"{self.uid}: there is no resource "
-                    f"associated with resource key: {resource_key}") from err
+            next_build_item = build_item.component
+            if next_build_item == build_item:
+                raise KeyError(f"{self.uid}: there is no resource "
+                               f"associated with resource key: {resource_key}")
+            build_item = next_build_item
 
 
 class PackageComponent(BuildItem):
@@ -755,9 +744,8 @@ class PackageComponent(BuildItem):
         self.selection = ItemSelection(self.item.cache,
                                        self.item["enabled-set"],
                                        self.is_item_enabled)
-        try:
-            component = self.component
-        except StopIteration:
+        component = self.component
+        if component == self:
             view = item.cache.top_view
         else:
             view = ItemView(component.view)
@@ -768,12 +756,11 @@ class PackageComponent(BuildItem):
         while True:
             if key in component.item:
                 return component.substitute(component.item[key])
-            try:
-                component = component.component
-            except StopIteration as err:
-                raise KeyError(
-                    f"{self.uid}: "
-                    f"cannot get component value for '{key}': {err}") from err
+            next_component = component.component
+            if next_component == component:
+                raise KeyError(f"{self.uid}: "
+                               f"cannot get component value for '{key}'")
+            component = next_component
 
     def components(self) -> Iterator["PackageComponent"]:
         """ Yield the component and all its subcomponents. """
