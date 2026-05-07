@@ -341,14 +341,34 @@ class WorkspaceTestLog(WorkspaceFile):
 class WorkspaceRedirect(_WorkspaceItem):
     """ Represents a workspace item redirection. """
 
+    def __init__(self,
+                 director: PackageBuildDirector,
+                 item: Item,
+                 mapper: None | BuildItemMapper = None) -> None:
+        super().__init__(director, item, mapper)
+        self.redirect: _WorkspaceItem | None = None
+
     def load_workspace_state(self) -> str:
+        item = self.item
         data = load_data(self["source"])
         data["links"][:0] = self.item["links"]
-        self.item["redirect-data"] = data
+        item.cache.remove_item(item.uid)
+        self.item = item.cache.add_item(item.uid, data)
+        redirect = self.director.factory.create(self.director, self.item)
+        if isinstance(redirect, _WorkspaceItem):
+            self.redirect = redirect
+            return redirect.load_workspace_state()
         return super().load_workspace_state()
 
     def get_buildspace_data(self) -> dict:
-        return self.item["redirect-data"]
+        if self.redirect is None:
+            return self.item.data
+        return self.redirect.get_buildspace_data()
+
+    def copy_to_buildspace(self, buildspace_item: BuildItem) -> None:
+        if self.redirect is None:
+            return super().copy_to_buildspace(buildspace_item)
+        return self.redirect.copy_to_buildspace(buildspace_item)
 
 
 class WorkspaceRepository(_WorkspaceItem):
