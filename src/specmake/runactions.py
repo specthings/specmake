@@ -27,6 +27,7 @@
 import copy
 import contextlib
 import dataclasses
+import functools
 import itertools
 import os
 import logging
@@ -400,14 +401,23 @@ class RunActionsProvider:
 
     def _process(self, client: BuildItem, action: dict,
                  _output: Optional[DirectoryStateBase]) -> None:
-        action = client.substitute(action)
-        run_subprocess_action(client.uid, action)
-        cwd = action["working-directory"]
+        _is_enabled = functools.partial(is_enabled_with_ops,
+                                        self._is_enabled_ops,
+                                        client.enabled_set)
+        action_2: dict = {}
+        for key, value in action.items():
+            if key == "command":
+                action_2[key] = client.mapper.substitute_flexible_list(
+                    value, _is_enabled)
+            else:
+                action_2[key] = client.mapper.substitute_data(value)
+        run_subprocess_action(client.uid, action_2)
+        cwd = action_2["working-directory"]
         if cwd != ".":
             cmd = f"cd {cwd} && "
         else:
             cmd = ""
-        env_actions = action["env"]
+        env_actions = action_2["env"]
         if env_actions:
             env = _Env()
             for env_action in env_actions:
@@ -425,7 +435,7 @@ class RunActionsProvider:
             args.extend(f"{name}={value}"
                         for name, value in sorted(env.var_set.items()))
             cmd = f"{cmd}env {' '.join(args)} "
-        _add_description(client, f"{cmd}{' '.join(action['command'])}")
+        _add_description(client, f"{cmd}{' '.join(action_2['command'])}")
 
     def _for_each(self, client: BuildItem, action: dict,
                   _output: Optional[DirectoryStateBase]) -> None:

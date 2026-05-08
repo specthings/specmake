@@ -21,7 +21,7 @@ spec-info:
           example, you can use
           ``$${/variant:/build-directory}/some/path/to/build/file`` or
           ``$${/variant:/deployment-directory}/some/path/to/deployment/file``.
-        spec-type: list-str
+        spec-type: pkg-action-subprocess-arg-list
       env:
         description: null
         spec-type: pkg-action-subprocess-env-list
