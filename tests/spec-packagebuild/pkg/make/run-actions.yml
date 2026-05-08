@@ -254,8 +254,13 @@ actions:
   target: some/other/file.txt
 - action: subprocess
   command:
-  - git
-  - foobar
+  - enabled-by: true
+    value: git
+  - enabled-by: false
+    value: not-used
+  - enabled-by: true
+    value:
+    - foobar
   enabled-by: true
   env: []
   expected-return-code: null
