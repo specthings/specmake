@@ -79,6 +79,19 @@ def test_workspace_not_implemented():
         _WorkspaceItem.get_buildspace_data(0)
 
 
+def test_workspace_archive_invalid_digest(tmpdir):
+    with pytest.raises(IOError, match="actual archive file"):
+        _create_buildspace(tmpdir, "spec-pkg-wk/archive/invalid-digest")
+
+
+def test_workspace_archive_download(tmpdir):
+    buildspace, _ = _create_buildspace(tmpdir, "spec-pkg-wk/archive/download")
+    archive = buildspace.director["/archive"]
+    assert isinstance(archive, DirectoryState)
+    assert archive["directory-state-type"] == "unpacked-archive"
+    assert os.path.exists(archive.file)
+
+
 def test_workspace_dir_patterns(tmp_path):
     buildspace, _ = _create_buildspace(str(tmp_path),
                                        "spec-pkg-wk/dir/patterns")

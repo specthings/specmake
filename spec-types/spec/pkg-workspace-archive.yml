@@ -30,6 +30,11 @@ spec-info:
         description: |
           It shall be the archive origin URL.
         spec-type: str
+      archive-download-timeout-in-seconds:
+        description: |
+          It shall be the archive download timeout in seconds.  The default is
+          20 minutes.
+        spec-type: int
       copyrights-by-license:
         description: null
         spec-type: pkg-copyrights-by-license
@@ -47,7 +52,15 @@ spec-info:
         spec-type: pkg-symbolic-link-list
     description: |
       This set of attributes specifies a workspace archive.
-    mandatory-attributes: all
+    mandatory-attributes:
+    - archive-file
+    - archive-hash
+    - archive-patches
+    - archive-url
+    - copyrights-by-license
+    - description
+    - destination-directory
+    - symbolic-links
 spec-name: Workspace Archive Item Type
 spec-type: pkg-workspace-archive
 type: spec

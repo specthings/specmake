@@ -1,0 +1,21 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+archive-file: ${.:/component/deployment-directory}/does-not-exist.xz
+archive-hash: InvalidDigestInvalidDigestInvalidDigestInvalidDigestInvalidDigestInvalidDigestInvalidD==
+archive-patches: []
+archive-url: file://${.:/component/workspace-directory}/b.txt
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+description: |
+  Description.
+destination-directory: ${.:/component/deployment-directory}/source
+enabled-by: true
+links:
+- hash: null
+  name: component
+  role: input
+  uid: /pkg/component
+pkg-type: workspace
+symbolic-links: []
+type: pkg
+workspace-type: archive

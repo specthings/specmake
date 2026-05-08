@@ -34,6 +34,7 @@ import os
 import shutil
 import subprocess
 from typing import Iterator, Optional
+import urllib.request
 
 from specitems import (EnabledSet, Item, ItemCache, ItemCacheConfig,
                        ItemDataByUID, ItemGetValueContext, ItemSelection,
@@ -203,7 +204,22 @@ class WorkspaceArchive(_WorkspaceItem):
     def copy_to_buildspace(self, buildspace_item: BuildItem) -> None:
         assert isinstance(buildspace_item, DirectoryState)
         archive_file = self["archive-file"]
-        assert hash_file(archive_file) == buildspace_item["archive-hash"]
+        try:
+            actual_digest = hash_file(archive_file)
+        except FileNotFoundError:
+            url = self["archive-url"]
+            logging.info("%s: archive file '%s' not found, download from: %s",
+                         self.uid, archive_file, url)
+            timeout = self.get("archive-download-timeout-in-seconds", 1200)
+            with urllib.request.urlopen(url, timeout=timeout) as response:
+                with open(archive_file, "wb") as dst:
+                    shutil.copyfileobj(response, dst)
+            actual_digest = hash_file(archive_file)
+        expected_digest = buildspace_item["archive-hash"]
+        if actual_digest != expected_digest:
+            raise IOError(
+                f"{self.uid}: actual archive file '{archive_file}' "
+                f"digest is {actual_digest}, expected {expected_digest}")
         buildspace_item.add_tarfile_members(archive_file,
                                             buildspace_item.directory, True)
         buildspace_item.compact()
