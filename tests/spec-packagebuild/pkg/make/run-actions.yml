@@ -1,7 +1,58 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 actions:
 - action: mkdir
-  enabled-by: true
+  enabled-by:
+    and:
+    - eq: []
+    - eq:
+      - 'abc'
+      - 'abc'
+      - 'abc'
+    - not:
+        eq:
+        - 1
+        - 2
+        - 3
+    - is-empty: []
+    - not:
+        is-empty:
+        - 1
+    - ge: []
+    - ge:
+      - 2
+      - '1'
+      - 1
+    - not:
+        ge:
+        - '1'
+        - 2
+    - gt: []
+    - gt:
+      - 3
+      - '2'
+      - 1
+    - not:
+        gt:
+        - '1'
+        - 1
+    - le: []
+    - le:
+      - 1
+      - '1'
+      - '2'
+    - not:
+        le:
+        - '2'
+        - '1'
+    - lt: []
+    - lt:
+      - '1'
+      - 2
+      - '3'
+    - not:
+        lt:
+        - 1
+        - '1'
   exist-ok: false
   parents: true
   path: ${.:/component/build-directory}/some/more/dirs
