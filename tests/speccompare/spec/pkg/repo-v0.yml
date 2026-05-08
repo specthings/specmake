@@ -12,7 +12,7 @@ copyrights-by-license:
 description: |
   Description.
 destination-directory: ${.:/component/tmpdir}/repo-v0
-directory: ${.:/component/tmpdir}/repo
+directory: file://${.:/component/tmpdir}/repo
 enabled-by: true
 links:
 - hash: null

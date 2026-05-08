@@ -51,13 +51,12 @@ from .pkgtemplate import (ComponentTemplate, FileItemTemplate,
                           InlineItemTemplate)
 
 
-def _git_commit(repository_directory: str,
-                commit: Optional[str] = None) -> str:
+def _git_commit(repository: str, commit: Optional[str] = None) -> str:
     if commit is None:
         commit = "HEAD"
     stdout: list[str] = []
-    status = run_command(["git", "rev-parse", commit], repository_directory,
-                         stdout)
+    status = run_command(["git", "rev-parse", commit],
+                         repository.removeprefix("file://"), stdout)
     assert status == 0
     return stdout[0].strip()
 
@@ -419,27 +418,39 @@ class WorkspaceRepository(_WorkspaceItem):
         return _git_commit(self["directory"])
 
     def _git_clone(self, buildspace_item: RepositoryState) -> None:
-        source_directory = self["directory"]
+
+        repository = self["directory"]
         branch = self["branch"]
         commit = self["commit"]
-        status = run_command(["git", "branch", "-f", branch, commit],
-                             source_directory)
-        if status != 0:
-            status = run_command(["git", "fetch", "origin"], source_directory)
-            assert status == 0
+        if repository.startswith("file://"):
+            source_directory = repository[7:]
             status = run_command(["git", "branch", "-f", branch, commit],
                                  source_directory)
-            assert status == 0
-        destination_directory = buildspace_item.directory
+            if status != 0:
+                status = run_command(["git", "fetch", "origin"],
+                                     source_directory)
+                assert status == 0
+                status = run_command(["git", "branch", "-f", branch, commit],
+                                     source_directory)
+                assert status == 0
         clone_command = [
-            "git", "clone", "--no-local", "--branch", branch, "--single-branch"
+            "git",
+            "clone",
+            "--no-local",
+            "--revision",
+            commit,
         ]
         clone_depth = self["clone-depth"]
         if clone_depth is not None:
             clone_command.extend(["--depth", str(clone_depth)])
-        clone_command.extend(
-            [f"file://{source_directory}", destination_directory])
-        status = run_command(clone_command, source_directory)
+        destination_directory = buildspace_item.directory
+        clone_command.extend([repository, destination_directory])
+        status = run_command(
+            clone_command,
+            self.substitute("${.:/component/workspace-directory}"))
+        assert status == 0
+        status = run_command(["git", "checkout", "-B", branch, commit],
+                             destination_directory)
         assert status == 0
         for fetch in self["origin-fetch"]:
             if is_enabled(self.enabled_set, fetch["enabled-by"]):
