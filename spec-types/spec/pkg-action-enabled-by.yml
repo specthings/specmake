@@ -1,6 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
-- Copyright (C) 2020, 2024 embedded brains GmbH & Co. KG
+- Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 enabled-by: true
 links:
 - role: spec-member
@@ -22,18 +22,52 @@ spec-info:
           The *and* operator evaluates to the *logical and* of the evaluation
           results of the expressions in the list.
         spec-type: pkg-action-enabled-by-list
+      is-empty:
+        description: |
+          The expression of the *is-empty* operation shall be a list of
+          integers or strings.  If the list is empty, then the expression
+          evaluates to true, otherwise to false.
+        spec-type: list-int-or-str
       eq:
         description: |
-          The expression of the *eq* operation shall be a list of strings with
-          at least one element.  If all strings are equal, then the expression
-          evaluates to true, otherwise to false.
-        spec-type: list-str
+          The expression of the *eq* operation shall be a list of integers or
+          strings.  If all elements are equal, then the expression evaluates to
+          true, otherwise to false.  The empty list evaluates to true.
+        spec-type: list-int-or-str
+      ge:
+        description: |
+          The expression of the *ge* operation shall be a list of integers or
+          strings.  If each element converted to an integer is greater than or
+          equal to its successor, then the expression evaluates to true,
+          otherwise to false.  The empty list evaluates to true.
+        spec-type: list-int-or-str
+      gt:
+        description: |
+          The expression of the *gt* operation shall be a list of integers or
+          strings.  If each element converted to an integer is greater than its
+          successor, then the expression evaluates to true, otherwise to false.
+          The empty list evaluates to true.
+        spec-type: list-int-or-str
       has-output:
         description: |
           The expression of the *has-output* operation shall be the name of an
           output.  If an output of this name exists, then the expression
           evaluates to true, otherwise to false.
         spec-type: str
+      le:
+        description: |
+          The expression of the *le* operation shall be a list of integers or
+          strings.  If each element converted to an integer is less than or
+          equal to its successor, then the expression evaluates to true,
+          otherwise to false.  The empty list evaluates to true.
+        spec-type: list-int-or-str
+      lt:
+        description: |
+          The expression of the *lt* operation shall be a list of integers or
+          strings.  If each element converted to an integer is less than its
+          successor, then the expression evaluates to true, otherwise to false.
+          The empty list evaluates to true.
+        spec-type: list-int-or-str
       not:
         description: |
           The *not* operator evaluates to the *logical not* of the evaluation

@@ -148,6 +148,45 @@ def _do_copy_and_substitute(client: BuildItem, source_file: str,
     copy_and_substitute(source_file, target_file, client.mapper, client.uid)
 
 
+def _eq(_ops: dict, _enabled_set: EnabledSet, enabled_by: Any) -> bool:
+    for value in enabled_by[:-1]:
+        if value != enabled_by[-1]:
+            return False
+    return True
+
+
+def _ge(_ops: dict, _enabled_set: EnabledSet, enabled_by: Any) -> bool:
+    for index, value in enumerate(enabled_by[:-1]):
+        if int(value) < int(enabled_by[index + 1]):
+            return False
+    return True
+
+
+def _gt(_ops: dict, _enabled_set: EnabledSet, enabled_by: Any) -> bool:
+    for index, value in enumerate(enabled_by[:-1]):
+        if int(value) <= int(enabled_by[index + 1]):
+            return False
+    return True
+
+
+def _is_empty(_ops: dict, _enabled_set: EnabledSet, enabled_by: Any) -> bool:
+    return not enabled_by
+
+
+def _le(_ops: dict, _enabled_set: EnabledSet, enabled_by: Any) -> bool:
+    for index, value in enumerate(enabled_by[:-1]):
+        if int(value) > int(enabled_by[index + 1]):
+            return False
+    return True
+
+
+def _lt(_ops: dict, _enabled_set: EnabledSet, enabled_by: Any) -> bool:
+    for index, value in enumerate(enabled_by[:-1]):
+        if int(value) >= int(enabled_by[index + 1]):
+            return False
+    return True
+
+
 class RunActionsProvider:
     """ Runs actions provider. """
 
@@ -159,8 +198,13 @@ class RunActionsProvider:
             f"{client.item.type}:/host-processor-count",
             _get_host_processor_count)
         self._is_enabled_ops = IS_ENABLED_OPS | {
-            "eq": self._equal,
-            "has-output": self._has_output
+            "eq": _eq,
+            "ge": _ge,
+            "gt": _gt,
+            "is-empty": _is_empty,
+            "has-output": self._has_output,
+            "le": _le,
+            "lt": _lt,
         }
 
     def _run_actions(self, client: BuildItem, actions: dict) -> None:
@@ -192,14 +236,6 @@ class RunActionsProvider:
         client.description.add("Run the following actions:")
         with client.description.directive("code-block", "none", [":linenos:"]):
             self._run_actions(client, actions)
-
-    def _equal(self, _ops: dict, _enabled_set: EnabledSet,
-               enabled_by: Any) -> bool:
-        first = enabled_by[0]
-        for value in enabled_by[1:]:
-            if first != value:
-                return False
-        return True
 
     def _has_output(self, _ops: dict, _enabled_set: EnabledSet,
                     enabled_by: Any) -> bool:
