@@ -34,7 +34,7 @@ from pathlib import Path
 import shutil
 from typing import Any, Callable, Iterator, Optional, TextIO
 
-from specitems import (Item, ItemGetValueContext, IS_ENABLED_OPS,
+from specitems import (EnabledSet, Item, ItemGetValueContext, IS_ENABLED_OPS,
                        escape_code_line, is_enabled_with_ops,
                        run_subprocess_action)
 
@@ -167,9 +167,8 @@ class RunActionsProvider:
             action_type = action["action"]
             logging.info("%s: run action %i: %s", client.uid, index,
                          action_type)
-            if is_enabled_with_ops(client.enabled_set,
-                                   client.substitute(action["enabled-by"]),
-                                   self._is_enabled_ops):
+            if is_enabled_with_ops(self._is_enabled_ops, client.enabled_set,
+                                   client.substitute(action["enabled-by"])):
                 output_name = action.get("output-name", None)
                 if output_name is None:
                     output: None | BuildItem = None
@@ -193,16 +192,16 @@ class RunActionsProvider:
         with client.description.directive("code-block", "none", [":linenos:"]):
             self._run_actions(client, actions)
 
-    def _equal(self, _enabled_set: list[str], enabled_by: Any,
-               _ops: dict) -> bool:
+    def _equal(self, _ops: dict, _enabled_set: EnabledSet,
+               enabled_by: Any) -> bool:
         first = enabled_by[0]
         for value in enabled_by[1:]:
             if first != value:
                 return False
         return True
 
-    def _has_output(self, _enabled_set: list[str], enabled_by: Any,
-                    _ops: dict) -> bool:
+    def _has_output(self, _ops: dict, _enabled_set: EnabledSet,
+                    enabled_by: Any) -> bool:
         assert isinstance(enabled_by, str)
         try:
             self._client.output(enabled_by)
@@ -237,9 +236,8 @@ class RunActionsProvider:
 
     def _is_enabled(self, component: dict) -> bool:
         client = self._client
-        return is_enabled_with_ops(client.enabled_set,
-                                   client.substitute(component["enabled-by"]),
-                                   self._is_enabled_ops)
+        return is_enabled_with_ops(self._is_enabled_ops, client.enabled_set,
+                                   client.substitute(component["enabled-by"]))
 
     def _create_ini_file(self, client: BuildItem, action: dict,
                          output: Optional[DirectoryStateBase]) -> None:
