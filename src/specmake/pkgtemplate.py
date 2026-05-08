@@ -30,8 +30,8 @@ import os
 import re
 from typing import Any, NamedTuple
 
-from specitems import (IS_ENABLED_OPS, Item, is_enabled_with_ops, items,
-                       to_iterable)
+from specitems import (EnabledSet, IS_ENABLED_OPS, Item, is_enabled_with_ops,
+                       load_data, to_iterable)
 
 from . import pkgitems
 
@@ -203,8 +203,8 @@ class _Template(pkgitems.BuildItem):
                               data: Any) -> None:
         """ Run the attribute actions on the data. """
 
-        def _has_sibling(_enabled_set: list[str], enabled_by: Any,
-                         _ops: dict) -> bool:
+        def _has_sibling(_ops: dict, _enabled_set: EnabledSet,
+                         enabled_by: Any) -> bool:
             for parent in component.item.parents(enabled_by["parent-role"]):
                 if _enabled_by_has_type(parent, enabled_by, "parent"):
                     for child in parent.children(enabled_by["sibling-role"]):
@@ -216,8 +216,8 @@ class _Template(pkgitems.BuildItem):
 
         ops = IS_ENABLED_OPS | {"has-sibling": _has_sibling}
         for action in self.item["attribute-actions"]:
-            if not is_enabled_with_ops(component.selection.enabled_set,
-                                       action["enabled-by"], ops):
+            if not is_enabled_with_ops(ops, component.selection.enabled_set,
+                                       action["enabled-by"]):
                 continue
             _attribute_action(component, action, data)
 
@@ -259,7 +259,7 @@ class FileItemTemplate(_Template):
     def expand_template(self, component: pkgitems.PackageComponent,
                         new_uids: list[str]) -> None:
         path = component.substitute(self.item["file"])
-        data = items.load_data(path)
+        data = load_data(path)
         self.add_item(component, data, new_uids)
         super().expand_template(component, new_uids)
 
