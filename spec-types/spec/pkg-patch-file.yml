@@ -5,21 +5,26 @@ enabled-by: true
 links:
 - role: spec-member
   uid: root
+- role: spec-refinement
+  spec-key: type
+  spec-value: file
+  uid: pkg-patch
 spec-description: null
 spec-example: null
 spec-info:
   dict:
     attributes:
-      enabled-by:
-        description: null
-        spec-type: enabled-by
-      type:
+      file:
         description: |
-          It shall be the patch type.
+          It shall be the path to the patch file.
         spec-type: str
+      hash:
+        description: |
+          It shall be the hash of the patch file.
+        spec-type: sha512
     description: |
-      This set of attributes specifies a patch.
+      This set of attributes specifies a patch file.
     mandatory-attributes: all
-spec-name: Patch
-spec-type: pkg-patch
+spec-name: Patch File
+spec-type: pkg-patch-file
 type: spec

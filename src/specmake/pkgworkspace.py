@@ -31,8 +31,10 @@ import itertools
 import graphlib
 import logging
 import os
+from pathlib import Path
 import shutil
 import subprocess
+import tempfile
 from typing import Iterator, Optional
 import urllib.request
 
@@ -165,29 +167,44 @@ class _WorkspaceItem(BuildItem):
         """ Copies the associated workspace state to the buildspace. """
 
 
+def _apply_patch_file(workspace_directory: str,
+                      unpacked_archive: DirectoryState,
+                      patch_file: str) -> None:
+    command = [
+        "git", "--git-dir=.", "apply", "-v", "-p", "1",
+        os.path.join(workspace_directory, patch_file)
+    ]
+    env = copy.deepcopy(os.environ.copy())
+    env["LANG"] = "en_US.UTF-8"
+    logging.info("%s: apply patch in '%s': %s", unpacked_archive.uid,
+                 unpacked_archive.directory, " ".join(command))
+    output = subprocess.check_output(command,
+                                     cwd=unpacked_archive.directory,
+                                     env=env,
+                                     stderr=subprocess.STDOUT)
+    patched_files = [
+        line[14:].removesuffix(" cleanly.")
+        for line in output.decode("utf-8").splitlines()
+        if line.startswith("Applied patch ")
+    ]
+    logging.info("%s: patched files: %s", unpacked_archive.uid, patched_files)
+    unpacked_archive.add_files(patched_files)
+
+
 def _apply_patches(workspace_directory: str,
                    unpacked_archive: DirectoryState) -> None:
     for patch in unpacked_archive["archive-patches"]:
-        command = [
-            "git", "--git-dir=.", "apply", "-v", "-p", "1",
-            os.path.join(workspace_directory, patch["file"])
-        ]
-        env = copy.deepcopy(os.environ.copy())
-        env["LANG"] = "en_US.UTF-8"
-        logging.info("%s: apply patch in '%s': %s", unpacked_archive.uid,
-                     unpacked_archive.directory, " ".join(command))
-        output = subprocess.check_output(command,
-                                         cwd=unpacked_archive.directory,
-                                         env=env,
-                                         stderr=subprocess.STDOUT)
-        patched_files = [
-            line[14:].removesuffix(" cleanly.")
-            for line in output.decode("utf-8").splitlines()
-            if line.startswith("Applied patch ")
-        ]
-        logging.info("%s: patched files: %s", unpacked_archive.uid,
-                     patched_files)
-        unpacked_archive.add_files(patched_files)
+        if not is_enabled(unpacked_archive.enabled_set, patch["enabled-by"]):
+            continue
+        if patch["type"] == "inline":
+            with tempfile.TemporaryDirectory() as name:
+                patch_file = Path(name) / "patch"
+                patch_file.write_bytes(patch["patch"].encode("utf-8"))
+                _apply_patch_file(workspace_directory, unpacked_archive,
+                                  str(patch_file))
+        else:
+            _apply_patch_file(workspace_directory, unpacked_archive,
+                              patch["file"])
 
 
 class WorkspaceArchive(_WorkspaceItem):
