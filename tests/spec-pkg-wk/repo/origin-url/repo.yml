@@ -12,7 +12,7 @@ copyrights-by-license:
 description: |
   Description.
 destination-directory: ${.:/component/deployment-directory}/repo-2
-directory: ${.:/component/deployment-directory}/source/repo
+directory: file://${.:/component/deployment-directory}/source/repo
 enabled-by: true
 links:
 - role: repository
