@@ -2,8 +2,37 @@ SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 archive-file: ${.:/component/workspace-directory}/repo.tar.xz
 archive-hash: cDe9avnsj5SQv_v0J_IeYH6vVjM6y_wk6pKa-EYUki6TV-db8u53MdnbnfI6820K6I47d54Syp2ho5SlFUPi_Q==
 archive-patches:
-- file: 0001-README.md-Update.patch
+- enabled-by: true
+  file: 0001-README.md-Update.patch
   hash: Pv3Qwsd8xTt83LnDMttGJbWJRl8dHOhU3cWe_in4sOwDHzcPsFf4v1Aaq4LDiyugzBhpwFbmAroAF7-G4V0Taw==
+  type: file
+- enabled-by: false
+  file: 0001-README.md-Update.patch
+  hash: Pv3Qwsd8xTt83LnDMttGJbWJRl8dHOhU3cWe_in4sOwDHzcPsFf4v1Aaq4LDiyugzBhpwFbmAroAF7-G4V0Taw==
+  type: file
+- enabled-by: true
+  patch: |
+    From 96e9a8cea669a37e2a4a567f963c43573a596a80 Mon Sep 17 00:00:00 2001
+    From: Sebastian Huber <sebastian.huber@embedded-brains.de>
+    Date: Fri, 8 May 2026 15:53:30 +0200
+    Subject: [PATCH] Update README.md again
+
+    Signed-off-by: Sebastian Huber <sebastian.huber@embedded-brains.de>
+    ---
+     README.md | 1 +
+     1 file changed, 1 insertion(+)
+
+    diff --git a/README.md b/README.md
+    index 5550f57..a329da0 100644
+    --- a/README.md
+    +++ b/README.md
+    @@ -1,2 +1,3 @@
+     This is a Git repository.
+     Added by patch.
+    +Added by inline patch.
+    --
+    2.51.0
+  type: inline
 archive-url: https://foobar.org/repo.tar.xz
 copyrights:
 - Copyright (C) 2025 embedded brains GmbH & Co. KG
