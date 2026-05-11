@@ -27,7 +27,7 @@
 from pathlib import Path
 import pytest
 
-from specmake.linkhub import (_name_info_key_default, get_kind, SpecMapper)
+from specmake.linkhub import _name_info_key_default, get_kind, SpecMapper
 
 from .util import create_package, get_and_clear_log
 
@@ -52,7 +52,7 @@ def test_linkhub(caplog, tmp_path):
         "blub"
     ) == f"`blub() <{tmp_path}/pkg/doc-ddf-sdd/html/group__Blub.html#ga754ccc677acbd87ede8b3c082bb9ff6b>`__"
 
-    mapper = SpecMapper("icd", link_hub, link_hub.item)
+    mapper = SpecMapper(link_hub.item, link_hub, "icd")
     assert mapper.substitute(
         "${.:/sdd-define:DISABLED}"
     ) == f"`DISABLED <{tmp_path}/pkg/doc-ddf-sdd/html/group__Blub.html#gabd5c8ab57c190a6522ccdbf0ed7577da>`__"
@@ -150,7 +150,7 @@ def test_linkhub_no_tagfile(caplog, tmp_path):
                              ["djf-svs", "link-hub", "link-hub-no-tagfile"])
     package.director.build_package()
     link_hub = package.director["/pkg/steps/link-hub"]
-    mapper = SpecMapper("icd", link_hub, link_hub.item)
+    mapper = SpecMapper(link_hub.item, link_hub, "icd")
     assert mapper.get_link(package.item.cache["/rtems/if/func"],
                            "icd") == "``blub()``"
 
@@ -168,7 +168,7 @@ def test_linkhub_get_link(caplog, tmp_path):
                              ["sub-sub-s-link-hub", "sub-sub-t-link-hub"])
     package.director.build_package()
     subcomponent = package.director["/pkg/sub/component"]
-    mapper = SpecMapper("other", subcomponent, subcomponent.item)
+    mapper = SpecMapper(subcomponent.item, subcomponent, "other")
     assert mapper.substitute(
         "${/rtems/if/define-disabled:/name}") == "``DISABLED``"
     assert mapper.substitute("${/rtems/if/unspec-define:/name}") == (

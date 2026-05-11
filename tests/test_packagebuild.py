@@ -43,7 +43,7 @@ from .util import create_package, create_test_director, get_and_clear_log
 class _TestItem(BuildItem):
 
     def __init__(self, director: PackageBuildDirector, item: Item):
-        super().__init__(director, item, BuildItemMapper(item))
+        super().__init__(director, item, BuildItemMapper(item, self))
         my_type = self.item.type
         self.mapper.add_get_value(f"{my_type}:/input", self._get_input)
         self.mapper.add_get_value(f"{my_type}:/inputs", self._get_inputs)
@@ -110,7 +110,7 @@ def test_packagebuild(caplog, tmpdir, monkeypatch):
     director = package.director
     director.factory.add_constructor("pkg/test-mapper", _TestItem)
 
-    mapper = BuildItemMapper(package.item)
+    mapper = BuildItemMapper(package.item, package)
     with pytest.raises(NotImplementedError):
         mapper.get_link(mapper.item)
 

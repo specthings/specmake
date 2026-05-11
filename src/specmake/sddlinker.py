@@ -58,7 +58,7 @@ class SDDLinker(DirectoryState):
     """ Links SDD elements to other documents. """
 
     def __init__(self, director: PackageBuildDirector, item: Item) -> None:
-        super().__init__(director, item, SpecMapper("sdd", self, item))
+        super().__init__(director, item, SpecMapper(item, self, "sdd"))
         self.mapper.base_path = self.directory
 
     def run(self):
