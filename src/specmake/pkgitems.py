@@ -151,8 +151,10 @@ class BuildItemMapper(SphinxMapper):
     documentation place of the item.
     """
 
-    def __init__(self, item: Item) -> None:
+    # pylint: disable=too-many-instance-attributes
+    def __init__(self, item: Item, build_item: "BuildItem") -> None:
         super().__init__(item)
+        self.build_item = build_item
         self.base_path = "/"
         self.set_format("x.rst")
         self.add_default_get_value("spec", _get_spec)
@@ -228,7 +230,7 @@ class BuildItem():
         self.item = item
         self._resources: dict[str, _Resource] = {}
         if mapper is None:
-            mapper = BuildItemMapper(item)
+            mapper = BuildItemMapper(item, self)
         self.mapper = mapper
         try:
             component = self.input("component")

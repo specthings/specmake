@@ -961,9 +961,8 @@ items.""")
 class SpecMapper(BuildItemMapper):
     """ Item mapper for specifications. """
 
-    def __init__(self, whoami: str, build_item: BuildItem, item: Item):
-        super().__init__(item)
-        self._build_item = build_item
+    def __init__(self, item: Item, build_item: BuildItem, whoami: str):
+        super().__init__(item, build_item)
         self._whoami = whoami
         for type_path_key in (
                 "interface/appl-config-option/feature-enable:/name",
@@ -1012,7 +1011,7 @@ class SpecMapper(BuildItemMapper):
         try:
             default_key = item.view["default-document-key"]
         except KeyError:
-            build_item = self._build_item
+            build_item = self.build_item
             component_links: list[str] = []
             for component in build_item.component.components():
                 with build_item.component_scope(component):
@@ -1050,15 +1049,15 @@ class SpecMapper(BuildItemMapper):
         return self.get_link(ctx.item)
 
     def _get_value_sdd_link(self, kind: str, ctx: ItemGetValueContext) -> str:
-        link_hub_uid = self._build_item.component.item.child("link-hub").uid
-        link_hub = self._build_item.director[link_hub_uid]
+        link_hub_uid = self.build_item.component.item.child("link-hub").uid
+        link_hub = self.build_item.director[link_hub_uid]
         assert isinstance(link_hub, LinkHub)
         assert ctx.args
         return link_hub.get_sdd_link(kind, ctx.args)
 
     def _get_value_sdd_link_unique(self, ctx: ItemGetValueContext) -> str:
-        link_hub_uid = self._build_item.component.item.child("link-hub").uid
-        link_hub = self._build_item.director[link_hub_uid]
+        link_hub_uid = self.build_item.component.item.child("link-hub").uid
+        link_hub = self.build_item.director[link_hub_uid]
         assert isinstance(link_hub, LinkHub)
         assert ctx.args
         return link_hub.get_any_sdd_link(ctx.args)

@@ -41,7 +41,7 @@ class DocumentBuilder(SphinxBuilder):
 
     def __init__(self, director: PackageBuildDirector, item: Item):
         super().__init__(director, item,
-                         SpecMapper(item["document-key"], self, item))
+                         SpecMapper(item, self, item["document-key"]))
         self.mapper: SpecMapper
         CodeCoverageProvider(self)
         CompareSourcesProvider(self)
