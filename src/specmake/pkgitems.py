@@ -125,23 +125,23 @@ def _get_spec(ctx: ItemGetValueContext) -> Any:
     return ctx.item.spec
 
 
-def _basename(value: str) -> str:
+def _basename(_ctx: ItemGetValueContext, value: str) -> str:
     return os.path.basename(value)
 
 
-def _dash(value: str) -> str:
+def _dash(_ctx: ItemGetValueContext, value: str) -> str:
     return f"-{value}" if value else ""
 
 
-def _dirname(value: str) -> str:
+def _dirname(_ctx: ItemGetValueContext, value: str) -> str:
     return os.path.dirname(value)
 
 
-def _relpath(value: str, start: str) -> str:
+def _relpath(_ctx: ItemGetValueContext, value: str, start: str) -> str:
     return os.path.relpath(value, start)
 
 
-def _slash(value: str) -> str:
+def _slash(_ctx: ItemGetValueContext, value: str) -> str:
     return f"/{value}" if value else ""
 
 
