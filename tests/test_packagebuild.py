@@ -522,3 +522,52 @@ def test_builditemmapper():
                               "https://x.y") == "`name <https://x.y>`__"
     mapper.base_path = "/"
     assert mapper.format_reference("name", "label") == ":ref:`name <label>`"
+
+
+def test_builditem_transformer():
+    director = create_test_director()
+    director.package["list"] = [
+        {
+            "enabled-by": True,
+            "value": "A"
+        },
+        {
+            "enabled-by": False,
+            "value": "B"
+        },
+        "${.:/x}",
+    ]
+    director.package["x"] = "C"
+    data = {
+        "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+        "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        "copyrights-by-license": {},
+        "directory": "",
+        "directory-state-type": "explicit",
+        "enabled-by": True,
+        "files": [],
+        "hash": None,
+        "links": [],
+        "params": {
+            "list": [
+                {
+                    "enabled-by": True,
+                    "value": "a"
+                },
+                {
+                    "enabled-by": False,
+                    "value": "b"
+                },
+                "${.:/params/x}",
+            ],
+            "x":
+            "c"
+        },
+        "pkg-type": "directory-state",
+        "type": "pkg",
+    }
+    item = director.item_cache.add_item("/item", data)
+    build_item = director["/item"]
+    assert build_item.substitute("${.:/params/list:join}") == "a,c"
+    assert build_item.substitute("${.:/params/list:join separator=+}") == "a+c"
+    assert build_item.substitute("${.:/component/list:join}") == "A,C"

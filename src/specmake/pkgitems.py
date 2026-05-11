@@ -133,6 +133,20 @@ def _dash(_ctx: ItemGetValueContext, value: str) -> str:
     return f"-{value}" if value else ""
 
 
+def _join(ctx: ItemGetValueContext, value: list, **kwargs) -> str:
+    mapper = ctx.mapper
+    assert isinstance(mapper, BuildItemMapper)
+    build_item = mapper.build_item.director[ctx.item.uid]
+    if isinstance(build_item, PackageComponent):
+        component = build_item
+    else:
+        component = build_item.component
+    element_is_enabled = functools.partial(is_enabled, component.enabled_set)
+    separator = kwargs.get("separator", ",")
+    return separator.join(
+        mapper.substitute_flexible_list(value, element_is_enabled))
+
+
 def _dirname(_ctx: ItemGetValueContext, value: str) -> str:
     return os.path.dirname(value)
 
@@ -161,6 +175,7 @@ class BuildItemMapper(SphinxMapper):
         self.add_value_transformer("basename", _basename)
         self.add_value_transformer("dirname", _dirname)
         self.add_value_transformer("dash", _dash)
+        self.add_value_transformer("join", _join)
         self.add_value_transformer("relpath", _relpath)
         self.add_value_transformer("slash", _slash)
 
