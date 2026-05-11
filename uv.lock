@@ -1767,10 +1767,13 @@ dependencies = [
     { name = "pyyaml" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/3a/4f/f2235a949fbabd4e6dded94c63e282d8d6db3034abcd59391fbd5327dd99/specitems-1.4.0.tar.gz", hash = "sha256:0f72cfe52ffc7d253b84cab9d1940cb0335d6d9820c0dfddf9c11f03aa5ee815", size = 56052, upload-time = "2026-05-11T03:22:11.489Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c5/af/c0be01138bef5c04c2c724c330f301aacf5e280ea0e8e64b7c22588ef142/specitems-1.4.0-py3-none-any.whl", hash = "sha256:dcd2b2e254832c601261dc0607f247ea45b206af647a3211161c96c50684de87", size = 77687, upload-time = "2026-05-11T03:22:12.706Z" },
+]
 
 [[package]]
 name = "specmake"
-version = "1.4.0.dev1"
+version = "1.4.0"
 source = { editable = "." }
 dependencies = [
     { name = "gcovr" },
