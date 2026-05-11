@@ -437,14 +437,14 @@ class RunActionsProvider:
 
     def _process(self, client: BuildItem, action: dict,
                  _output: Optional[DirectoryStateBase]) -> None:
-        _is_enabled = functools.partial(is_enabled_with_ops,
-                                        self._is_enabled_ops,
-                                        client.enabled_set)
+        arg_is_enabled = functools.partial(is_enabled_with_ops,
+                                           self._is_enabled_ops,
+                                           client.enabled_set)
         action_2: dict = {}
         for key, value in action.items():
             if key == "command":
                 action_2[key] = client.mapper.substitute_flexible_list(
-                    value, _is_enabled)
+                    value, arg_is_enabled)
             else:
                 action_2[key] = client.mapper.substitute_data(value)
         run_subprocess_action(client.uid, action_2)
