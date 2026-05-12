@@ -220,7 +220,9 @@ class SpamrManager(DocumentBuilder):
         sections: List[str] = []
         command_section = ["grep", r"\*\*\*\*\*$", "filename"]
         tbd_docs: List[str] = []
-        command_tbd = ["grep", "-Fw", "-e", "TBC", "-e", "TBD", "--", "filename"]
+        command_tbd = [
+            "grep", "-Fw", "-e", "TBC", "-e", "TBD", "--", "filename"
+        ]
 
         # Search through the ReST documentation files
         for directory_state in self.inputs("rst-files"):
