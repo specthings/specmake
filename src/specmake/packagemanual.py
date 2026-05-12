@@ -434,7 +434,6 @@ class PackageSummary(DirectoryState):
     """ Builds a package summary. """
 
     def run(self) -> None:
-        package_manual = self.input("source")
         content = self.mapper.create_content(section_level=0)
         with content.section(f"Package Summary - {self.component['ident']}"):
             with content.section("Unexpected Test Failures"):
@@ -452,21 +451,26 @@ class PackageSummary(DirectoryState):
             with content.section("Code/Branch Coverage"):
                 self._add_coverage_achievement(content)
             with content.section("Repositories"):
-                prefix = package_manual.substitute(
-                    "${.:/component/deployment-directory}")
-                for item in package_manual.component.item.children(
-                        "repository"):
+                self._add_repositories(content)
+        content.write(self.file)
+        self.description.add(f"""Produce the package summary file
+{content.path(self.file)}.""")
+
+    def _add_repositories(self, content: TextContent) -> None:
+        package = self.director.package
+        prefix = package.substitute("${.:/component/deployment-directory}")
+        for component in package.components():
+            with component.scope():
+                for item in component.item.children("input"):
+                    if not item.type.startswith(
+                            "pkg/directory-state/repository"):
+                        continue
                     repo = self.director[item.uid]
                     repo_dir = repo["directory"]
                     with content.section(os.path.relpath(repo_dir, prefix)):
                         stdout: list[str] = []
-                        status = run_command(["git", "log", "-1"], repo_dir,
-                                             stdout)
-                        assert status == 0
+                        run_command(["git", "log", "-1"], repo_dir, stdout)
                         content.add_code_block(stdout)
-        content.write(self.file)
-        self.description.add(f"""Produce the package summary file
-{content.path(self.file)}.""")
 
     def _add_coverage_achievement(self, content: TextContent) -> None:
         for test_aggregator in self.inputs("test-aggregation"):
