@@ -218,21 +218,48 @@ class WorkspaceArchive(_WorkspaceItem):
                    "copyrights-by-license", "description", "symbolic-links"))
         return data
 
+    def _download(self, archive_file: str, actual_digest: str | None,
+                  expected_digest: str) -> str | None:
+        timeout = self.get("archive-download-timeout-in-seconds", 1200)
+        for url in to_iterable(self["archive-url"]):
+            logging.info("%s: download from: %s", self.uid, url)
+            try:
+                with urllib.request.urlopen(url, timeout=timeout) as response:
+                    with open(archive_file, "wb") as dst:
+                        shutil.copyfileobj(response, dst)
+            # pylint: disable-next=broad-exception-caught
+            except Exception as err:
+                logging.error("%s: download failed: %s", self.uid, err)
+                continue
+            download_digest = hash_file(archive_file)
+            if download_digest == expected_digest:
+                return expected_digest
+            logging.error(
+                "%s: downloaded archive file '%s' "
+                "digest is %s, expected %s", self.uid, archive_file,
+                download_digest, expected_digest)
+            actual_digest = download_digest
+        return actual_digest
+
     def copy_to_buildspace(self, buildspace_item: BuildItem) -> None:
         assert isinstance(buildspace_item, DirectoryState)
         archive_file = self["archive-file"]
+        actual_digest: str | None = None
+        expected_digest = buildspace_item["archive-hash"]
         try:
             actual_digest = hash_file(archive_file)
         except FileNotFoundError:
-            url = self["archive-url"]
-            logging.info("%s: archive file '%s' not found, download from: %s",
-                         self.uid, archive_file, url)
-            timeout = self.get("archive-download-timeout-in-seconds", 1200)
-            with urllib.request.urlopen(url, timeout=timeout) as response:
-                with open(archive_file, "wb") as dst:
-                    shutil.copyfileobj(response, dst)
-            actual_digest = hash_file(archive_file)
-        expected_digest = buildspace_item["archive-hash"]
+            logging.info("%s: file not found: %s", self.uid, archive_file)
+            actual_digest = self._download(archive_file, actual_digest,
+                                           expected_digest)
+        else:
+            if actual_digest != expected_digest:
+                logging.error(
+                    "%s: present archive file '%s' "
+                    "digest is %s, expected %s", self.uid, archive_file,
+                    actual_digest, expected_digest)
+                actual_digest = self._download(archive_file, actual_digest,
+                                               expected_digest)
         if actual_digest != expected_digest:
             raise IOError(
                 f"{self.uid}: actual archive file '{archive_file}' "
