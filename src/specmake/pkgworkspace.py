@@ -130,12 +130,8 @@ class _WorkspaceItem(BuildItem):
             workspace_component: PackageComponent = self
         else:
             workspace_component = self.component
-        item_cache = self.director.item_cache
-        item_cache.push_selection(workspace_component.selection)
-        item_cache.push_view(workspace_component.view)
-        yield
-        item_cache.pop_view()
-        item_cache.pop_selection()
+        with workspace_component.scope():
+            yield
 
     def load_workspace_state(self) -> str:
         """

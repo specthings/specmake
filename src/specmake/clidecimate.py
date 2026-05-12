@@ -109,8 +109,6 @@ def clidecimate(argv: list[str] = sys.argv) -> None:
     for uid in args.uids:
         directory_state = director.create_with_dependencies(uid)
         assert isinstance(directory_state, DirectoryState)
-        component = directory_state.component
-        with item_cache.selection(component.selection):
-            with item_cache.view_scope(component.view):
-                keep.update(directory_state.files())
+        with directory_state.component.scope():
+            keep.update(directory_state.files())
     _decimate(director.package["deployment-directory"], keep)
