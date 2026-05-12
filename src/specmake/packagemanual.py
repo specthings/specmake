@@ -42,6 +42,7 @@ from .membench import generate, generate_variants_table, MembenchVariant
 from .pkgitems import PackageBuildDirector
 from .packagechanges import PackageChanges
 from .testaggregator import TestAggregator
+from .testreporter import TestReporter
 from .testrunner import TestLog
 
 _EnvToStats = dict[str, tuple[float, float, float]]
@@ -435,19 +436,9 @@ class PackageSummary(DirectoryState):
 
     def run(self) -> None:
         content = self.mapper.create_content(section_level=0)
-        with content.section(f"Package Summary - {self.component['ident']}"):
-            with content.section("Unexpected Test Failures"):
-                for item in self.item.cache.items_by_type.get(
-                        "pkg/directory-state/sphinx/test-report", []):
-                    ident = self.substitute(
-                        f"${{{item.uid}:/component/ident}}")
-                    with content.section(f"Component - {ident}"):
-                        for target, failures in item[
-                                "unexpected-test-failures"].items():
-                            content.add_list_item(target)
-                            content.add_blank_line()
-                            with content.indent("  "):
-                                content.add_list(failures)
+        with content.section(f"Package summary - {self.component['ident']}"):
+            with content.section("Test status"):
+                self._add_test_status(content)
             with content.section("Code/Branch Coverage"):
                 self._add_coverage_achievement(content)
             with content.section("Repositories"):
@@ -455,6 +446,21 @@ class PackageSummary(DirectoryState):
         content.write(self.file)
         self.description.add(f"""Produce the package summary file
 {content.path(self.file)}.""")
+
+    def _add_test_status(self, content: TextContent) -> None:
+        for test_report in self.inputs("test-report"):
+            assert isinstance(test_report, TestReporter)
+            with test_report.component.scope():
+                ident = test_report.substitute("${.:/component/ident}")
+                with content.section(f"Component - {ident}"):
+                    unexpected = test_report["unexpected-test-failures"]
+                    if unexpected:
+                        for target, failures in unexpected.items():
+                            with content.list_item(target):
+                                content.add_list(failures)
+                    else:
+                        content.add("There were no unexpected test errors "
+                                    "found in the test outputs.")
 
     def _add_repositories(self, content: TextContent) -> None:
         package = self.director.package

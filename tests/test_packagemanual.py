@@ -1026,15 +1026,15 @@ Support the package build.
     with open(package_summary.file, "r", encoding="utf-8") as src:
         assert src.read() == """.. _PackageSummarySparcGr712rcSmp4:
 
-Package Summary - sparc/gr712rc/smp/4
+Package summary - sparc/gr712rc/smp/4
 #####################################
 
-.. _PackageSummarySparcGr712rcSmp4UnexpectedTestFailures:
+.. _PackageSummarySparcGr712rcSmp4TestStatus:
 
-Unexpected Test Failures
-************************
+Test status
+***********
 
-.. _PackageSummarySparcGr712rcSmp4UnexpectedTestFailuresComponentSparcGr712rcSmp4:
+.. _PackageSummarySparcGr712rcSmp4TestStatusComponentSparcGr712rcSmp4:
 
 Component - sparc/gr712rc/smp/4
 ===============================
@@ -1076,6 +1076,13 @@ Component - sparc/gr712rc/smp/4
   - /testsuites/test-suite-pass
 
   - /testsuites/test-suite-xfail
+
+.. _PackageSummarySparcGr712rcSmp4TestStatusComponentSparcGr712rcSmp4:
+
+Component - sparc/gr712rc/smp/4
+===============================
+
+There were no unexpected test errors found in the test outputs.
 
 .. _PackageSummarySparcGr712rcSmp4CodeBranchCoverage:
 
