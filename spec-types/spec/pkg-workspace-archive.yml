@@ -28,8 +28,10 @@ spec-info:
         spec-type: pkg-patch-list
       archive-url:
         description: |
-          It shall be the archive origin URL.
-        spec-type: str
+          It shall be the archive download URL.  A list of URLs may be provided
+          to query multiple download sources.  This may increase the download
+          availability in case of service failures.
+        spec-type: str-or-list-str
       archive-download-timeout-in-seconds:
         description: |
           It shall be the archive download timeout in seconds.  The default is

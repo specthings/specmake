@@ -1,8 +1,8 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
-archive-file: ${.:/component/deployment-directory}/does-not-exist.xz
+archive-file: ${.:/component/workspace-directory}/b.txt
 archive-hash: InvalidDigestInvalidDigestInvalidDigestInvalidDigestInvalidDigestInvalidDigestInvalidD==
 archive-patches: []
-archive-url: file://${.:/component/workspace-directory}/b.txt
+archive-url: []
 copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
 copyrights-by-license: {}
