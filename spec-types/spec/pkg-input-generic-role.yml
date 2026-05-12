@@ -107,6 +107,10 @@ links:
   uid: pkg-input-role
 - role: spec-refinement
   spec-key: name
+  spec-value: test-report
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
   spec-value: test-runner
   uid: pkg-input-role
 - role: spec-refinement
