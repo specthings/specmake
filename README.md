@@ -3,7 +3,7 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 
 Copyright (C) 2026 embedded brains GmbH & Co. KG
 -->
-## Overview
+# Overview
 
 The *specmake* Python package provides utilities to build packages of software
 products along with their documentation.  The package uses the specification
@@ -17,7 +17,7 @@ The package is maintained by the
 [specthings](https://github.com/specthings)
 project.
 
-## Contributing
+# Contributing
 
 Please refer to our
 [Contributing Guidelines](https://github.com/specthings/specmake/blob/main/CONTRIBUTING.md).
