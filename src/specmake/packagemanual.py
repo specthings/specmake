@@ -435,6 +435,8 @@ class PackageSummary(DirectoryState):
     """ Builds a package summary. """
 
     def run(self) -> None:
+        summary_file = self.file
+        self.mapper.set_format(summary_file)
         content = self.mapper.create_content(section_level=0)
         with content.section(f"Package summary - {self.component['ident']}"):
             with content.section("Test status"):
@@ -443,9 +445,9 @@ class PackageSummary(DirectoryState):
                 self._add_coverage_achievement(content)
             with content.section("Repositories"):
                 self._add_repositories(content)
-        content.write(self.file)
+        content.write(summary_file)
         self.description.add(f"""Produce the package summary file
-{content.path(self.file)}.""")
+{content.path(summary_file)}.""")
 
     def _add_test_status(self, content: TextContent) -> None:
         for test_report in self.inputs("test-report"):
