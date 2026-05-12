@@ -350,6 +350,13 @@ def test_packagebuild(caplog, tmpdir, monkeypatch):
     assert c.component["ident"] == "sparc/gr712rc/smp/4"
     assert c.component["arch"] == "sparc"
     assert c.enabled_set == set()
+    c.item.view["foo"] = "bar"
+    with subcomponent.scope():
+        assert sorted(c.enabled_set) == ["five", "four"]
+        assert c.item.view["foo"] == "bar"
+        c.item.view["foo"] = "blub"
+        assert c.item.view["foo"] == "blub"
+    assert c.item.view["foo"] == "bar"
     assert c.enabled
     assert build_item_input(c.item, "foo").uid == "/pkg/steps/a"
     assert build_item_input(c.item, "bar").uid == "/pkg/steps/a"

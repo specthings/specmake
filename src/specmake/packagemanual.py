@@ -418,7 +418,7 @@ relative to {content.path(deployment_directory)}.""")
         with self.section_content(ctx) as (content, _):
             targets: set[str] = set()
             for component in self.component.components():
-                with component.item.cache.selection(component.selection):
+                with component.scope():
                     targets.update(
                         item.uid
                         for item in component.item.parents("design-target"))

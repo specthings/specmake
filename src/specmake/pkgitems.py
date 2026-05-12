@@ -793,6 +793,18 @@ class PackageComponent(BuildItem):
                 yield subcomponent
                 yield from subcomponent.subcomponents()
 
+    @contextmanager
+    def scope(self) -> Iterator[None]:
+        """ Opens a package component context. """
+        item_cache = self.item.cache
+        item_cache.push_selection(self.selection)
+        item_cache.push_view(self.view)
+        try:
+            yield
+        finally:
+            item_cache.pop_view()
+            item_cache.pop_selection()
+
     def run(self) -> None:
         self.description.add("Provide settings for the component.")
 
@@ -827,10 +839,9 @@ class GenericPackageComponent(PackageComponent):
         super().__init__(director, item, mapper)
 
         # Augment view with glossary terms
-        with self.item.cache.selection(self.selection):
-            with self.item.cache.view_scope(self.view):
-                for glossary in self.item.parents("glossary"):
-                    augment_glossary_terms(glossary, [])
+        with self.scope():
+            for glossary in self.item.parents("glossary"):
+                augment_glossary_terms(glossary, [])
 
 
 class Redirection(BuildItem):
@@ -952,14 +963,11 @@ class PackageBuildDirector(dict):
         if uid in seen:
             return self[uid]
         seen.add(uid)
-        item_cache = self.item_cache
-        item = item_cache[uid]
-        component = self._get_component(item)
-        with item_cache.selection(component.selection):
-            with item_cache.view_scope(component.view):
-                for link in _get_input_links(item):
-                    self.create_with_dependencies(link.uid, seen)
-                return self[uid]
+        item = self.item_cache[uid]
+        with self._get_component(item).scope():
+            for link in _get_input_links(item):
+                self.create_with_dependencies(link.uid, seen)
+            return self[uid]
 
     @property
     def package(self) -> PackageComponent:
@@ -1041,18 +1049,17 @@ class PackageBuildDirector(dict):
                 item.view["package-build-order"] = build_order
                 component = item.view["component"]
                 logging.info("%s: use component %s", uid, component.uid)
-                with item_cache.selection(component.selection):
-                    with item_cache.view_scope(component.view):
-                        # Construct the builder even if building it is skipped
-                        builder = self[uid]
-                        is_forced = _match(uid, force)
-                        if _match(uid, skip) and not is_forced:
-                            logging.info(
-                                "%s: build is skipped due to skip filter", uid)
-                            continue
-                        kwargs["component"] = component
-                        kwargs["force"] = is_forced
-                        getattr(builder, method)(**kwargs)
+                with component.scope():
+                    # Construct the builder even if building it is skipped
+                    builder = self[uid]
+                    is_forced = _match(uid, force)
+                    if _match(uid, skip) and not is_forced:
+                        logging.info("%s: build is skipped due to skip filter",
+                                     uid)
+                        continue
+                    kwargs["component"] = component
+                    kwargs["force"] = is_forced
+                    getattr(builder, method)(**kwargs)
 
     def build_package(self,
                       only: Optional[list[str]] = None,
@@ -1090,28 +1097,24 @@ class PackageBuildDirector(dict):
             item.view["package-build-order"] = build_order
             component = item.view["component"]
             logging.info("%s: use component %s", item.uid, component.uid)
-            with self.item_cache.selection(component.selection):
-                with self.item_cache.view_scope(component.view):
-                    build_item = self[item.uid]
-                    is_necessary = build_item.is_build_necessary()
-                    if is_necessary:
-                        logging.info("%s: build is necessary", item.uid)
-                    if is_forced:
-                        logging.info("%s: build is forced", item.uid)
-                    if is_necessary or is_forced:
-                        for dependency in itertools.chain(
-                                item.children("input-to"),
-                                item.parents("input")):
-                            dependency_build_item = self[dependency.uid]
-                            if not dependency_build_item.is_present():
-                                logging.info(
-                                    "%s: dependency is not present: %s",
-                                    item.uid, dependency.uid)
-                                forced.add(dependency.uid)
-                                self._build_only(dependency, force_patterns,
-                                                 forced, set(),
-                                                 build_order - 1)
-                        build_item.do_run()
+            with component.scope():
+                build_item = self[item.uid]
+                is_necessary = build_item.is_build_necessary()
+                if is_necessary:
+                    logging.info("%s: build is necessary", item.uid)
+                if is_forced:
+                    logging.info("%s: build is forced", item.uid)
+                if is_necessary or is_forced:
+                    for dependency in itertools.chain(
+                            item.children("input-to"), item.parents("input")):
+                        dependency_build_item = self[dependency.uid]
+                        if not dependency_build_item.is_present():
+                            logging.info("%s: dependency is not present: %s",
+                                         item.uid, dependency.uid)
+                            forced.add(dependency.uid)
+                            self._build_only(dependency, force_patterns,
+                                             forced, set(), build_order - 1)
+                    build_item.do_run()
         logging.info("%s: building done", item.uid)
 
     def build_only(self,

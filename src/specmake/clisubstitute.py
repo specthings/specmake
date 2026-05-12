@@ -80,7 +80,6 @@ def clisubstitute(argv: list[str] = sys.argv) -> None:
         component = build_item
     else:
         component = build_item.component
-    with item_cache.selection(component.selection):
-        with item_cache.view_scope(component.view):
-            for line in sys.stdin:
-                sys.stdout.write(build_item.substitute(line))
+    with component.scope():
+        for line in sys.stdin:
+            sys.stdout.write(build_item.substitute(line))
