@@ -6,7 +6,7 @@ directory: ${.:/component/deployment-directory}
 directory-state-type: package-summary
 enabled-by: package-manual
 files:
-- file: package-summary.rst
+- file: package-summary.md
   hash: null
 hash: null
 links:

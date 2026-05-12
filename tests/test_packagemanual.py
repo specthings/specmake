@@ -1024,20 +1024,17 @@ Support the package build.
 """
     package_summary = director["/pkg/deployment/doc-package-summary"]
     with open(package_summary.file, "r", encoding="utf-8") as src:
-        assert src.read() == """.. _PackageSummarySparcGr712rcSmp4:
+        assert src.read() == """(PackageSummarySparcGr712rcSmp4)=
 
-Package summary - sparc/gr712rc/smp/4
-#####################################
+# Package summary - sparc/gr712rc/smp/4
 
-.. _PackageSummarySparcGr712rcSmp4TestStatus:
+(PackageSummarySparcGr712rcSmp4TestStatus)=
 
-Test status
-***********
+## Test status
 
-.. _PackageSummarySparcGr712rcSmp4TestStatusComponentSparcGr712rcSmp4:
+(PackageSummarySparcGr712rcSmp4TestStatusComponentSparcGr712rcSmp4)=
 
-Component - sparc/gr712rc/smp/4
-===============================
+### Component - sparc/gr712rc/smp/4
 
 - /rtems/target-a
 
@@ -1077,108 +1074,66 @@ Component - sparc/gr712rc/smp/4
 
   - /testsuites/test-suite-xfail
 
-.. _PackageSummarySparcGr712rcSmp4TestStatusComponentSparcGr712rcSmp4:
+(PackageSummarySparcGr712rcSmp4TestStatusComponentSparcGr712rcSmp4)=
 
-Component - sparc/gr712rc/smp/4
-===============================
+### Component - sparc/gr712rc/smp/4
 
 There were no unexpected test errors found in the test outputs.
 
-.. _PackageSummarySparcGr712rcSmp4CoverageData:
+(PackageSummarySparcGr712rcSmp4CoverageData)=
 
-Coverage data
-*************
+## Coverage data
 
-.. _PackageSummarySparcGr712rcSmp4CoverageDataComponentSparcGr712rcSmp4:
+(PackageSummarySparcGr712rcSmp4CoverageDataComponentSparcGr712rcSmp4)=
 
-Component - sparc/gr712rc/smp/4
-===============================
+### Component - sparc/gr712rc/smp/4
 
-.. table::
-    :class: longtable
+ | Target        | Configuration    | Scope | Functions       | Status  | Lines             | Status  | Branches        | Status  |
+ | ------------- | ---------------- | ----- | --------------- | ------- | ----------------- | ------- | --------------- | ------- |
+ | Name Target A | build-config-key | Scope | 13+1/15 (93.3%) | **NOK** | 118+3/123 (98.3%) | **NOK** | 14+2/18 (88.8%) | **NOK** |
+ | Name Target A | build-config-key | Empty | N/A             | **NOK** | N/A               | **NOK** | N/A             | **NOK** |
+ | Name Target A | build-config-key | Good  | 1/1 (100%)      | OK      | 18/18 (100%)      | OK      | 4/4 (100%)      | OK      |
 
-    ============= ================ ===== =============== ======= ================= ======= =============== =======
-    Target        Configuration    Scope Functions       Status  Lines             Status  Branches        Status
-    ============= ================ ===== =============== ======= ================= ======= =============== =======
-    Name Target A build-config-key Scope 13+1/15 (93.3%) **NOK** 118+3/123 (98.3%) **NOK** 14+2/18 (88.8%) **NOK**
-    Name Target A build-config-key Empty N/A             **NOK** N/A               **NOK** N/A             **NOK**
-    Name Target A build-config-key Good  1/1 (100%)      OK      18/18 (100%)      OK      4/4 (100%)      OK
-    ============= ================ ===== =============== ======= ================= ======= =============== =======
+(PackageSummarySparcGr712rcSmp4CoverageDataComponentSparcGr712rcSmp4)=
 
-.. _PackageSummarySparcGr712rcSmp4CoverageDataComponentSparcGr712rcSmp4:
+### Component - sparc/gr712rc/smp/4
 
-Component - sparc/gr712rc/smp/4
-===============================
+ | Target | Configuration | Scope | Functions | Status | Lines | Status | Branches | Status |
+ | ------ | ------------- | ----- | --------- | ------ | ----- | ------ | -------- | ------ |
 
-.. table::
-    :class: longtable
+(PackageSummarySparcGr712rcSmp4Repositories)=
 
-    ====== ============= ===== ========= ====== ===== ====== ======== ======
-    Target Configuration Scope Functions Status Lines Status Branches Status
-    ====== ============= ===== ========= ====== ===== ====== ======== ======
-    ====== ============= ===== ========= ====== ===== ====== ======== ======
+## Repositories
 
-.. _PackageSummarySparcGr712rcSmp4Repositories:
+(PackageSummarySparcGr712rcSmp4RepositoriesSpec)=
 
-Repositories
-************
+### ../spec
 
-.. _PackageSummarySparcGr712rcSmp4RepositoriesSpec:
+```{code} none
+:linenos:
+:lineno-start: 1
+git log -1
+```
 
-../spec
-=======
+(PackageSummarySparcGr712rcSmp4RepositoriesBuildSrcB)=
 
-.. raw:: latex
+### build/src/b
 
-    \\begin{footnotesize}
+```{code} none
+:linenos:
+:lineno-start: 1
+git log -1
+```
 
-.. code-block:: none
-    :linenos:
-    :lineno-start: 1
+(PackageSummarySparcGr712rcSmp4RepositoriesSubRepo)=
 
-    git log -1
+### sub-repo
 
-.. raw:: latex
-
-    \\end{footnotesize}
-
-.. _PackageSummarySparcGr712rcSmp4RepositoriesBuildSrcB:
-
-build/src/b
-===========
-
-.. raw:: latex
-
-    \\begin{footnotesize}
-
-.. code-block:: none
-    :linenos:
-    :lineno-start: 1
-
-    git log -1
-
-.. raw:: latex
-
-    \\end{footnotesize}
-
-.. _PackageSummarySparcGr712rcSmp4RepositoriesSubRepo:
-
-sub-repo
-========
-
-.. raw:: latex
-
-    \\begin{footnotesize}
-
-.. code-block:: none
-    :linenos:
-    :lineno-start: 1
-
-    git log -1
-
-.. raw:: latex
-
-    \\end{footnotesize}
+```{code} none
+:linenos:
+:lineno-start: 1
+git log -1
+```
 """
     pm2_build = Path(director["/pkg/build/doc-package-manual-2"].directory)
     pm2_index = pm2_build / "source" / "index.rst"
