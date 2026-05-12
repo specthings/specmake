@@ -439,7 +439,7 @@ class PackageSummary(DirectoryState):
         with content.section(f"Package summary - {self.component['ident']}"):
             with content.section("Test status"):
                 self._add_test_status(content)
-            with content.section("Code/Branch Coverage"):
+            with content.section("Coverage data"):
                 self._add_coverage_achievement(content)
             with content.section("Repositories"):
                 self._add_repositories(content)
@@ -481,6 +481,8 @@ class PackageSummary(DirectoryState):
     def _add_coverage_achievement(self, content: TextContent) -> None:
         for test_aggregator in self.inputs("test-aggregation"):
             assert isinstance(test_aggregator, TestAggregator)
-            ident = test_aggregator.substitute("${.:/component/ident}")
-            with content.section(f"Component - {ident}"):
-                test_aggregator.add_coverage_achievement(content, self.mapper)
+            with test_aggregator.component.scope():
+                ident = test_aggregator.substitute("${.:/component/ident}")
+                with content.section(f"Component - {ident}"):
+                    test_aggregator.add_simple_coverage_achievement(
+                        content, self.mapper)

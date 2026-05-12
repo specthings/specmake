@@ -1084,58 +1084,39 @@ Component - sparc/gr712rc/smp/4
 
 There were no unexpected test errors found in the test outputs.
 
-.. _PackageSummarySparcGr712rcSmp4CodeBranchCoverage:
+.. _PackageSummarySparcGr712rcSmp4CoverageData:
 
-Code/Branch Coverage
-********************
+Coverage data
+*************
 
-.. _PackageSummarySparcGr712rcSmp4CodeBranchCoverageComponentSparcGr712rcSmp4:
-
-Component - sparc/gr712rc/smp/4
-===============================
-
-.. raw:: latex
-
-    \\begin{scriptsize}
-
-.. table::
-    :class: longtable
-    :widths: 18,8,8,13,7,13,7,13,7
-
-    +------------------------------------+-----------------------------------------------------+-------+-----------------+---------+-------------------+---------+-----------------+---------+
-    | Target                             | Configuration                                       | Scope | Functions       | Status  | Lines             | Status  | Branches        | Status  |
-    +====================================+=====================================================+=======+=================+=========+===================+=========+=================+=========+
-    | `Name Target A <reports.html#a>`__ | `build-config-key <reports.html#abuildconfigkey>`__ | Scope | 13+1/15 (93.3%) | **NOK** | 118+3/123 (98.3%) | **NOK** | 14+2/18 (88.8%) | **NOK** |
-    +                                    +                                                     +-------+-----------------+---------+-------------------+---------+-----------------+---------+
-    |                                    |                                                     | Empty | N/A             | **NOK** | N/A               | **NOK** | N/A             | **NOK** |
-    +                                    +                                                     +-------+-----------------+---------+-------------------+---------+-----------------+---------+
-    |                                    |                                                     | Good  | 1/1 (100%)      | OK      | 18/18 (100%)      | OK      | 4/4 (100%)      | OK      |
-    +------------------------------------+-----------------------------------------------------+-------+-----------------+---------+-------------------+---------+-----------------+---------+
-
-.. raw:: latex
-
-    \\end{scriptsize}
-
-.. _PackageSummarySparcGr712rcSmp4CodeBranchCoverageComponentSparcGr712rcSmp4:
+.. _PackageSummarySparcGr712rcSmp4CoverageDataComponentSparcGr712rcSmp4:
 
 Component - sparc/gr712rc/smp/4
 ===============================
 
-.. raw:: latex
+.. table::
+    :class: longtable
 
-    \\begin{scriptsize}
+    ============= ================ ===== =============== ======= ================= ======= =============== =======
+    Target        Configuration    Scope Functions       Status  Lines             Status  Branches        Status
+    ============= ================ ===== =============== ======= ================= ======= =============== =======
+    Name Target A build-config-key Scope 13+1/15 (93.3%) **NOK** 118+3/123 (98.3%) **NOK** 14+2/18 (88.8%) **NOK**
+    Name Target A build-config-key Empty N/A             **NOK** N/A               **NOK** N/A             **NOK**
+    Name Target A build-config-key Good  1/1 (100%)      OK      18/18 (100%)      OK      4/4 (100%)      OK
+    ============= ================ ===== =============== ======= ================= ======= =============== =======
+
+.. _PackageSummarySparcGr712rcSmp4CoverageDataComponentSparcGr712rcSmp4:
+
+Component - sparc/gr712rc/smp/4
+===============================
 
 .. table::
     :class: longtable
-    :widths: 18,8,8,13,7,13,7,13,7
 
-    +--------+---------------+-------+-----------+--------+-------+--------+----------+--------+
-    | Target | Configuration | Scope | Functions | Status | Lines | Status | Branches | Status |
-    +--------+---------------+-------+-----------+--------+-------+--------+----------+--------+
-
-.. raw:: latex
-
-    \\end{scriptsize}
+    ====== ============= ===== ========= ====== ===== ====== ======== ======
+    Target Configuration Scope Functions Status Lines Status Branches Status
+    ====== ============= ===== ========= ====== ===== ====== ======== ======
+    ====== ============= ===== ========= ====== ===== ====== ======== ======
 
 .. _PackageSummarySparcGr712rcSmp4Repositories:
 
