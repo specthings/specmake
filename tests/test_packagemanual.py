@@ -1172,6 +1172,25 @@ build/src/b
 .. raw:: latex
 
     \\end{footnotesize}
+
+.. _PackageSummarySparcGr712rcSmp4RepositoriesSubRepo:
+
+sub-repo
+========
+
+.. raw:: latex
+
+    \\begin{footnotesize}
+
+.. code-block:: none
+    :linenos:
+    :lineno-start: 1
+
+    git log -1
+
+.. raw:: latex
+
+    \\end{footnotesize}
 """
     pm2_build = Path(director["/pkg/build/doc-package-manual-2"].directory)
     pm2_index = pm2_build / "source" / "index.rst"

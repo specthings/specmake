@@ -14,9 +14,5 @@ links:
   name: component
   role: input
   uid: ../component
-- hash: null
-  name: source
-  role: input
-  uid: doc-package-manual
 pkg-type: directory-state
 type: pkg
