@@ -220,7 +220,7 @@ class SpamrManager(DocumentBuilder):
         sections: List[str] = []
         command_section = ["grep", r"\*\*\*\*\*$", "filename"]
         tbd_docs: List[str] = []
-        command_tbd = ["grep", "TB[CD]", "filename"]
+        command_tbd = ["grep", "-Fw", "-e", "TBC", "-e", "TBD", "--", "filename"]
 
         # Search through the ReST documentation files
         for directory_state in self.inputs("rst-files"):
@@ -231,7 +231,7 @@ class SpamrManager(DocumentBuilder):
                           self.uid, directory_state.directory, files)
             for rst_file in files:
                 command_section[2] = rst_file
-                command_tbd[2] = rst_file
+                command_tbd[-1] = rst_file
                 tbd_file_doc: List[str] = []
                 run_command(command_section, stdout=sections)
                 run_command(command_tbd, stdout=tbd_file_doc)
