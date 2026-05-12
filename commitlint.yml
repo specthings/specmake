@@ -34,3 +34,8 @@ rules:
     - 2
     - 'always'
     - 5
+
+  # Enforce that the message body begins with a blank line
+  body-leading-blank:
+    - 2
+    - 'always'
