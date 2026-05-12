@@ -764,6 +764,29 @@ class TestAggregator(BuildItem):
         content.add_grid_table(rows, [18, 8, 8, 13, 7, 13, 7, 13, 7],
                                font_size=-3)
 
+    def add_simple_coverage_achievement(self, content: TextContent,
+                                        mapper: BuildItemMapper) -> None:
+        """
+        Add the code/branch coverage achievement to the content as a simple
+        table.
+        """
+        rows: list[list[str]] = [[
+            "Target", "Configuration", "Scope", "Functions", "Status", "Lines",
+            "Status", "Branches", "Status"
+        ]]
+        for target_data in self.targets.values():
+            target = target_data["name"]
+            for config_data in target_data["configs"]:
+                key = config_data["config-key"]
+                for coverage in config_data.get("coverage", []):
+                    summary = _CoverageSummary(self, mapper, coverage)
+                    row = [target, key, coverage["scope"]]
+                    for kind in _COVERAGE_KINDS:
+                        row.append(summary.overall[f"{kind}-info"])
+                        row.append(summary.overall[f"{kind}-status"])
+                    rows.append(row)
+        content.add_simple_table(rows)
+
     def add_coverage_limits(self, content: TextContent,
                             mapper: BuildItemMapper) -> None:
         """ Add the code/branch coverage limits to the content. """
