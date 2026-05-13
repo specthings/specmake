@@ -234,6 +234,10 @@ class TestRunner(BuildItem):
             self._executables = executables
             for new_report in self.run_tests(executables):
                 augment_report(new_report, new_report["output"])
+                previous_report = reports_by_path.get(new_report["executable"])
+                if previous_report is not None:
+                    new_report["failed-attempts"] = previous_report.get(
+                        "failed-attempts", []) + [previous_report]
                 reports_by_path[new_report["executable"]] = new_report
             next_executables: list[Executable] = []
             for executable in executables:
