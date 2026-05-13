@@ -249,7 +249,7 @@ Section content: sub-arch
 
 (PkgSourceDocSubsection)=
 
-#### Subsection Header
+##### Subsection Header
 
 Subsection content: sparc
 
@@ -258,7 +258,7 @@ Push component content: sub-arch
 
 (subsection 2 Header)=
 
-#### subsection 2 Header
+##### subsection 2 Header
 
 Subsection content: sub-arch
 
