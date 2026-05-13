@@ -318,6 +318,12 @@ class BuildItem():
         """ Is the package component stack depth of the build item. """
         return len(self._component_stack)
 
+    @contextmanager
+    def scope(self) -> Iterator[None]:
+        """ Opens a package component context. """
+        with self.component.scope():
+            yield
+
     @property
     def git_directory(self) -> str:
         """ Is the package Git directory. """
@@ -795,7 +801,6 @@ class PackageComponent(BuildItem):
 
     @contextmanager
     def scope(self) -> Iterator[None]:
-        """ Opens a package component context. """
         item_cache = self.item.cache
         item_cache.push_selection(self.selection)
         item_cache.push_view(self.view)
