@@ -5,7 +5,9 @@ enabled-by: true
 links: []
 non-functional-type: design
 rationale: null
-references: []
+references:
+- identifier: https://www.example.com/redirect-source-2
+  type: url
 requirement-type: non-functional
 text: |
   Redirection target text.

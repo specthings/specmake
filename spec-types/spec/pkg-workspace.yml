@@ -14,13 +14,18 @@ spec-example: null
 spec-info:
   dict:
     attributes:
+      attribute-actions:
+        description: |
+          It shall be the list of attribute actions.
+        spec-type: pkg-attribute-action-list
       workspace-type:
         description: |
           It shall be the workspace type.
         spec-type: name
     description: |
       This set of attributes specifies a package workspace.
-    mandatory-attributes: all
+    mandatory-attributes:
+    - workspace-type
 spec-name: Package Workspace Item Type
 spec-type: pkg-workspace
 type: spec
