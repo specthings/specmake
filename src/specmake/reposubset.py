@@ -68,8 +68,6 @@ class RepositorySubset(DirectoryState):
                     cache_directory=tmp_dir,
                 )
                 item_cache = ItemCache(cache_config)
-                logging.info("items %s %s", cache_config,
-                             list(item_cache.keys()))
         else:
             item_cache = self.item.cache
         config = {
