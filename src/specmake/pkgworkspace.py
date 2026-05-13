@@ -51,7 +51,7 @@ from .pkgitems import (BuildItem, BuildItemFactory, BuildItemMapper,
                        BuildItemTypeProvider, PackageBuildDirector,
                        PackageComponent)
 from .pkgtemplate import (ComponentTemplate, FileItemTemplate,
-                          InlineItemTemplate)
+                          InlineItemTemplate, run_attribute_actions)
 
 
 def _git_commit(repository: str, commit: Optional[str] = None) -> str:
@@ -123,6 +123,14 @@ def _make_directory_state_data(item: Item, directory_state_type: str) -> dict:
 
 class _WorkspaceItem(BuildItem):
 
+    def __init__(self,
+                 director: PackageBuildDirector,
+                 item: Item,
+                 mapper: None | BuildItemMapper = None) -> None:
+        super().__init__(director, item, mapper)
+        self.attribute_actions: list[dict] | None = self.item.get(
+            "attribute-actions")
+
     def load_workspace_state(self) -> str:
         """
         Load the workspace state of the item.  Returns the hash of the state.
@@ -142,12 +150,21 @@ class _WorkspaceItem(BuildItem):
             else:
                 data[key] = value
 
+    def prepare_buildspace_data(self) -> dict:
+        """
+        Prepare the workspace item state for export from the workspace to the
+        buildspace.  Return the buildspace item data.
+        """
+        raise NotImplementedError
+
     def get_buildspace_data(self) -> dict:
         """
         Export the workspace item state from the workspace to the buildspace.
         Return the buildspace item data.
         """
-        raise NotImplementedError
+        data = self.prepare_buildspace_data()
+        run_attribute_actions(self.attribute_actions, self.component, data)
+        return data
 
     def copy_to_buildspace(self, buildspace_item: BuildItem) -> None:
         """ Copies the associated workspace state to the buildspace. """
@@ -196,7 +213,7 @@ def _apply_patches(workspace_directory: str,
 class WorkspaceArchive(_WorkspaceItem):
     """ Represents a workspace archive. """
 
-    def get_buildspace_data(self) -> dict:
+    def prepare_buildspace_data(self) -> dict:
         data = _make_directory_state_data(self.item, "unpacked-archive")
         data["archive-file"] = os.path.basename(self["archive-file"])
         self.copy_attributes(
@@ -274,7 +291,7 @@ class WorkspaceComponent(_WorkspaceItem, PackageComponent):
         factory.add_get_value(f"{type_name}:/workspace-commit", _get_view)
         factory.add_get_value(f"{type_name}:/workspace-directory", _get_view)
 
-    def get_buildspace_data(self) -> dict:
+    def prepare_buildspace_data(self) -> dict:
         data = copy.deepcopy(self.item.data)
         del data["enabled-set-actions"]
         del data["enabled-set-feedback-mapping"]
@@ -290,7 +307,7 @@ class WorkspaceDirectory(_WorkspaceItem, DirectoryState):
         self.load()
         return super().load_workspace_state()
 
-    def get_buildspace_data(self) -> dict:
+    def prepare_buildspace_data(self) -> dict:
         data = _make_directory_state_data(self.item, "explicit")
         self.copy_attributes(data, ("directory-state-load-before-use",
                                     "copyrights-by-license", "params"))
@@ -317,7 +334,7 @@ class WorkspaceDirectoryRepository(WorkspaceDirectory):
                                               []).append(self.uid)
         return super().load_workspace_state()
 
-    def get_buildspace_data(self) -> dict:
+    def prepare_buildspace_data(self) -> dict:
         data = _make_directory_state_data(self.item, "repository")
         data["branch"] = "main"
         data["commit"] = "01234567890abcdef01234567890abcdef012345"
@@ -377,8 +394,8 @@ class WorkspaceFile(WorkspaceDirectory):
 class WorkspaceTestLog(WorkspaceFile):
     """ Represents a workspace test log. """
 
-    def get_buildspace_data(self) -> dict:
-        data = super().get_buildspace_data()
+    def prepare_buildspace_data(self) -> dict:
+        data = super().prepare_buildspace_data()
         data["directory-state-type"] = "test-log"
         return data
 
@@ -405,7 +422,7 @@ class WorkspaceRedirect(_WorkspaceItem):
             return redirect.load_workspace_state()
         return super().load_workspace_state()
 
-    def get_buildspace_data(self) -> dict:
+    def prepare_buildspace_data(self) -> dict:
         if self.redirect is None:
             return self.item.data
         return self.redirect.get_buildspace_data()
@@ -436,7 +453,7 @@ class WorkspaceRepository(_WorkspaceItem):
         self.item["origin-commit"] = self["origin-commit"]
         return super().load_workspace_state()
 
-    def get_buildspace_data(self) -> dict:
+    def prepare_buildspace_data(self) -> dict:
         data = _make_directory_state_data(self.item, "repository")
         data["commit"] = self["commit"]
         data["origin-commit"] = self["origin-commit"]

@@ -1,0 +1,23 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+attribute-actions:
+- action: set
+  enabled-by: true
+  path: /directory
+  value: ${.:/component/deployment-directory}/attribute-modified
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+destination-directory: ${.:/component/deployment-directory}
+directory: ${.:/component/workspace-directory}/dir
+enabled-by: true
+files:
+- file: t.txt
+  hash: null
+links:
+- hash: null
+  name: component
+  role: input
+  uid: /pkg/component
+pkg-type: workspace
+type: pkg
+workspace-type: directory

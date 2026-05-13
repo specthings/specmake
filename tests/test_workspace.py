@@ -77,7 +77,7 @@ def _create_buildspace(tmp_dir, spec_dir):
 
 def test_workspace_not_implemented():
     with pytest.raises(NotImplementedError):
-        _WorkspaceItem.get_buildspace_data(0)
+        _WorkspaceItem.prepare_buildspace_data(0)
 
 
 def test_workspace_archive_invalid_digest(tmpdir):
@@ -91,6 +91,13 @@ def test_workspace_archive_download(tmpdir):
     assert isinstance(archive, DirectoryState)
     assert archive["directory-state-type"] == "unpacked-archive"
     assert os.path.exists(archive.file)
+
+
+def test_workspace_dir_attribute_actions(tmp_path):
+    buildspace, _ = _create_buildspace(str(tmp_path),
+                                       "spec-pkg-wk/dir/attribute-actions")
+    assert buildspace.director["/dir"]["directory-state-type"] == "explicit"
+    assert (tmp_path / "attribute-modified" / "t.txt").is_file()
 
 
 def test_workspace_dir_patterns(tmp_path):
@@ -148,6 +155,20 @@ def test_workspace_redirect(tmpdir):
     buildspace, _ = _create_buildspace(tmpdir, "spec-pkg-wk/redirect")
     item = buildspace.director["/redirect"].item
     assert item.type == "requirement/non-functional/design"
+    assert item["references"] == [
+        {
+            "identifier": "https://www.example.com/redirect-source-2",
+            "type": "url",
+        },
+        {
+            "identifier": "https://www.example.com/redirect-source",
+            "type": "url",
+        },
+        {
+            "identifier": "https://www.example.com/redirect",
+            "type": "url",
+        },
+    ]
 
 
 def test_workspace_repo_clone_workaround(tmpdir, monkeypatch):
