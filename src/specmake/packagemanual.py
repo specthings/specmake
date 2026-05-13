@@ -470,8 +470,7 @@ class PackageSummary(DirectoryState):
         for component in package.components():
             with component.scope():
                 for item in component.item.children("input"):
-                    if not item.type.startswith(
-                            "pkg/directory-state/repository"):
+                    if item.type != "pkg/directory-state/repository":
                         continue
                     repo = self.director[item.uid]
                     repo_dir = repo["directory"]

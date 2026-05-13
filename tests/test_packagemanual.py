@@ -1124,16 +1124,6 @@ git log -1
 :lineno-start: 1
 git log -1
 ```
-
-(PackageSummarySparcGr712rcSmp4RepositoriesSubRepo)=
-
-### sub-repo
-
-```{code} none
-:linenos:
-:lineno-start: 1
-git log -1
-```
 """
     pm2_build = Path(director["/pkg/build/doc-package-manual-2"].directory)
     pm2_index = pm2_build / "source" / "index.rst"
