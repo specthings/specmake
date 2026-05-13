@@ -80,8 +80,14 @@ class _TestRunner(TestRunner):
                     "S:RTEMS_DEBUG:0", "S:RTEMS_MULTIPROCESSING:0",
                     "S:RTEMS_POSIX_API:0", "S:RTEMS_PROFILING:0",
                     "S:RTEMS_SMP:0", "Z:TS:C:0:N:0:F:0:D:0.014590",
-                    "Y:ReportHash:SHA256:JlS-9kM8jYqTjFvRbuUDzHpfph6PznxFxCLx30NkcoI="
+                    "Y:ReportHash:SHA256:JlS-9kM8jYqTjFvRbuUDzHpfph6PznxFxCLx30NkcoI=",
+                    "*** END OF TEST TS ***"
                 ]
+            }]
+        if run_count == 4:
+            return [{
+                "executable": executables[0].path,
+                "output": ["*** BEGIN OF TEST TS ***"]
             }]
         if run_count in (7, 8, 9, 10):
             return [{
@@ -245,6 +251,7 @@ building the package and captures the output:
     assert ": no report" in log
     assert ": gcov info is corrupt" in log
     assert ": test suite report is corrupt" in log
+    assert ": missing end of test line" in log
     assert (f"executables: [Executable(path='{build_bsp.directory}"
             "/a.exe', digest='z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg_SpIdNs6c5H0NE8"
             "XYXysP-DGNKHfuwvY7kxvUdBeoGlODJ6-SfaPg==', timeout=180.0), "
@@ -255,7 +262,7 @@ building the package and captures the output:
     failed_attempts = tuple(
         len(report.get("failed-attempts", []))
         for report in test_log["reports"])
-    assert failed_attempts == (2, 1, 0)
+    assert failed_attempts == (2, 0, 0)
 
     test_log_file = tmp_dir / "pkg/test-log-bsp.json"
     test_log_file.unlink()

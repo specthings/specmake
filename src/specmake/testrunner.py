@@ -236,7 +236,7 @@ class TestRunner(BuildItem):
                 augment_report(new_report, new_report["output"])
                 previous_report = reports_by_path.get(new_report["executable"])
                 if previous_report is not None:
-                    new_report["failed-attempts"] = previous_report.get(
+                    new_report["failed-attempts"] = previous_report.pop(
                         "failed-attempts", []) + [previous_report]
                 reports_by_path[new_report["executable"]] = new_report
             next_executables: list[Executable] = []
@@ -251,6 +251,13 @@ class TestRunner(BuildItem):
                     next_executables.append(executable)
                     logging.warning("%s: executable '%s': %s", self.uid,
                                     executable.path, report["error"])
+                    continue
+                if ("line-begin-of-test" in report["info"]
+                        and "line-end-of-test" not in report["info"]):
+                    next_executables.append(executable)
+                    logging.warning(
+                        "%s: executable '%s': missing end of test line",
+                        self.uid, executable.path)
                     continue
                 if report.get("gcov-info-hash",
                               "") != report.get("gcov-info-hash-calculated",
