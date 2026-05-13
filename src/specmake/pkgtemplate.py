@@ -33,11 +33,11 @@ from typing import Any, NamedTuple
 from specitems import (EnabledSet, IS_ENABLED_OPS, Item, is_enabled_with_ops,
                        load_data, to_iterable)
 
-from . import pkgitems
+from .pkgitems import BuildItem, PackageComponent
 
 
 class _AttributeActionContext(NamedTuple):
-    item: pkgitems.BuildItem
+    item: BuildItem
     action: dict
     action_value: Any
     value: Any
@@ -171,8 +171,7 @@ def _get_name_and_index(key: str) -> tuple[str, int]:
         return parts[0], -1
 
 
-def _attribute_action(item: pkgitems.BuildItem, action: dict,
-                      data: Any) -> None:
+def _attribute_action(item: BuildItem, action: dict, data: Any) -> None:
     for path in to_iterable(action["path"]):
         path_list = path.strip("/").split("/")
         value = data
@@ -197,31 +196,37 @@ def _enabled_by_has_type(item: Item, enabled_by: dict, who: str) -> bool:
     return item.type in value
 
 
-class _Template(pkgitems.BuildItem):
+def run_attribute_actions(attribute_actions: dict, component: PackageComponent,
+                          data: Any) -> None:
+    """ Run the attribute actions on the data. """
 
-    def run_attribute_actions(self, component: pkgitems.PackageComponent,
+    def _has_sibling(_ops: dict, _enabled_set: EnabledSet,
+                     enabled_by: Any) -> bool:
+        for parent in component.item.parents(enabled_by["parent-role"]):
+            if _enabled_by_has_type(parent, enabled_by, "parent"):
+                for child in parent.children(enabled_by["sibling-role"]):
+                    if child == component.item:
+                        continue
+                    if _enabled_by_has_type(child, enabled_by, "sibling"):
+                        return True
+        return False
+
+    ops = IS_ENABLED_OPS | {"has-sibling": _has_sibling}
+    for action in attribute_actions:
+        if not is_enabled_with_ops(ops, component.selection.enabled_set,
+                                   action["enabled-by"]):
+            continue
+        _attribute_action(component, action, data)
+
+
+class _Template(BuildItem):
+
+    def run_attribute_actions(self, component: PackageComponent,
                               data: Any) -> None:
         """ Run the attribute actions on the data. """
+        run_attribute_actions(self.item["attribute-actions"], component, data)
 
-        def _has_sibling(_ops: dict, _enabled_set: EnabledSet,
-                         enabled_by: Any) -> bool:
-            for parent in component.item.parents(enabled_by["parent-role"]):
-                if _enabled_by_has_type(parent, enabled_by, "parent"):
-                    for child in parent.children(enabled_by["sibling-role"]):
-                        if child == component.item:
-                            continue
-                        if _enabled_by_has_type(child, enabled_by, "sibling"):
-                            return True
-            return False
-
-        ops = IS_ENABLED_OPS | {"has-sibling": _has_sibling}
-        for action in self.item["attribute-actions"]:
-            if not is_enabled_with_ops(ops, component.selection.enabled_set,
-                                       action["enabled-by"]):
-                continue
-            _attribute_action(component, action, data)
-
-    def add_item(self, component: pkgitems.PackageComponent, data: dict,
+    def add_item(self, component: PackageComponent, data: dict,
                  new_uids) -> None:
         """ Add an item with the data along the component. """
         uid = f"{os.path.dirname(component.uid)}/{os.path.basename(self.uid)}"
@@ -231,7 +236,7 @@ class _Template(pkgitems.BuildItem):
         component.item.cache.add_item(uid, data, initialize_links=False)
         new_uids.append(uid)
 
-    def expand_template(self, component: pkgitems.PackageComponent,
+    def expand_template(self, component: PackageComponent,
                         new_uids: list[str]) -> None:
         """ Expand the template for the component. """
         for item in itertools.chain(
@@ -244,7 +249,7 @@ class _Template(pkgitems.BuildItem):
 class ComponentTemplate(_Template):
     """ Provides a template for components. """
 
-    def expand_template(self, component: pkgitems.PackageComponent,
+    def expand_template(self, component: PackageComponent,
                         new_uids: list[str]) -> None:
         self.run_attribute_actions(component, component.item.data)
         super().expand_template(component, new_uids)
@@ -256,7 +261,7 @@ class FileItemTemplate(_Template):
     referenced by the template item.
     """
 
-    def expand_template(self, component: pkgitems.PackageComponent,
+    def expand_template(self, component: PackageComponent,
                         new_uids: list[str]) -> None:
         path = component.substitute(self.item["file"])
         data = load_data(path)
@@ -270,7 +275,7 @@ class InlineItemTemplate(_Template):
     template item.
     """
 
-    def expand_template(self, component: pkgitems.PackageComponent,
+    def expand_template(self, component: PackageComponent,
                         new_uids: list[str]) -> None:
         data = self.item["attributes"]
         data["SPDX-License-Identifier"] = self.item["SPDX-License-Identifier"]
