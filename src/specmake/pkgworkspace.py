@@ -35,7 +35,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import tempfile
-from typing import Iterator, Optional
+from typing import Optional
 import urllib.request
 
 from specitems import (EnabledSet, Item, ItemCache, ItemCacheConfig,
@@ -122,16 +122,6 @@ def _make_directory_state_data(item: Item, directory_state_type: str) -> dict:
 
 
 class _WorkspaceItem(BuildItem):
-
-    @contextlib.contextmanager
-    def selection_and_view_scope(self) -> Iterator[None]:
-        """ Opens a selection and view context. """
-        if isinstance(self, WorkspaceComponent):
-            workspace_component: PackageComponent = self
-        else:
-            workspace_component = self.component
-        with workspace_component.scope():
-            yield
 
     def load_workspace_state(self) -> str:
         """
@@ -659,7 +649,7 @@ def _prepare_components(director: PackageBuildDirector,
 
 def _expand_templates(director: PackageBuildDirector,
                       component: WorkspaceComponent) -> None:
-    with component.selection_and_view_scope():
+    with component.scope():
         new_uids: list[str] = []
         for item in itertools.chain(
                 component.item.parents(("use-package-template",
@@ -833,7 +823,7 @@ def _gather_workspace_modified(workspace_director: PackageBuildDirector,
     for uid in uids.workspace:
         workspace_item = workspace_director[uid]
         assert isinstance(workspace_item, _WorkspaceItem)
-        with workspace_item.selection_and_view_scope():
+        with workspace_item.scope():
             if workspace_item.item.enabled:
                 logging.info("%s: load workspace state", uid)
                 digest = workspace_item.load_workspace_state()
@@ -930,7 +920,7 @@ def _copy_to_buildspace(workspace_director: PackageBuildDirector,
     for uid in workspace_copy:
         workspace_item = workspace_director[uid]
         assert isinstance(workspace_item, _WorkspaceItem)
-        with workspace_item.selection_and_view_scope():
+        with workspace_item.scope():
             buildspace_item = buildspace_director[uid]
             logging.info("%s: copy to buildspace", uid)
             workspace_item.copy_to_buildspace(buildspace_item)

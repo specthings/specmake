@@ -34,8 +34,7 @@ from specitems import (ItemCache, ItemCacheConfig, JSONItemCache,
                        get_item_cache_arguments)
 
 from .pkgfactory import create_build_item_factory
-from .pkgitems import (BuildItemTypeProvider, PackageBuildDirector,
-                       PackageComponent)
+from .pkgitems import BuildItemTypeProvider, PackageBuildDirector
 
 _ITEM_CACHE = {
     "JSON": JSONItemCache,
@@ -76,10 +75,6 @@ def clisubstitute(argv: list[str] = sys.argv) -> None:
     factory = create_build_item_factory()
     director = PackageBuildDirector(item_cache, package_uid, factory, False)
     build_item = director.create_with_dependencies(args.uid)
-    if isinstance(build_item, PackageComponent):
-        component = build_item
-    else:
-        component = build_item.component
-    with component.scope():
+    with build_item.scope():
         for line in sys.stdin:
             sys.stdout.write(build_item.substitute(line))
