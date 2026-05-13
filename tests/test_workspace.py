@@ -30,6 +30,7 @@ import pytest
 
 from specware import run_command
 
+import specmake
 from specmake import (BuildItem, BuildspaceConfig, DirectoryState,
                       PackageComponent, WorkspaceConfig,
                       create_build_item_factory, create_workspace,
@@ -141,6 +142,21 @@ def test_workspace_file_list(tmpdir):
 def test_workspace_file_no_file(tmpdir):
     with pytest.raises(ValueError, match="file: no source file available"):
         _create_buildspace(tmpdir, "spec-pkg-wk/file/no-file")
+
+
+def test_workspace_repo_clone_workaround(tmpdir, monkeypatch):
+
+    def _run_command(args, cwd=None, stdout=None, status=None):
+        if "--revision" in args:
+            return 1
+        if "fetch" in args:
+            return 1
+        return run_command(args, cwd, stdout, status)
+
+    monkeypatch.setattr(specmake.pkgworkspace, "run_command", _run_command)
+    with pytest.raises(IOError, match="cannot clone"):
+        _create_buildspace(
+            tmpdir, ["spec-pkg-wk/repo/archive", "spec-pkg-wk/repo/default"])
 
 
 def test_workspace_repo_default(tmpdir):
