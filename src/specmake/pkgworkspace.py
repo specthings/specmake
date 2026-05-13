@@ -458,13 +458,6 @@ class WorkspaceRepository(_WorkspaceItem):
 
     def copy_to_buildspace(self, buildspace_item: BuildItem) -> None:
         assert isinstance(buildspace_item, RepositoryState)
-        destination_directory = buildspace_item.directory
-        logging.info("%s: remove Git repository '%s'", self.uid,
-                     destination_directory)
-        try:
-            shutil.rmtree(destination_directory)
-        except FileNotFoundError:
-            assert not os.path.exists(destination_directory)
         self._git_clone(buildspace_item)
 
     def _git_commit(self, ctx: ItemGetValueContext) -> str:
@@ -473,8 +466,43 @@ class WorkspaceRepository(_WorkspaceItem):
     def _git_commit_head(self, _ctx: ItemGetValueContext) -> str:
         return _git_commit(self["directory"])
 
-    def _git_clone(self, buildspace_item: RepositoryState) -> None:
+    def _git_depth(self) -> list[str]:
+        clone_depth = self["clone-depth"]
+        if clone_depth is None:
+            return []
+        return ["--depth", str(clone_depth)]
 
+    def _git_prepare_destination_directory(self,
+                                           destination_directory: str) -> None:
+        logging.info("%s: remove Git repository '%s'", self.uid,
+                     destination_directory)
+        with contextlib.suppress(FileNotFoundError):
+            shutil.rmtree(destination_directory)
+        os.makedirs(destination_directory)
+
+    def _git_clone_revision(self, repository: str, commit: str,
+                            workspace_directory: str,
+                            destination_directory: str) -> int:
+        self._git_prepare_destination_directory(destination_directory)
+        return run_command(
+            ["git", "clone", "--no-local", "--revision", commit] +
+            self._git_depth() + [repository, destination_directory],
+            workspace_directory)
+
+    def _git_init_fetch(self, repository: str, commit: str,
+                        workspace_directory: str,
+                        destination_directory: str) -> int:
+        self._git_prepare_destination_directory(destination_directory)
+        status = run_command(["git", "init", destination_directory],
+                             workspace_directory)
+        assert status == 0
+        status = run_command(["git", "remote", "add", "origin", repository],
+                             destination_directory)
+        assert status == 0
+        return run_command(["git", "fetch"] + self._git_depth() +
+                           ["origin", commit], destination_directory)
+
+    def _git_clone(self, buildspace_item: RepositoryState) -> None:
         repository = self["directory"]
         branch = self["branch"]
         commit = self["commit"]
@@ -489,22 +517,19 @@ class WorkspaceRepository(_WorkspaceItem):
                 status = run_command(["git", "branch", "-f", branch, commit],
                                      source_directory)
                 assert status == 0
-        clone_command = [
-            "git",
-            "clone",
-            "--no-local",
-            "--revision",
-            commit,
-        ]
-        clone_depth = self["clone-depth"]
-        if clone_depth is not None:
-            clone_command.extend(["--depth", str(clone_depth)])
+        workspace_directory = self.substitute(
+            "${.:/component/workspace-directory}")
         destination_directory = buildspace_item.directory
-        clone_command.extend([repository, destination_directory])
-        status = run_command(
-            clone_command,
-            self.substitute("${.:/component/workspace-directory}"))
-        assert status == 0
+        status = self._git_clone_revision(repository, commit,
+                                          workspace_directory,
+                                          destination_directory)
+        if status != 0:
+            status = self._git_init_fetch(repository, commit,
+                                          workspace_directory,
+                                          destination_directory)
+        if status != 0:
+            raise IOError(f"{self.uid}: cannot clone or "
+                          f"initialize repository: {repository}")
         status = run_command(["git", "checkout", "-B", branch, commit],
                              destination_directory)
         assert status == 0
