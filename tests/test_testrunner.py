@@ -251,8 +251,14 @@ building the package and captures the output:
             f"Executable(path='{build_bsp.directory}/b.exe', "
             "digest='hopqxuHQKT10-tB_bZWVKz4B09MVPbZ3p12Ad5g_1OMNtr_Im3YIqT-yZ"
             "GkjOp8aCVctaHqcXaeLID6xUQQKFQ==', timeout=20.0)]") in log
+    test_log = director["/pkg/test-logs/bsp"].json_load()
+    failed_attempts = tuple(
+        len(report.get("failed-attempts", []))
+        for report in test_log["reports"])
+    assert failed_attempts == (2, 1, 0)
 
-    (tmp_dir / "pkg/test-log-bsp.json").unlink()
+    test_log_file = tmp_dir / "pkg/test-log-bsp.json"
+    test_log_file.unlink()
     _TestRunner.run_round = 1
     director.build_package(force=["/pkg/test-logs/bsp"])
     log = get_and_clear_log(caplog)
@@ -263,7 +269,7 @@ building the package and captures the output:
     log = get_and_clear_log(caplog)
     assert f"use previous report for: {build_bsp.directory}/a.exe" in log
 
-    (tmp_dir / "pkg/test-log-bsp.json").unlink()
+    test_log_file.unlink()
     _TestRunner.run_round = 3
     director.build_package(force=["/pkg/test-logs/bsp"])
     log = get_and_clear_log(caplog)
