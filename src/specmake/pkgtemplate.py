@@ -171,7 +171,7 @@ def _get_name_and_index(key: str) -> tuple[str, int]:
         return parts[0], -1
 
 
-def _attribute_action(item: BuildItem, action: dict, data: Any) -> None:
+def _attribute_action(item: BuildItem, action: dict, data: dict) -> None:
     for path in to_iterable(action["path"]):
         path_list = path.strip("/").split("/")
         value = data
@@ -196,9 +196,12 @@ def _enabled_by_has_type(item: Item, enabled_by: dict, who: str) -> bool:
     return item.type in value
 
 
-def run_attribute_actions(attribute_actions: dict, component: PackageComponent,
-                          data: Any) -> None:
+def run_attribute_actions(attribute_actions: list[dict] | None,
+                          component: PackageComponent, data: dict) -> None:
     """ Run the attribute actions on the data. """
+
+    if not attribute_actions:
+        return
 
     def _has_sibling(_ops: dict, _enabled_set: EnabledSet,
                      enabled_by: Any) -> bool:
@@ -222,9 +225,10 @@ def run_attribute_actions(attribute_actions: dict, component: PackageComponent,
 class _Template(BuildItem):
 
     def run_attribute_actions(self, component: PackageComponent,
-                              data: Any) -> None:
+                              data: dict) -> None:
         """ Run the attribute actions on the data. """
-        run_attribute_actions(self.item["attribute-actions"], component, data)
+        run_attribute_actions(self.item.get("attribute-actions"), component,
+                              data)
 
     def add_item(self, component: PackageComponent, data: dict,
                  new_uids) -> None:
