@@ -24,9 +24,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import copy
 import itertools
 import logging
-import os
+import posixpath
 import re
 from typing import Any, NamedTuple
 
@@ -222,67 +223,71 @@ def run_attribute_actions(attribute_actions: list[dict] | None,
         _attribute_action(component, action, data)
 
 
-class _Template(BuildItem):
+def _add_item(template_item: Item, component: PackageComponent, data: dict,
+              new_uids) -> None:
+    """ Add an item with the data along the component. """
+    uid = (f"{posixpath.dirname(component.uid)}/"
+           f"{posixpath.basename(template_item.uid)}")
+    logging.info("%s: expand template to: %s", template_item.uid, uid)
+    data = component.substitute(data)
+    component.item.cache.add_item(uid, data, initialize_links=False)
+    new_uids.append(uid)
 
-    def run_attribute_actions(self, component: PackageComponent,
-                              data: dict) -> None:
-        """ Run the attribute actions on the data. """
-        run_attribute_actions(self.item.get("attribute-actions"), component,
-                              data)
 
-    def add_item(self, component: PackageComponent, data: dict,
-                 new_uids) -> None:
-        """ Add an item with the data along the component. """
-        uid = f"{os.path.dirname(component.uid)}/{os.path.basename(self.uid)}"
-        logging.info("%s: expand template to: %s", self.uid, uid)
-        data = component.substitute(data)
-        self.run_attribute_actions(component, data)
-        component.item.cache.add_item(uid, data, initialize_links=False)
-        new_uids.append(uid)
+def _expand_component_template(
+        _template_data: dict,
+        component: PackageComponent) -> tuple[dict, bool]:
+    """
+    Expand the component template.
+
+    In contrast to the other template expansion methods, no new item will be
+    added.  Instead, only the component data is altered in place later.
+    """
+    return component.item.data, False
+
+
+def _expand_file_template(template_data: dict,
+                          component: PackageComponent) -> tuple[dict, bool]:
+    """
+    Expand the template using the attributes provided by the referenced file.
+    """
+    return load_data(component.substitute(template_data["file"])), True
+
+
+def _expand_inline_template(template_data: dict,
+                            _component: PackageComponent) -> tuple[dict, bool]:
+    """
+    Expand the template using the attributes provided by the template data.
+    """
+    data = copy.deepcopy(template_data["attributes"])
+    data["SPDX-License-Identifier"] = template_data["SPDX-License-Identifier"]
+    data["copyrights"] = template_data["copyrights"]
+    return data, True
+
+
+_EXPAND_TEMPLATE = {
+    "component": _expand_component_template,
+    "file-item": _expand_file_template,
+    "inline-item": _expand_inline_template,
+}
+
+
+class BuildItemTemplate(BuildItem):
+    """ Provides build item templates. """
 
     def expand_template(self, component: PackageComponent,
                         new_uids: list[str]) -> None:
-        """ Expand the template for the component. """
+        """ Expand the template. """
+        template_item = self.item
+        data, add_item = _EXPAND_TEMPLATE[template_item["template-type"]](
+            template_item.data, component)
+        run_attribute_actions(template_item.get("attribute-actions"),
+                              component, data)
+        if add_item:
+            _add_item(template_item, component, data, new_uids)
         for item in itertools.chain(
-                self.item.parents("use-package-template"),
-                self.item.children("add-package-template")):
-            template_item = self.director[item.uid]
-            template_item.expand_template(component, new_uids)
-
-
-class ComponentTemplate(_Template):
-    """ Provides a template for components. """
-
-    def expand_template(self, component: PackageComponent,
-                        new_uids: list[str]) -> None:
-        self.run_attribute_actions(component, component.item.data)
-        super().expand_template(component, new_uids)
-
-
-class FileItemTemplate(_Template):
-    """
-    Provides a template for items where the attributes are provided by a file
-    referenced by the template item.
-    """
-
-    def expand_template(self, component: PackageComponent,
-                        new_uids: list[str]) -> None:
-        path = component.substitute(self.item["file"])
-        data = load_data(path)
-        self.add_item(component, data, new_uids)
-        super().expand_template(component, new_uids)
-
-
-class InlineItemTemplate(_Template):
-    """
-    Provides a template for items where the attributes are provided by the
-    template item.
-    """
-
-    def expand_template(self, component: PackageComponent,
-                        new_uids: list[str]) -> None:
-        data = self.item["attributes"]
-        data["SPDX-License-Identifier"] = self.item["SPDX-License-Identifier"]
-        data["copyrights"] = self.item["copyrights"]
-        self.add_item(component, data, new_uids)
-        super().expand_template(component, new_uids)
+                template_item.parents("use-package-template"),
+                template_item.children("add-package-template")):
+            template = self.director[item.uid]
+            assert isinstance(template, BuildItemTemplate)
+            template.expand_template(component, new_uids)
