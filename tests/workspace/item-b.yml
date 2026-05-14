@@ -12,5 +12,8 @@ links:
   name: component
   role: input
   uid: component
+params:
+  list:
+  - item-b
 pkg-type: directory-state
 type: pkg
