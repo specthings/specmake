@@ -144,6 +144,12 @@ def test_workspace_file_no_file(tmpdir):
         _create_buildspace(tmpdir, "spec-pkg-wk/file/no-file")
 
 
+def test_workspace_redirect(tmpdir):
+    buildspace, _ = _create_buildspace(tmpdir, "spec-pkg-wk/redirect")
+    item = buildspace.director["/redirect"].item
+    assert item.type == "requirement/non-functional/design"
+
+
 def test_workspace_repo_clone_workaround(tmpdir, monkeypatch):
 
     def _run_command(args, cwd=None, stdout=None, status=None):

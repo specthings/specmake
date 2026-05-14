@@ -6,7 +6,7 @@ links:
 - hash: null
   name: component
   role: input
-  uid: component
+  uid: /pkg/component
 pkg-type: workspace
 source: ${.:/component/workspace-directory}/redirect-source.yml
 type: pkg
