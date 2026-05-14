@@ -19,7 +19,7 @@ jobs:
       uses: vmactions/freebsd-vm@v1
       with:
         run: |
-          pkg install -y python3 py311-numpy py311-lxml py311-pillow py311-sqlite3 uv cmake gmake git
+          pkg install -y python3 py311-maturin py311-numpy py311-lxml py311-pillow py311-sqlite3 uv cmake gmake git rust
           git config --global user.email "you@example.com"
           git config --global user.name "Your Name"
           git config --global --add safe.directory /home/runner/work/specmake/specmake
