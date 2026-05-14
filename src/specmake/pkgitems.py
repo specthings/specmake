@@ -137,11 +137,8 @@ def _join(ctx: ItemGetValueContext, value: list, **kwargs) -> str:
     mapper = ctx.mapper
     assert isinstance(mapper, BuildItemMapper)
     build_item = mapper.build_item.director[ctx.item.uid]
-    if isinstance(build_item, PackageComponent):
-        component = build_item
-    else:
-        component = build_item.component
-    element_is_enabled = functools.partial(is_enabled, component.enabled_set)
+    element_is_enabled = functools.partial(is_enabled,
+                                           build_item.component.enabled_set)
     separator = kwargs.get("separator", ",")
     return separator.join(
         mapper.substitute_flexible_list(value, element_is_enabled))
@@ -247,15 +244,7 @@ class BuildItem():
         if mapper is None:
             mapper = BuildItemMapper(item, self)
         self.mapper = mapper
-        try:
-            component = self.input("component")
-            assert isinstance(component, PackageComponent)
-        except KeyError:
-            if isinstance(self, PackageComponent):
-                component = self
-            else:
-                component = self.director.package
-        self._component_stack = [component]
+        self._component_stack = [self._associate_with_component()]
         mapper.add_default_get_value("component", self._get_component)
         director.factory.add_get_values_to_mapper(self.mapper)
         my_type = self.item.type
@@ -285,6 +274,26 @@ class BuildItem():
 
     def __setitem__(self, key: str, value: Any) -> None:
         self.item[key] = value
+
+    def _associate_with_component(self) -> "PackageComponent":
+        try:
+            component = self.input("component")
+            assert isinstance(component, PackageComponent)
+        except KeyError:
+            component = self.director.package
+        return component
+
+    def parent(self, _no_parent_message: str) -> "PackageComponent":
+        """
+        Return the parent component of the item.
+
+        For items which are not a component themself, the parent component is
+        their currently associated component.
+
+        If the item has no parent component, the function raises a KeyError
+        exception with the specified message.
+        """
+        return self._component_stack[-1]
 
     def get(self, key: str, default: Any) -> Any:
         """
@@ -696,10 +705,7 @@ class BuildItem():
             build_item = self
         else:
             build_item = self.director[uid]
-        if isinstance(build_item, PackageComponent):
-            component = build_item
-        else:
-            component = build_item._component_stack[-1]
+        component = build_item.component
         while True:
             try:
                 args = "" if ctx.args is None else f":{ctx.args}"
@@ -713,10 +719,7 @@ class BuildItem():
                 ctx.key_index = ""
                 ctx.remaining_path = ""
                 return value
-            next_component = component.component
-            if next_component == component:
-                raise KeyError("cannot get component value")
-            component = next_component
+            component = component.parent("cannot get component value")
 
     def _get_input(self, ctx: ItemGetValueContext) -> Any:
         return _get_input_or_output(ctx, self.input)
@@ -749,11 +752,9 @@ class BuildItem():
                         link.data.get("label"), link.data.get("name"))
                     self._resources[cache_key] = resource
                     return resource
-            next_build_item = build_item.component
-            if next_build_item == build_item:
-                raise KeyError(f"{self.uid}: there is no resource "
-                               f"associated with resource key: {resource_key}")
-            build_item = next_build_item
+            build_item = build_item.parent(
+                "there is no resource "
+                f"associated with resource key: {resource_key}")
 
 
 class PackageComponent(BuildItem):
@@ -767,11 +768,15 @@ class PackageComponent(BuildItem):
         self.selection = ItemSelection(self.item.cache,
                                        self.item["enabled-set"],
                                        self.is_item_enabled)
-        component = self.component
-        if component == self:
+        self._parent: "PackageComponent" | None = None
+        try:
+            parent = self.input("component")
+            assert isinstance(parent, PackageComponent)
+        except KeyError:
             view = item.cache.top_view
         else:
-            view = ItemView(component.view)
+            self._parent = parent
+            view = ItemView(parent.view)
         self.view: ItemView = view
 
     def __getitem__(self, key: str) -> Any:
@@ -779,11 +784,17 @@ class PackageComponent(BuildItem):
         while True:
             if key in component.item:
                 return component.substitute(component.item[key])
-            next_component = component.component
-            if next_component == component:
-                raise KeyError(f"{self.uid}: "
-                               f"cannot get component value for '{key}'")
-            component = next_component
+            component = component.parent(
+                f"cannot get component value for '{key}'")
+
+    def _associate_with_component(self) -> "PackageComponent":
+        return self
+
+    def parent(self, no_parent_message: str) -> "PackageComponent":
+        component = self._parent
+        if component is None:
+            raise KeyError(f"{self.uid}: {no_parent_message}")
+        return component
 
     def components(self) -> Iterator["PackageComponent"]:
         """ Yield the component and all its subcomponents. """
