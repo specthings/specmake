@@ -50,8 +50,7 @@ from .pkgfactory import create_build_item_factory
 from .pkgitems import (BuildItem, BuildItemFactory, BuildItemMapper,
                        BuildItemTypeProvider, PackageBuildDirector,
                        PackageComponent)
-from .pkgtemplate import (ComponentTemplate, FileItemTemplate,
-                          InlineItemTemplate, run_attribute_actions)
+from .pkgtemplate import BuildItemTemplate, run_attribute_actions
 
 
 def _git_commit(repository: str, commit: Optional[str] = None) -> str:
@@ -587,9 +586,9 @@ class WorkspaceRepository(_WorkspaceItem):
 def create_workspace_item_factory() -> BuildItemFactory:
     """ Create the workspace build item factory. """
     factory = BuildItemFactory()
-    factory.add_constructor("pkg/template/component", ComponentTemplate)
-    factory.add_constructor("pkg/template/file-item", FileItemTemplate)
-    factory.add_constructor("pkg/template/inline-item", InlineItemTemplate)
+    factory.add_constructor("pkg/template/component", BuildItemTemplate)
+    factory.add_constructor("pkg/template/file-item", BuildItemTemplate)
+    factory.add_constructor("pkg/template/inline-item", BuildItemTemplate)
     factory.add_constructor("pkg/workspace/archive", WorkspaceArchive)
     factory.add_constructor("pkg/workspace/component", WorkspaceComponent)
     factory.add_constructor("pkg/workspace/directory", WorkspaceDirectory)
