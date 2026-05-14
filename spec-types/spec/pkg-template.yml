@@ -24,7 +24,8 @@ spec-info:
         spec-type: name
     description: |
       This set of attributes specifies a package template.
-    mandatory-attributes: all
+    mandatory-attributes:
+    - template-type
 spec-name: Package Template Item Type
 spec-type: pkg-template
 type: spec
