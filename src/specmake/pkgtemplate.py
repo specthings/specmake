@@ -265,10 +265,25 @@ def _expand_inline_template(template_data: dict,
     return data, True
 
 
+def _expand_redirect_template(
+        template_data: dict, component: PackageComponent) -> tuple[dict, bool]:
+    """
+    Expand the template by redirecting to the template provided by the
+    referenced file.
+    """
+    template_data = load_data(component.substitute(template_data["file"]))
+    data, add_item = _EXPAND_TEMPLATE[template_data["template-type"]](
+        template_data, component)
+    run_attribute_actions(template_data.get("attribute-actions"), component,
+                          data)
+    return data, add_item
+
+
 _EXPAND_TEMPLATE = {
     "component": _expand_component_template,
     "file-item": _expand_file_template,
     "inline-item": _expand_inline_template,
+    "redirect": _expand_redirect_template,
 }
 
 

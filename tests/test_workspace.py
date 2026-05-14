@@ -334,6 +334,14 @@ def test_workspace_component(tmpdir):
     assert work_item_a["directory"] == "."
     work_item_a["directory"] = "foobar"
 
+    build_redirect_a = buildspace.director["/pkg/template-redirect-a"]
+    assert isinstance(build_redirect_a, DirectoryState)
+    assert build_redirect_a["params"]["list"] == [
+        "item-b",
+        "template-redirect-b",
+        "template-redirect-a",
+    ]
+
     buildspace_2 = export_to_buildspace(workspace, buildspace_config)
 
     build_item_a_2 = buildspace_2.director["/pkg/template-item-a"]

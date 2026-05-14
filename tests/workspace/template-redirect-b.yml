@@ -1,0 +1,14 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+attribute-actions:
+- action: append
+  enabled-by: true
+  path: /params/list
+  value: template-redirect-b
+file: ${.:/workspace-directory}/item-b.yml
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links: []
+pkg-type: template
+template-type: file-item
+type: pkg

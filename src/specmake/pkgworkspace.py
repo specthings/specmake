@@ -589,6 +589,7 @@ def create_workspace_item_factory() -> BuildItemFactory:
     factory.add_constructor("pkg/template/component", BuildItemTemplate)
     factory.add_constructor("pkg/template/file-item", BuildItemTemplate)
     factory.add_constructor("pkg/template/inline-item", BuildItemTemplate)
+    factory.add_constructor("pkg/template/redirect", BuildItemTemplate)
     factory.add_constructor("pkg/workspace/archive", WorkspaceArchive)
     factory.add_constructor("pkg/workspace/component", WorkspaceComponent)
     factory.add_constructor("pkg/workspace/directory", WorkspaceDirectory)
