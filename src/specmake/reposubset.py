@@ -83,14 +83,13 @@ class RepositorySubset(DirectoryState):
         return files
 
     def run(self):
-        source = self.input("source")
-        assert isinstance(source, DirectoryState)
-
-        self.discard()
-        self.clear()
+        files = self.gather_files()
+        self.discard_and_clear()
 
         logging.info("%s: copy gathered files", self.uid)
-        self.copy_files(source.directory, self.gather_files())
+        source = self.input("source")
+        assert isinstance(source, DirectoryState)
+        self.copy_files(source.directory, files)
 
         self.description.add(f"""Produce a repository subset in directory
 {self.description.path(self.directory)}""")

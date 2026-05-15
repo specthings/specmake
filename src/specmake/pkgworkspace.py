@@ -890,8 +890,7 @@ def _delete_buildspace_items(director: PackageBuildDirector,
     for uid in deleted_uids:
         buildspace_item = director.create_with_dependencies(uid)
         logging.info("%s: discard buildspace state", uid)
-        buildspace_item.discard()
-        buildspace_item.clear()
+        buildspace_item.discard_and_clear()
         buildspace_item.commit("Delete")
         file = buildspace_item.item.file
         director.remove(uid)
@@ -916,8 +915,7 @@ def _discard_buildspace_items(director: PackageBuildDirector,
     for uid in discard_uids:
         buildspace_item = director.create_with_dependencies(uid)
         logging.info("%s: discard buildspace state", uid)
-        buildspace_item.discard()
-        buildspace_item.clear()
+        buildspace_item.discard_and_clear()
         buildspace_item.commit("Discard")
         director.remove(uid)
 

@@ -500,6 +500,11 @@ class BuildItem():
     def clear(self) -> None:
         """ Clear the state of the build item.  """
 
+    def discard_and_clear(self) -> None:
+        """ Discard and clear the build item. """
+        self.discard()
+        self.clear()
+
     def lazy_verify(self) -> bool:
         """ Lazily verify the state of the build item.  """
         return True

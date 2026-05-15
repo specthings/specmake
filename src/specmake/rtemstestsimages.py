@@ -227,8 +227,7 @@ class BuildRTEMSTestsImages(DirectoryState):
         self._generate(_append_test_images)
 
     def run(self) -> None:
-        self.discard()
-        self.clear()
+        self.discard_and_clear()
         os.makedirs(self.directory, exist_ok=True)
         self._generate(self._build_test_images)
         plt.close()
