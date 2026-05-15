@@ -15,6 +15,7 @@ attribute-actions:
 - action: set
   enabled-by: true
   path: /c
+  substitute: true
   value: ${.:/a}/$${.:/b}
 - action: extend
   enabled-by: true
@@ -137,6 +138,7 @@ attribute-actions:
 - action: set
   enabled-by: true
   path: /list-5[0]
+  substitute: true
   value: $$$${.:/a}
 - action: substitute
   enabled-by: true

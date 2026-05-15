@@ -183,9 +183,13 @@ def _attribute_action(item: BuildItem, action: dict, data: dict) -> None:
             else:
                 value = value[name]
         name, index = _get_name_and_index(path_list[-1])
+        action_value = action.get("value")
+        if action.get("substitute"):
+            action_value = item.substitute(action_value)
+        else:
+            action_value = copy.deepcopy(action_value)
         _ATTRIBUTE_ACTIONS[action["action"]](_AttributeActionContext(
-            item, action, item.substitute(action.get("value", None)), value,
-            name, index, path))
+            item, action, action_value, value, name, index, path))
 
 
 def _enabled_by_has_type(item: Item, enabled_by: dict, who: str) -> bool:

@@ -18,6 +18,11 @@ spec-example: null
 spec-info:
   dict:
     attributes:
+      substitute:
+        description: |
+          It shall be true, to substitute the value before it is used,
+          otherwise false.
+        spec-type: bool
       value:
         description: |
           It shall be the action value.
@@ -33,7 +38,10 @@ spec-info:
         spec-type: any
     description: |
       This set of attributes specifies an insert attribute action.
-    mandatory-attributes: all
+    mandatory-attributes:
+    - value
+    - where-key
+    - where-value
 spec-name: Insert Attribute Action
 spec-type: pkg-attribute-action-insert
 type: spec
