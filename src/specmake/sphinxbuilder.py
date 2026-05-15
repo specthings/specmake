@@ -35,12 +35,7 @@ import shutil
 from typing import Any, Callable, Iterator, Optional
 import yaml
 
-from specitems import (BibTeXCitationProvider, Copyrights,
-                       DocumentGlossaryConfig, GlossaryConfig, Item, ItemCache,
-                       ItemGetValueContext, ItemMapper, ItemValueProvider,
-                       Link, SphinxContent, TextContent, generate_glossary,
-                       get_value_subprocess, is_enabled, list_terms,
-                       to_iterable)
+from specitems import (BibTeXCitationProvider, Copyrights, DocumentGlossaryConfig, GlossaryConfig, Item, ItemCache, ItemGetValueContext, ItemMapper, ItemValueProvider, Link, SphinxContent, TextContent, generate_glossary, get_value_subprocess, is_enabled, list_terms, to_iterable)
 from specware import BSD_2_CLAUSE_LICENSE, run_command
 
 from .directorystate import DirectoryState
