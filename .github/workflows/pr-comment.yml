@@ -26,16 +26,15 @@ jobs:
       with:
         script: |
           const [owner, repo] = process.env.REPOSITORY.split('/');
-          const commit = process.env.COMMIT;
-          const pull_requests = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+          const commit_sha = process.env.COMMIT;
+          const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
             owner,
             repo,
-            commit_sha: commit
+            commit_sha
           });
-          const match = pull_requests.data.find(pr => pr.head.sha === commit);
-          if (match) {
-            core.info(`PR #${match.number} matches with this workflow run`);
-            core.setOutput('pr', match.number);
+          if (prs.length > 0) {
+            core.info(`PR #${prs[0].number} matches with this workflow run`);
+            core.setOutput('pr', prs[0].number);
           } else {
             core.setFailed('No PR is associated with this workflow run');
           }
