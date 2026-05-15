@@ -40,7 +40,7 @@ class GCDAProducer(DirectoryState):
 
     def run(self):
         super().run()
-        self.discard()
+        self.discard_and_clear()
 
         build = self.input("build")
         assert isinstance(build, DirectoryState)

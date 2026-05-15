@@ -190,10 +190,10 @@ class BuildPerformanceImages(DirectoryState):
         self._perf_files = files
 
     def run(self) -> None:
+        self.discard_and_clear()
+        os.makedirs(self.directory, exist_ok=True)
         tests = self.input("test-aggregation")
         assert isinstance(tests, TestAggregator)
-        self.discard()
-        os.makedirs(self.directory, exist_ok=True)
         work_queue: multiprocessing.Queue = multiprocessing.Queue()
         for measurement_data in tests.runtime_measurements:
             work_queue.put(measurement_data)

@@ -479,6 +479,7 @@ class SphinxBuilder(DirectoryState):
 
         build = self.output("build")
         assert isinstance(build, DirectoryState)
+        build.discard_and_clear()
         build_dir = build.directory
 
         try:
@@ -486,8 +487,7 @@ class SphinxBuilder(DirectoryState):
             assert isinstance(destination, DirectoryState)
         except KeyError:
             destination = self
-        destination.discard()
-        destination.clear()
+        destination.discard_and_clear()
 
         os.makedirs(os.path.join(build_dir, "source"), exist_ok=True)
         status = run_command(

@@ -340,7 +340,7 @@ class DirectoryStateBase(BuildItem):
 
     def clear(self) -> None:
         """ Clear the file set of the directory state. """
-        logging.info("%s: clear directory state", self.uid)
+        logging.info("%s: clear", self.uid)
         self.item["hash"] = None
         self._files.clear()
         self._update_item_files()
