@@ -363,7 +363,6 @@ class BuildItem():
     def do_run(self) -> None:
         """ Run the build. """
         self.mapper.item = self.item
-        self.discard_outputs()
         self.clear_description()
         logging.info("%s: run", self.uid)
         self.run()
@@ -483,19 +482,6 @@ class BuildItem():
 
     def discard(self) -> None:
         """ Discard the data associated with the build item.  """
-
-    def discard_outputs(self) -> None:
-        """ Discard all outputs of the build item.  """
-        logging.info("%s: discard outputs", self.uid)
-        for item in self.item.parents("output",
-                                      is_link_enabled=link_is_enabled):
-            if not item.enabled:
-                logging.info("%s: output is disabled: %s", self.uid, item.uid)
-                continue
-            item["build-description"] = None
-            build_item = self.director[item.uid]
-            build_item.discard()
-            build_item.clear_description()
 
     def clear(self) -> None:
         """ Clear the state of the build item.  """
