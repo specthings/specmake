@@ -474,8 +474,9 @@ General
 This test case validates all state transitions
 specified by the action requirement `spec:/​rtems/​req/​action </pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction>`__.  The
 transition map is validated by the function
-`T_case_body_RtemsReqAction() </pkg/doc-ddf-sdd/html/group__RtemsReqAction.html#ga041c7d03352b4363574beb9d7bebfa54>`__ contained in the
-file `tests/tc-action.c </pkg/doc-ddf-sdd/html/tc-action_8c.html>`__.
+`T_case_body_RtemsReqAction() </pkg/doc-ddf-sdd/html/group__RtemsReqAction.html#ga041c7d03352b4363574beb9d7bebfa54>`__
+contained in the file
+`tests/tc-action.c </pkg/doc-ddf-sdd/html/tc-action_8c.html>`__.
 
 .. rubric:: TEST SUITES:
 
@@ -549,8 +550,9 @@ General
 This test case validates all state transitions
 specified by the action requirement `spec:/​rtems/​req/​action-2 </pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2>`__.  The
 transition map is validated by the function
-`T_case_body_RtemsReqAction2() </pkg/doc-ddf-sdd/html/group__RtemsReqAction2.html#ga5e62b99a0ea0b8fdece5bbfc3532300f>`__ contained in the
-file `tests/tc-action-2.c </pkg/doc-ddf-sdd/html/tc-action-2_8c.html>`__.
+`T_case_body_RtemsReqAction2() </pkg/doc-ddf-sdd/html/group__RtemsReqAction2.html#ga5e62b99a0ea0b8fdece5bbfc3532300f>`__
+contained in the file
+`tests/tc-action-2.c </pkg/doc-ddf-sdd/html/tc-action-2_8c.html>`__.
 
 .. rubric:: TEST SUITES:
 
@@ -626,8 +628,9 @@ measurement request which is carried out by
 :ref:`spec:/​score/​cpu/​val/​perf <SpecScoreCpuValPerf>`.  It produces the runtime measurements
 required by the runtime performance requirement `spec:/​rtems/​req/​perf </pkg/doc-ts-srs/html/requirements.html#specrtemsreqperf>`__.
 It is implemented by the function
-`RtemsReqPerf_Body() </pkg/doc-ddf-sdd/html/group__RtemsReqPerf.html#ga80297695652fb63b3f419701ebf5b8a7>`__ contained in the
-file `tests/tc-perf.c </pkg/doc-ddf-sdd/html/tc-perf_8c.html>`__.
+`RtemsReqPerf_Body() </pkg/doc-ddf-sdd/html/group__RtemsReqPerf.html#ga80297695652fb63b3f419701ebf5b8a7>`__
+contained in the file
+`tests/tc-perf.c </pkg/doc-ddf-sdd/html/tc-perf_8c.html>`__.
 
 .. rubric:: TEST RESULTS:
 
@@ -703,8 +706,9 @@ measurement request which is carried out by
 :ref:`spec:/​score/​cpu/​val/​perf <SpecScoreCpuValPerf>`.  It produces the runtime measurements
 required by the runtime performance requirement `spec:/​rtems/​req/​perf-no-results </pkg/doc-ts-srs/html/requirements.html#specrtemsreqperfnoresults>`__.
 It is implemented by the function
-`RtemsReqPerfNoResults_Body() </pkg/doc-ddf-sdd/html/group__RtemsReqPerfNoResults.html#gac756b36b1183be9770beb26f1e1b2bbf>`__ contained in the
-file `tests/tc-perf.c </pkg/doc-ddf-sdd/html/tc-perf_8c.html>`__.
+`RtemsReqPerfNoResults_Body() </pkg/doc-ddf-sdd/html/group__RtemsReqPerfNoResults.html#gac756b36b1183be9770beb26f1e1b2bbf>`__
+contained in the file
+`tests/tc-perf.c </pkg/doc-ddf-sdd/html/tc-perf_8c.html>`__.
 
 .. rubric:: TEST RESULTS:
 
@@ -786,8 +790,9 @@ The following test case actions are carried out:
   the function `RtemsValTestCase_Action_0() </pkg/doc-ddf-sdd/html/group__RtemsValTestCase.html#ga3a02cc8507f203b9231feb6f5904c1ef>`__.
 
 This test case is implemented by the
-function `T_case_body_RtemsValTestCase() </pkg/doc-ddf-sdd/html/group__RtemsValTestCase.html#gabdf6e7d14949fd137b99d4efad655d34>`__ contained
-in the file `tests/tc-blub.c </pkg/doc-ddf-sdd/html/tc-blub_8c.html>`__.
+function `T_case_body_RtemsValTestCase() </pkg/doc-ddf-sdd/html/group__RtemsValTestCase.html#gabdf6e7d14949fd137b99d4efad655d34>`__
+contained in the file
+`tests/tc-blub.c </pkg/doc-ddf-sdd/html/tc-blub_8c.html>`__.
 
 .. rubric:: TEST SUITES:
 
@@ -869,8 +874,9 @@ Description.
 The following test case actions are carried out:
 
 This test case is implemented by the
-function `T_case_body_RtemsValTestCaseFail() </pkg/doc-ddf-sdd/html/group__RtemsValTestCaseFail.html#gaf6e0cb824ab37c1fc93cb11de79ec7de>`__ contained
-in the file `tests/tc-fail.c </pkg/doc-ddf-sdd/html/tc-fail_8c.html>`__.
+function `T_case_body_RtemsValTestCaseFail() </pkg/doc-ddf-sdd/html/group__RtemsValTestCaseFail.html#gaf6e0cb824ab37c1fc93cb11de79ec7de>`__
+contained in the file
+`tests/tc-fail.c </pkg/doc-ddf-sdd/html/tc-fail_8c.html>`__.
 
 .. rubric:: TEST SUITES:
 
@@ -951,8 +957,9 @@ Description.
 The following test case actions are carried out:
 
 This test case is implemented by the
-function `T_case_body_RtemsValTestCasePass() </pkg/doc-ddf-sdd/html/group__RtemsValTestCasePass.html#gac1d679420bcb7eab4d90e977023f3c70>`__ contained
-in the file `tests/tc-pass.c </pkg/doc-ddf-sdd/html/tc-pass_8c.html>`__.
+function `T_case_body_RtemsValTestCasePass() </pkg/doc-ddf-sdd/html/group__RtemsValTestCasePass.html#gac1d679420bcb7eab4d90e977023f3c70>`__
+contained in the file
+`tests/tc-pass.c </pkg/doc-ddf-sdd/html/tc-pass_8c.html>`__.
 
 .. rubric:: TEST SUITES:
 
@@ -1039,8 +1046,9 @@ The following test case actions are carried out:
   the function `RtemsValTestCaseRun_Action_0() </pkg/doc-ddf-sdd/html/group__RtemsValTestCaseRun.html#ga3cbb537cb50db02607b786cec0cc3bd1>`__.
 
 This test case is implemented by the
-function `RtemsValTestCaseRun_Run() </pkg/doc-ddf-sdd/html/group__RtemsValTestCaseRun.html#ga301259ebfd4b0c947ad359e448a3a7bb>`__ contained
-in the file `tests/tr-test-case.c </pkg/doc-ddf-sdd/html/tr-test-case_8c.html>`__.
+function `RtemsValTestCaseRun_Run() </pkg/doc-ddf-sdd/html/group__RtemsValTestCaseRun.html#ga301259ebfd4b0c947ad359e448a3a7bb>`__
+contained in the file
+`tests/tr-test-case.c </pkg/doc-ddf-sdd/html/tr-test-case_8c.html>`__.
 
 .. rubric:: TEST SUITES:
 
@@ -1117,8 +1125,9 @@ Description.
 The following test case actions are carried out:
 
 This test case is implemented by the
-function `T_case_body_RtemsValTestCaseXfail() </pkg/doc-ddf-sdd/html/group__RtemsValTestCaseXfail.html#ga8bd4229a2e63e549db1f0ad7c4f18a5c>`__ contained
-in the file `tests/tc-xfail.c </pkg/doc-ddf-sdd/html/tc-xfail_8c.html>`__.
+function `T_case_body_RtemsValTestCaseXfail() </pkg/doc-ddf-sdd/html/group__RtemsValTestCaseXfail.html#ga8bd4229a2e63e549db1f0ad7c4f18a5c>`__
+contained in the file
+`tests/tc-xfail.c </pkg/doc-ddf-sdd/html/tc-xfail_8c.html>`__.
 
 .. rubric:: TEST SUITES:
 
@@ -1202,8 +1211,9 @@ The following runtime measurement requests are carried out:
 
 This test case validates `spec:/​req/​root </pkg/doc-ts-srs/html/requirements.html#specreqroot>`__.
 This test case is implemented by the
-function `T_case_body_ScoreCpuValPerf() </pkg/doc-ddf-sdd/html/group__ScoreCpuValPerf.html#ga00214d5ab555daf1418266e8733a91ad>`__ contained
-in the file `tests/tc-perf.c </pkg/doc-ddf-sdd/html/tc-perf_8c.html>`__.
+function `T_case_body_ScoreCpuValPerf() </pkg/doc-ddf-sdd/html/group__ScoreCpuValPerf.html#ga00214d5ab555daf1418266e8733a91ad>`__
+contained in the file
+`tests/tc-perf.c </pkg/doc-ddf-sdd/html/tc-perf_8c.html>`__.
 
 .. rubric:: TEST SUITES:
 
