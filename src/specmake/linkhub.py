@@ -934,20 +934,21 @@ class LinkHub(BuildItem):
         self.description.add("""Provide documentation links for specification
 items.""")
 
-    def get_sdd_link(self, kind: str, name: str) -> str:
+    def get_sdd_link(self, kind: str, name: str,
+                     mapper: BuildItemMapper) -> str:
         """ Return the SDD link for the name by kind. """
         elem_info = self.name_info[f"{kind}/{name}"]
-        return self.mapper.format_link(elem_info["name"], elem_info["link"])
+        return mapper.format_link(elem_info["name"], elem_info["link"])
 
-    def get_file_sdd_link(self, path: str) -> str:
+    def get_file_sdd_link(self, path: str, mapper: BuildItemMapper) -> str:
         """ Return the SDD link for the file path. """
-        return self.get_sdd_link("file", path)
+        return self.get_sdd_link("file", path, mapper)
 
-    def get_function_sdd_link(self, name: str) -> str:
+    def get_function_sdd_link(self, name: str, mapper: BuildItemMapper) -> str:
         """ Return the SDD link for the function with the name. """
-        return self.get_sdd_link("function", name)
+        return self.get_sdd_link("function", name, mapper)
 
-    def get_any_sdd_link(self, name: str) -> str:
+    def get_any_sdd_link(self, name: str, mapper: BuildItemMapper) -> str:
         """ Return an SDD link for the name. """
         for kind in _ELEMENT_KINDS:
             elem_info = self.name_info.get(f"{kind}/{name}")
@@ -955,7 +956,7 @@ items.""")
                 break
         if elem_info is None:
             raise ValueError(f"there is no SDD element with this name: {name}")
-        return self.mapper.format_link(elem_info["name"], elem_info["link"])
+        return mapper.format_link(elem_info["name"], elem_info["link"])
 
 
 class SpecMapper(BuildItemMapper):
@@ -1053,11 +1054,11 @@ class SpecMapper(BuildItemMapper):
         link_hub = self.build_item.director[link_hub_uid]
         assert isinstance(link_hub, LinkHub)
         assert ctx.args
-        return link_hub.get_sdd_link(kind, ctx.args)
+        return link_hub.get_sdd_link(kind, ctx.args, self)
 
     def _get_value_sdd_link_unique(self, ctx: ItemGetValueContext) -> str:
         link_hub_uid = self.build_item.component.item.child("link-hub").uid
         link_hub = self.build_item.director[link_hub_uid]
         assert isinstance(link_hub, LinkHub)
         assert ctx.args
-        return link_hub.get_any_sdd_link(ctx.args)
+        return link_hub.get_any_sdd_link(ctx.args, self)

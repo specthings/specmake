@@ -139,7 +139,7 @@ ${/pkg/deployment/doc-package-manual:/cite-long}."""))
             with content.section("Approach refinements"):
                 content.add(f"""There are no approach refinements
 necessary.  The test suite is implemented in the file
-{self._get_link_hub().get_file_sdd_link(item['test-target'])}.""")
+{self._get_link_hub().get_file_sdd_link(item['test-target'], self.mapper)}.""")
 
     def _get_test_suites(self, _ctx: ItemGetValueContext) -> str:
         content = SphinxContent(section_level=2)
@@ -178,8 +178,9 @@ necessary.  The test suite is implemented in the file
         content.add(f"""This test case validates all state transitions
 specified by the action requirement {self.mapper.get_link(item)}.  The
 transition map is validated by the function
-{link_hub.get_function_sdd_link(test_case_function)} contained in the
-file {link_hub.get_file_sdd_link(item['test-target'])}.""")
+{link_hub.get_function_sdd_link(test_case_function, self.mapper)}
+contained in the file
+{link_hub.get_file_sdd_link(item['test-target'], self.mapper)}.""")
 
     def _document_performance_runtime(self, content: SphinxContent,
                                       link_hub: LinkHub, item: Item,
@@ -191,8 +192,9 @@ measurement request which is carried out by
 {self.mapper.make_reference(context)}.  It produces the runtime measurements
 required by the runtime performance requirement {self.mapper.get_link(item)}.
 It is implemented by the function
-{link_hub.get_function_sdd_link(test_case_function)} contained in the
-file {link_hub.get_file_sdd_link(context['test-target'])}.""")
+{link_hub.get_function_sdd_link(test_case_function, self.mapper)}
+contained in the file
+{link_hub.get_file_sdd_link(context['test-target'], self.mapper)}.""")
 
     def _document_runtime_measurement_request(self, content: SphinxContent,
                                               link_hub: LinkHub, item: Item,
@@ -208,8 +210,9 @@ file {link_hub.get_file_sdd_link(context['test-target'])}.""")
             content, item, item["links"], "This test case validates")
         test_case_function = f"T_case_body_{ident}"
         content.add(f"""This test case is implemented by the
-function {link_hub.get_function_sdd_link(test_case_function)} contained
-in the file {link_hub.get_file_sdd_link(item['test-target'])}.""")
+function {link_hub.get_function_sdd_link(test_case_function, self.mapper)}
+contained in the file
+{link_hub.get_file_sdd_link(item['test-target'], self.mapper)}.""")
 
     def _document_test_case(self, content: SphinxContent, link_hub: LinkHub,
                             item: Item, ident: str) -> None:
@@ -230,11 +233,13 @@ in the file {link_hub.get_file_sdd_link(item['test-target'])}.""")
                     content, item, action["links"], "This action validates")
                 action_function = f"{ident}_Action_{index}"
                 content.add(f"""This action is implemented by
-the function {link_hub.get_function_sdd_link(action_function)}.""")
+the function {link_hub.get_function_sdd_link(action_function, self.mapper)}."""
+                            )
         test_case_function = _get_test_case_function(item, ident)
         content.add(f"""This test case is implemented by the
-function {link_hub.get_function_sdd_link(test_case_function)} contained
-in the file {link_hub.get_file_sdd_link(item['test-target'])}.""")
+function {link_hub.get_function_sdd_link(test_case_function, self.mapper)}
+contained in the file
+{link_hub.get_file_sdd_link(item['test-target'], self.mapper)}.""")
 
     def _add_test_suite_memberships(self, content: SphinxContent,
                                     item: Item) -> None:

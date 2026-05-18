@@ -44,12 +44,13 @@ def test_linkhub(caplog, tmp_path):
 
     link_hub = director["/pkg/steps/link-hub"]
     assert link_hub.get_sdd_link(
-        "function", "blub"
+        "function", "blub", link_hub.mapper
     ) == f"`blub() <{tmp_path}/pkg/doc-ddf-sdd/html/group__Blub.html#ga754ccc677acbd87ede8b3c082bb9ff6b>`__"
     assert link_hub.get_file_sdd_link(
-        "a.c") == f"`a.c <{tmp_path}/pkg/doc-ddf-sdd/html/a_8c.html>`__"
+        "a.c", link_hub.mapper
+    ) == f"`a.c <{tmp_path}/pkg/doc-ddf-sdd/html/a_8c.html>`__"
     assert link_hub.get_function_sdd_link(
-        "blub"
+        "blub", link_hub.mapper
     ) == f"`blub() <{tmp_path}/pkg/doc-ddf-sdd/html/group__Blub.html#ga754ccc677acbd87ede8b3c082bb9ff6b>`__"
 
     mapper = SpecMapper(link_hub.item, link_hub, "icd")
