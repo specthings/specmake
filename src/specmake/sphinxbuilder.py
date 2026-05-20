@@ -389,7 +389,7 @@ class SphinxBuilder(DirectoryState):
         self._whoami = self["document-key"]
         self._index: list[str] = []
         self._section_level_stack: list[int] = [2]
-        self._section_stack: list[BuildItem] = [self]
+        self._section_lifo: list[BuildItem] = [self]
         self.content_license: set[str] = {self["document-license"]}
         for source_license in self["document-license-map"].keys():
             for the_license in source_license.split(" OR "):
@@ -671,9 +671,11 @@ class SphinxBuilder(DirectoryState):
                              section: BuildItem) -> None:
         lines = self._push_pop_enabled_by(
             section.item["content"].strip().splitlines())
-        self._section_stack.append(section)
-        content.add(self.substitute("\n".join(lines), section.item))
-        self._section_stack.pop()
+        self._section_lifo.insert(0, section)
+        try:
+            content.add(self.substitute("\n".join(lines), section.item))
+        finally:
+            self._section_lifo.pop(0)
 
     def _push_component(self, ctx: ItemGetValueContext) -> str:
         assert ctx.args
@@ -705,7 +707,7 @@ class SphinxBuilder(DirectoryState):
             assert isinstance(mapper, BuildItemMapper)
             links_sections = [
                 (link, section)
-                for link, section in self._section_stack[-1].input_links(
+                for link, section in self._section_lifo[0].input_links(
                     "document-section") if link["section-key"] == section_key
             ]
             if len(links_sections
