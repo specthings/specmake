@@ -454,6 +454,44 @@ class SphinxBuilder(DirectoryState):
         }
         _CitationProvider(self)
 
+    def input(self, name: str) -> "BuildItem":
+        for section in self._section_lifo[:-1]:
+            try:
+                return section.input(name)
+            except KeyError:
+                continue
+        return super().input(name)
+
+    def inputs(self, name: Optional[str] = None) -> Iterator["BuildItem"]:
+        for section in self._section_lifo[:-1]:
+            yield from section.inputs(name)
+        yield from super().inputs(name)
+
+    def input_link(self,
+                   name: Optional[str] = None) -> tuple[Link, "BuildItem"]:
+        for section in self._section_lifo[:-1]:
+            try:
+                return section.input_link(name)
+            except KeyError:
+                continue
+        return super().input_link(name)
+
+    def input_links(
+            self,
+            name: Optional[str] = None) -> Iterator[tuple[Link, "BuildItem"]]:
+        for section in self._section_lifo[:-1]:
+            yield from section.input_links(name)
+        yield from super().input_links(name)
+
+    def input_link_by_key(self, name: str, key: str,
+                          value: str) -> tuple[Link, "BuildItem"]:
+        for section in self._section_lifo[:-1]:
+            try:
+                return section.input_link_by_key(name, key, value)
+            except ValueError:
+                continue
+        return super().input_link_by_key(name, key, value)
+
     def _run_actions(self, source: DirectoryState, build_dir: str) -> None:
         source_dir = source.directory
         document_components = self["document-components"]
