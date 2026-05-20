@@ -45,8 +45,7 @@ from specware import BSD_2_CLAUSE_LICENSE, run_command
 
 from .directorystate import DirectoryState
 from .pkgitems import (BuildItem, BuildItemFactory, BuildItemMapper,
-                       PackageBuildDirector, PackageComponent,
-                       build_item_input)
+                       PackageBuildDirector, PackageComponent)
 from .testoutputparser import augment_report
 
 _BREAK = "\\break"
@@ -390,7 +389,7 @@ class SphinxBuilder(DirectoryState):
         self._whoami = self["document-key"]
         self._index: list[str] = []
         self._section_level_stack: list[int] = [2]
-        self._section_stack: list[BuildItem] = [self]
+        self._section_lifo: list[BuildItem] = [self]
         self.content_license: set[str] = {self["document-license"]}
         for source_license in self["document-license-map"].keys():
             for the_license in source_license.split(" OR "):
@@ -454,6 +453,44 @@ class SphinxBuilder(DirectoryState):
             "glossary": self._glossary
         }
         _CitationProvider(self)
+
+    def input(self, name: str) -> "BuildItem":
+        for section in self._section_lifo[:-1]:
+            try:
+                return section.input(name)
+            except KeyError:
+                continue
+        return super().input(name)
+
+    def inputs(self, name: Optional[str] = None) -> Iterator["BuildItem"]:
+        for section in self._section_lifo[:-1]:
+            yield from section.inputs(name)
+        yield from super().inputs(name)
+
+    def input_link(self,
+                   name: Optional[str] = None) -> tuple[Link, "BuildItem"]:
+        for section in self._section_lifo[:-1]:
+            try:
+                return section.input_link(name)
+            except KeyError:
+                continue
+        return super().input_link(name)
+
+    def input_links(
+            self,
+            name: Optional[str] = None) -> Iterator[tuple[Link, "BuildItem"]]:
+        for section in self._section_lifo[:-1]:
+            yield from section.input_links(name)
+        yield from super().input_links(name)
+
+    def input_link_by_key(self, name: str, key: str,
+                          value: str) -> tuple[Link, "BuildItem"]:
+        for section in self._section_lifo[:-1]:
+            try:
+                return section.input_link_by_key(name, key, value)
+            except ValueError:
+                continue
+        return super().input_link_by_key(name, key, value)
 
     def _run_actions(self, source: DirectoryState, build_dir: str) -> None:
         source_dir = source.directory
@@ -672,9 +709,9 @@ class SphinxBuilder(DirectoryState):
                              section: BuildItem) -> None:
         lines = self._push_pop_enabled_by(
             section.item["content"].strip().splitlines())
-        self._section_stack.append(section)
+        self._section_lifo.insert(0, section)
         content.add(self.substitute("\n".join(lines), section.item))
-        self._section_stack.pop()
+        self._section_lifo.pop(0)
 
     def _push_component(self, ctx: ItemGetValueContext) -> str:
         assert ctx.args
@@ -706,7 +743,7 @@ class SphinxBuilder(DirectoryState):
             assert isinstance(mapper, BuildItemMapper)
             links_sections = [
                 (link, section)
-                for link, section in self._section_stack[-1].input_links(
+                for link, section in self._section_lifo[0].input_links(
                     "document-section") if link["section-key"] == section_key
             ]
             if len(links_sections
@@ -752,15 +789,7 @@ class SphinxBuilder(DirectoryState):
             matching = set()
             for uid in anchors:
                 item = item_cache[uid]
-                if item.type.startswith("pkg/component"):
-                    component = self.director[item.uid]
-                else:
-                    try:
-                        component_item = build_item_input(item, "component")
-                    except KeyError:
-                        component = self.director.package
-                    else:
-                        component = self.director[component_item.uid]
+                component = item.view["component"]
                 with item_cache.selection(component.selection):
                     matching.update(item_2.uid
                                     for item_2 in itertools.chain(
