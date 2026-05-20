@@ -45,8 +45,7 @@ from specware import BSD_2_CLAUSE_LICENSE, run_command
 
 from .directorystate import DirectoryState
 from .pkgitems import (BuildItem, BuildItemFactory, BuildItemMapper,
-                       PackageBuildDirector, PackageComponent,
-                       build_item_input)
+                       PackageBuildDirector, PackageComponent)
 from .testoutputparser import augment_report
 
 _BREAK = "\\break"
@@ -752,15 +751,7 @@ class SphinxBuilder(DirectoryState):
             matching = set()
             for uid in anchors:
                 item = item_cache[uid]
-                if item.type.startswith("pkg/component"):
-                    component = self.director[item.uid]
-                else:
-                    try:
-                        component_item = build_item_input(item, "component")
-                    except KeyError:
-                        component = self.director.package
-                    else:
-                        component = self.director[component_item.uid]
+                component = item.view["component"]
                 with item_cache.selection(component.selection):
                     matching.update(item_2.uid
                                     for item_2 in itertools.chain(

@@ -276,12 +276,7 @@ class BuildItem():
         self.item[key] = value
 
     def _associate_with_component(self) -> "PackageComponent":
-        try:
-            component = self.input("component")
-            assert isinstance(component, PackageComponent)
-        except KeyError:
-            component = self.director.package
-        return component
+        return self.item.view["component"]
 
     def parent(self, _no_parent_message: str) -> "PackageComponent":
         """
@@ -971,7 +966,7 @@ class PackageBuildDirector(dict):
             return self[uid]
         seen.add(uid)
         item = self.item_cache[uid]
-        with self._get_component(item).scope():
+        with item.view["component"].scope():
             for link in _get_input_links(item):
                 self.create_with_dependencies(link.uid, seen)
             return self[uid]
@@ -997,10 +992,13 @@ class PackageBuildDirector(dict):
         self.submodules = self.submodules + (submodule, )
 
     def _get_component(self, item: Item) -> PackageComponent:
-        try:
-            component_item = build_item_input(item, "component")
-        except KeyError:
-            return self.package
+        if item.type.startswith("pkg/component"):
+            component_item = item
+        else:
+            try:
+                component_item = build_item_input(item, "component")
+            except KeyError:
+                return self.package
         component = self[component_item.uid]
         assert isinstance(component, PackageComponent)
         return component
