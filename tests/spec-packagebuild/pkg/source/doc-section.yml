@@ -3,6 +3,8 @@ content: |
   Section content: ${.:/component/arch}
 
   ${.:/sections:2:subsection}
+
+  ${.:/show-inputs}
 copyrights:
 - Copyright (C) 2023 embedded brains GmbH & Co. KG
 enabled-by: true
@@ -12,5 +14,9 @@ links:
   name: component
   role: input
   uid: ../sub/component
+- hash: null
+  name: source
+  role: input
+  uid: empty
 pkg-type: sphinx-section
 type: pkg

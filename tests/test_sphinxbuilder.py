@@ -71,15 +71,31 @@ def test_sphinxbuilder(caplog, tmp_path, monkeypatch):
                              ["sphinx-builder"])
     director = package.director
     doc = director["/pkg/deployment/doc"]
-    doc.substitute("${.:/document-author}") == "embedded brains GmbH & Co. KG"
-    doc.substitute("${.:/document-year}") == "2020"
-    doc.substitute(
+
+    def _show_inputs(ctx: ItemGetValueContext) -> str:
+        lines: list[str] = []
+        lines.append(f"input: {doc.input('document-section').uid}")
+        lines.append(f"inputs: {[item.uid for item in doc.inputs()]}")
+        link, item = doc.input_link("document-section")
+        lines.append(f"input_link: {link.uid, item.uid}")
+        lines.append(
+            f"input_links: {[(link['name'], item.uid) for link, item in doc.input_links()]}"
+        )
+        return "\n".join(lines)
+
+    doc.mapper.add_get_value("pkg/sphinx-section:/show-inputs", _show_inputs)
+
+    assert doc.substitute(
+        "${.:/document-author}") == "embedded brains GmbH & Co. KG"
+    assert doc.substitute("${.:/document-year}") == "2020"
+    assert doc.substitute(
         "${.:/document-copyright}") == "2020 embedded brains GmbH & Co. KG"
     doc.item["document-copyrights"].append("Copyright (C) 2023 John Doe")
-    doc.substitute("${.:/document-author}"
-                   ) == "embedded brains GmbH & Co. KG and contributors"
-    doc.substitute("${.:/document-copyright}"
-                   ) == "2020 embedded brains GmbH & Co. KG and contributors"
+    assert doc.substitute("${.:/document-author}"
+                          ) == "embedded brains GmbH & Co. KG and contributors"
+    assert doc.substitute(
+        "${.:/document-copyright}"
+    ) == "2020 embedded brains GmbH & Co. KG and contributors"
     doc.item["document-copyrights"].pop()
     assert doc.substitute(
         "${.:/document-title-page-title}") == "The \\break \\break Title"
@@ -146,6 +162,11 @@ subsection 2 Header
 Subsection content: sub-arch
 
 subsection 2 Header
+
+input: /pkg/source/doc-subsection
+inputs: ['/pkg/sub/component', '/pkg/source/empty', '/pkg/source/doc-subsection', '/pkg/source/doc-subsection-2', '/pkg/component', '/pkg/source/doc', '/pkg/source/doc-section', '/pkg/source/doc-element', '/pkg/source/doc-element-2', '/pkg/source/doc-element-3']
+input_link: ('/pkg/source/doc-subsection', '/pkg/source/doc-subsection')
+input_links: [('component', '/pkg/sub/component'), ('source', '/pkg/source/empty'), ('document-section', '/pkg/source/doc-subsection'), ('document-section', '/pkg/source/doc-subsection-2'), ('component', '/pkg/component'), ('source', '/pkg/source/doc'), ('document-section', '/pkg/source/doc-section'), ('document-element', '/pkg/source/doc-element'), ('document-element', '/pkg/source/doc-element-2'), ('document-element', '/pkg/source/doc-element-3')]
 text
 :ref:`SectionHeader`
 text
@@ -263,6 +284,11 @@ Push component content: sub-arch
 Subsection content: sub-arch
 
 subsection 2 Header
+
+input: /pkg/source/doc-subsection
+inputs: ['/pkg/sub/component', '/pkg/source/empty', '/pkg/source/doc-subsection', '/pkg/source/doc-subsection-2', '/pkg/component', '/pkg/source/doc', '/pkg/source/doc-section', '/pkg/source/doc-element', '/pkg/source/doc-element-2', '/pkg/source/doc-element-3']
+input_link: ('/pkg/source/doc-subsection', '/pkg/source/doc-subsection')
+input_links: [('component', '/pkg/sub/component'), ('source', '/pkg/source/empty'), ('document-section', '/pkg/source/doc-subsection'), ('document-section', '/pkg/source/doc-subsection-2'), ('component', '/pkg/component'), ('source', '/pkg/source/doc'), ('document-section', '/pkg/source/doc-section'), ('document-element', '/pkg/source/doc-element'), ('document-element', '/pkg/source/doc-element-2'), ('document-element', '/pkg/source/doc-element-3')]
 text
 {ref}`SectionHeader`
 text
