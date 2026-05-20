@@ -534,7 +534,7 @@ class BuildItem():
         """ Refresh all make and input links of the build item.  """
         logging.info("%s: refresh make and input links", self.uid)
         for link in itertools.chain(self.item.links_to_parents("make"),
-                                    _get_input_links(self.item)):
+                                    self.yield_item_input_links()):
             self.director[link.item.uid].refresh_link(link)
 
     def _make(self, parent_links: Iterator[Link], child_links: Iterator[Link],
@@ -581,23 +581,29 @@ class BuildItem():
             item = self.item
         return self.mapper.substitute_data(data, item)
 
+    def yield_item_input_links(self) -> Iterator[Link]:
+        """ Yield the input links of the associated item. """
+        item = self.item
+        yield from itertools.chain(item.links_to_parents("input"),
+                                   item.links_to_children("input-to"))
+
     def input(self, name: str) -> "BuildItem":
         """ Return the first input associated with the name. """
-        for link in _get_input_links(self.item):
+        for link in self.yield_item_input_links():
             if link["name"] == name:
                 return self.director[link.item.uid]
         raise KeyError
 
     def inputs(self, name: Optional[str] = None) -> Iterator["BuildItem"]:
         """ Yield the inputs associated with the name. """
-        for link in _get_input_links(self.item):
+        for link in self.yield_item_input_links():
             if name is None or link["name"] == name:
                 yield self.director[link.item.uid]
 
     def input_link(self,
                    name: Optional[str] = None) -> tuple[Link, "BuildItem"]:
         """ Return the first link and input pair associated with the name. """
-        for link in _get_input_links(self.item):
+        for link in self.yield_item_input_links():
             if link["name"] == name:
                 return link, self.director[link.item.uid]
         raise KeyError
@@ -606,7 +612,7 @@ class BuildItem():
             self,
             name: Optional[str] = None) -> Iterator[tuple[Link, "BuildItem"]]:
         """ Yield the link and input pairs associated with the name. """
-        for link in _get_input_links(self.item):
+        for link in self.yield_item_input_links():
             if name is None or link["name"] == name:
                 yield link, self.director[link.item.uid]
 
@@ -615,7 +621,7 @@ class BuildItem():
         """
         Get the input associated with the name and a key with the value.
         """
-        for link in _get_input_links(self.item):
+        for link in self.yield_item_input_links():
             if name is None or link["name"] == name and link[key] == value:
                 return link, self.director[link.item.uid]
         raise ValueError(f"{self.uid}: has no {name} input with attribute "

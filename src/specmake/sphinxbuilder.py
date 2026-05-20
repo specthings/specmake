@@ -454,6 +454,12 @@ class SphinxBuilder(DirectoryState):
         }
         _CitationProvider(self)
 
+    def yield_item_input_links(self) -> Iterator[Link]:
+        for section in self._section_lifo:
+            item = section.item
+            yield from itertools.chain(item.links_to_parents("input"),
+                                       item.links_to_children("input-to"))
+
     def _run_actions(self, source: DirectoryState, build_dir: str) -> None:
         source_dir = source.directory
         document_components = self["document-components"]
