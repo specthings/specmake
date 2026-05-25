@@ -43,6 +43,10 @@ from .pkgitems import PackageBuildDirector
 from .testrunner import Executable, Report, TestRunner
 
 
+def _bz2_name(exe: Executable) -> str:
+    return f"{Path(exe.path).name}.bz2"
+
+
 class ESATestRunner(TestRunner):
     """ Runs tests using the ESA run tests service. """
 
@@ -108,18 +112,15 @@ to run the test programs on the ``{self._target_board()}`` target board."""
         remaining: list[Executable] = []
         strip = self["strip-program-path"]
         for exe in executables:
-            source = Path(exe.path)
-            stripped = working_directory / source.name
+            stripped = working_directory / Path(exe.path).name
             status = run_command(
-                [strip, str(source), "-o",
-                 str(stripped)],
+                [strip, exe.path, "-o", str(stripped)],
                 cwd=str(working_directory))
             assert status == 0
             data = bz2.compress(stripped.read_bytes())
             stripped.unlink()
-            name = f"{source.name}.bz2"
-            remaining.append(Executable(name, exe.digest, exe.timeout))
-            compressed = working_directory / name
+            remaining.append(exe)
+            compressed = working_directory / _bz2_name(exe)
             compressed.write_bytes(data)
         return remaining
 
@@ -136,7 +137,7 @@ to run the test programs on the ``{self._target_board()}`` target board."""
             remaining[:] = []
         overall_timeout = sum(int(math.ceil(exe.timeout)) for exe in todo)
         jobs = [{
-            exe.path: {
+            _bz2_name(exe): {
                 "job_timeout": int(math.ceil(exe.timeout))
             }
         } for exe in todo]
@@ -166,7 +167,7 @@ to run the test programs on the ``{self._target_board()}`` target board."""
                     break
                 overall_timeout = new_overall_timeout
             todo.append(exe)
-            jobs.append({exe.path: {"job_timeout": timeout}})
+            jobs.append({_bz2_name(exe): {"job_timeout": timeout}})
         return {
             "version": 1,
             "target_board": self._target_board(),
@@ -223,7 +224,7 @@ to run the test programs on the ``{self._target_board()}`` target board."""
                      executables: list[Executable],
                      reports: list[Report]) -> None:
         for exe in executables:
-            result_path = working_directory / f"{exe.path}.result.txt"
+            result_path = working_directory / f"{_bz2_name(exe)}.result.txt"
             report: Report = {
                 "executable": exe.path,
                 "executable-sha512": exe.digest,
@@ -251,7 +252,7 @@ to run the test programs on the ``{self._target_board()}`` target board."""
             while remaining:
                 request_file, overall_timeout, todo = self._write_request_file(
                     working_directory, iteration, remaining)
-                files = [exe.path for exe in todo]
+                files = [_bz2_name(exe) for exe in todo]
                 status = run_command(["git", "add"] + files + [request_file],
                                      cwd=str(working_directory))
                 assert status == 0

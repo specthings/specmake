@@ -383,9 +383,11 @@ to run the test programs on the ``Board`` target board."""
         _GIT_BASE_BRANCH,
         _GIT_DELETE_BRANCH,
     ])
-    runner.run_tests(
+    reports = runner.run_tests(
         [Executable(str(exe_a), "", 1),
          Executable(str(exe_b), "", 20)])
+    assert reports[0]["executable"] == str(exe_a)
+    assert reports[1]["executable"] == str(exe_b)
 
     logging.critical("split request limit executable count")
     runner.item["request-policy"] = {
@@ -416,6 +418,8 @@ to run the test programs on the ``Board`` target board."""
         _GIT_BASE_BRANCH,
         _GIT_DELETE_BRANCH,
     ])
-    runner.run_tests(
+    reports = runner.run_tests(
         [Executable(str(exe_a), "", 20),
          Executable(str(exe_b), "", 1)])
+    assert reports[0]["executable"] == str(exe_b)
+    assert reports[1]["executable"] == str(exe_a)
