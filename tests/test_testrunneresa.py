@@ -401,13 +401,13 @@ to run the test programs on the ``Board`` target board."""
         _GIT_NEW_BRANCH,
         _strip(exe_a),
         _strip(exe_b),
-        _add([exe_a]),
+        _add([exe_b]),
         _commit(0),
         _GIT_PUSH_BRANCH,
         _fetch(0),
         _log(["x"]),
         _GIT_RESET_BRANCH,
-        _add([exe_b]),
+        _add([exe_a]),
         _commit(1),
         _GIT_PUSH_BRANCH,
         _fetch(0),
@@ -417,5 +417,5 @@ to run the test programs on the ``Board`` target board."""
         _GIT_DELETE_BRANCH,
     ])
     runner.run_tests(
-        [Executable(str(exe_a), "", 1),
-         Executable(str(exe_b), "", 20)])
+        [Executable(str(exe_a), "", 20),
+         Executable(str(exe_b), "", 1)])

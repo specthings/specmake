@@ -124,32 +124,35 @@ to run the test programs on the ``{self._target_board()}`` target board."""
         return remaining
 
     def _get_request_limit_executable_count(
-            self, remaining: list[Executable],
+            self, iteration: int, remaining: list[Executable],
             policy: dict) -> tuple[dict, int, list[Executable]]:
+        if iteration == 0:
+            remaining[:] = sorted(remaining, key=lambda x: x.timeout)
         max_executable_count = policy["max-executable-count"]
-        todo = remaining[:max_executable_count]
-        remaining[:] = remaining[max_executable_count:]
+        count = (len(remaining) + max_executable_count -
+                 1) // max_executable_count
+        todo = remaining[iteration::count]
+        if iteration == count - 1:
+            remaining[:] = []
         overall_timeout = sum(int(math.ceil(exe.timeout)) for exe in todo)
-        jobs = [{exe.path: None} for exe in todo]
+        jobs = [{
+            exe.path: {
+                "job_timeout": int(math.ceil(exe.timeout))
+            }
+        } for exe in todo]
         return {
-            "version":
-            1,
-            "target_board":
-            self._target_board(),
-            "timeout_in_seconds":
-            min(overall_timeout, self["max-overall-timeout-in-seconds"]),
-            "jobs":
-            jobs,
+            "version": 1,
+            "target_board": self._target_board(),
+            "jobs": jobs,
         }, overall_timeout, todo
 
     def _get_request_use_timeouts(
-            self, remaining: list[Executable],
+            self, _iteration: int, remaining: list[Executable],
             _policy: dict) -> tuple[dict, int, list[Executable]]:
         overall_timeout = 0
         todo: list[Executable] = []
         max_overall_timeout = self["max-overall-timeout-in-seconds"]
         jobs: list[dict[str, dict[str, int]]] = []
-        max_timeout = 0
         while remaining:
             exe = remaining.pop(0)
             timeout = int(math.ceil(exe.timeout))
@@ -162,19 +165,18 @@ to run the test programs on the ``{self._target_board()}`` target board."""
                     remaining.insert(0, exe)
                     break
                 overall_timeout = new_overall_timeout
-            max_timeout = max(max_timeout, timeout)
             todo.append(exe)
-            jobs.append({exe.path: {"timeout_in_seconds": timeout}})
+            jobs.append({exe.path: {"job_timeout": timeout}})
         return {
             "version": 1,
             "target_board": self._target_board(),
-            "timeout_in_seconds": max_timeout,
             "jobs": jobs,
         }, overall_timeout, todo
 
     def _write_request_file(
         self,
         working_directory: Path,
+        iteration: int,
         remaining: list[Executable],
     ) -> tuple[str, int, list[Executable]]:
         """
@@ -183,7 +185,7 @@ to run the test programs on the ``{self._target_board()}`` target board."""
         """
         policy = self["request-policy"]
         request, overall_timeout, todo = self._request_policies[
-            policy["policy"]](remaining, policy)
+            policy["policy"]](iteration, remaining, policy)
         request_file = working_directory / "request.yaml"
         request_file.write_text(
             yaml.dump(request, default_flow_style=False, allow_unicode=True),
@@ -242,19 +244,19 @@ to run the test programs on the ``{self._target_board()}`` target board."""
             "weak-package-build-dependency").uid]
         assert isinstance(repository, RepositoryState)
         working_directory = Path(repository.directory)
-        counter = 0
+        iteration = 0
         with self._temporary_branch(working_directory, repository) as branch:
             remaining = self._copy_and_prepare_executables(
                 working_directory, executables)
             while remaining:
                 request_file, overall_timeout, todo = self._write_request_file(
-                    working_directory, remaining)
+                    working_directory, iteration, remaining)
                 files = [exe.path for exe in todo]
                 status = run_command(["git", "add"] + files + [request_file],
                                      cwd=str(working_directory))
                 assert status == 0
                 status = run_command(
-                    ["git", "commit", "-m", f"Request {counter}"],
+                    ["git", "commit", "-m", f"Request {iteration}"],
                     cwd=str(working_directory),
                 )
                 assert status == 0
@@ -269,5 +271,5 @@ to run the test programs on the ``{self._target_board()}`` target board."""
                 )
                 assert status == 0
                 self._add_reports(working_directory, todo, reports)
-                counter += 1
+                iteration += 1
         return reports
