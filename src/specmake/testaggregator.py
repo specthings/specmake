@@ -32,7 +32,7 @@ import os
 from typing import Any
 
 from specitems import (COL_SPAN, Item, link_is_enabled, make_label,
-                       SphinxContent, TextContent)
+                       SphinxContent, TextContent, to_collection)
 from specware import CodeMapper
 
 from .directorystate import DirectoryState
@@ -64,7 +64,7 @@ def _set_limits_and_target_hash(target_data: dict, target: Item) -> None:
         limits_by_req[link.item.uid] = link["limits"]
     target_data["limits-by-requirement"] = limits_by_req
     target_data["limits-uid"] = limits.uid
-    target_data["target-hash"] = target["target-hash"]
+    target_data["target-hash"] = to_collection(target["target-hash"])
 
 
 def _test_status(target_data: dict, target: Item, info: dict,
