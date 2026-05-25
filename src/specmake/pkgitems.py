@@ -276,7 +276,7 @@ class BuildItem():
         self.item[key] = value
 
     def _associate_with_component(self) -> "PackageComponent":
-        return self.item.view["component"]
+        return self.director.get_component(self.item)
 
     def parent(self, _no_parent_message: str) -> "PackageComponent":
         """
@@ -955,7 +955,7 @@ class PackageBuildDirector(dict):
         self.factory = factory
         self.use_git = use_git
         self.submodules: tuple[str, ...] = tuple()
-        item_cache.top_view.add_get_missing("component", self._get_component)
+        item_cache.top_view.add_get_missing("component", self.get_component)
 
     def __missing__(self, uid: str) -> BuildItem:
         logging.info("%s: create build item", uid)
@@ -997,7 +997,8 @@ class PackageBuildDirector(dict):
         submodule = f"{submodule.rstrip('/')}/"
         self.submodules = self.submodules + (submodule, )
 
-    def _get_component(self, item: Item) -> PackageComponent:
+    def get_component(self, item: Item) -> PackageComponent:
+        """ Get the component associated with the item. """
         if item.type.startswith("pkg/component"):
             component_item = item
         else:
