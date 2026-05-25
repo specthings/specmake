@@ -21,7 +21,9 @@ non-functional-type: design-target
 rationale: null
 references: []
 requirement-type: non-functional
-target-hash: cpI09Ju6orF2eoJcmJi4igeIarypsRNwUxTrZSs9LMg=
+target-hash:
+- cpI09Ju6orF2eoJcmJi4igeIarypsRNwUxTrZSs9LMg=
+- oqNHrlFi_jsico5ygHk-OcfeM9oaY3JMw_z6dmF09-U=
 text: |
   The ${.:/name} shall be a target.
 type: requirement

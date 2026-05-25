@@ -65,10 +65,6 @@ def _check(expected: str, reported: str) -> str:
     return _ok(expected == reported)
 
 
-def _check_target_hash(expected: str, reported: str) -> str:
-    return _ok(reported in ("\u200b", expected))
-
-
 def _check_gt_zero(_expected: str, reported: str) -> str:
     try:
         if float(reported) > 0.0:
@@ -203,7 +199,8 @@ class _TestContext:
         self.unexpected_failures: _Failures = {}
         self.limits_uid = ""
         self.limits_by_req: dict[str, dict] = {}
-        self.target_hash = ""
+        self.target_hashes: tuple[str, ...] = tuple()
+        self.target_hashes_display = ""
         self.target_uid = ""
         self.build_label = ""
         self.bsp: str = reporter.component["bsp"]
@@ -341,6 +338,10 @@ executable.  The executable file had an SHA512 digest of
             name = key.replace("-", "_").upper()
             self.check(rows, info, name, key,
                        _zero_one(name in self.enabled_set), _zero_one)
+
+    def check_target_hash(self, _expected: str, reported: str) -> str:
+        """ Check the target hash. """
+        return _ok(reported in self.target_hashes)
 
     def check_validations_by_test(self, test_aggregator: TestAggregator,
                                   target_uid: str) -> None:
@@ -592,7 +593,8 @@ presented in the following sections.""")
             ctx.check(rows, info, "Build Label", "build-label",
                       ctx.build_label, _invisible_spaces)
             ctx.check(rows, info, "Target Hash", "target-hash",
-                      ctx.target_hash, _target_hash, _check_target_hash)
+                      ctx.target_hashes_display, _target_hash,
+                      ctx.check_target_hash)
             ctx.check_build_options(rows, info)
             ctx.check(rows, info, "Step Count", "step-count", "> 0", str,
                       _check_gt_zero)
@@ -681,7 +683,9 @@ presented in the following sections.""")
         for target_uid, target_data in test_aggregator.targets.items():
             ctx.limits_uid = target_data["limits-uid"]
             ctx.limits_by_req = target_data["limits-by-requirement"]
-            ctx.target_hash = _invisible_spaces(target_data["target-hash"])
+            ctx.target_hashes = ("\u200b", ) + tuple(
+                _invisible_spaces(text) for text in target_data["target-hash"])
+            ctx.target_hashes_display = ", ".join(ctx.target_hashes[1:])
             ctx.target_uid = target_uid
             ctx.verifications = target_data["test-error-verifications"]
             with ctx.content.section(f"Target - {target_data['name']}",
