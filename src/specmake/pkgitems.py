@@ -546,11 +546,14 @@ class BuildItem():
         item = Item(item_cache, make_link.item.uid,
                     copy.deepcopy(make_link.item.data))
         item["make-params"] = make_link["params"]
-        item.init_parents(item_cache)
-        # The maker item has no links to children by itself
-        for link in parent_links:
+        # Initialize the parent and child links of the temporary item.  Make
+        # sure that other items do not get child links added to the temporary
+        # item.
+        for link in itertools.chain(make_link.item.links_to_parents(),
+                                    parent_links):
             item.add_link_to_parent(link)
-        for link in child_links:
+        for link in itertools.chain(make_link.item.links_to_children(),
+                                    child_links):
             item.add_link_to_child(link)
         item.add_link_to_parent(
             Link(
