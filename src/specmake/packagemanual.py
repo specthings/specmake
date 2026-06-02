@@ -30,8 +30,8 @@ import logging
 import os
 from typing import Iterator
 
-from specitems import (COL_SPAN, Copyrights, Item, ItemGetValueContext,
-                       make_label, Link, TextContent)
+from specitems import (Copyrights, Item, ItemGetValueContext, Link, ROW_SPAN,
+                       TextContent, make_label)
 from specware import (BSD_2_CLAUSE_LICENSE, MIT_LICENSE, gather_api_items,
                       run_command)
 
@@ -292,8 +292,8 @@ class PackageManualBuilder(DocumentBuilder):
                         for j, value in enumerate(stats)))
                 else:
                     rows.append(info + ("?", "?", "?"))
-                info_spec = COL_SPAN
-                info_env = COL_SPAN
+                info_spec = ROW_SPAN
+                info_env = ROW_SPAN
         return rows
 
     def _get_performance_variants_table(self, ctx: ItemGetValueContext) -> str:
