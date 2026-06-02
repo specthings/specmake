@@ -128,7 +128,7 @@ to run the test programs on the ``{self._target_board()}`` target board."""
             self, iteration: int, remaining: list[Executable],
             policy: dict) -> tuple[dict, int, list[Executable]]:
         if iteration == 0:
-            remaining[:] = sorted(remaining, key=lambda x: x.timeout)
+            remaining[:] = sorted(remaining, key=lambda x: -x.timeout)
         max_executable_count = policy["max-executable-count"]
         count = (len(remaining) + max_executable_count -
                  1) // max_executable_count
