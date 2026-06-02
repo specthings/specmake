@@ -801,7 +801,7 @@ spec:/pkg/source/test-files
 
 Use input :ref:`spec:/pkg/component <PackageItemPkgComponent>`.
 
-Represent 77 files in directory
+Represent 78 files in directory
 {_format_path(tmp_dir, '')}.
 
 .. _PackageItemPkgCoverageTargetA:

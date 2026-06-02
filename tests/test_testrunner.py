@@ -262,7 +262,7 @@ building the package and captures the output:
     failed_attempts = tuple(
         len(report.get("failed-attempts", []))
         for report in test_log["reports"])
-    assert failed_attempts == (2, 0, 0)
+    assert failed_attempts == (2, 0, 0, 0)
 
     test_log_file = tmp_dir / "pkg/test-log-bsp.json"
     test_log_file.unlink()

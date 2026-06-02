@@ -12,6 +12,8 @@ files:
   hash: null
 - file: do-not-run.exe
   hash: null
+- file: do-not-run-via-link.exe
+  hash: null
 - file: b.norun.exe
   hash: null
 - file: f.gcno
@@ -22,5 +24,13 @@ links:
   name: component
   role: input
   uid: ../component
+- do-not-run:
+  - do-not-run-via-link.exe
+  role: test-runner-do-not-run
+  uid: ../test-runner/grpc
+- do-not-run:
+  - do-not-run-via-link.exe
+  role: test-runner-do-not-run
+  uid: ../test-runner/test
 pkg-type: directory-state
 type: pkg
