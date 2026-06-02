@@ -149,7 +149,9 @@ class TestRunner(BuildItem):
         assert isinstance(source, DirectoryState)
         reports: list[Report] = []
         executables: list[Executable] = []
-        do_not_run = self["do-not-run"]
+        do_not_run: set[str] = set(self["do-not-run"])
+        for link in self.item.links_to_children("test-runner-do-not-run"):
+            do_not_run.update(link["do-not-run"])
         default_timeout = self["default-timeout-in-seconds"]
         min_timeout = self["min-timeout-in-seconds"]
         timeout_scaler = self["timeout-scaler"]
