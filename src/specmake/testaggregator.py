@@ -31,8 +31,8 @@ import logging
 import os
 from typing import Any
 
-from specitems import (COL_SPAN, Item, link_is_enabled, make_label,
-                       SphinxContent, TextContent, to_collection)
+from specitems import (Item, ROW_SPAN, SphinxContent, TextContent,
+                       link_is_enabled, make_label, to_collection)
 from specware import CodeMapper
 
 from .directorystate import DirectoryState
@@ -759,8 +759,8 @@ class TestAggregator(BuildItem):
                         row.append(summary.overall[f"{kind}-info"])
                         row.append(summary.overall[f"{kind}-status"])
                     rows.append(row)
-                    config = COL_SPAN
-                    target = COL_SPAN
+                    config = ROW_SPAN
+                    target = ROW_SPAN
         content.add_grid_table(rows, [18, 8, 8, 13, 7, 13, 7, 13, 7],
                                font_size=-3)
 
@@ -812,8 +812,8 @@ class TestAggregator(BuildItem):
                             f"{limits[f'{kind}-min-percent']:.1f}%"
                             for kind in _COVERAGE_KINDS
                         ])
-                        config = COL_SPAN
-                        target = COL_SPAN
+                        config = ROW_SPAN
+                        target = ROW_SPAN
         content.add_grid_table(rows, [22, 12, 10, 17, 13, 13, 13],
                                font_size=-3)
 

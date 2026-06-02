@@ -27,7 +27,7 @@
 import itertools
 from typing import Iterator
 
-from specitems import COL_SPAN, Item, ItemGetValueContext, SphinxContent
+from specitems import Item, ItemGetValueContext, ROW_SPAN, SphinxContent
 from specware import gather_benchmarks_and_test_suites
 
 from .directorystate import DirectoryState
@@ -118,7 +118,7 @@ class SVRBuilder(SpecDocumentBuilder):
                     link = self.mapper.format_link(component.view["sdd-name"],
                                                    path)
                 rows.append((req, link))
-                req = COL_SPAN
+                req = ROW_SPAN
             if isinstance(req, str) and req:
                 rows.append(
                     (req, "N/A (no directly associated design components)"))
@@ -186,7 +186,7 @@ class SVRBuilder(SpecDocumentBuilder):
         rows: list[tuple[str | int, ...]] = [("Design Component", "File")]
         last = ""
         for design, code in self._get_design_to_code():
-            rows.append((COL_SPAN if last == design else design, code))
+            rows.append((ROW_SPAN if last == design else design, code))
             last = design
         content.add_grid_table(rows, [60, 40], font_size=-4)
         return str(content)
@@ -196,9 +196,9 @@ class SVRBuilder(SpecDocumentBuilder):
         code_to_design = sorted(
             (code, design) for design, code in self._get_design_to_code())
         rows: list[tuple[str | int, ...]] = [("File", "Design Component")]
-        last: str | int = COL_SPAN
+        last: str | int = ROW_SPAN
         for code, design in code_to_design:
-            rows.append((COL_SPAN if last == code else code, design))
+            rows.append((ROW_SPAN if last == code else code, design))
             last = code
         content.add_grid_table(rows, [40, 60], font_size=-4)
         return str(content)

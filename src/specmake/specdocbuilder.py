@@ -309,11 +309,11 @@ performance limits shall apply:""")
                      f"{duration(lower_bound)} :math:`\\leq` Minimum"))
                 lower_bound = limits["median-lower-bound"]
                 upper_bound = limits["median-upper-bound"]
-                rows.append((COL_SPAN, "Median",
+                rows.append((ROW_SPAN, "Median",
                              f"{duration(lower_bound)} :math:`\\leq` Median "
                              f":math:`\\leq` {duration(upper_bound)}"))
                 upper_bound = limits["max-upper-bound"]
-                rows.append((COL_SPAN, "Maximum",
+                rows.append((ROW_SPAN, "Maximum",
                              f"Maximum :math:`\\leq` {duration(upper_bound)}"))
             ctx.content.add_grid_table(rows, [25, 25, 50])
             try:
@@ -384,9 +384,9 @@ def _add_transition_map(
     infeasible_pre_conds: list[tuple[str, PreCondsOfPostCond]] = []
     transition_map = TransitionMap(ctx.item, "N/A")
     rows: list[Iterable[str | int]] = [
-        ("Pre-Conditions", ) + (ROW_SPAN, ) *
+        ("Pre-Conditions", ) + (COL_SPAN, ) *
         (transition_map.pre_co_count - 1) + ("Post-Conditions", ) +
-        (ROW_SPAN, ) * (transition_map.post_co_count - 1)
+        (COL_SPAN, ) * (transition_map.post_co_count - 1)
     ]
     rows.append(
         tuple(
@@ -402,10 +402,10 @@ def _add_transition_map(
                  pre_co_collection))
             post_co_row = ((_name_ref(
                 ctx, transition_map.skip_idx_to_name(post_co[0]), "Skip"), ) +
-                           (ROW_SPAN, ) * (transition_map.post_co_count - 1))
+                           (COL_SPAN, ) * (transition_map.post_co_count - 1))
             post_co_col_span: tuple[str | int,
-                                    ...] = ((COL_SPAN, ) +
-                                            (COL_SPAN | ROW_SPAN, ) *
+                                    ...] = ((ROW_SPAN, ) +
+                                            (ROW_SPAN | COL_SPAN, ) *
                                             (transition_map.post_co_count - 1))
         else:
             post_co_row = tuple(
@@ -413,7 +413,7 @@ def _add_transition_map(
                     transition_map.post_co_idx_st_idx_to_st_name(
                         co_idx, st_idx))
                 for co_idx, st_idx in enumerate(post_co[1:]))
-            post_co_col_span = (COL_SPAN, ) * transition_map.post_co_count
+            post_co_col_span = (ROW_SPAN, ) * transition_map.post_co_count
         for pre_co in pre_co_collection:
             pre_co_row = tuple(
                 _states(transition_map, co_idx, co_states)
@@ -1026,8 +1026,8 @@ class SpecDocumentBuilder(DocumentBuilder):
                                           document_key="test-plan").replace(
                                               "spec:", "")
                 rows.append((req, status, item_2_ref, role))
-                req = COL_SPAN
-                status = COL_SPAN
+                req = ROW_SPAN
+                status = ROW_SPAN
             if isinstance(req, str) and req:
                 rows.append(
                     (req, status, "N/A", self._validation_status(item)))

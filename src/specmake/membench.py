@@ -30,7 +30,7 @@ import os
 import re
 from typing import Any, NamedTuple
 
-from specitems import (COL_SPAN, Item, ItemCache, ItemMapper, TextContent,
+from specitems import (Item, ItemCache, ItemMapper, ROW_SPAN, TextContent,
                        get_reference)
 from specware import run_command
 
@@ -496,7 +496,7 @@ def generate_variants_table(content: TextContent,
                                              for i, j in zip(sections, base)))
                 else:
                     rows.append(what + tuple("?") * len(base))
-            spec = COL_SPAN
+            spec = ROW_SPAN
     content.add_grid_table(rows, [35, 20, 9, 9, 9, 9, 9], font_size=-3)
 
 
