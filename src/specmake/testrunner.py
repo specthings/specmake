@@ -376,10 +376,11 @@ class SubprocessTestRunner(TestRunner):
     """ Runs tests in subprocesses. """
 
     def describe(self) -> str:
-        self._executable = "${test-program}"
+        executable = "<test-program>"
+        self._executable = executable
         command = " ".join(f"'{part}'" if " " in part else part
                            for part in self["command"])
-        return f"""For each test program (indicated by ``${{test-program}}``),
+        return f"""For each test program (indicated by ``{executable}``),
 this test procedure runs the following command as a subprocess on the machine
 building the package and captures the output:
 
