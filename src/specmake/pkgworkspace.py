@@ -195,7 +195,8 @@ def _apply_patch_file(workspace_directory: str,
 
 def _apply_patches(workspace_directory: str,
                    unpacked_archive: DirectoryState) -> None:
-    for patch in unpacked_archive["archive-patches"]:
+    # Do not substitute patches
+    for patch in unpacked_archive.item["archive-patches"]:
         if not is_enabled(unpacked_archive.enabled_set, patch["enabled-by"]):
             continue
         if patch["type"] == "inline":
