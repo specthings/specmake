@@ -179,12 +179,13 @@ class TestRunner(BuildItem):
                     augment_report(report, report["output"])
                     reports.append(report)
                 else:
-                    logging.debug("%s: run: %s", self.uid, path)
                     try:
                         timeout = max(timeouts[timeout_key][name])
                     except KeyError:
                         timeout = default_timeout
                     timeout = timeout_scaler * max(timeout, min_timeout)
+                    logging.debug("%s: run with %ss timeout: %s", self.uid,
+                                  timeout, path)
                     executables.append(Executable(path, digest, timeout))
             else:
                 logging.info("%s: use previous report for: %s", self.uid, path)
