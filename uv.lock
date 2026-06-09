@@ -1743,7 +1743,7 @@ wheels = [
 
 [[package]]
 name = "specitems"
-version = "1.5.2"
+version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "mdformat" },
@@ -1754,9 +1754,9 @@ dependencies = [
     { name = "mdformat-tables" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/74/a9/d737911cb80a1101fc00f3d725485809cefb0507bd496ec684a08be7146b/specitems-1.5.2.tar.gz", hash = "sha256:4f21b59140c948dee8ea6bda4c4a014ec36766daab85ca8be5d452be79a230cd", size = 57227, upload-time = "2026-06-05T07:04:09.694Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2f/13/f934028bb23dd9ca607d6dfec3603ce4edfe0547b130431e04e207b2720f/specitems-1.6.0.tar.gz", hash = "sha256:d345a03ac5bdbab53523f784ed2d2de2e219c326e8118bd65707713c1e65e991", size = 57420, upload-time = "2026-06-09T01:12:28.07Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e0/48/9aeb4cfb2bf071d149a206c72653dc8617a689995816ff419b3c9cb0798f/specitems-1.5.2-py3-none-any.whl", hash = "sha256:9e4edaf894b0c19b42db01b4498f496e7a59ae7d6d1c135f816fe707cf2d8e59", size = 80541, upload-time = "2026-06-05T07:04:10.784Z" },
+    { url = "https://files.pythonhosted.org/packages/9a/ca/54998e875756e626b869ef302c2e8262cce5c139e5ea3c7c54cbd524fcbd/specitems-1.6.0-py3-none-any.whl", hash = "sha256:97f2ae428413da02978b2ddbaea5d9c908016524e5497cc7f9cf9f7146db6e7c", size = 80777, upload-time = "2026-06-09T01:12:29.051Z" },
 ]
 
 [[package]]
@@ -1805,9 +1805,9 @@ dev = [
 requires-dist = [
     { name = "gcovr", specifier = ">=8.6" },
     { name = "matplotlib", specifier = ">=3.10.1" },
-    { name = "specitems", specifier = ">=1.5.2" },
+    { name = "specitems", specifier = ">=1.6.0" },
     { name = "spectestrunner", specifier = ">=0.9.2" },
-    { name = "specware", specifier = ">=1.2.4" },
+    { name = "specware", specifier = ">=1.2.5" },
     { name = "sphinx", specifier = ">=8.2.3" },
     { name = "sphinx-better-subsection", specifier = ">=0.2" },
     { name = "sphinx-rtd-theme", specifier = ">=3.0.2" },
@@ -1855,14 +1855,14 @@ wheels = [
 
 [[package]]
 name = "specware"
-version = "1.2.4"
+version = "1.2.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "specitems" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5d/71/d4657b448d844a46e5c57e565a27274e3fc8464468b707debe6a7eecbc4b/specware-1.2.4.tar.gz", hash = "sha256:01b59adbf8808f141bb6ce98d57c3423e5d055c7e04b90106fab859a356df5f0", size = 81357, upload-time = "2026-06-02T02:26:01.372Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b9/7b/ef80175720869ebef8a5bf334f89a8777ff04993fca93f1f2a7bf8429112/specware-1.2.5.tar.gz", hash = "sha256:0892ddb6e641d145c3c32f45b01e6f4ac93096046cdcf42b51358d6486d2d497", size = 81454, upload-time = "2026-06-09T01:16:02.048Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5a/4b/8327d8c0c3530ed8b5e65953e5ae233066fe68d1420f9ba6ec0b45e73709/specware-1.2.4-py3-none-any.whl", hash = "sha256:fed7df816329b96de1425d60c218cdf8f700e402270fce4b85371da266d19e97", size = 96910, upload-time = "2026-06-02T02:26:00.071Z" },
+    { url = "https://files.pythonhosted.org/packages/9e/8f/f755c6aae370e9603d560c42313d46016c5bfa89832b6e3041a34ea0715d/specware-1.2.5-py3-none-any.whl", hash = "sha256:78a17c3d94366a585418dfd9d65435d783dc622132f530a17178bb3d29e38d2e", size = 97098, upload-time = "2026-06-09T01:16:03.014Z" },
 ]
 
 [[package]]
@@ -2207,11 +2207,11 @@ wheels = [
 
 [[package]]
 name = "wcwidth"
-version = "0.7.0"
+version = "0.8.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/2c/ee/afaf0f85a9a18fe47a67f1e4422ed6cf1fe642f0ae0a2f81166231303c52/wcwidth-0.7.0.tar.gz", hash = "sha256:90e3a7ea092341c44b99562e75d09e4d5160fe7a3974c6fb842a101a95e7eed0", size = 182132, upload-time = "2026-05-02T16:04:12.653Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/49/b4/51fe890511f0f242d07cb1ebe6a5b6db417262b9d2568b460347c57d95cc/wcwidth-0.8.1.tar.gz", hash = "sha256:faf5b4a5366a72dc49cad48cdf21f52bdf63bdda995178e483ba247ff79089b9", size = 1466072, upload-time = "2026-06-08T05:57:23.146Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/41/52/e465037f5375f43533d1a80b6923955201596a99142ed524d77b571a1418/wcwidth-0.7.0-py3-none-any.whl", hash = "sha256:5d69154c429a82910e241c738cd0e2976fac8a2dd47a1a805f4afed1c0f136f2", size = 110825, upload-time = "2026-05-02T16:04:11.033Z" },
+    { url = "https://files.pythonhosted.org/packages/bd/6e/95b0e537de1f4d4301f76f944642c6da50d1511cc7b3d64dc418a66c7509/wcwidth-0.8.1-py3-none-any.whl", hash = "sha256:f453740b1e4a4f3291faa37944c555d71056c4da08d59809b307ef4feba695c8", size = 323092, upload-time = "2026-06-08T05:57:21.413Z" },
 ]
 
 [[package]]
