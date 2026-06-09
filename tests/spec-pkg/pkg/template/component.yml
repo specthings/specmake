@@ -137,7 +137,7 @@ attribute-actions:
 - action: set
   enabled-by: true
   path: /list-5[0]
-  value: $$$${.:/a}
+  value: $${.:/a}
 - action: substitute
   enabled-by: true
   path: /list-5[0]
