@@ -184,7 +184,7 @@ class TestRunner(BuildItem):
                     except KeyError:
                         timeout = default_timeout
                     timeout = timeout_scaler * max(timeout, min_timeout)
-                    logging.debug("%s: run with %ss timeout: %s", self.uid,
+                    logging.debug("%s: run with %.1fs timeout: %s", self.uid,
                                   timeout, path)
                     executables.append(Executable(path, digest, timeout))
             else:
