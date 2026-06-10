@@ -69,13 +69,13 @@ def test_testplanbuilder(caplog, tmp_path, monkeypatch):
 Subprocess
 ==========
 
-For each test program (indicated by ``<test-program>``),
+For each test program (indicated by ``${test_program}``),
 this test procedure runs the following command as a subprocess on the machine
 building the package and captures the output:
 
 .. code-block:: none
 
-    foo bar <test-program>
+    foo bar ${test_program}
 .. test-procedures end
 
 .. other-validations begin
@@ -1279,13 +1279,13 @@ There are no specific interface dependencies present.
 Subprocess
 ==========
 
-For each test program (indicated by ``<test-program>``),
+For each test program (indicated by ``${test_program}``),
 this test procedure runs the following command as a subprocess on the machine
 building the package and captures the output:
 
 .. code-block:: none
 
-    foo bar <test-program>
+    foo bar ${test_program}
 .. test-procedures end
 
 .. other-validations begin

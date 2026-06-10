@@ -376,7 +376,7 @@ class SubprocessTestRunner(TestRunner):
     """ Runs tests in subprocesses. """
 
     def describe(self) -> str:
-        executable = "<test-program>"
+        executable = "${test_program}"
         self._executable = executable
         command = " ".join(f"'{part}'" if " " in part else part
                            for part in self["command"])

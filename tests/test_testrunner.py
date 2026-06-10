@@ -151,13 +151,13 @@ def test_testrunner(caplog, tmpdir, monkeypatch):
     # Test SubprocessTestRunner
     subprocess_runner = director["/pkg/test-runner/subprocess"]
     assert subprocess_runner.describe(
-    ) == """For each test program (indicated by ``<test-program>``),
+    ) == """For each test program (indicated by ``${test_program}``),
 this test procedure runs the following command as a subprocess on the machine
 building the package and captures the output:
 
 .. code-block:: none
 
-    foo bar <test-program>"""
+    foo bar ${test_program}"""
     assert subprocess_runner.get_run_command("exe") == ["foo", "bar", "exe"]
     reports = subprocess_runner.run_tests([
         Executable(
