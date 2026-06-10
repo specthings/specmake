@@ -801,7 +801,7 @@ spec:/pkg/source/test-files
 
 Use input :ref:`spec:/pkg/component <PackageItemPkgComponent>`.
 
-Represent 78 files in directory
+Represent 79 files in directory
 {_format_path(tmp_dir, '')}.
 
 .. _PackageItemPkgCoverageTargetA:
@@ -848,6 +848,21 @@ Use the following inputs:
 - :ref:`spec:/rtems/target-a <PackageItemRtemsTargetA>`
 
 Represent the file {_format_path(tmp_dir, 'pkg/coverage-good.json')}.
+
+.. _PackageItemPkgCoverageTargetAOverall:
+
+spec:/pkg/coverage/target-a-overall
+===================================
+
+Use the following inputs:
+
+- :ref:`spec:/pkg/build-config <PackageItemPkgBuildConfig>`
+
+- :ref:`spec:/pkg/component <PackageItemPkgComponent>`
+
+- :ref:`spec:/rtems/target-a <PackageItemRtemsTargetA>`
+
+Represent the file {_format_path(tmp_dir, 'pkg/coverage-overall.json')}.
 
 .. _PackageItemPkgTestLogsPerf:
 
@@ -955,6 +970,9 @@ Use the following inputs:
 - :ref:`spec:/pkg/coverage/target-a-empty <PackageItemPkgCoverageTargetAEmpty>`
 
 - :ref:`spec:/pkg/coverage/target-a-good <PackageItemPkgCoverageTargetAGood>`
+
+- :ref:`spec:/pkg/coverage/target-a-overall
+  <PackageItemPkgCoverageTargetAOverall>`
 
 - :ref:`spec:/pkg/steps/rtems-item-cache <PackageItemPkgStepsRtemsItemCache>`
 
@@ -1088,11 +1106,12 @@ There were no unexpected test errors found in the test outputs.
 
 ### Component - sparc/gr712rc/smp/4
 
- | Target        | Configuration    | Scope | Functions       | Status  | Lines             | Status  | Branches        | Status  |
- | ------------- | ---------------- | ----- | --------------- | ------- | ----------------- | ------- | --------------- | ------- |
- | Name Target A | build-config-key | Scope | 13+1/15 (93.3%) | **NOK** | 118+3/123 (98.3%) | **NOK** | 14+2/18 (88.8%) | **NOK** |
- | Name Target A | build-config-key | Empty | N/A             | **NOK** | N/A               | **NOK** | N/A             | **NOK** |
- | Name Target A | build-config-key | Good  | 1/1 (100%)      | OK      | 18/18 (100%)      | OK      | 4/4 (100%)      | OK      |
+ | Target        | Configuration    | Scope   | Functions           | Status  | Lines                    | Status  | Branches             | Status  |
+ | ------------- | ---------------- | ------- | ------------------- | ------- | ------------------------ | ------- | -------------------- | ------- |
+ | Name Target A | build-config-key | Scope   | 0/0 (N/A) [13+1/15] | **NOK** | 5+1/6 (100%) [113+2/117] | OK      | 2/2 (100%) [12+2/16] | OK      |
+ | Name Target A | build-config-key | Empty   | N/A                 | **NOK** | N/A                      | **NOK** | N/A                  | **NOK** |
+ | Name Target A | build-config-key | Good    | 1/1 (100%)          | OK      | 18/18 (100%)             | OK      | 4/4 (100%)           | OK      |
+ | Name Target A | build-config-key | Overall | 0/1 (0.0%) [1/1]    | **NOK** | 3/18 (16.6%) [0/2]       | **NOK** | 2/4 (50.0%)          | **NOK** |
 
 (PackageSummarySparcGr712rcSmp4CoverageDataComponentSparcGr712rcSmp4)=
 

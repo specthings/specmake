@@ -52,11 +52,13 @@ def test_svrbuilder(caplog, tmpdir):
     +-+-+-+-+-+-+-+-+-+
     | Target | Configuration | Scope | Functions | Status | Lines | Status | Branches | Status |
     +=+=+=+=+=+=+=+=+=+
-    | `Name Target A <reports.html#a>`__ | `build-config-key <reports.html#abuildconfigkey>`__ | Scope | 13+1/15 (93.3%) | **NOK** | 118+3/123 (98.3%) | **NOK** | 14+2/18 (88.8%) | **NOK** |
+    | `Name Target A <reports.html#a>`__ | `build-config-key <reports.html#abuildconfigkey>`__ | Scope | 0/0 (N/A) [13+1/15] | **NOK** | 5+1/6 (100%) [113+2/117] | OK | 2/2 (100%) [12+2/16] | OK |
     + + +-+-+-+-+-+-+-+
     | | | Empty | N/A | **NOK** | N/A | **NOK** | N/A | **NOK** |
     + + +-+-+-+-+-+-+-+
     | | | Good | 1/1 (100%) | OK | 18/18 (100%) | OK | 4/4 (100%) | OK |
+    + + +-+-+-+-+-+-+-+
+    | | | Overall | 0/1 (0.0%) [1/1] | **NOK** | 3/18 (16.6%) [0/2] | **NOK** | 2/4 (50.0%) | **NOK** |
     +-+-+-+-+-+-+-+-+-+
 
 .. raw:: latex
@@ -94,6 +96,12 @@ Component - spec:/pkg/component
     | | | Good | overall | 100.0% | 100.0% | 100.0% |
     + + +-+-+-+-+-+
     | | | Good | per-file | 100.0% | 100.0% | 80.0% |
+    + + +-+-+-+-+-+
+    | | | Overall | overall | 100.0% | 100.0% | 100.0% |
+    + + +-+-+-+-+-+
+    | | | Overall | per-file | 100.0% | 100.0% | 80.0% |
+    + + +-+-+-+-+-+
+    | | | Overall | bsps/include/bsp/fatal.h | 100.0% | 100.0% | 100.0% |
     +-+-+-+-+-+-+-+
 
 .. raw:: latex

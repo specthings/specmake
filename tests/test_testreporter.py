@@ -292,27 +292,41 @@ spec:/​rtems/​target-a
 
 For this target, the following code coverage issues were present.
 
+- Insufficient file-specific branch coverage:
+
+  - `cpukit​/score​/src​/chain.c
+    </pkg/coverage-overall-html/index.chain.c.fb6aee9b3f6ae0998256d52130e2c678.html>`__
+
 - Insufficient file-specific function coverage:
+
+  - `cpukit​/score​/src​/chain.c
+    </pkg/coverage-overall-html/index.chain.c.fb6aee9b3f6ae0998256d52130e2c678.html>`__
 
   - `cpukit​/score​/src​/threadqenqueue.c
     </pkg/coverage-html/index.threadqenqueue.c.49433ec925b45a09aa7c6c6f0199f026.html>`__
 
 - Insufficient file-specific line coverage:
 
+  - `bsps​/include​/bsp​/fatal.h
+    </pkg/coverage-overall-html/index.fatal.h.7f3bb1e879e3580b41139d705e6b007f.html>`__
+
+  - `cpukit​/score​/src​/chain.c
+    </pkg/coverage-overall-html/index.chain.c.fb6aee9b3f6ae0998256d52130e2c678.html>`__
+
   - `cpukit​/score​/src​/threadqenqueue.c
     </pkg/coverage-html/index.threadqenqueue.c.49433ec925b45a09aa7c6c6f0199f026.html>`__
 
 - Insufficient overall branch coverage:
 
-  - Scope - Scope
+  - Scope - Overall
 
 - Insufficient overall function coverage:
 
-  - Scope - Scope
+  - Scope - Overall
 
 - Insufficient overall line coverage:
 
-  - Scope - Scope
+  - Scope - Overall
 
 - No branch information in coverage data:
 
@@ -321,6 +335,10 @@ For this target, the following code coverage issues were present.
 - No function information in coverage data:
 
   - Scope - Empty
+
+- No general function information in coverage data:
+
+  - Scope - Scope
 
 - No line information in coverage data:
 
@@ -1694,11 +1712,13 @@ Overview
     +-+-+-+-+-+-+-+
     | Scope | Functions | Status | Lines | Status | Branches | Status |
     +=+=+=+=+=+=+=+
-    | Scope | 13+1/15 (93.3%) | **NOK** | 118+3/123 (98.3%) | **NOK** | 14+2/18 (88.8%) | **NOK** |
+    | Scope | 0/0 (N/A) [13+1/15] | **NOK** | 5+1/6 (100%) [113+2/117] | OK | 2/2 (100%) [12+2/16] | OK |
     +-+-+-+-+-+-+-+
     | Empty | N/A | **NOK** | N/A | **NOK** | N/A | **NOK** |
     +-+-+-+-+-+-+-+
     | Good | 1/1 (100%) | OK | 18/18 (100%) | OK | 4/4 (100%) | OK |
+    +-+-+-+-+-+-+-+
+    | Overall | 0/1 (0.0%) [1/1] | **NOK** | 3/18 (16.6%) [0/2] | **NOK** | 2/4 (50.0%) | **NOK** |
     +-+-+-+-+-+-+-+
 
 .. raw:: latex
@@ -1784,6 +1804,55 @@ The following table lists files having the expected coverage.
     | `cpukit​/score​/src​/chain.c </pkg/coverage-good-html/index.chain.c.fb6aee9b3f6ae0998256d52130e2c678.html>`__ | 1/1 (100%) | OK | 15/15 (100%) | OK | 2/2 (100%) | OK |
     +-+-+-+-+-+-+-+
     | `cpukit​/libc​/string​/flsl.c </pkg/coverage-good-html/index.flsl.c.187042b9c864845145c986de5bb93dd5.html>`__ | N/A | OK | 3/3 (100%) | OK | 2/2 (100%) | OK |
+    +-+-+-+-+-+-+-+
+
+.. raw:: latex
+
+    \\end{scriptsize}
+
+.. _CoverageTargetNameTargetAScopeOverall:
+
+Scope - Overall
+***************
+
+The following table lists files with unjustified coverage issues.
+
+.. raw:: latex
+
+    \\begin{scriptsize}
+
+.. table::
+    :class: longtable
+    :widths: 34,13,7,13,7,13,7
+
+    +-+-+-+-+-+-+-+
+    | File | Functions | Status | Lines | Status | Branches | Status |
+    +=+=+=+=+=+=+=+
+    | `bsps​/include​/bsp​/fatal.h </pkg/coverage-overall-html/index.fatal.h.7f3bb1e879e3580b41139d705e6b007f.html>`__ | 1/1 (100%) | OK | 0/2 (0.0%) | **NOK** | N/A | OK |
+    +-+-+-+-+-+-+-+
+    | `cpukit​/score​/src​/chain.c </pkg/coverage-overall-html/index.chain.c.fb6aee9b3f6ae0998256d52130e2c678.html>`__ | 0/1 (0.0%) | **NOK** | 0/15 (0.0%) | **NOK** | 0/2 (0.0%) | **NOK** |
+    +-+-+-+-+-+-+-+
+
+.. raw:: latex
+
+    \\end{scriptsize}
+
+There are no files with justified coverage issues.
+
+The following table lists files having the expected coverage.
+
+.. raw:: latex
+
+    \\begin{scriptsize}
+
+.. table::
+    :class: longtable
+    :widths: 34,13,7,13,7,13,7
+
+    +-+-+-+-+-+-+-+
+    | File | Functions | Status | Lines | Status | Branches | Status |
+    +=+=+=+=+=+=+=+
+    | `cpukit​/libc​/string​/flsl.c </pkg/coverage-overall-html/index.flsl.c.187042b9c864845145c986de5bb93dd5.html>`__ | N/A | OK | 3/3 (100%) | OK | 2/2 (100%) | OK |
     +-+-+-+-+-+-+-+
 
 .. raw:: latex
