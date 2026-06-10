@@ -200,6 +200,9 @@ class _CoverageSummary:
             self.overall[f"{kind}-covered"] = 0
             self.overall[f"{kind}-justified"] = 0
             self.overall[f"{kind}-total"] = 0
+            self.overall[f"per-file-{kind}-covered"] = 0
+            self.overall[f"per-file-{kind}-justified"] = 0
+            self.overall[f"per-file-{kind}-total"] = 0
         for file_coverage in coverage["files"]:
             self._add_coverage_of_file(mapper, file_coverage)
         limits = self.limits_by_area["overall"]
@@ -249,34 +252,56 @@ class _CoverageSummary:
             else:
                 content.add("There is no coverage information available.")
 
+    def _add_no_coverage_data(self, stats: dict, overall: bool, kind: str,
+                              per_file_total: int) -> None:
+        if overall:
+            stats[f"{kind}-status"] = "**NOK**"
+            stats[f"{kind}-error"] = True
+            stats["error"] = True
+            if per_file_total:
+                info = f"No general {kind} information in coverage data"
+            else:
+                info = f"No {kind} information in coverage data"
+            self.issues.setdefault(info, set()).add(f"Scope - {self.scope}")
+        else:
+            stats[f"{kind}-status"] = "OK"
+
     def _add_coverage_status(self, mapper: BuildItemMapper, stats: dict,
                              limit: float, overall: bool, kind: str) -> None:
         # pylint: disable=too-many-arguments
         # pylint: disable=too-many-positional-arguments
+        # pylint: disable=too-many-locals
         total = stats[f"{kind}-total"]
-        if not total:
+        per_file_total = stats.get(f"per-file-{kind}-total", 0)
+        if total + per_file_total == 0:
             stats[f"{kind}-info"] = "N/A"
-            if overall:
-                stats[f"{kind}-status"] = "**NOK**"
-                stats[f"{kind}-error"] = True
-                stats["error"] = True
-                self.issues.setdefault(
-                    f"No {kind} information in coverage data",
-                    set()).add(f"Scope - {self.scope}")
-            else:
-                stats[f"{kind}-status"] = "OK"
+            self._add_no_coverage_data(stats, overall, kind, per_file_total)
             return
 
+        per_file_info = ""
+        if per_file_total:
+            per_file_covered = stats.get(f"per-file-{kind}-covered", 0)
+            per_file_justified = stats.get(f"per-file-{kind}-justified", 0)
+            per_file_info = f"{per_file_info} [{per_file_covered}"
+            if per_file_justified:
+                per_file_info = f"{per_file_info}+{per_file_justified}"
+            per_file_info = f"{per_file_info}/{per_file_total}]"
+
         covered = stats[f"{kind}-covered"]
+        info = str(covered)
         justified = stats[f"{kind}-justified"]
         if justified != 0:
-            info = f"{covered}+{justified}/{total}"
-        else:
-            info = f"{covered}/{total}"
+            info = f"{info}+{justified}"
+        info = f"{info}/{total}"
         both = covered + justified
         if both == total:
-            stats[f"{kind}-info"] = f"{info} (100%)"
-            stats[f"{kind}-status"] = "OK"
+            if total:
+                stats[f"{kind}-info"] = f"{info} (100%){per_file_info}"
+                stats[f"{kind}-status"] = "OK"
+            else:
+                stats[f"{kind}-info"] = f"{info} (N/A){per_file_info}"
+                self._add_no_coverage_data(stats, overall, kind,
+                                           per_file_total)
             return
 
         # Make sure we never display 100.0% if not everything is covered
@@ -297,18 +322,24 @@ class _CoverageSummary:
                     f"Insufficient file-specific {kind} coverage", set()).add(
                         mapper.format_link(spacify(stats["file-path"]),
                                            stats["file-link"]))
-        stats[f"{kind}-info"] = f"{info} ({percent:.1f}%)"
+        stats[f"{kind}-info"] = f"{info} ({percent:.1f}%){per_file_info}"
         stats[f"{kind}-status"] = status
 
     def _add_file_stats(self, mapper: BuildItemMapper,
                         stats: dict[str, int | str], file_path: str,
                         spot_to_justification: _SpotToJustification) -> None:
-        limits = self.limits_by_area.get(f"file-{file_path}",
-                                         self.limits_by_area["per-file"])
+        # Files with explicit coverage limits are excluded from the general
+        # overall coverage accounting and shown separately in [...] brackets.
+        limits = self.limits_by_area.get(f"file-{file_path}")
+        if limits is None:
+            limits = self.limits_by_area["per-file"]
+            overall_scope = ""
+        else:
+            overall_scope = "per-file-"
         for kind in _COVERAGE_KINDS:
             for what in ("covered", "justified", "total"):
                 key = f"{kind}-{what}"
-                self.overall[key] += stats[key]
+                self.overall[f"{overall_scope}{key}"] += stats[key]
             self._add_coverage_status(mapper, stats,
                                       limits[f"{kind}-min-percent"], False,
                                       kind)
