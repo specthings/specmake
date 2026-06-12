@@ -1761,7 +1761,7 @@ wheels = [
 
 [[package]]
 name = "specmake"
-version = "1.5.6"
+version = "1.5.7.dev1"
 source = { editable = "." }
 dependencies = [
     { name = "gcovr" },
