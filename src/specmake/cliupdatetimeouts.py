@@ -171,7 +171,7 @@ def cliupdatetimeouts(argv: list[str] = sys.argv) -> None:
         except KeyError:
             logging.warning("%s: report has no target attribute", report_path)
             continue
-        uid = f"{target}/{args.test_timeouts}"
+        uid = f"{target.removesuffix('/target')}/{args.test_timeouts}"
         logging.info("%s: test timeouts item UID: %s", report_path, uid)
         item = item_cache[uid]
         time_of_last_update = datetime.datetime.fromisoformat(
