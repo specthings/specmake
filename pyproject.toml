@@ -62,6 +62,7 @@ classifiers = [
 "Bug Tracker" = "https://github.com/specthings/specmake/issues"
 
 [project.scripts]
+specaddpatches = "specmake.cliaddpatches:cliaddpatches"
 specbuild = "specmake.clibuild:clibuild"
 specfromsource = "specmake.clifromsource:clifromsource"
 specgcovr = "specmake.cligcovr:cligcovr"
