@@ -538,13 +538,13 @@ The value shall be a string. It shall be a copyright statement of a copyright
 holder of the specification item. The value
 
 - shall match with the regular expression
-  "``^\\s*Copyright\\s+\(C\)\\s+[0-9]+,\\s*[0-9]+\\s+.+\\s*$``",
+  "``^\\s*Copyright\\s+\\(C\)\\s+[0-9]+,\\s*[0-9]+\\s+.+\\s*$``",
 
 - or, shall match with the regular expression
-  "``^\\s*Copyright\\s+\(C\)\\s+[0-9]+\\s+.+\\s*$``",
+  "``^\\s*Copyright\\s+\\(C\)\\s+[0-9]+\\s+.+\\s*$``",
 
 - or, shall match with the regular expression
-  "``^\\s*Copyright\\s+\(C\)\\s+.+\\s*$``".
+  "``^\\s*Copyright\\s+\\(C\)\\s+.+\\s*$``".
 
 This type is used by the following types:
 
@@ -661,6 +661,9 @@ though an SPDX License Identifier. The value
 - or, shall be equal to "``CC-BY-SA-4.0 OR BSD-2-Clause``",
 
 - or, shall be equal to "``CC-BY-SA-4.0 OR BSD-2-Clause OR MIT``",
+
+- or, shall be equal to "``CC-BY-SA-4.0 OR BSD-2-Clause OR Apache-2.0 OR
+  GPL-2.0-or-later``",
 
 - or, shall be equal to "``CC-BY-SA-4.0 OR MIT``",
 
