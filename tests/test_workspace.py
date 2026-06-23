@@ -60,18 +60,18 @@ def _create_workspace(tmp_dir, spec_dir):
     return workspace
 
 
-def _create_buildspace_from_workspace(tmp_dir, workspace):
+def _create_buildspace_from_workspace(tmp_dir, workspace, factory=None):
     buildspace_config = BuildspaceConfig(
         spec_directory=os.path.join(tmp_dir, "spec"),
         cache_directory=os.path.join(tmp_dir, "cache-buildspace"),
         verify_specification_format=True,
-        factory=create_build_item_factory())
+        factory=factory)
     return export_to_buildspace(workspace, buildspace_config)
 
 
-def _create_buildspace(tmp_dir, spec_dir):
+def _create_buildspace(tmp_dir, spec_dir, factory=None):
     workspace = _create_workspace(tmp_dir, spec_dir)
-    buildspace = _create_buildspace_from_workspace(tmp_dir, workspace)
+    buildspace = _create_buildspace_from_workspace(tmp_dir, workspace, factory)
     return buildspace, workspace
 
 
@@ -247,6 +247,39 @@ def test_workspace_test_log(tmpdir):
     assert buildspace.director["/file"]["directory-state-type"] == "test-log"
     with open(os.path.join(tmpdir, "file", "c.txt"), "rb") as file:
         assert file.read() == b"b\n"
+
+
+def test_workspace_discard_and_delete_error(tmpdir):
+    create_error = False
+
+    class _Item(BuildItem):
+
+        def __init__(self, director, item, mapper=None) -> None:
+            super().__init__(director, item, mapper)
+            if create_error:
+                raise IOError("create error")
+
+    factory = create_build_item_factory()
+    factory.add_constructor("pkg/directory-state/explicit", _Item)
+    buildspace, workspace = _create_buildspace(
+        tmpdir, "spec-pkg-wk/discard-and-delete-error", factory)
+    assert "/a" in buildspace.cache
+    assert "/b" in buildspace.cache
+    assert "/c" in buildspace.cache
+    assert buildspace.director["/c"]["directory"] != "foobar"
+    workspace.director.remove("/a")
+    workspace.director["/c"]["directory"] = "foobar"
+    create_error = True
+    buildspace.director.clear()
+    with pytest.raises(IOError, match="create error"):
+        buildspace.director.create_with_dependencies("/a")
+    buildspace_2 = _create_buildspace_from_workspace(tmpdir, workspace,
+                                                     factory)
+    assert "/a" not in buildspace_2.cache
+    assert "/b" in buildspace_2.cache
+    assert "/c" in buildspace_2.cache
+    create_error = False
+    assert buildspace_2.director["/c"]["directory"] == "foobar"
 
 
 def test_workspace_component(tmpdir):

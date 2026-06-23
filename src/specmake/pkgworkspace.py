@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# pylint: disable=too-many-lines
+
 import contextlib
 import copy
 import dataclasses
@@ -889,11 +891,17 @@ def _delete_buildspace_items(director: PackageBuildDirector,
                              deleted_uids: list[str],
                              item_files: list[str]) -> None:
     for uid in deleted_uids:
-        buildspace_item = director.create_with_dependencies(uid)
         logging.info("%s: discard buildspace state", uid)
-        buildspace_item.discard_and_clear()
-        buildspace_item.commit("Delete")
-        file = buildspace_item.item.file
+        try:
+            buildspace_item = director.create_with_dependencies(
+                uid, permissive_errors=True)
+        # pylint: disable-next=broad-exception-caught
+        except Exception as err:
+            logging.error("%s: create buildspace item failed: %s", uid, err)
+        else:
+            buildspace_item.discard_and_clear()
+            buildspace_item.commit("Delete")
+        file = director.item_cache[uid].file
         director.remove(uid)
         logging.info("%s: remove: %s", uid, file)
         os.remove(file)
@@ -914,10 +922,16 @@ def _add_buildspace_submodules(
 def _discard_buildspace_items(director: PackageBuildDirector,
                               discard_uids: list[str]) -> None:
     for uid in discard_uids:
-        buildspace_item = director.create_with_dependencies(uid)
         logging.info("%s: discard buildspace state", uid)
-        buildspace_item.discard_and_clear()
-        buildspace_item.commit("Discard")
+        try:
+            buildspace_item = director.create_with_dependencies(
+                uid, permissive_errors=True)
+        # pylint: disable-next=broad-exception-caught
+        except Exception as err:
+            logging.error("%s: create buildspace item failed: %s", uid, err)
+        else:
+            buildspace_item.discard_and_clear()
+            buildspace_item.commit("Discard")
         director.remove(uid)
 
 
