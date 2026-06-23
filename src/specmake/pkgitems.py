@@ -967,7 +967,8 @@ class PackageBuildDirector(dict):
 
     def create_with_dependencies(self,
                                  uid: str,
-                                 seen: Optional[set[str]] = None) -> BuildItem:
+                                 seen: Optional[set[str]] = None,
+                                 permissive_errors: bool = False) -> BuildItem:
         """ Create the build item with all its input dependencies. """
         if seen is None:
             seen = set()
@@ -977,7 +978,16 @@ class PackageBuildDirector(dict):
         item = self.item_cache[uid]
         with item.view["component"].scope():
             for link in _get_input_links(item):
-                self.create_with_dependencies(link.uid, seen)
+                try:
+                    self.create_with_dependencies(link.uid, seen,
+                                                  permissive_errors)
+                # pylint: disable-next=broad-exception-caught
+                except Exception as err:
+                    if permissive_errors:
+                        logging.error("%s: create dependency %s failed: %s",
+                                      uid, link.uid, err)
+                    else:
+                        raise
             return self[uid]
 
     @property
