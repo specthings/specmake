@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.12.0" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.17.0" xml:lang="en-US">
   <compounddef id="header_8h" kind="file" language="C++">
     <compoundname>header.h</compoundname>
     <includedby refid="source_8c" local="yes">source.c</includedby>
@@ -89,10 +89,10 @@
           </detaileddescription>
         </enumvalue>
         <briefdescription>
-<para>Brief e_0. </para>
+<para>Brief <ref refid="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9f" kindref="member">e_0</ref>. </para>
         </briefdescription>
         <detaileddescription>
-<para>Description e_0. </para>
+<para>Description <ref refid="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9f" kindref="member">e_0</ref>. </para>
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
@@ -111,14 +111,34 @@
           </detaileddescription>
         </enumvalue>
         <briefdescription>
-<para>Brief e_1. </para>
+<para>Brief <ref refid="header_8h_1adbc74fb9d93477777c8774e9db9864a2" kindref="member">e_1</ref>. </para>
         </briefdescription>
         <detaileddescription>
-<para>Description e_1. </para>
+<para>Description <ref refid="header_8h_1adbc74fb9d93477777c8774e9db9864a2" kindref="member">e_1</ref>. </para>
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
         <location file="header.h" line="324" column="1" bodyfile="header.h" bodystart="324" bodyend="331"/>
+      </memberdef>
+      <memberdef kind="enum" id="header_8h_1a8bbf6ee69bc37bfcb0453bb5fa6d202c" prot="public" static="no" strong="no">
+        <type></type>
+        <name>@140054235311313057212272103177147332064345235355</name>
+        <enumvalue id="header_8h_1a8bbf6ee69bc37bfcb0453bb5fa6d202ca6dc6ce1cd7b91e95c843d9ee06165d61" prot="public">
+          <name>E_ANON_A</name>
+          <briefdescription>
+<para>Brief E_ANON_A. </para>
+          </briefdescription>
+          <detaileddescription>
+<para>Description E_ANON_A. </para>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="header.h" line="333" column="1" bodyfile="header.h" bodystart="333" bodyend="340"/>
       </memberdef>
     </sectiondef>
     <sectiondef kind="typedef">
@@ -128,10 +148,10 @@
         <argsstring></argsstring>
         <name>e_0</name>
         <briefdescription>
-<para>Brief e_0. </para>
+<para>Brief <ref refid="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9f" kindref="member">e_0</ref>. </para>
         </briefdescription>
         <detaileddescription>
-<para>Description e_0. </para>
+<para>Description <ref refid="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9f" kindref="member">e_0</ref>. </para>
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
@@ -143,7 +163,7 @@
       <member refid="group__FooGroup_1ga4f62ceb5b79ec2e1e2ccc4f379ca2d5f" kind="function"><name>gf_1</name></member>
       <member refid="group__FooGroup_1ga4ce2d0c839ba3140c1285e4a29fe71e4" kind="function"><name>gf_2</name></member>
       <member refid="group__FooGroup_1ga0da7a13a733311498f208f6a08b6e918" kind="function"><name>gf_3</name></member>
-      <member refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" kind="function"><name>gf_4</name></member>
+      <member refid="group__FooGroup_1ga82b8bb29d8e16f2f0436a38b035b192e" kind="function"><name>gf_4</name></member>
       <memberdef kind="function" id="header_8h_1aa2f8caf29834418e60688b225e2413db" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>int</type>
         <definition>int f_0</definition>
@@ -316,6 +336,7 @@
     <programlisting>
 <codeline lineno="1"><highlight class="comment">/*<sp/>SPDX-License-Identifier:<sp/>BSD-2-Clause<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
 <codeline lineno="2"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight></codeline>
 <codeline lineno="16"><highlight class="normal"></highlight><highlight class="comment">/*</highlight></codeline>
 <codeline lineno="17"><highlight class="comment"><sp/>*<sp/>Copyright<sp/>(c)<sp/>2024,<sp/>2025<sp/>embedded<sp/>brains<sp/>GmbH<sp/>&amp;<sp/>Co.<sp/>KG</highlight></codeline>
 <codeline lineno="18"><highlight class="comment"><sp/>*</highlight></codeline>
@@ -344,6 +365,7 @@
 <codeline lineno="41"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>HEADER_H</highlight><highlight class="normal"></highlight></codeline>
 <codeline lineno="42"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>HEADER_H</highlight><highlight class="normal"></highlight></codeline>
 <codeline lineno="43"><highlight class="normal"></highlight></codeline>
+<codeline lineno="50"><highlight class="normal"></highlight></codeline>
 <codeline lineno="68"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group__FooGroup_1ga670c7f2490aa4624e8b3ee3d04ce448b" kindref="member">gf_0</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*in,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*out,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*inout,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>none);</highlight></codeline>
 <codeline lineno="69"><highlight class="normal"></highlight></codeline>
 <codeline lineno="75"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="group__FooGroup_1ga4f62ceb5b79ec2e1e2ccc4f379ca2d5f" kindref="member">gf_1</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
@@ -356,16 +378,16 @@
 <codeline lineno="95"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>No<sp/>doxygen<sp/>comment.<sp/><sp/>*/</highlight><highlight class="normal"></highlight></codeline>
 <codeline lineno="96" refid="group__FooGroup_1ga0da7a13a733311498f208f6a08b6e918" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="group__FooGroup_1ga0da7a13a733311498f208f6a08b6e918" kindref="member">gf_3</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>x,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>y);</highlight></codeline>
 <codeline lineno="97"><highlight class="normal"></highlight></codeline>
-<codeline lineno="109" refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" kindref="member">gf_4</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*in,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*out);</highlight></codeline>
+<codeline lineno="109" refid="group__FooGroup_1ga983f90c33690e3ad1647997231aafc7d" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>GM_0(a,<sp/>b)<sp/>((a)<sp/>&gt;<sp/>(b)<sp/>?<sp/>(a)<sp/>:<sp/>(b))</highlight><highlight class="normal"></highlight></codeline>
 <codeline lineno="110"><highlight class="normal"></highlight></codeline>
-<codeline lineno="122" refid="group__FooGroup_1ga983f90c33690e3ad1647997231aafc7d" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>GM_0(a,<sp/>b)<sp/>((a)<sp/>&gt;<sp/>(b)<sp/>?<sp/>(a)<sp/>:<sp/>(b))</highlight><highlight class="normal"></highlight></codeline>
-<codeline lineno="123"><highlight class="normal"></highlight></codeline>
-<codeline lineno="127" refid="group__FooGroup_1gacdd314c944182a477291569a0f5e632a" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>GD_1<sp/>4096</highlight><highlight class="normal"></highlight></codeline>
-<codeline lineno="128"><highlight class="normal"></highlight></codeline>
-<codeline lineno="134" refid="structgt__0" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">{</highlight></codeline>
-<codeline lineno="135" refid="structgt__0_1a9aa1d8ed9d7e498e65f425aa4fbfe002" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structgt__0_1a9aa1d8ed9d7e498e65f425aa4fbfe002" kindref="member">x</ref>;</highlight></codeline>
-<codeline lineno="136" refid="structgt__0_1ae7e13b530de35e0b0265f70d40deacc3" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structgt__0_1ae7e13b530de35e0b0265f70d40deacc3" kindref="member">y</ref>;</highlight></codeline>
-<codeline lineno="137"><highlight class="normal">}<sp/><ref refid="structgt__0" kindref="compound">gt_0</ref>;</highlight></codeline>
+<codeline lineno="114" refid="group__FooGroup_1gacdd314c944182a477291569a0f5e632a" refkind="member"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>GD_1<sp/>4096</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="115"><highlight class="normal"></highlight></codeline>
+<codeline lineno="121" refid="structgt__0" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="122" refid="structgt__0_1a9aa1d8ed9d7e498e65f425aa4fbfe002" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structgt__0_1a9aa1d8ed9d7e498e65f425aa4fbfe002" kindref="member">x</ref>;</highlight></codeline>
+<codeline lineno="123" refid="structgt__0_1ae7e13b530de35e0b0265f70d40deacc3" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structgt__0_1ae7e13b530de35e0b0265f70d40deacc3" kindref="member">y</ref>;</highlight></codeline>
+<codeline lineno="124"><highlight class="normal">}<sp/><ref refid="structgt__0" kindref="compound">gt_0</ref>;</highlight></codeline>
+<codeline lineno="125"><highlight class="normal"></highlight></codeline>
+<codeline lineno="137" refid="group__FooGroup_1ga82b8bb29d8e16f2f0436a38b035b192e" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="group__FooGroup_1ga82b8bb29d8e16f2f0436a38b035b192e" kindref="member">gf_4</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/><ref refid="structgt__0" kindref="compound">gt_0</ref><sp/>*in,<sp/><ref refid="structgt__0" kindref="compound">gt_0</ref><sp/>*out);</highlight></codeline>
 <codeline lineno="138"><highlight class="normal"></highlight></codeline>
 <codeline lineno="144" refid="structgs__0" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal"><ref refid="structgs__0" kindref="compound">gs_0</ref><sp/>{</highlight></codeline>
 <codeline lineno="145" refid="structgs__0_1a5226a883ac10623503af9aff0d08974f" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="structgs__0_1a5226a883ac10623503af9aff0d08974f" kindref="member">a</ref>;</highlight></codeline>
@@ -387,9 +409,10 @@
 <codeline lineno="181"><highlight class="normal"></highlight></codeline>
 <codeline lineno="187" refid="group__FooGroup_1ggad9450fd0bc1a7ba2ce704c69f0bbfb46abe38e392580fc344890940799adb8460" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="group__FooGroup_1ggad9450fd0bc1a7ba2ce704c69f0bbfb46abe38e392580fc344890940799adb8460" kindref="member">GE_0_B</ref>,</highlight></codeline>
 <codeline lineno="188"><highlight class="normal"></highlight></codeline>
-<codeline lineno="194"><highlight class="normal"><sp/><sp/><ref refid="group__FooGroup_1ggad9450fd0bc1a7ba2ce704c69f0bbfb46a6abf4f552630e9e8994c91aeadf9d9d0" kindref="member">GE_0_C</ref></highlight></codeline>
-<codeline lineno="195" refid="group__FooGroup_1ggad9450fd0bc1a7ba2ce704c69f0bbfb46a6abf4f552630e9e8994c91aeadf9d9d0" refkind="member"><highlight class="normal">}<sp/><ref refid="group__FooGroup_1gad9450fd0bc1a7ba2ce704c69f0bbfb46" kindref="member">ge_0</ref>;</highlight></codeline>
+<codeline lineno="194" refid="group__FooGroup_1ggad9450fd0bc1a7ba2ce704c69f0bbfb46a6abf4f552630e9e8994c91aeadf9d9d0" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="group__FooGroup_1ggad9450fd0bc1a7ba2ce704c69f0bbfb46a6abf4f552630e9e8994c91aeadf9d9d0" kindref="member">GE_0_C</ref></highlight></codeline>
+<codeline lineno="195"><highlight class="normal">}<sp/><ref refid="group__FooGroup_1gad9450fd0bc1a7ba2ce704c69f0bbfb46" kindref="member">ge_0</ref>;</highlight></codeline>
 <codeline lineno="196"><highlight class="normal"></highlight></codeline>
+<codeline lineno="198"><highlight class="normal"></highlight></codeline>
 <codeline lineno="220"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="header_8h_1aa2f8caf29834418e60688b225e2413db" kindref="member">f_0</ref>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*in,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*out,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*inout,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>none,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*(*f)(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*(*f2)(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">)));</highlight></codeline>
 <codeline lineno="221"><highlight class="normal"></highlight></codeline>
 <codeline lineno="227"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="header_8h_1a17124d351aade94c069796b00a063b72" kindref="member">f_1</ref>(</highlight><highlight class="keywordtype">void</highlight><highlight class="normal">);</highlight></codeline>
@@ -424,14 +447,18 @@
 <codeline lineno="303"><highlight class="normal">};</highlight></codeline>
 <codeline lineno="304"><highlight class="normal"></highlight></codeline>
 <codeline lineno="310" refid="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9f" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"><sp/><ref refid="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9f" kindref="member">e_0</ref><sp/>{</highlight></codeline>
-<codeline lineno="316"><highlight class="normal"><sp/><sp/><ref refid="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9fad67b160e0559ffcbea0f19ab5a997668" kindref="member">E_0_A</ref></highlight></codeline>
+<codeline lineno="316" refid="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9fad67b160e0559ffcbea0f19ab5a997668" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9fad67b160e0559ffcbea0f19ab5a997668" kindref="member">E_0_A</ref></highlight></codeline>
 <codeline lineno="317" refid="header_8h_1a01325395cf2af877fccf63801bcc2aeb" refkind="member"><highlight class="normal">}<sp/><ref refid="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9f" kindref="member">e_0</ref>;</highlight></codeline>
 <codeline lineno="318"><highlight class="normal"></highlight></codeline>
 <codeline lineno="324" refid="header_8h_1adbc74fb9d93477777c8774e9db9864a2" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">enum</highlight><highlight class="normal"><sp/><ref refid="header_8h_1adbc74fb9d93477777c8774e9db9864a2" kindref="member">e_1</ref><sp/>{</highlight></codeline>
-<codeline lineno="330"><highlight class="normal"><sp/><sp/><ref refid="header_8h_1adbc74fb9d93477777c8774e9db9864a2af8032135292d00116d68c5e58e3301e1" kindref="member">E_1_A</ref></highlight></codeline>
-<codeline lineno="331" refid="header_8h_1adbc74fb9d93477777c8774e9db9864a2af8032135292d00116d68c5e58e3301e1" refkind="member"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="330" refid="header_8h_1adbc74fb9d93477777c8774e9db9864a2af8032135292d00116d68c5e58e3301e1" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="header_8h_1adbc74fb9d93477777c8774e9db9864a2af8032135292d00116d68c5e58e3301e1" kindref="member">E_1_A</ref></highlight></codeline>
+<codeline lineno="331"><highlight class="normal">};</highlight></codeline>
 <codeline lineno="332"><highlight class="normal"></highlight></codeline>
-<codeline lineno="333"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>HEADER_H<sp/>*/</highlight><highlight class="preprocessor"></highlight></codeline>
+<codeline lineno="333"><highlight class="normal"></highlight><highlight class="keyword">enum</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="339" refid="header_8h_1a8bbf6ee69bc37bfcb0453bb5fa6d202ca6dc6ce1cd7b91e95c843d9ee06165d61" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="header_8h_1a8bbf6ee69bc37bfcb0453bb5fa6d202ca6dc6ce1cd7b91e95c843d9ee06165d61" kindref="member">E_ANON_A</ref></highlight></codeline>
+<codeline lineno="340"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="341"><highlight class="normal"></highlight></codeline>
+<codeline lineno="342"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/></highlight><highlight class="comment">/*<sp/>HEADER_H<sp/>*/</highlight><highlight class="preprocessor"></highlight></codeline>
     </programlisting>
     <location file="header.h"/>
   </compounddef>

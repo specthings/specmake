@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Provides a command line interface to generate interface items. """
 
-# Copyright (C) 2024, 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2024, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -27,38 +27,51 @@
 import contextlib
 import os
 import sys
+import yaml
 
-from specitems import get_arguments, save_data
+from specitems import get_arguments
 from specware import load_specware_config
 
-from .sourcetospec import (doxygen_xml_to_spec, DoxygenContext, DoxygenGroup,
-                           DoxygenFile, DoxygenFunction)
+from .sourcetospec import (DoxygenContext, DoxygenEnum, DoxygenGroup,
+                           DoxygenFile, DoxygenTypedef)
 
 
-def _propose_config(ctx: DoxygenContext, spec_dir: str, config: dict) -> None:
-    print("spec-from-source:")
-    print(f"  spec-directory: {spec_dir}")
-    print("  groups:")
-    for group in sorted(ctx.items_by_kind["group"].values()):
-        print(f"    {group.doxygen_id}: # {group.name} "
-              f"({group.data['title']})")
-        print(f"      uid: {group.uid}")
+def _propose_config(ctx: DoxygenContext, config: dict) -> None:
+    config_2 = {"spec-from-source": config}
+    config_2["spec-from-source"].pop("item-to-group", None)
+    text = yaml.dump(config_2, default_flow_style=False, allow_unicode=True)
+    print(text.rstrip())
+    print("  item-to-group:")
+    for doxygen_id, group_ident in sorted(ctx.item_to_group.items()):
+        item = ctx.items[doxygen_id]
+        print(f"    {doxygen_id}: {group_ident} # {item.kind}/{item.name}")
+
+
+def _generate_header(header: DoxygenFile) -> None:
+    print("  ", header.uid)
+    header.save()
+    for header_member in header.members():
+        if isinstance(header_member, DoxygenTypedef):
+            continue
+        print("    ", header_member.uid)
+        header_member.save()
+        if isinstance(header_member, DoxygenEnum):
+            for enumerator in header_member.members():
+                print("      ", enumerator.uid)
+                enumerator.save()
+
+
+def _generate_groups(ctx: DoxygenContext, config: dict) -> None:
     for group in sorted(ctx.items_by_kind["group"].values()):
         assert isinstance(group, DoxygenGroup)
-        if group.doxygen_id not in config["enabled-groups"]:
+        if group.name not in config["enabled-groups"]:
             continue
         print(group.doxygen_id)
+        group.save()
         for group_member in group.members():
             if group_member.is_header:
                 assert isinstance(group_member, DoxygenFile)
-                print("  ", group_member.uid)
-                for header_member in group_member.members():
-                    if not isinstance(header_member, DoxygenFunction):
-                        continue
-                    path = os.path.join(spec_dir,
-                                        f"{header_member.uid[1:]}.yml")
-                    print("    ", header_member.uid, path)
-                    save_data(path, header_member.export())
+                _generate_header(group_member)
 
 
 def clifromsource(argv: list[str] = sys.argv) -> None:
@@ -86,11 +99,10 @@ def clifromsource(argv: list[str] = sys.argv) -> None:
     config, working_directory = load_specware_config(args.config_file)
     config = config["spec-from-source"]
     with contextlib.chdir(working_directory):
-        spec_dir = config["spec-directory"]
-        os.makedirs(spec_dir, exist_ok=True)
-        ctx = doxygen_xml_to_spec(config, args.doxygen_xml_files)
+        ctx = DoxygenContext(config)
+        os.makedirs(ctx.spec_directory, exist_ok=True)
+        ctx.doxygen_xml_to_spec(args.doxygen_xml_files)
         if args.propose_config:
-            _propose_config(ctx, spec_dir, config)
+            _propose_config(ctx, config)
         else:
-            for item in ctx.items_by_kind["function"].values():
-                print(item.name, item.data)
+            _generate_groups(ctx, config)

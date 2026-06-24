@@ -96,19 +96,6 @@ static inline int gf_2(int x, int y)
 void gf_3(int x, int y);
 
 /**
- * @brief Brief gf_4().
- *
- * Description gf_4().
- *
- * @param[in] in gf_4() in description.
- *
- * @param[out] out gf_4() out description.
- *
- * @return gf_4() return description.
- */
-int gf_4(const int *in, int *out);
-
-/**
  * @brief Brief GM_0().
  *
  * Description GM_0().
@@ -135,6 +122,19 @@ typedef struct {
   int x;
   int y;
 } gt_0;
+
+/**
+ * @brief Brief gf_4().
+ *
+ * Description gf_4().
+ *
+ * @param[in] in gf_4() in description.
+ *
+ * @param[out] out gf_4() out description.
+ *
+ * @return gf_4() return description.
+ */
+int gf_4(const gt_0 *in, gt_0 *out);
 
 /**
  * @brief Brief gs_0.
@@ -328,6 +328,15 @@ enum e_1 {
    * Description E_1_A.
    */
   E_1_A
+};
+
+enum {
+  /**
+   * @brief Brief E_ANON_A.
+   *
+   * Description E_ANON_A.
+   */
+  E_ANON_A
 };
 
 #endif /* HEADER_H */
