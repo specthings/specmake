@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Tests for the sourcetospec module. """
 
-# Copyright (C) 2024, 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2024, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -28,13 +28,13 @@ from pathlib import Path
 
 import pytest
 
-from specmake import doxygen_xml_to_spec
+from specmake import DoxygenContext
 
 _GF_0_EXPECTED_RESULT = {
     "SPDX-License-Identifier":
     "CC-BY-SA-4.0 OR BSD-2-Clause",
     "brief":
-    "Brief  gf_0().",
+    "Brief gf_0().",
     "copyrights": ["Copyright (C) 2024 embedded brains GmbH & Co. KG"],
     "definition": {
         "default": {
@@ -52,7 +52,7 @@ _GF_0_EXPECTED_RESULT = {
         "variants": []
     },
     "description":
-    "Description  gf_0().",
+    "Description gf_0().",
     "enabled-by":
     True,
     "index-entries": [],
@@ -102,7 +102,7 @@ _F_0_EXPECTED_RESULT = {
     "SPDX-License-Identifier":
     "CC-BY-SA-4.0 OR BSD-2-Clause",
     "brief":
-    "Brief  f_0().",
+    "Brief f_0().",
     "copyrights": ["Copyright (C) 2024 embedded brains GmbH & Co. KG"],
     "definition": {
         "default": {
@@ -121,7 +121,7 @@ _F_0_EXPECTED_RESULT = {
         "variants": []
     },
     "description":
-    "Description  f_0().",
+    "Description f_0().",
     "enabled-by":
     True,
     "index-entries": [],
@@ -176,7 +176,7 @@ _GF_1_EXPECTED_RESULT = {
     "SPDX-License-Identifier":
     "CC-BY-SA-4.0 OR BSD-2-Clause",
     "brief":
-    "Brief  gf_1().",
+    "Brief gf_1().",
     "copyrights": ["Copyright (C) 2024 embedded brains GmbH & Co. KG"],
     "definition": {
         "default": {
@@ -188,7 +188,7 @@ _GF_1_EXPECTED_RESULT = {
         "variants": []
     },
     "description":
-    "Description  gf_1().",
+    "Description gf_1().",
     "enabled-by":
     True,
     "index-entries": [],
@@ -216,7 +216,7 @@ _F_1_EXPECTED_RESULT = {
     "SPDX-License-Identifier":
     "CC-BY-SA-4.0 OR BSD-2-Clause",
     "brief":
-    "Brief  f_1().",
+    "Brief f_1().",
     "copyrights": ["Copyright (C) 2024 embedded brains GmbH & Co. KG"],
     "definition": {
         "default": {
@@ -228,7 +228,7 @@ _F_1_EXPECTED_RESULT = {
         "variants": []
     },
     "description":
-    "Description  f_1().",
+    "Description f_1().",
     "enabled-by":
     True,
     "index-entries": [],
@@ -364,7 +364,7 @@ _GF_3_EXPECTED_RESULT = {
     "SPDX-License-Identifier":
     "CC-BY-SA-4.0 OR BSD-2-Clause",
     "brief":
-    None,
+    "Brief TODO.\n",
     "copyrights": ["Copyright (C) 2024 embedded brains GmbH & Co. KG"],
     "definition": {
         "default": {
@@ -412,7 +412,7 @@ _GF_4_EXPECTED_RESULT = {
     "SPDX-License-Identifier":
     "CC-BY-SA-4.0 OR BSD-2-Clause",
     "brief":
-    "Brief  gf_4().",
+    "Brief gf_4().",
     "copyrights": ["Copyright (C) 2024 embedded brains GmbH & Co. KG"],
     "definition": {
         "default": {
@@ -420,15 +420,17 @@ _GF_4_EXPECTED_RESULT = {
             None,
             "body":
             None,
-            "params":
-            ["const int *${.:/params[0]/name}", "int *${.:/params[1]/name}"],
+            "params": [
+                "const ${/gt_0:/name} *${.:/params[0]/name}",
+                "${/gt_0:/name} *${.:/params[1]/name}"
+            ],
             "return":
             "int"
         },
         "variants": []
     },
     "description":
-    "Description  gf_4().",
+    "Description gf_4().",
     "enabled-by":
     True,
     "index-entries": [],
@@ -466,7 +468,7 @@ _GM_0_EXPECTED_RESULT = {
     "SPDX-License-Identifier":
     "CC-BY-SA-4.0 OR BSD-2-Clause",
     "brief":
-    "Brief  GM_0().",
+    "Brief GM_0().",
     "copyrights": ["Copyright (C) 2024 embedded brains GmbH & Co. KG"],
     "definition": {
         "default": {
@@ -478,7 +480,7 @@ _GM_0_EXPECTED_RESULT = {
         "variants": []
     },
     "description":
-    "Description  GM_0().",
+    "Description GM_0().",
     "enabled-by":
     True,
     "index-entries": [],
@@ -512,11 +514,61 @@ _GM_0_EXPECTED_RESULT = {
     "interface"
 }
 
+_FOO_GROUP_EXPECTED_RESULT = {
+    "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+    "brief": "This group contains example items.",
+    "copyrights": [
+        "Copyright (C) 2024 embedded brains GmbH & Co. KG",
+    ],
+    "description": None,
+    "enabled-by": True,
+    "index-entries": [],
+    "links": [],
+    "name": "Example Group",
+    "notes": None,
+    "type": "interface",
+    "interface-type": "group",
+    "identifier": "FooGroup",
+}
+
+_HEADER_H_EXPECTED_RESULT = {
+    "SPDX-License-Identifier":
+    "CC-BY-SA-4.0 OR BSD-2-Clause",
+    "brief":
+    "This header file declares various C constructs with Doxygen comments.",
+    "copyrights": [
+        "Copyright (C) 2024 embedded brains GmbH & Co. KG",
+    ],
+    "description":
+    "This file contains examples of functions, macros, typedefs, defines, "
+    "structs, unions, and enums with Doxygen comments. Some of these are group "
+    "members, and some are not.",
+    "enabled-by":
+    True,
+    "index-entries": [],
+    "links": [
+        {
+            "role": "interface-ingroup",
+            "uid": "group",
+        },
+    ],
+    "notes":
+    None,
+    "type":
+    "interface",
+    "interface-type":
+    "header-file",
+    "path":
+    "header.h",
+    "prefix":
+    "",
+}
+
 _M_0_EXPECTED_RESULT = {
     "SPDX-License-Identifier":
     "CC-BY-SA-4.0 OR BSD-2-Clause",
     "brief":
-    "Brief  M_0().",
+    "Brief M_0().",
     "copyrights": ["Copyright (C) 2024 embedded brains GmbH & Co. KG"],
     "definition": {
         "default": {
@@ -528,7 +580,7 @@ _M_0_EXPECTED_RESULT = {
         "variants": []
     },
     "description":
-    "Description  M_0().",
+    "Description M_0().",
     "enabled-by":
     True,
     "index-entries": [],
@@ -630,11 +682,11 @@ _GT_0_EXPECTED_RESULT = {
     "SPDX-License-Identifier":
     "CC-BY-SA-4.0 OR BSD-2-Clause",
     "brief":
-    "Brief  gt_0.",
+    "Brief gt_0.",
     "copyrights": ["Copyright (C) 2024 embedded brains GmbH & Co. KG"],
     "definition": [{
         "default": {
-            "brief": None,
+            "brief": "Brief TODO.\n",
             "definition": "int ${.:name}",
             "description": None,
             "kind": "member",
@@ -643,7 +695,7 @@ _GT_0_EXPECTED_RESULT = {
         "variants": []
     }, {
         "default": {
-            "brief": None,
+            "brief": "Brief TODO.\n",
             "definition": "int ${.:name}",
             "description": None,
             "kind": "member",
@@ -654,7 +706,7 @@ _GT_0_EXPECTED_RESULT = {
     "definition-kind":
     "typedef-only",
     "description":
-    "Description  gt_0.",
+    "Description gt_0.",
     "enabled-by":
     True,
     "index-entries": [],
@@ -679,11 +731,11 @@ _T_0_EXPECTED_RESULT = {
     "SPDX-License-Identifier":
     "CC-BY-SA-4.0 OR BSD-2-Clause",
     "brief":
-    "Brief  t_0.",
+    "Brief t_0.",
     "copyrights": ["Copyright (C) 2024 embedded brains GmbH & Co. KG"],
     "definition": [{
         "default": {
-            "brief": None,
+            "brief": "Brief TODO.\n",
             "definition": "int ${.:name}",
             "description": None,
             "kind": "member",
@@ -692,7 +744,7 @@ _T_0_EXPECTED_RESULT = {
         "variants": []
     }, {
         "default": {
-            "brief": None,
+            "brief": "Brief TODO.\n",
             "definition": "int ${.:name}",
             "description": None,
             "kind": "member",
@@ -703,7 +755,7 @@ _T_0_EXPECTED_RESULT = {
     "definition-kind":
     "typedef-only",
     "description":
-    "Description  t_0.",
+    "Description t_0.",
     "enabled-by":
     True,
     "index-entries": [],
@@ -728,11 +780,11 @@ _GS_0_EXPECTED_RESULT = {
     "SPDX-License-Identifier":
     "CC-BY-SA-4.0 OR BSD-2-Clause",
     "brief":
-    "Brief  gs_0.",
+    "Brief gs_0.",
     "copyrights": ["Copyright (C) 2024 embedded brains GmbH & Co. KG"],
     "definition": [{
         "default": {
-            "brief": None,
+            "brief": "Brief TODO.\n",
             "definition": "int ${.:name}",
             "description": None,
             "kind": "member",
@@ -741,7 +793,7 @@ _GS_0_EXPECTED_RESULT = {
         "variants": []
     }, {
         "default": {
-            "brief": None,
+            "brief": "Brief TODO.\n",
             "definition": "int ${.:name}",
             "description": None,
             "kind": "member",
@@ -752,7 +804,7 @@ _GS_0_EXPECTED_RESULT = {
     "definition-kind":
     "struct-only",
     "description":
-    "Description  gs_0.",
+    "Description gs_0.",
     "enabled-by":
     True,
     "index-entries": [],
@@ -777,11 +829,11 @@ _S_0_EXPECTED_RESULT = {
     "SPDX-License-Identifier":
     "CC-BY-SA-4.0 OR BSD-2-Clause",
     "brief":
-    "Brief  s_0.",
+    "Brief s_0.",
     "copyrights": ["Copyright (C) 2024 embedded brains GmbH & Co. KG"],
     "definition": [{
         "default": {
-            "brief": None,
+            "brief": "Brief TODO.\n",
             "definition": "int ${.:name}",
             "description": None,
             "kind": "member",
@@ -790,7 +842,7 @@ _S_0_EXPECTED_RESULT = {
         "variants": []
     }, {
         "default": {
-            "brief": None,
+            "brief": "Brief TODO.\n",
             "definition": "int ${.:name}",
             "description": None,
             "kind": "member",
@@ -801,7 +853,7 @@ _S_0_EXPECTED_RESULT = {
     "definition-kind":
     "struct-only",
     "description":
-    "Description  s_0.",
+    "Description s_0.",
     "enabled-by":
     True,
     "index-entries": [],
@@ -826,11 +878,11 @@ _GU_0_EXPECTED_RESULT = {
     "SPDX-License-Identifier":
     "CC-BY-SA-4.0 OR BSD-2-Clause",
     "brief":
-    "Brief  gu_0.",
+    "Brief gu_0.",
     "copyrights": ["Copyright (C) 2024 embedded brains GmbH & Co. KG"],
     "definition": [{
         "default": {
-            "brief": None,
+            "brief": "Brief TODO.\n",
             "definition": "int ${.:name}",
             "description": None,
             "kind": "member",
@@ -839,7 +891,7 @@ _GU_0_EXPECTED_RESULT = {
         "variants": []
     }, {
         "default": {
-            "brief": None,
+            "brief": "Brief TODO.\n",
             "definition": "float ${.:name}",
             "description": None,
             "kind": "member",
@@ -850,7 +902,7 @@ _GU_0_EXPECTED_RESULT = {
     "definition-kind":
     "typedef-only",
     "description":
-    "Description  gu_0.",
+    "Description gu_0.",
     "enabled-by":
     True,
     "index-entries": [],
@@ -875,11 +927,11 @@ _U_0_EXPECTED_RESULT = {
     "SPDX-License-Identifier":
     "CC-BY-SA-4.0 OR BSD-2-Clause",
     "brief":
-    "Brief  u_0.",
+    "Brief u_0.",
     "copyrights": ["Copyright (C) 2024 embedded brains GmbH & Co. KG"],
     "definition": [{
         "default": {
-            "brief": None,
+            "brief": "Brief TODO.\n",
             "definition": "char ${.:name}",
             "description": None,
             "kind": "member",
@@ -888,7 +940,7 @@ _U_0_EXPECTED_RESULT = {
         "variants": []
     }, {
         "default": {
-            "brief": None,
+            "brief": "Brief TODO.\n",
             "definition": "int ${.:name}",
             "description": None,
             "kind": "member",
@@ -899,7 +951,7 @@ _U_0_EXPECTED_RESULT = {
     "definition-kind":
     "typedef-only",
     "description":
-    "Description  u_0.",
+    "Description u_0.",
     "enabled-by":
     True,
     "index-entries": [],
@@ -924,11 +976,11 @@ _GU_1_EXPECTED_RESULT = {
     "SPDX-License-Identifier":
     "CC-BY-SA-4.0 OR BSD-2-Clause",
     "brief":
-    "Brief  gu_1.",
+    "Brief gu_1.",
     "copyrights": ["Copyright (C) 2024 embedded brains GmbH & Co. KG"],
     "definition": [{
         "default": {
-            "brief": None,
+            "brief": "Brief TODO.\n",
             "definition": "int ${.:name}",
             "description": None,
             "kind": "member",
@@ -937,7 +989,7 @@ _GU_1_EXPECTED_RESULT = {
         "variants": []
     }, {
         "default": {
-            "brief": None,
+            "brief": "Brief TODO.\n",
             "definition": "float ${.:name}",
             "description": None,
             "kind": "member",
@@ -948,7 +1000,7 @@ _GU_1_EXPECTED_RESULT = {
     "definition-kind":
     "union-only",
     "description":
-    "Description  gu_1.",
+    "Description gu_1.",
     "enabled-by":
     True,
     "index-entries": [],
@@ -973,11 +1025,11 @@ _U_1_EXPECTED_RESULT = {
     "SPDX-License-Identifier":
     "CC-BY-SA-4.0 OR BSD-2-Clause",
     "brief":
-    "Brief  u_1.",
+    "Brief u_1.",
     "copyrights": ["Copyright (C) 2024 embedded brains GmbH & Co. KG"],
     "definition": [{
         "default": {
-            "brief": None,
+            "brief": "Brief TODO.\n",
             "definition": "char ${.:name}",
             "description": None,
             "kind": "member",
@@ -986,7 +1038,7 @@ _U_1_EXPECTED_RESULT = {
         "variants": []
     }, {
         "default": {
-            "brief": None,
+            "brief": "Brief TODO.\n",
             "definition": "int ${.:name}",
             "description": None,
             "kind": "member",
@@ -997,7 +1049,7 @@ _U_1_EXPECTED_RESULT = {
     "definition-kind":
     "union-only",
     "description":
-    "Description  u_1.",
+    "Description u_1.",
     "enabled-by":
     True,
     "index-entries": [],
@@ -1131,6 +1183,10 @@ def _enumvalue(name: str) -> dict:
         "copyrights": [
             "Copyright (C) 2024 embedded brains GmbH & Co. KG",
         ],
+        "definition": {
+            "default": None,
+            "variants": [],
+        },
         "description": f"Description {name}.",
         "enabled-by": True,
         "index-entries": [],
@@ -1143,6 +1199,24 @@ def _enumvalue(name: str) -> dict:
 
 
 _RESULTS = {
+    "define": {
+        "M_0": _M_0_EXPECTED_RESULT,
+        "GM_0": _GM_0_EXPECTED_RESULT,
+        "D_1": _D_1_EXPECTED_RESULT,
+        "GD_1": _GD_1_EXPECTED_RESULT,
+    },
+    "enum": {
+        "e_0": _E_0_EXPECTED_RESULT,
+        "ge_0": _GE_0_EXPECTED_RESULT,
+        "e_1": _E_1_EXPECTED_RESULT,
+    },
+    "enumvalue": {
+        "GE_0_A": _enumvalue("GE_0_A"),
+        "GE_0_B": _enumvalue("GE_0_B"),
+        "GE_0_C": _enumvalue("GE_0_C"),
+        "E_0_A": _enumvalue("E_0_A"),
+        "E_1_A": _enumvalue("E_1_A")
+    },
     "function": {
         "f_0": _F_0_EXPECTED_RESULT,
         "f_1": _F_1_EXPECTED_RESULT,
@@ -1153,11 +1227,11 @@ _RESULTS = {
         "gf_3": _GF_3_EXPECTED_RESULT,
         "gf_4": _GF_4_EXPECTED_RESULT,
     },
-    "define": {
-        "M_0": _M_0_EXPECTED_RESULT,
-        "GM_0": _GM_0_EXPECTED_RESULT,
-        "D_1": _D_1_EXPECTED_RESULT,
-        "GD_1": _GD_1_EXPECTED_RESULT,
+    "group": {
+        "FooGroup": _FOO_GROUP_EXPECTED_RESULT,
+    },
+    "file": {
+        "header.h": _HEADER_H_EXPECTED_RESULT,
     },
     "struct": {
         "s_0": _S_0_EXPECTED_RESULT,
@@ -1171,18 +1245,6 @@ _RESULTS = {
         "u_1": _U_1_EXPECTED_RESULT,
         "gu_1": _GU_1_EXPECTED_RESULT,
     },
-    "enum": {
-        "e_0": _E_0_EXPECTED_RESULT,
-        "ge_0": _GE_0_EXPECTED_RESULT,
-        "e_1": _E_1_EXPECTED_RESULT,
-    },
-    "enumvalue": {
-        "GE_0_A": _enumvalue("GE_0_A"),
-        "GE_0_B": _enumvalue("GE_0_B"),
-        "GE_0_C": _enumvalue("GE_0_C"),
-        "E_0_A": _enumvalue("E_0_A"),
-        "E_1_A": _enumvalue("E_1_A")
-    }
 }
 
 
@@ -1191,11 +1253,13 @@ def _get_path(path: str) -> str:
     return str(test_dir / f"{path}")
 
 
-def test_doxygen_xml_to_spec():
+def test_doxygen_xml_to_spec(tmp_path):
     xml_files = [
         _get_path("source-to-spec/xml/bad_8c.xml"),
+        _get_path("source-to-spec/xml/default_8h.xml"),
         _get_path("source-to-spec/xml/header_8h.xml"),
         _get_path("source-to-spec/xml/foobar_8h.xml"),
+        _get_path("source-to-spec/xml/group__DefaultGroup.xml"),
         _get_path("source-to-spec/xml/group__FooGroup.xml"),
         _get_path("source-to-spec/xml/source_8c.xml"),
         _get_path("source-to-spec/xml/structs__0.xml"),
@@ -1212,20 +1276,33 @@ def test_doxygen_xml_to_spec():
             "copyrights": ["Copyright (C) 2024 embedded brains GmbH & Co. KG"]
         },
         "groups": {
-            "group__FooGroup": {
+            "FooGroup": {
                 "uid": "/if/group",
                 "remove-prefix": "foobar-"
             }
-        }
+        },
+        "type-map": {
+            "gt_0": "${/gt_0:/name}"
+        },
+        "spec-directory": str(tmp_path)
     }
-    ctx = doxygen_xml_to_spec(config, xml_files)
+    ctx = DoxygenContext(config)
+    ctx.doxygen_xml_to_spec(xml_files)
     for kind, name_result in _RESULTS.items():
         for name, result in name_result.items():
             assert result == ctx.items_by_name[kind][name][0].export()
+
+    # Check union
     u_0 = ctx.items["unionu__0"]
     assert u_0 < ctx.items["unionu__1"]
     assert not u_0.is_header
     assert u_0.uid == "/if/u-0"
+    u_0_file = tmp_path / "if" / "u-0.yml"
+    assert not u_0_file.exists()
+    u_0.save()
+    assert u_0_file.is_file()
+
+    # Check header
     header = ctx.items["header_8h"]
     assert header.is_header
     assert header.uid == "/if/header-header"
@@ -1235,7 +1312,19 @@ def test_doxygen_xml_to_spec():
     source = ctx.items["source_8c"]
     assert not source.is_header
     assert source.uid == "/if/source-c"
+
+    # Check bad function
     bad_f = ctx.items["bad_8c_1a8cc687906d3e4964fc993ca1bf18472e"]
     with pytest.raises(ValueError):
         bad_f.group
     assert not bad_f.is_header
+
+    # Check default group association
+    config["default-group-name"] = "DefaultGroup"
+    config["item-to-group"] = {"bad_8c": "FooGroup"}
+    ctx_2 = DoxygenContext(config)
+    ctx_2.doxygen_xml_to_spec(xml_files)
+    assert sorted(
+        item.uid
+        for item in ctx_2.items_by_name["group"]["DefaultGroup"][0].members()
+        if item.kind == "file") == ["/header-default"]

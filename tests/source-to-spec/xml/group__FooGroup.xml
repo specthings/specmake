@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.12.0" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.17.0" xml:lang="en-US">
   <compounddef id="group__FooGroup" kind="group">
     <compoundname>FooGroup</compoundname>
     <title>Example Group</title>
@@ -42,10 +42,10 @@
           </detaileddescription>
         </enumvalue>
         <briefdescription>
-<para>Brief ge_0. </para>
+<para>Brief <ref refid="group__FooGroup_1gad9450fd0bc1a7ba2ce704c69f0bbfb46" kindref="member">ge_0</ref>. </para>
         </briefdescription>
         <detaileddescription>
-<para>Description ge_0. </para>
+<para>Description <ref refid="group__FooGroup_1gad9450fd0bc1a7ba2ce704c69f0bbfb46" kindref="member">ge_0</ref>. </para>
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
@@ -220,30 +220,30 @@
         </inbodydescription>
         <location file="header.h" line="96" column="6" declfile="header.h" declline="96" declcolumn="6"/>
       </memberdef>
-      <memberdef kind="function" id="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="group__FooGroup_1ga82b8bb29d8e16f2f0436a38b035b192e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>int</type>
         <definition>int gf_4</definition>
-        <argsstring>(const int *in, int *out)</argsstring>
+        <argsstring>(const gt_0 *in, gt_0 *out)</argsstring>
         <name>gf_4</name>
         <param>
-          <type>const int *</type>
+          <type>const <ref refid="structgt__0" kindref="compound">gt_0</ref> *</type>
           <declname>in</declname>
         </param>
         <param>
-          <type>int *</type>
+          <type><ref refid="structgt__0" kindref="compound">gt_0</ref> *</type>
           <declname>out</declname>
         </param>
         <briefdescription>
-<para>Brief <ref refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" kindref="member">gf_4()</ref>. </para>
+<para>Brief <ref refid="group__FooGroup_1ga82b8bb29d8e16f2f0436a38b035b192e" kindref="member">gf_4()</ref>. </para>
         </briefdescription>
         <detaileddescription>
-<para>Description <ref refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" kindref="member">gf_4()</ref>.</para>
+<para>Description <ref refid="group__FooGroup_1ga82b8bb29d8e16f2f0436a38b035b192e" kindref="member">gf_4()</ref>.</para>
 <para><parameterlist kind="param"><parameteritem>
 <parameternamelist>
 <parametername direction="in">in</parametername>
 </parameternamelist>
 <parameterdescription>
-<para><ref refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" kindref="member">gf_4()</ref> in description.</para>
+<para><ref refid="group__FooGroup_1ga82b8bb29d8e16f2f0436a38b035b192e" kindref="member">gf_4()</ref> in description.</para>
 </parameterdescription>
 </parameteritem>
 <parameteritem>
@@ -251,17 +251,17 @@
 <parametername direction="out">out</parametername>
 </parameternamelist>
 <parameterdescription>
-<para><ref refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" kindref="member">gf_4()</ref> out description.</para>
+<para><ref refid="group__FooGroup_1ga82b8bb29d8e16f2f0436a38b035b192e" kindref="member">gf_4()</ref> out description.</para>
 </parameterdescription>
 </parameteritem>
 </parameterlist>
-<simplesect kind="return"><para><ref refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" kindref="member">gf_4()</ref> return description. </para>
+<simplesect kind="return"><para><ref refid="group__FooGroup_1ga82b8bb29d8e16f2f0436a38b035b192e" kindref="member">gf_4()</ref> return description. </para>
 </simplesect>
 </para>
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="header.h" line="109" column="5" declfile="header.h" declline="109" declcolumn="5"/>
+        <location file="header.h" line="137" column="5" declfile="header.h" declline="137" declcolumn="5"/>
       </memberdef>
     </sectiondef>
     <sectiondef kind="define">
@@ -298,7 +298,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="header.h" line="122" column="9" bodyfile="header.h" bodystart="122" bodyend="-1"/>
+        <location file="header.h" line="109" column="9" bodyfile="header.h" bodystart="109" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__FooGroup_1gacdd314c944182a477291569a0f5e632a" prot="public" static="no">
         <name>GD_1</name>
@@ -310,7 +310,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="header.h" line="127" column="9" bodyfile="header.h" bodystart="127" bodyend="-1"/>
+        <location file="header.h" line="114" column="9" bodyfile="header.h" bodystart="114" bodyend="-1"/>
       </memberdef>
     </sectiondef>
     <briefdescription>

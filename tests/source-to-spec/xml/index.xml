@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.12.0" xml:lang="en-US">
+<doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.17.0" xml:lang="en-US">
   <compound refid="structgs__0" kind="struct"><name>gs_0</name>
     <member refid="structgs__0_1a5226a883ac10623503af9aff0d08974f" kind="variable"><name>a</name></member>
     <member refid="structgs__0_1a685de05882780fc00a682548615f210c" kind="variable"><name>b</name></member>
@@ -35,6 +35,8 @@
   <compound refid="bad_8c" kind="file"><name>bad.c</name>
     <member refid="bad_8c_1a8cc687906d3e4964fc993ca1bf18472e" kind="function"><name>bad_f</name></member>
   </compound>
+  <compound refid="default_8h" kind="file"><name>default.h</name>
+  </compound>
   <compound refid="foobar_8h" kind="file"><name>foobar.h</name>
   </compound>
   <compound refid="header_8h" kind="file"><name>header.h</name>
@@ -47,12 +49,14 @@
     <member refid="header_8h_1a1b35953f2451fd1970b4ac9b72c76d9fad67b160e0559ffcbea0f19ab5a997668" kind="enumvalue"><name>E_0_A</name></member>
     <member refid="header_8h_1adbc74fb9d93477777c8774e9db9864a2" kind="enum"><name>e_1</name></member>
     <member refid="header_8h_1adbc74fb9d93477777c8774e9db9864a2af8032135292d00116d68c5e58e3301e1" kind="enumvalue"><name>E_1_A</name></member>
+    <member refid="header_8h_1a8bbf6ee69bc37bfcb0453bb5fa6d202c" kind="enum"><name>@140054235311313057212272103177147332064345235355</name></member>
+    <member refid="header_8h_1a8bbf6ee69bc37bfcb0453bb5fa6d202ca6dc6ce1cd7b91e95c843d9ee06165d61" kind="enumvalue"><name>E_ANON_A</name></member>
     <member refid="header_8h_1a01325395cf2af877fccf63801bcc2aeb" kind="typedef"><name>e_0</name></member>
     <member refid="group__FooGroup_1ga670c7f2490aa4624e8b3ee3d04ce448b" kind="function"><name>gf_0</name></member>
     <member refid="group__FooGroup_1ga4f62ceb5b79ec2e1e2ccc4f379ca2d5f" kind="function"><name>gf_1</name></member>
     <member refid="group__FooGroup_1ga4ce2d0c839ba3140c1285e4a29fe71e4" kind="function"><name>gf_2</name></member>
     <member refid="group__FooGroup_1ga0da7a13a733311498f208f6a08b6e918" kind="function"><name>gf_3</name></member>
-    <member refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" kind="function"><name>gf_4</name></member>
+    <member refid="group__FooGroup_1ga82b8bb29d8e16f2f0436a38b035b192e" kind="function"><name>gf_4</name></member>
     <member refid="header_8h_1aa2f8caf29834418e60688b225e2413db" kind="function"><name>f_0</name></member>
     <member refid="header_8h_1a17124d351aade94c069796b00a063b72" kind="function"><name>f_1</name></member>
     <member refid="header_8h_1a25096a68ec7d02165d897d8cf59e3dce" kind="function"><name>f_2</name></member>
@@ -63,6 +67,8 @@
     <member refid="source_8c_1aa2f8caf29834418e60688b225e2413db" kind="function"><name>f_0</name></member>
     <member refid="source_8c_1a17124d351aade94c069796b00a063b72" kind="function"><name>f_1</name></member>
   </compound>
+  <compound refid="group__DefaultGroup" kind="group"><name>DefaultGroup</name>
+  </compound>
   <compound refid="group__FooGroup" kind="group"><name>FooGroup</name>
     <member refid="group__FooGroup_1gad9450fd0bc1a7ba2ce704c69f0bbfb46" kind="enum"><name>ge_0</name></member>
     <member refid="group__FooGroup_1ggad9450fd0bc1a7ba2ce704c69f0bbfb46ab6b348f38612ea526613c0a9d40a0f4b" kind="enumvalue"><name>GE_0_A</name></member>
@@ -72,7 +78,7 @@
     <member refid="group__FooGroup_1ga4f62ceb5b79ec2e1e2ccc4f379ca2d5f" kind="function"><name>gf_1</name></member>
     <member refid="group__FooGroup_1ga4ce2d0c839ba3140c1285e4a29fe71e4" kind="function"><name>gf_2</name></member>
     <member refid="group__FooGroup_1ga0da7a13a733311498f208f6a08b6e918" kind="function"><name>gf_3</name></member>
-    <member refid="group__FooGroup_1gaad4ff0f19fca6949c385597dac318763" kind="function"><name>gf_4</name></member>
+    <member refid="group__FooGroup_1ga82b8bb29d8e16f2f0436a38b035b192e" kind="function"><name>gf_4</name></member>
     <member refid="group__FooGroup_1ga983f90c33690e3ad1647997231aafc7d" kind="define"><name>GM_0</name></member>
     <member refid="group__FooGroup_1gacdd314c944182a477291569a0f5e632a" kind="define"><name>GD_1</name></member>
   </compound>

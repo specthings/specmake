@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Converts Doxygen XML content to interface specification files. """
 
-# Copyright (C) 2024, 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2024, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -25,24 +25,13 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import dataclasses
-import os
+from pathlib import Path
+import posixpath
 import re
 from typing import Any, Iterator
 from xml.etree import ElementTree
 
-
-@dataclasses.dataclass
-class DoxygenContext:
-    """ Represents the Doxygen context. """
-    config: dict
-    items_by_kind: dict[str, dict[str, "DoxygenItem"]] = dataclasses.field(
-        default_factory=dict)
-    items_by_name: dict[str, dict[str,
-                                  list["DoxygenItem"]]] = dataclasses.field(
-                                      default_factory=dict)
-    items: dict[str, "DoxygenItem"] = dataclasses.field(default_factory=dict)
-    compound_typedefs: dict[str, str] = dataclasses.field(default_factory=dict)
-
+from specitems import save_data
 
 _Data = dict[str, Any]
 
@@ -51,66 +40,45 @@ _INVALID_NAME_CHARS = re.compile(r"[^a-zA-Z0-9]+")
 _FUNCTION_POINTER = re.compile(r"([^(]+)\(\*\)\((.*)")
 
 
-def _strip(text: str | None) -> str | None:
+def _strip(text: str | None, default: str | None) -> str | None:
     if text is None:
-        return None
+        return default
     text = text.strip()
     if not text:
-        return None
+        return default
     return text
 
 
-def _decl(defs: dict[str, str], index: int) -> str:
-    name = f"${{.:/params[{index}]/name}}"
-    type_name = defs.get("type", None)
-    if type_name is None:
-        return name
-    mobj = _FUNCTION_POINTER.match(type_name)
-    if mobj is not None:
-        type_name = mobj.group(1).strip()
-        name = f"(*{name})({mobj.group(2)}"
-    if type_name.endswith("*"):
-        return f"{type_name}{name}"
-    return f"{type_name} {name}"
-
-
-@dataclasses.dataclass
 class DoxygenItem:
     """ Represents a Doxygen item. """
-    ctx: DoxygenContext
-    kind: str
-    doxygen_id: str
-    name: str
-    data: _Data = dataclasses.field(default_factory=lambda: {
-        "brief": "",
-        "description": ""
-    })
-    group_ids: list[str] = dataclasses.field(default_factory=list)
-    file_ids: set[str] = dataclasses.field(default_factory=set)
+
+    def __init__(self, ctx: "DoxygenContext", kind: str, doxygen_id: str,
+                 name: str) -> None:
+        self.ctx = ctx
+        self.kind = kind
+        self.doxygen_id = doxygen_id
+        self.name = name
+        self.data: _Data = {"brief": "", "description": ""}
+        self.group_ids: list[str] = []
+        self.file_ids: set[str] = set()
 
     def __lt__(self, other: "DoxygenItem") -> bool:
         return self.doxygen_id < other.doxygen_id
-
-    def __str__(self) -> str:
-        fields = ", ".join(f"{field.name}={getattr(self, field.name)!r}"
-                           for field in dataclasses.fields(self)
-                           if field.name != "ctx")
-        return f"{type(self).__name__}({fields})"
 
     @property
     def uid(self) -> str:
         """ Is the UID of the item. """
         group = self.group
-        prefix = os.path.dirname(group.uid)
+        prefix = posixpath.dirname(group.uid)
         name = self.name.lower()
         name = _INVALID_NAME_CHARS.sub("-", name)
-        name = name.removeprefix(self.ctx.config["groups"].get(
-            group.doxygen_id, {}).get("remove-prefix", ""))
-        return os.path.join(prefix, name)
+        name = name.removeprefix(
+            self.ctx.groups.get(group.name, {}).get("remove-prefix", ""))
+        return posixpath.join(prefix, name)
 
     def uid_relative_to(self, other: str) -> str:
         """ Get the UID of the item relative to the other UID. """
-        return os.path.relpath(self.uid, os.path.dirname(other))
+        return posixpath.relpath(self.uid, posixpath.dirname(other))
 
     @property
     def file(self) -> "DoxygenFile":
@@ -149,13 +117,15 @@ class DoxygenItem:
         """ Indicates if the item is a header file. """
         return False
 
-    def _get_optional_text(self, key: str) -> str | None:
-        return _strip(self.data.get(key, None))
+    def _get_optional_text(self,
+                           key: str,
+                           default: str | None = None) -> str | None:
+        return _strip(self.data.get(key), default)
 
     @property
     def brief(self) -> str | None:
         """ Is the brief description of the item. """
-        return self._get_optional_text("brief")
+        return self._get_optional_text("brief", "Brief TODO.\n")
 
     @property
     def description(self) -> str | None:
@@ -189,11 +159,18 @@ class DoxygenItem:
             "enabled-by": True,
             "index-entries": [],
             "links": links,
+            "name": self.name,
             "notes": self.notes,
             "type": "interface"
         }
-        data.update(self.ctx.config["data"])
+        data.update(self.ctx.data)
         return data
+
+    def save(self) -> None:
+        """ Saves the exported item. """
+        path = self.ctx.spec_directory / f"{self.uid[1:]}.yml"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        save_data(str(path), self.export())
 
     def _get_initializer(self) -> str | None:
         body = self.data.get("initializer", None)
@@ -204,7 +181,6 @@ class DoxygenItem:
     def add_function_like_attributes(self, interface_type: str,
                                      data: dict[str, Any]) -> None:
         """ Add function-like attributes to the data. """
-        data["name"] = self.name
         data["interface-type"] = interface_type
         params: list[dict] = []
         paramdefs: list[str] = []
@@ -216,17 +192,20 @@ class DoxygenItem:
                     "dir": param["dir"],
                     "name": param["name"]
                 })
-                paramdefs.append(_decl(definition, index))
+                paramdefs.append(self.ctx.decl(definition, index))
         else:
             for index, definition in enumerate(self.data["paramdefs"]):
                 if definition["type"] == "void":
                     continue
                 params.append({
-                    "description": None,
-                    "dir": None,
-                    "name": definition["declname"]
+                    "description":
+                    None,
+                    "dir":
+                    None,
+                    "name":
+                    definition.get("declname", f"param_{index}").strip()
                 })
-                paramdefs.append(_decl(definition, index))
+                paramdefs.append(self.ctx.decl(definition, index))
         data["params"] = params
         type_name = self.data.get("type", None)
         data["definition"] = {
@@ -234,7 +213,8 @@ class DoxygenItem:
                 "attributes": None,
                 "body": self._get_initializer(),
                 "params": paramdefs,
-                "return": None if type_name == "void" else type_name
+                "return": _strip(None if type_name == "void" else type_name,
+                                 None)
             },
             "variants": []
         }
@@ -242,10 +222,10 @@ class DoxygenItem:
         if "return" in self.data or retval:
             data["return"] = {
                 "return":
-                _strip(self.data.get("return", None)),
+                _strip(self.data.get("return", None), None),
                 "return-values": [{
                     "description": info["description"].strip(),
-                    "value": info["name"]
+                    "value": info["name"].strip(":")
                 } for info in retval]
             }
         else:
@@ -262,10 +242,13 @@ class DoxygenItem:
             data["definition-kind"] = f"{self.kind}-only"
 
 
-@dataclasses.dataclass
 class DoxygenContainer(DoxygenItem):
     """ Represents a Doxygen container item. """
-    member_ids: list[str] = dataclasses.field(default_factory=list)
+
+    def __init__(self, ctx: "DoxygenContext", kind: str, doxygen_id: str,
+                 name: str) -> None:
+        super().__init__(ctx, kind, doxygen_id, name)
+        self.member_ids: list[str] = []
 
     def members(self) -> Iterator[DoxygenItem]:
         """ Yields the members of the item. """
@@ -273,13 +256,11 @@ class DoxygenContainer(DoxygenItem):
             yield self.ctx.items[member_id]
 
 
-@dataclasses.dataclass
 class DoxygenCompound(DoxygenContainer):
     """ Represents a Doxygen compound item. """
 
     def export(self) -> dict:
         data = super().export()
-        data["name"] = self.name
         data["interface-type"] = self.kind
         self.add_definition_kind(data)
         definition: list[dict] = []
@@ -304,7 +285,6 @@ class DoxygenCompound(DoxygenContainer):
         return data
 
 
-@dataclasses.dataclass
 class DoxygenDefine(DoxygenItem):
     """ Represents a Doxygen define item. """
 
@@ -313,7 +293,6 @@ class DoxygenDefine(DoxygenItem):
         if self.data.get("param", []):
             self.add_function_like_attributes("macro", data)
         else:
-            data["name"] = self.name
             data["interface-type"] = "define"
             data["definition"] = {
                 "default": self._get_initializer(),
@@ -322,18 +301,15 @@ class DoxygenDefine(DoxygenItem):
         return data
 
 
-@dataclasses.dataclass
 class DoxygenDir(DoxygenItem):
     """ Represents a Doxygen directory item. """
 
 
-@dataclasses.dataclass
 class DoxygenEnum(DoxygenContainer):
     """ Represents a Doxygen enumeration item. """
 
     def export(self) -> dict:
         data = super().export()
-        data["name"] = self.name
         data["interface-type"] = "enum"
         self.add_definition_kind(data)
         for member in self.members():
@@ -344,19 +320,17 @@ class DoxygenEnum(DoxygenContainer):
         return data
 
 
-@dataclasses.dataclass
 class DoxygenEnumValue(DoxygenItem):
     """ Represents a Doxygen enumerator item. """
 
     def export(self) -> dict:
         data = super().export()
-        data["name"] = self.name
         data["interface-type"] = "enumerator"
         data["links"] = []
+        data["definition"] = {"default": None, "variants": []}
         return data
 
 
-@dataclasses.dataclass
 class DoxygenFile(DoxygenContainer):
     """ Represents a Doxygen file item. """
 
@@ -365,19 +339,27 @@ class DoxygenFile(DoxygenContainer):
         the_uid = super().uid
         if not self.is_header:
             return the_uid
-        basename = os.path.basename(the_uid)[:-2]
-        if basename:
-            basename = f"header-{basename}"
-        else:
+        basename = posixpath.basename(the_uid)[:-2]
+        prefix = posixpath.dirname(the_uid)
+        if basename in prefix:
             basename = "header"
-        return os.path.join(os.path.dirname(the_uid), basename)
+        else:
+            basename = f"header-{basename}"
+        return posixpath.join(prefix, basename)
 
     @property
     def is_header(self) -> bool:
         return self.name.endswith(".h")
 
+    def export(self) -> dict:
+        data = super().export()
+        del data["name"]
+        data["interface-type"] = "header-file"
+        data["path"] = self.name
+        data["prefix"] = ""
+        return data
 
-@dataclasses.dataclass
+
 class DoxygenFunction(DoxygenItem):
     """ Represents a Doxygen function item. """
 
@@ -387,35 +369,44 @@ class DoxygenFunction(DoxygenItem):
         return data
 
 
-@dataclasses.dataclass
 class DoxygenGroup(DoxygenContainer):
     """ Represents a Doxygen group item. """
 
     @property
     def uid(self) -> str:
-        return self.ctx.config["groups"].get(self.doxygen_id,
-                                             {}).get("uid",
-                                                     f"/{self.name.lower()}")
+        return self.ctx.groups.get(self.name, {}).get("uid",
+                                                      f"/{self.name.lower()}")
+
+    def export(self) -> dict:
+        data = super().export()
+        data["name"] = self.data["title"]
+        data["interface-type"] = "group"
+        data["identifier"] = self.name
+        return data
 
 
-@dataclasses.dataclass
 class DoxygenStruct(DoxygenCompound):
     """ Represents a Doxygen structure item. """
 
 
-@dataclasses.dataclass
 class DoxygenTypedef(DoxygenItem):
     """ Represents a Doxygen typedef item. """
 
 
-@dataclasses.dataclass
 class DoxygenUnion(DoxygenCompound):
     """ Represents a Doxygen union item. """
 
 
-@dataclasses.dataclass
 class DoxygenVariable(DoxygenItem):
     """ Represents a Doxygen variable item. """
+
+
+class DoxygenNamespace(DoxygenItem):
+    """ Represents a Doxygen namespace item. """
+
+
+class DoxygenPage(DoxygenItem):
+    """ Represents a Doxygen page item. """
 
 
 _ITEM_TYPES = {
@@ -426,6 +417,8 @@ _ITEM_TYPES = {
     "file": DoxygenFile,
     "function": DoxygenFunction,
     "group": DoxygenGroup,
+    "namespace": DoxygenNamespace,
+    "page": DoxygenPage,
     "struct": DoxygenStruct,
     "typedef": DoxygenTypedef,
     "union": DoxygenUnion,
@@ -515,7 +508,7 @@ def _tag_ref(elem: ElementTree.Element, scope: _Scope) -> _Scope:
     tail = elem.tail
     if tail is not None:
         text += tail
-    scope.data[scope.key] += text
+    scope.data[scope.key] = f"{scope.data[scope.key].rstrip()} {text}"
     return scope
 
 
@@ -638,89 +631,137 @@ _COMPOUND_TYPEDEF = re.compile(
     r"typedef\s+(enum|struct|union)(\s+[a-zA-Z0-9_]+)?")
 
 
-def _learn_compound_typedefs(ctx: DoxygenContext,
-                             elem: ElementTree.Element) -> None:
-    text = " ".join(elem.itertext()).strip()
-    mobj = _COMPOUND_TYPEDEF.match(text)
-    if mobj:
-        ctx.compound_typedefs[elem.attrib["refid"]] = mobj.group(2)
+class DoxygenContext:
+    """ Represents the Doxygen context. """
 
+    # pylint: disable=too-many-instance-attributes
+    def __init__(self, config: dict) -> None:
+        self.spec_directory = Path(config["spec-directory"])
+        self.data: dict = config["data"]
+        self.type_map: dict[str, str] = config.get("type-map", {})
+        self.default_group_name: str | None = config.get("default-group-name")
+        self.groups: dict[str, dict[str, str]] = config["groups"]
+        self.item_to_group: dict[str,
+                                 str | None] = config.get("item-to-group", {})
+        self.items_by_kind: dict[str, dict[str, "DoxygenItem"]] = {}
+        self.items_by_name: dict[str, dict[str, list["DoxygenItem"]]] = {}
+        self.items: dict[str, "DoxygenItem"] = {}
+        self.compound_typedefs: dict[str, str] = {}
 
-def _gather_doxygen_id_to_item_mappings(ctx: DoxygenContext,
-                                        xml_files: list[str]):
-    for xml_file in xml_files:
-        tree = ElementTree.parse(xml_file)
-        for elem in tree.iter():
-            if elem.tag == "codeline" and elem.attrib.get(
-                    "refkind", None) in ("compound", "member"):
-                _learn_compound_typedefs(ctx, elem)
-                continue
-            try:
-                doxygen_id = elem.attrib["id"]
-            except KeyError:
-                continue
-            try:
-                kind, name = _get_kind_name(elem)
-            except KeyError:
-                continue
-            item = ctx.items.setdefault(
-                doxygen_id, _ITEM_TYPES[kind](ctx, kind, doxygen_id, name))
-            ctx.items_by_kind.setdefault(kind, {}).setdefault(doxygen_id, item)
-            ctx.items_by_name.setdefault(kind, {}).setdefault(name,
-                                                              []).append(item)
-            handler = _RELATIONSHIP_HANDLER.get(kind, None)
-            if handler is not None:
-                handler(elem, item)
+    def doxygen_xml_to_spec(self, xml_files: list[str]) -> None:
+        """ Convert Doxygen XML files to specification item data.  """
 
+        # In the first pass get the Doxygen identifier to item mappings and
+        # vice versa.  Associate items with groups.
+        self._gather_doxygen_id_to_item_mappings(xml_files)
+        self._add_group_associations()
+        self._add_file_associations()
+        self._add_group_through_file_associations_or_config()
 
-def _add_group_associations(ctx: DoxygenContext):
-    for group in ctx.items_by_kind["group"].values():
-        assert isinstance(group, DoxygenGroup)
-        group_id = group.doxygen_id
-        for member_id in group.member_ids:
-            ctx.items[member_id].group_ids.append(group_id)
+        # In the second pass fill the items
+        for xml_file in xml_files:
+            tree = ElementTree.parse(xml_file)
+            _fill_items(tree.getroot(),
+                        _Scope(DoxygenItem(self, "root", "", ""), {}, ""))
 
+    def decl(self, defs: dict[str, str], index: int) -> str:
+        """ Get the declaration for the index-th parameter. """
+        name = f"${{.:/params[{index}]/name}}"
+        type_name = defs.get("type", None)
+        if type_name is None:
+            return name
+        mobj = _FUNCTION_POINTER.match(type_name)
+        if mobj is not None:
+            type_name = mobj.group(1).strip()
+            name = f"(*{name})({mobj.group(2)}"
+        type_name = type_name.strip()
+        if type_name.endswith("*"):
+            return self._map_types(f"{type_name}{name}")
+        return self._map_types(f"{type_name} {name}")
 
-def _add_file_associations(ctx: DoxygenContext):
-    for file in ctx.items_by_kind["file"].values():
-        assert isinstance(file, DoxygenFile)
-        for member_id in file.member_ids:
-            ctx.items[member_id].file_ids.add(file.doxygen_id)
+    def _map_types(self, declaration: str) -> str:
+        for from_type, to_item in self.type_map.items():
+            declaration = declaration.replace(from_type, to_item)
+        return declaration
 
+    def _learn_compound_typedefs(self, elem: ElementTree.Element) -> None:
+        text = " ".join(elem.itertext()).strip()
+        mobj = _COMPOUND_TYPEDEF.match(text)
+        if mobj:
+            self.compound_typedefs[elem.attrib["refid"]] = mobj.group(2)
 
-def _add_group_through_file_associations(ctx: DoxygenContext):
-    for kind, items in ctx.items_by_kind.items():
-        if kind in ("dir", "group"):
-            continue
-        for item in items.values():
-            if not item.group_ids:
+    def _gather_doxygen_id_to_item_mappings(self, xml_files: list[str]):
+        for xml_file in xml_files:
+            tree = ElementTree.parse(xml_file)
+            for elem in tree.iter():
+                if elem.tag == "codeline" and elem.attrib.get(
+                        "refkind", None) in ("compound", "member"):
+                    self._learn_compound_typedefs(elem)
+                    continue
                 try:
-                    file_item = ctx.items[item.file.doxygen_id]
+                    doxygen_id = elem.attrib["id"]
+                except KeyError:
+                    continue
+                try:
+                    kind, name = _get_kind_name(elem)
+                except KeyError:
+                    continue
+                item = self.items.setdefault(
+                    doxygen_id, _ITEM_TYPES[kind](self, kind, doxygen_id,
+                                                  name))
+                self.items_by_kind.setdefault(kind,
+                                              {}).setdefault(doxygen_id, item)
+                self.items_by_name.setdefault(kind,
+                                              {}).setdefault(name,
+                                                             []).append(item)
+                handler = _RELATIONSHIP_HANDLER.get(kind, None)
+                if handler is not None:
+                    handler(elem, item)
+
+    def _add_group_associations(self):
+        for group in self.items_by_kind["group"].values():
+            assert isinstance(group, DoxygenGroup)
+            group_id = group.doxygen_id
+            for member_id in group.member_ids:
+                self.items[member_id].group_ids.append(group_id)
+
+    def _add_file_associations(self):
+        for file in self.items_by_kind["file"].values():
+            assert isinstance(file, DoxygenFile)
+            for member_id in file.member_ids:
+                self.items[member_id].file_ids.add(file.doxygen_id)
+
+    def _add_to_group(self, item: DoxygenItem, group_name: str) -> None:
+        group = self.items_by_name["group"][group_name][0]
+        assert isinstance(group, DoxygenGroup)
+        self.item_to_group[item.doxygen_id] = group_name
+        group.member_ids.append(item.doxygen_id)
+        item.group_ids.append(group.doxygen_id)
+
+    def _add_group_through_file_associations_or_config(self):
+        for kind, items in self.items_by_kind.items():
+            if kind in ("dir", "group"):
+                continue
+            for item in items.values():
+                if item.group_ids:
+                    continue
+                group_name = self.item_to_group.get(item.doxygen_id)
+                if group_name is not None:
+                    self._add_to_group(item, group_name)
+                    continue
+                try:
+                    file_item = self.items[item.file.doxygen_id]
                     assert isinstance(file_item, DoxygenFile)
                 except ValueError:
                     pass
                 else:
                     try:
-                        item.group_ids.append(file_item.group_ids[0])
+                        group_id = file_item.group_ids[0]
                     except IndexError:
                         pass
-
-
-def doxygen_xml_to_spec(config: dict, xml_files: list[str]) -> DoxygenContext:
-    """ Convert Doxygen XML files to specification item data.  """
-    ctx = DoxygenContext(config)
-
-    # In the first pass get the Doxygen identifier to item mappings and vice
-    # versa.  Associate items with groups.
-    _gather_doxygen_id_to_item_mappings(ctx, xml_files)
-    _add_group_associations(ctx)
-    _add_file_associations(ctx)
-    _add_group_through_file_associations(ctx)
-
-    # In the second pass fill the items
-    for xml_file in xml_files:
-        tree = ElementTree.parse(xml_file)
-        _fill_items(tree.getroot(),
-                    _Scope(DoxygenItem(ctx, "root", "", ""), {}, ""))
-
-    return ctx
+                    else:
+                        group_name = self.items[group_id].name
+                        self._add_to_group(item, group_name)
+                        continue
+                if self.default_group_name is not None:
+                    self._add_to_group(item, self.default_group_name)
