@@ -49,13 +49,17 @@ from specitems import (EnabledSet, Item, ItemCache, ItemDataByUID,
 from specware import SpecWareTypeProvider, run_command
 
 
+def load_specmake_types() -> ItemDataByUID:
+    """ Load the specmake specification types. """
+    return pickle_load_data_by_uid(
+        os.path.join(os.path.dirname(__file__), "spec.pickle"))
+
+
 class BuildItemTypeProvider(SpecWareTypeProvider):
     """ Provides a type system for specification build items. """
 
     def __init__(self, data_by_uid: ItemDataByUID) -> None:
-        data_by_uid.update(
-            pickle_load_data_by_uid(
-                os.path.join(os.path.dirname(__file__), "spec.pickle")))
+        data_by_uid.update(load_specmake_types())
         super().__init__(data_by_uid)
         dict_info = self.data_by_uid["/spec/root"]["spec-info"]["dict"]
         dict_info["mandatory-attributes"] = list(

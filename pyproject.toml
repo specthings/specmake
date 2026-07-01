@@ -69,9 +69,11 @@ specgcovr = "specmake.cligcovr:cligcovr"
 specmake = "specmake.climake:climake"
 specmakedecimate = "specmake.clidecimate:clidecimate"
 specmakesub = "specmake.clisubstitute:clisubstitute"
-specmakeverify = "specmake.cliverify:cliverify"
 specupdateperf = "specmake.cliupdateperf:cliupdateperf"
 specupdatetimeouts = "specmake.cliupdatetimeouts:cliupdatetimeouts"
+
+[project.entry-points."specitems_type_provider.plugins"]
+specmake = "specmake.pkgitems:load_specmake_types"
 
 [build-system]
 requires = ["uv_build>=0.10.0"]
