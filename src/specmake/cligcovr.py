@@ -97,7 +97,8 @@ def cligcovr(argv: list[str] = sys.argv) -> None:
     shutil.rmtree(args.destination_directory, ignore_errors=True)
     os.makedirs(args.destination_directory)
     cmd = [
-        "gcovr", "--include-internal-functions", "--json-summary",
+        args.gcovr, "--include-internal-functions", "--json",
+        f"{args.destination_directory}/report.json", "--json-summary",
         f"{args.destination_directory}/summary.json", "--json-summary-pretty",
         f"--gcov-executable={args.gcov}", "--html-details",
         f"{args.destination_directory}/index.html", "--html-medium-threshold",
