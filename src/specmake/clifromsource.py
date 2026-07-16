@@ -150,7 +150,8 @@ def clifromsource(argv: list[str] = sys.argv) -> None:
     config, working_directory = load_specware_config(args.config_file)
     config = config["spec-from-source"]
     with contextlib.chdir(working_directory):
-        ctx = DoxygenContext(config)
+        ctx = DoxygenContext(config,
+                             require_enabled_groups=not args.propose_config)
         os.makedirs(ctx.spec_directory, exist_ok=True)
         ctx.doxygen_xml_to_spec(args.doxygen_xml_files)
         if args.propose_config:

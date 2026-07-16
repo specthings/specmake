@@ -24,10 +24,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import re
 from pathlib import Path
 
 import yaml
 
+import pytest
+
+from specmake import DoxygenContext
 from specmake.clifromsource import clifromsource
 
 # bad_f is declared in bad_8c.c, which belongs to no Doxygen group. With
@@ -244,6 +248,188 @@ def test_generate_groups_reaches_files_via_member_ingroup_alone(tmp_path):
         _get_path("source-to-spec/ingroup-only-member/xml/widget_8h.xml"),
     ])
     assert (spec_dir / "if" / "header-widget.yml").is_file()
+    assert (spec_dir / "if" / "widget-set-size.yml").is_file()
+
+
+def _valid_config() -> dict:
+    return {
+        "data": {},
+        "spec-directory": "spec",
+        "groups": {},
+        "item-to-group": None,
+        "type-map": {},
+        "default-group-name": "DefaultGroup",
+        "enabled-groups": [],
+    }
+
+
+def test_doxygen_context_accepts_a_valid_config():
+    # DoxygenContext validates on construction, so a caller that never
+    # goes through the command line interface gets the same named error
+    # rather than a crash deep in resolution.
+    DoxygenContext(_valid_config(), require_enabled_groups=True)
+    DoxygenContext(_valid_config(), require_enabled_groups=False)
+
+
+@pytest.mark.parametrize("missing_attribute",
+                         ["data", "spec-directory", "groups"])
+def test_doxygen_context_reports_missing_required_attribute(missing_attribute):
+    config = _valid_config()
+    del config[missing_attribute]
+    with pytest.raises(
+            ValueError,
+            match=f"missing required attribute {missing_attribute!r}"):
+        DoxygenContext(config, require_enabled_groups=True)
+
+
+@pytest.mark.parametrize("attribute,bad_value", [
+    ("data", []),
+    ("spec-directory", 123),
+    ("groups", []),
+    ("item-to-group", []),
+    ("type-map", []),
+    ("default-group-name", []),
+    ("enabled-groups", "FooGroup"),
+])
+def test_doxygen_context_reports_wrong_type(attribute, bad_value):
+    config = _valid_config()
+    config[attribute] = bad_value
+    with pytest.raises(ValueError, match=f"attribute {attribute!r} must be a"):
+        DoxygenContext(config, require_enabled_groups=True)
+
+
+def test_doxygen_context_reports_every_problem_at_once():
+    with pytest.raises(ValueError) as excinfo:
+        DoxygenContext({}, require_enabled_groups=True)
+    message = str(excinfo.value)
+    for attribute in ("data", "spec-directory", "groups", "enabled-groups"):
+        assert attribute in message, (
+            f"{attribute!r} missing from aggregated error")
+
+
+def test_doxygen_context_does_not_require_enabled_groups_to_propose():
+    DoxygenContext({"data": {}, "spec-directory": "spec", "groups": {}})
+
+
+def test_doxygen_context_still_checks_enabled_groups_type_when_optional():
+    config = {
+        "data": {},
+        "spec-directory": "spec",
+        "groups": {},
+        "enabled-groups": "FooGroup",
+    }
+    with pytest.raises(ValueError,
+                       match="attribute 'enabled-groups' must be a"):
+        DoxygenContext(config)
+
+
+# Elements, not just the containers holding them. Each of these values
+# reaches code that assumes a string, so an unchecked element would
+# surface as a TypeError far from the configuration that caused it.
+@pytest.mark.parametrize("attribute,bad_value,expected", [
+    ("enabled-groups", [{
+        "FooGroup": True
+    }], "entry 0 must be a string"),
+    ("enabled-groups", ["FooGroup", 7], "entry 1 must be a string"),
+    ("groups", {
+        "FooGroup": []
+    }, "entry 'FooGroup' must be a dict"),
+    ("groups", {
+        7: {}
+    }, "non-string key 7"),
+    ("item-to-group", {
+        "id_0": []
+    }, "must be a string or null"),
+    ("item-to-group", {
+        7: "FooGroup"
+    }, "non-string key 7"),
+    ("type-map", {
+        "a": 7
+    }, "value for 'a' must be a string"),
+    ("type-map", {
+        7: "a"
+    }, "non-string key 7"),
+])
+def test_doxygen_context_reports_bad_elements(attribute, bad_value, expected):
+    config = _valid_config()
+    config[attribute] = bad_value
+    with pytest.raises(ValueError, match=re.escape(expected)):
+        DoxygenContext(config, require_enabled_groups=True)
+
+
+def test_doxygen_context_accepts_a_null_item_to_group_value():
+    # A null value is how a user pins an item to no group at all and
+    # leaves it to inference, so it has to stay valid.
+    config = _valid_config()
+    config["item-to-group"] = {"id_0": None}
+    DoxygenContext(config, require_enabled_groups=True)
+
+
+def test_clifromsource_reports_an_invalid_config(tmp_path):
+    with pytest.raises(ValueError, match="invalid 'spec-from-source'"):
+        _generate(tmp_path, {"groups": {}}, _foo_group_xml_files())
+
+
+def test_generate_writes_the_enabled_group_contents(tmp_path):
+    spec_dir = tmp_path / "spec"
+    config = {
+        "data": {},
+        "groups": {
+            "FooGroup": {
+                "uid": "/if/group",
+                "remove-prefix": "foobar-"
+            }
+        },
+        "enabled-groups": ["FooGroup"],
+        "spec-directory": str(spec_dir),
+    }
+    _generate(tmp_path, config, _foo_group_xml_files())
+
+    # A function (gf_0) and an enum with enumerators (ge_0/GE_0_A) both
+    # live in FooGroup, exercising the header member loop and its
+    # enum-enumerator recursion in one real run. header.h's e_0 also has
+    # a "typedef enum e_0 e_0" alias with the same target uid as the enum
+    # itself; the typedef skip keeps that alias from ever being saved, so
+    # e-0.yml ends up holding the enum's own content.
+    assert (spec_dir / "if" / "group.yml").is_file()
+    assert (spec_dir / "if" / "gf-0.yml").is_file()
+    assert (spec_dir / "if" / "ge-0.yml").is_file()
+    assert (spec_dir / "if" / "ge-0-a.yml").is_file()
+
+
+def test_generate_skips_disabled_groups(tmp_path):
+    spec_dir = tmp_path / "spec"
+    config = {
+        "data": {},
+        "groups": {},
+        "enabled-groups": [],
+        "spec-directory": str(spec_dir),
+    }
+    _generate(tmp_path, config, _foo_group_xml_files())
+    assert not list(spec_dir.rglob("*.yml"))
+
+
+def test_propose_config_output_is_usable_verbatim(tmp_path, capsys):
+    spec_dir = tmp_path / "spec"
+    config = {
+        "data": {},
+        "groups": {
+            "WidgetAPI": {
+                "uid": "/if/group"
+            }
+        },
+        "enabled-groups": ["WidgetAPI"],
+        "spec-directory": str(spec_dir),
+    }
+    output = _propose(capsys, tmp_path, config, _widget_api_xml_files())
+    proposed = yaml.safe_load(output)["spec-from-source"]
+    assert proposed["item-to-group"] == {}
+
+    # Copy the proposal verbatim into a fresh run, exactly as a user
+    # would, and it has to generate.
+    proposed["spec-directory"] = str(spec_dir)
+    _generate(tmp_path, proposed, _widget_api_xml_files())
+    assert (spec_dir / "if" / "group.yml").is_file()
     assert (spec_dir / "if" / "widget-set-size.yml").is_file()
 
 

@@ -657,11 +657,120 @@ _COMPOUND_TYPEDEF = re.compile(
     r"typedef\s+(enum|struct|union)(\s+[a-zA-Z0-9_]+)?")
 
 
+def _validate_string_list(errors: list[str], attribute: str,
+                          value: list) -> None:
+    for index, element in enumerate(value):
+        if not isinstance(element, str):
+            errors.append(f"attribute {attribute!r} entry {index} must be a "
+                          f"string, got {element!r}")
+
+
+def _validate_groups(errors: list[str], groups: dict) -> None:
+    for name, entry in groups.items():
+        if not isinstance(name, str):
+            errors.append(f"attribute 'groups' has a non-string key {name!r}")
+        elif not isinstance(entry, dict):
+            errors.append(f"attribute 'groups' entry {name!r} must be a dict, "
+                          f"got {entry!r}")
+
+
+def _validate_item_to_group(errors: list[str], item_to_group: dict) -> None:
+    for doxygen_id, group_name in item_to_group.items():
+        if not isinstance(doxygen_id, str):
+            errors.append("attribute 'item-to-group' has a non-string key "
+                          f"{doxygen_id!r}")
+        elif group_name is not None and not isinstance(group_name, str):
+            errors.append(
+                f"attribute 'item-to-group' value for {doxygen_id!r} must be "
+                f"a string or null, got {group_name!r}")
+
+
+def _validate_type_map(errors: list[str], type_map: dict) -> None:
+    for from_type, to_item in type_map.items():
+        if not isinstance(from_type, str):
+            errors.append(
+                f"attribute 'type-map' has a non-string key {from_type!r}")
+        elif not isinstance(to_item, str):
+            errors.append(f"attribute 'type-map' value for {from_type!r} must "
+                          f"be a string, got {to_item!r}")
+
+
+def _validate_config(config: dict, require_enabled_groups: bool) -> None:
+    """
+    Validate a ``spec-from-source:`` configuration upfront.
+
+    Raises a single ``ValueError`` naming every problem found, instead
+    of letting each one surface separately as a raw crash deep inside a
+    later call.
+
+    Every attribute this module indexes or iterates into is checked
+    down to its elements. A group name is looked up in a dict, an
+    enabled group ends up in a set, and a type-map pair is handed to
+    ``str.replace``, so an element of the wrong type would otherwise
+    reach that code and raise ``TypeError`` well away from the
+    configuration that caused it.
+
+    ``enabled-groups`` is only consumed by a real generation run, so
+    its presence is required only when the caller asks for it.
+    """
+    errors: list[str] = []
+
+    def require(attribute: str, expected_type: type, type_name: str) -> bool:
+        if attribute not in config:
+            errors.append(f"missing required attribute {attribute!r}")
+            return False
+        if not isinstance(config[attribute], expected_type):
+            errors.append(f"attribute {attribute!r} must be a {type_name}, "
+                          f"got {config[attribute]!r}")
+            return False
+        return True
+
+    def optional(attribute: str, expected_type: type, type_name: str) -> bool:
+        value = config.get(attribute)
+        if value is None:
+            return False
+        if not isinstance(value, expected_type):
+            errors.append(
+                f"attribute {attribute!r} must be a {type_name} or null, "
+                f"got {value!r}")
+            return False
+        return True
+
+    require("data", dict, "dict")
+    require("spec-directory", str, "string")
+    if require("groups", dict, "dict"):
+        _validate_groups(errors, config["groups"])
+    if optional("item-to-group", dict, "dict"):
+        _validate_item_to_group(errors, config["item-to-group"])
+    if optional("type-map", dict, "dict"):
+        _validate_type_map(errors, config["type-map"])
+    optional("default-group-name", str, "string")
+    if require_enabled_groups:
+        checked = require("enabled-groups", list, "list of group names")
+    else:
+        checked = optional("enabled-groups", list, "list of group names")
+    if checked:
+        _validate_string_list(errors, "enabled-groups",
+                              config["enabled-groups"])
+
+    if errors:
+        problems = "\n".join(f"  - {error}" for error in errors)
+        raise ValueError(
+            f"invalid 'spec-from-source' configuration:\n{problems}")
+
+
 class DoxygenContext:
     """ Represents the Doxygen context. """
 
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, config: dict) -> None:
+    def __init__(self,
+                 config: dict,
+                 require_enabled_groups: bool = False) -> None:
+        # Validate here rather than trusting the caller, so every
+        # consumer of this class gets the same named error instead of a
+        # crash deep in resolution. Only the caller knows whether this
+        # run consumes enabled-groups, so it says so.
+        _validate_config(config, require_enabled_groups)
         self.spec_directory = Path(config["spec-directory"])
         self.data: dict = config["data"]
         # A bare 'type-map:' attribute parses as null, not as an empty
