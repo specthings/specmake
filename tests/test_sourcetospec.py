@@ -1248,6 +1248,17 @@ _RESULTS = {
 }
 
 
+def test_null_item_to_group_is_treated_as_absent():
+    config = {
+        "data": {},
+        "groups": {},
+        "item-to-group": None,
+        "spec-directory": "spec",
+    }
+    ctx = DoxygenContext(config)
+    assert not ctx.item_to_group
+
+
 def _get_path(path: str) -> str:
     test_dir = Path(__file__).parent
     return str(test_dir / f"{path}")
