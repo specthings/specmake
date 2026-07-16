@@ -392,6 +392,36 @@ class DoxygenStruct(DoxygenCompound):
 class DoxygenTypedef(DoxygenItem):
     """ Represents a Doxygen typedef item. """
 
+    @property
+    def aliases_compound(self) -> bool:
+        """
+        Indicate whether this typedef merely aliases a compound item.
+
+        True if it merely names a struct/union/enum compound that
+        Doxygen already represents as its own, separate item under the
+        same generated UID, for example ``typedef enum e { ... } e;``,
+        as opposed to a genuine standalone type alias such as
+        ``typedef unsigned int my_type;`` that only coincidentally
+        shares a name with some unrelated compound elsewhere.
+        """
+        for kind in ("struct", "union", "enum"):
+            for candidate in self.ctx.items_by_name.get(kind,
+                                                        {}).get(self.name, ()):
+                if candidate.group_ids and candidate.uid == self.uid:
+                    return True
+        return False
+
+    def export(self) -> dict:
+        data = super().export()
+        data["interface-type"] = "typedef"
+        data["params"] = []
+        data["return"] = None
+        data["definition"] = {
+            "default": "_ImplementationDefined",
+            "variants": []
+        }
+        return data
+
 
 class DoxygenUnion(DoxygenCompound):
     """ Represents a Doxygen union item. """

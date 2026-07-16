@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.17.0" xml:lang="en-US">
+  <compounddef id="group__NetworkingAPI" kind="group">
+    <compoundname>NetworkingAPI</compoundname>
+    <title>Networking API</title>
+    <innerclass refid="structstatus" prot="public">status</innerclass>
+    <sectiondef kind="typedef">
+      <memberdef kind="typedef" id="group__NetworkingAPI_1gabe68fdb99ba24ae9b96f8b7841679c6b" prot="public" static="no">
+        <type>struct status</type>
+        <definition>typedef struct status status</definition>
+        <argsstring></argsstring>
+        <name>status</name>
+        <briefdescription>
+<para>A networking status compound. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="networking.h" line="15" column="8"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>This is the Networking API. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

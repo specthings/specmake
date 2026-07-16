@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.17.0" xml:lang="en-US">
+  <compounddef id="structstatus" kind="struct" language="C++" prot="public">
+    <compoundname>status</compoundname>
+    <includes refid="networking_8h" local="no">networking.h</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structstatus_1a9e924212f1fcc4a27556a7b0685487f2" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int status::code</definition>
+        <argsstring></argsstring>
+        <name>code</name>
+        <qualifiedname>status::code</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="networking.h" line="14" column="7" bodyfile="networking.h" bodystart="14" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>A networking status compound. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="networking.h" line="13" column="1" bodyfile="networking.h" bodystart="13" bodyend="15"/>
+    <listofallmembers>
+      <member refid="structstatus_1a9e924212f1fcc4a27556a7b0685487f2" prot="public" virt="non-virtual"><scope>status</scope><name>code</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

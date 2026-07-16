@@ -62,7 +62,10 @@ def _generate_header(header: DoxygenFile) -> None:
     print("  ", header.uid)
     header.save()
     for header_member in header.members():
-        if isinstance(header_member, DoxygenTypedef):
+        if (isinstance(header_member, DoxygenTypedef)
+                and header_member.aliases_compound):
+            # For example `typedef enum e { ... } e;`. The enum item already
+            # covers this under the same name, marked via definition-kind.
             continue
         print("    ", header_member.uid)
         header_member.save()

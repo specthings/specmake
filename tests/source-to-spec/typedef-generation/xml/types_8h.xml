@@ -1,0 +1,92 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.17.0" xml:lang="en-US">
+  <compounddef id="types_8h" kind="file" language="C++">
+    <compoundname>types.h</compoundname>
+    <sectiondef kind="enum">
+      <memberdef kind="enum" id="types_8h_1a454259f6637e0de415e28d4c37c93419" prot="public" static="no" strong="no">
+        <type></type>
+        <name>tagged_enum</name>
+        <enumvalue id="types_8h_1a454259f6637e0de415e28d4c37c93419a75615b3ad253e9207e6fdbf81b6293c5" prot="public">
+          <name>TAGGED_ENUM_A</name>
+          <briefdescription>
+<para>Brief TAGGED_ENUM_A. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>A named tag enum with a same-named typedef alias. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="types.h" line="27" column="1" bodyfile="types.h" bodystart="27" bodyend="32"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="typedef">
+      <memberdef kind="typedef" id="types_8h_1ac957731784c17583b59aa54b10696ef8" prot="public" static="no">
+        <type>unsigned int</type>
+        <definition>typedef unsigned int widget_size_t</definition>
+        <argsstring></argsstring>
+        <name>widget_size_t</name>
+        <briefdescription>
+<para>A widget size in application-defined units. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="types.h" line="17" column="22" bodyfile="types.h" bodystart="17" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="types_8h_1a7da2eacb46e71e37bf59c829dd13ca58" prot="public" static="no">
+        <type>struct widget *</type>
+        <definition>typedef struct widget* widget_handle</definition>
+        <argsstring></argsstring>
+        <name>widget_handle</name>
+        <briefdescription>
+<para>A widget handle. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="types.h" line="22" column="21" bodyfile="types.h" bodystart="22" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="types_8h_1a680099e7a8e6961719603aedaa4bada3" prot="public" static="no">
+        <type>enum <ref refid="types_8h_1a454259f6637e0de415e28d4c37c93419" kindref="member">tagged_enum</ref></type>
+        <definition>typedef enum tagged_enum tagged_enum</definition>
+        <argsstring></argsstring>
+        <name>tagged_enum</name>
+        <briefdescription>
+<para>A named tag enum with a same-named typedef alias. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="types.h" line="32" column="13"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>TYPES_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>TYPES_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight></codeline>
+<codeline lineno="17" refid="types_8h_1ac957731784c17583b59aa54b10696ef8" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">unsigned</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="types_8h_1ac957731784c17583b59aa54b10696ef8" kindref="member">widget_size_t</ref>;</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="22" refid="types_8h_1a7da2eacb46e71e37bf59c829dd13ca58" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">widget<sp/>*<ref refid="types_8h_1a7da2eacb46e71e37bf59c829dd13ca58" kindref="member">widget_handle</ref>;</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"></highlight></codeline>
+<codeline lineno="27" refid="types_8h_1a454259f6637e0de415e28d4c37c93419" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">enum</highlight><highlight class="normal"><sp/><ref refid="types_8h_1a454259f6637e0de415e28d4c37c93419" kindref="member">tagged_enum</ref><sp/>{</highlight></codeline>
+<codeline lineno="31" refid="types_8h_1a454259f6637e0de415e28d4c37c93419a75615b3ad253e9207e6fdbf81b6293c5" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="types_8h_1a454259f6637e0de415e28d4c37c93419a75615b3ad253e9207e6fdbf81b6293c5" kindref="member">TAGGED_ENUM_A</ref></highlight></codeline>
+<codeline lineno="32" refid="types_8h_1a680099e7a8e6961719603aedaa4bada3" refkind="member"><highlight class="normal">}<sp/><ref refid="types_8h_1a454259f6637e0de415e28d4c37c93419" kindref="member">tagged_enum</ref>;</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+    </programlisting>
+    <location file="types.h"/>
+  </compounddef>
+</doxygen>
