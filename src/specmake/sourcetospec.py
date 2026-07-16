@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# pylint: disable=too-many-lines
+
 import dataclasses
 from pathlib import Path
 import posixpath
@@ -812,6 +814,13 @@ def _validate_config(config: dict, require_full_config: bool) -> None:
             f"invalid 'spec-from-source' configuration:\n{problems}")
 
 
+def _proposed_group_uid(group_name: str) -> str:
+    # There's no way to guess which component a group actually belongs
+    # under from its name alone, so make the placeholder impossible to
+    # miss rather than emit something that merely looks plausible.
+    return f"/TODO/{_slugify(group_name)}/if/group"
+
+
 class DoxygenContext:
     """ Represents the Doxygen context. """
 
@@ -838,8 +847,11 @@ class DoxygenContext:
         self.type_map: dict[str, str] = config.get("type-map") or {}
         self.default_group_name: str | None = config.get("default-group-name")
         self.groups: dict[str, dict[str, str]] = config.get("groups") or {}
-        self.item_to_group: dict[str, str
-                                 | None] = config.get("item-to-group") or {}
+        # Copied, not aliased: resolution below adds an entry to
+        # self.item_to_group for every inferred association, and that
+        # must never leak back into the caller's config dict.
+        self.item_to_group: dict[str, str | None] = dict(
+            config.get("item-to-group") or {})
         self.items_by_kind: dict[str, dict[str, "DoxygenItem"]] = {}
         self.items_by_name: dict[str, dict[str, list["DoxygenItem"]]] = {}
         self.items: dict[str, "DoxygenItem"] = {}
@@ -860,6 +872,78 @@ class DoxygenContext:
             tree = ElementTree.parse(xml_file)
             _fill_items(tree.getroot(),
                         _Scope(DoxygenItem(self, "root", "", ""), {}, ""))
+
+    def proposed_config(self, config: dict) -> dict:
+        """
+        Build the proposed ``spec-from-source:`` config.
+
+        ``config`` with a ``groups:`` skeleton entry added for every
+        group discovered in the Doxygen XML that isn't already
+        configured, and ``data``/``spec-directory``/``enabled-groups``
+        defaulted if absent. Never overwrites an existing ``groups``
+        entry. Does not include ``item-to-group``, which
+        ``--propose-config``'s two consumers handle separately:
+        printing for review shows everything this run resolved, while
+        ``--apply`` writing to disk only ever preserves what the config
+        already had.
+
+        Absent means missing or null, the same way validation and this
+        constructor read it. A bare ``spec-directory:`` attribute left
+        in the proposal would be written back by ``--apply`` and then
+        rejected by the next real generation run, which does require a
+        string there.
+        """
+        proposed = dict(config)
+        proposed.pop("item-to-group", None)
+        proposed["data"] = config.get("data") or {}
+        spec_directory = config.get("spec-directory")
+        proposed["spec-directory"] = (spec_directory if spec_directory
+                                      is not None else "spec")
+        proposed["enabled-groups"] = config.get("enabled-groups") or []
+        groups = dict(proposed.get("groups") or {})
+        for group in sorted(self.items_by_kind.get("group", {}).values()):
+            groups.setdefault(group.name,
+                              {"uid": _proposed_group_uid(group.name)})
+        proposed["groups"] = groups
+        return proposed
+
+    def resolved_item_to_group(self) -> dict[str, str | None]:
+        """
+        Filter stale entries out of ``item_to_group``.
+
+        Resolution mutates ``item_to_group`` with every association this
+        run inferred, from an XML group, a containing file's group, or
+        ``default-group-name``, not just the entries the config started
+        with. It may also contain entries whose doxygen_id no longer
+        corresponds to any item discovered in the current XML, for
+        example the declaration was removed from the header. Filtering
+        them out avoids crashing on the lookup or carrying a reference
+        to a nonexistent item forward into a fresh proposal.
+        """
+        return {
+            doxygen_id: group_name
+            for doxygen_id, group_name in sorted(self.item_to_group.items())
+            if doxygen_id in self.items
+        }
+
+    def preserved_item_to_group(self, config: dict) -> dict[str, str | None]:
+        """
+        Filter stale entries out of the config's own ``item-to-group``.
+
+        Unlike ``item_to_group``, which resolution mutates with every
+        inferred association, this dict is only ever what the config
+        already had before this run: entries a user wrote by hand to pin
+        an item to a group. Only entries whose doxygen_id no longer
+        corresponds to any item discovered in the current XML are
+        dropped; every other entry is preserved as is, including one
+        currently shadowed by the item's own XML group membership.
+        """
+        item_to_group = config.get("item-to-group") or {}
+        return {
+            doxygen_id: group_name
+            for doxygen_id, group_name in sorted(item_to_group.items())
+            if doxygen_id in self.items
+        }
 
     def decl(self, defs: dict[str, str], index: int) -> str:
         """ Get the declaration for the index-th parameter. """
