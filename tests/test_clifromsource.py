@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import json
+import os
 import re
 from pathlib import Path
 
@@ -125,12 +127,12 @@ def _propose(capsys, tmp_path, config, xml_files) -> str:
     return capsys.readouterr().out
 
 
-def _generate(tmp_path, config, xml_files) -> None:
+def _generate(tmp_path, config, xml_files, prune: bool = False) -> None:
     """ Run a generation pass through the command line interface. """
-    clifromsource([
-        "specfromsource", "--config-file",
-        _write_config(tmp_path, config), *xml_files
-    ])
+    argv = ["specfromsource", "--config-file", _write_config(tmp_path, config)]
+    if prune:
+        argv.append("--prune")
+    clifromsource(argv + list(xml_files))
 
 
 def _proposed_item_to_group(output: str) -> dict:
@@ -503,6 +505,179 @@ def test_generate_groups_typedef_alias_check_is_scoped_by_group(tmp_path):
     assert networking_status["interface-type"] == "struct"
 
 
+def _manifest_path(spec_dir) -> Path:
+    return spec_dir / ".specfromsource-manifest.json"
+
+
+def _read_manifest(spec_dir) -> dict:
+    with open(_manifest_path(spec_dir), encoding="utf-8") as src:
+        return json.load(src)
+
+
+def _write_manifest(spec_dir, manifest: dict) -> None:
+    spec_dir.mkdir(parents=True, exist_ok=True)
+    with open(_manifest_path(spec_dir), "w", encoding="utf-8") as dst:
+        json.dump(manifest, dst)
+
+
+def _foo_group_config(spec_dir) -> dict:
+    return {
+        "data": {},
+        "groups": {
+            "FooGroup": {
+                "uid": "/if/group",
+                "remove-prefix": "foobar-"
+            }
+        },
+        "enabled-groups": ["FooGroup"],
+        "spec-directory": str(spec_dir),
+    }
+
+
+def test_prune_manifest_records_every_generated_uid_with_its_group(tmp_path):
+    # The manifest is how one run's generated set survives to the next,
+    # so it is also where that set is observable from outside.
+    spec_dir = tmp_path / "spec"
+    _generate(tmp_path,
+              _foo_group_config(spec_dir),
+              _foo_group_xml_files(),
+              prune=True)
+    manifest = _read_manifest(spec_dir)
+    assert manifest["/if/group"] == ["FooGroup"]
+    assert manifest["/if/gf-0"] == ["FooGroup"]
+    assert {owner
+            for owners in manifest.values()
+            for owner in owners} == {"FooGroup"}
+
+
+def test_prune_removes_stale_items_tracked_in_manifest(tmp_path):
+    spec_dir = tmp_path / "spec"
+    _write_manifest(spec_dir, {
+        "/if/gone": ["FooGroup"],
+        "/if/group": ["FooGroup"]
+    })
+    (spec_dir / "if").mkdir(parents=True, exist_ok=True)
+    (spec_dir / "if" / "gone.yml").write_text("stale: true\n")
+
+    # This run regenerates /if/group, but nothing produces /if/gone.
+    _generate(tmp_path,
+              _foo_group_config(spec_dir),
+              _foo_group_xml_files(),
+              prune=True)
+
+    assert not (spec_dir / "if" / "gone.yml").exists()
+    assert (spec_dir / "if" / "group.yml").is_file()
+    assert "/if/gone" not in _read_manifest(spec_dir)
+
+
+def test_prune_does_not_touch_groups_outside_this_run(tmp_path):
+    spec_dir = tmp_path / "spec"
+    _write_manifest(spec_dir, {"/other/item": ["OtherGroup"]})
+    (spec_dir / "other").mkdir(parents=True, exist_ok=True)
+    (spec_dir / "other" / "item.yml").write_text("x: 1\n")
+
+    # This run only processes FooGroup. OtherGroup is left alone even
+    # though none of its manifest entries were regenerated.
+    _generate(tmp_path,
+              _foo_group_config(spec_dir),
+              _foo_group_xml_files(),
+              prune=True)
+
+    assert (spec_dir / "other" / "item.yml").is_file()
+    manifest = _read_manifest(spec_dir)
+    assert manifest["/other/item"] == ["OtherGroup"]
+    # This run's own entries are recorded alongside it, which is what
+    # distinguishes "pruning ran and spared OtherGroup" from "pruning
+    # never ran at all".
+    assert manifest["/if/group"] == ["FooGroup"]
+
+
+def test_prune_never_touches_files_outside_the_manifest(tmp_path):
+    spec_dir = tmp_path / "spec"
+    (spec_dir / "if").mkdir(parents=True, exist_ok=True)
+    (spec_dir / "if" / "hand-authored.yml").write_text("x: 1\n")
+    # No manifest yet: hand-authored.yml was never tool-generated.
+    _generate(tmp_path,
+              _foo_group_config(spec_dir),
+              _foo_group_xml_files(),
+              prune=True)
+    assert (spec_dir / "if" / "hand-authored.yml").is_file()
+    # A manifest exists only because pruning ran, so this cannot pass by
+    # pruning having been skipped.
+    assert "/if/group" in _read_manifest(spec_dir)
+
+
+def test_prune_tolerates_a_manifest_entry_already_missing_from_disk(tmp_path):
+    # A manifest entry whose file was already removed by other means,
+    # for example by hand, must not raise. It is simply dropped from the
+    # manifest.
+    spec_dir = tmp_path / "spec"
+    _write_manifest(spec_dir, {"/if/already-gone": ["FooGroup"]})
+    _generate(tmp_path,
+              _foo_group_config(spec_dir),
+              _foo_group_xml_files(),
+              prune=True)
+    assert "/if/already-gone" not in _read_manifest(spec_dir)
+
+
+def test_prune_refuses_to_delete_outside_spec_directory(tmp_path, capsys):
+    # A manifest is trusted state from a prior run of this same tool, but
+    # it's still just a file on disk. A UID escaping spec-directory via
+    # ".." must never be deleted, regardless of how it got there:
+    # hand-edited, corrupted, or copied from a differently-configured
+    # checkout.
+    outside = tmp_path / "outside-spec-directory.yml"
+    outside.write_text("must not be deleted\n")
+    spec_dir = tmp_path / "spec"
+    escaping_uid = "/" + os.path.relpath(outside, spec_dir)[:-len(".yml")]
+    _write_manifest(spec_dir, {escaping_uid: "FooGroup"})
+
+    _generate(tmp_path,
+              _foo_group_config(spec_dir),
+              _foo_group_xml_files(),
+              prune=True)
+
+    assert outside.is_file()
+    assert outside.read_text() == "must not be deleted\n"
+    assert "escapes spec-directory" in capsys.readouterr().out
+
+
+def test_prune_removes_item_for_a_declaration_deleted_from_the_header(
+        tmp_path):
+    spec_dir = tmp_path / "spec"
+    config = {
+        "data": {},
+        "groups": {
+            "QueueAPI": {
+                "uid": "/if/group"
+            }
+        },
+        "enabled-groups": ["QueueAPI"],
+        "spec-directory": str(spec_dir),
+    }
+
+    def queue_xml(revision: str) -> list[str]:
+        return [
+            _get_path(f"source-to-spec/prune-removed-declaration/{revision}"
+                      f"/xml/{name}")
+            for name in ("group__QueueAPI.xml", "queue_8h.xml")
+        ]
+
+    # First run: queue_create and queue_destroy both exist.
+    _generate(tmp_path, config, queue_xml("before"), prune=True)
+    assert (spec_dir / "if" / "queue-create.yml").is_file()
+    assert (spec_dir / "if" / "queue-destroy.yml").is_file()
+
+    # Second run: queue_destroy has been removed from the header.
+    _generate(tmp_path, config, queue_xml("after"), prune=True)
+
+    assert (spec_dir / "if" / "queue-create.yml").is_file()
+    assert not (spec_dir / "if" / "queue-destroy.yml").exists()
+    manifest = _read_manifest(spec_dir)
+    assert "/if/queue-destroy" not in manifest
+    assert manifest["/if/queue-create"] == ["QueueAPI"]
+
+
 def _shared_header_xml_files() -> list[str]:
     # shared-header/shared.h carries two @file @ingroup blocks, so it is
     # a direct member of both AlphaAPI and BetaAPI.
@@ -534,3 +709,140 @@ def test_generate_groups_generates_a_shared_header_once(tmp_path, capsys):
     _generate(tmp_path, config, _shared_header_xml_files())
     output = capsys.readouterr().out
     assert output.count("/if/header-shared") == 1
+
+
+def _shared_header_config(spec_dir, enabled_groups=None) -> dict:
+    return {
+        "data": {},
+        "groups": {
+            "AlphaAPI": {
+                "uid": "/if/alpha"
+            },
+            "BetaAPI": {
+                "uid": "/if/beta"
+            }
+        },
+        "enabled-groups": (["AlphaAPI", "BetaAPI"]
+                           if enabled_groups is None else enabled_groups),
+        "spec-directory":
+        str(spec_dir),
+    }
+
+
+def test_prune_manifest_records_every_owner_of_a_shared_header(tmp_path):
+    # shared.h belongs to both enabled groups, so neither one owns its
+    # items alone. Recording a single owner would make the survivor
+    # depend on group iteration order.
+    spec_dir = tmp_path / "spec"
+    _generate(tmp_path,
+              _shared_header_config(spec_dir),
+              _shared_header_xml_files(),
+              prune=True)
+    manifest = _read_manifest(spec_dir)
+    assert manifest["/if/header-shared"] == ["AlphaAPI", "BetaAPI"]
+    assert manifest["/if/alpha"] == ["AlphaAPI"]
+    assert manifest["/if/beta"] == ["BetaAPI"]
+
+
+def test_prune_removes_a_shared_item_when_one_owner_is_still_enabled(tmp_path):
+    # A jointly-owned item that this run no longer produces is stale as
+    # soon as any one of its owners is present to notice. Requiring all
+    # of them would leave it on disk forever whenever the other owner is
+    # disabled.
+    spec_dir = tmp_path / "spec"
+    _write_manifest(spec_dir, {"/if/gone": ["AlphaAPI", "BetaAPI"]})
+    (spec_dir / "if").mkdir(parents=True, exist_ok=True)
+    (spec_dir / "if" / "gone.yml").write_text("stale: true\n")
+
+    _generate(tmp_path,
+              _shared_header_config(spec_dir, enabled_groups=["AlphaAPI"]),
+              _shared_header_xml_files(),
+              prune=True)
+
+    assert not (spec_dir / "if" / "gone.yml").exists()
+    assert "/if/gone" not in _read_manifest(spec_dir)
+
+
+def test_prune_spares_an_item_when_no_owner_is_enabled(tmp_path):
+    # The other half of the same rule: with every owner absent, nothing
+    # in this run can tell whether the item is obsolete.
+    spec_dir = tmp_path / "spec"
+    _write_manifest(spec_dir, {"/if/kept": ["BetaAPI"]})
+    (spec_dir / "if").mkdir(parents=True, exist_ok=True)
+    (spec_dir / "if" / "kept.yml").write_text("x: 1\n")
+
+    _generate(tmp_path,
+              _shared_header_config(spec_dir, enabled_groups=["AlphaAPI"]),
+              _shared_header_xml_files(),
+              prune=True)
+
+    assert (spec_dir / "if" / "kept.yml").is_file()
+    assert _read_manifest(spec_dir)["/if/kept"] == ["BetaAPI"]
+
+
+def test_prune_reads_a_legacy_single_owner_manifest(tmp_path):
+    # A manifest written before ownership became a list stores a bare
+    # group name. Iterating that string character by character would
+    # match no group, silently sparing every entry it records.
+    spec_dir = tmp_path / "spec"
+    _write_manifest(spec_dir, {"/if/gone": "FooGroup"})
+    (spec_dir / "if").mkdir(parents=True, exist_ok=True)
+    (spec_dir / "if" / "gone.yml").write_text("stale: true\n")
+
+    _generate(tmp_path,
+              _foo_group_config(spec_dir),
+              _foo_group_xml_files(),
+              prune=True)
+
+    assert not (spec_dir / "if" / "gone.yml").exists()
+    assert _read_manifest(spec_dir)["/if/group"] == ["FooGroup"]
+
+
+def test_prune_manifest_records_each_owner_once(tmp_path):
+    # Two headers in one group can yield the same UID, for example an
+    # enumerator reachable through either of them. The owner is still
+    # recorded once.
+    spec_dir = tmp_path / "spec"
+    _generate(tmp_path,
+              _foo_group_config(spec_dir),
+              _foo_group_xml_files(),
+              prune=True)
+    manifest = _read_manifest(spec_dir)
+    duplicated = {
+        uid: owners
+        for uid, owners in manifest.items() if len(owners) != len(set(owners))
+    }
+    assert not duplicated
+
+
+@pytest.mark.parametrize("bad_owners", [None, 5, {"FooGroup": 1}, [7]])
+def test_prune_spares_an_entry_with_unreadable_owners(tmp_path, bad_owners):
+    # A manifest is read back as a plain file that could be stale or
+    # hand-edited. An entry whose owners can't be read yields no owners,
+    # so it is spared rather than raising.
+    spec_dir = tmp_path / "spec"
+    _write_manifest(spec_dir, {"/if/odd": bad_owners})
+    (spec_dir / "if").mkdir(parents=True, exist_ok=True)
+    (spec_dir / "if" / "odd.yml").write_text("x: 1\n")
+
+    _generate(tmp_path,
+              _foo_group_config(spec_dir),
+              _foo_group_xml_files(),
+              prune=True)
+
+    assert (spec_dir / "if" / "odd.yml").is_file()
+    assert _read_manifest(spec_dir)["/if/odd"] == []
+
+
+def test_prune_ignores_a_manifest_that_is_not_a_mapping(tmp_path):
+    spec_dir = tmp_path / "spec"
+    spec_dir.mkdir(parents=True, exist_ok=True)
+    with open(_manifest_path(spec_dir), "w", encoding="utf-8") as dst:
+        json.dump(["not", "a", "mapping"], dst)
+
+    _generate(tmp_path,
+              _foo_group_config(spec_dir),
+              _foo_group_xml_files(),
+              prune=True)
+
+    assert _read_manifest(spec_dir)["/if/group"] == ["FooGroup"]
