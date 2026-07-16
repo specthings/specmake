@@ -269,8 +269,8 @@ def test_doxygen_context_accepts_a_valid_config():
     # DoxygenContext validates on construction, so a caller that never
     # goes through the command line interface gets the same named error
     # rather than a crash deep in resolution.
-    DoxygenContext(_valid_config(), require_enabled_groups=True)
-    DoxygenContext(_valid_config(), require_enabled_groups=False)
+    DoxygenContext(_valid_config(), require_full_config=True)
+    DoxygenContext(_valid_config(), require_full_config=False)
 
 
 @pytest.mark.parametrize("missing_attribute",
@@ -281,7 +281,7 @@ def test_doxygen_context_reports_missing_required_attribute(missing_attribute):
     with pytest.raises(
             ValueError,
             match=f"missing required attribute {missing_attribute!r}"):
-        DoxygenContext(config, require_enabled_groups=True)
+        DoxygenContext(config, require_full_config=True)
 
 
 @pytest.mark.parametrize("attribute,bad_value", [
@@ -297,19 +297,19 @@ def test_doxygen_context_reports_wrong_type(attribute, bad_value):
     config = _valid_config()
     config[attribute] = bad_value
     with pytest.raises(ValueError, match=f"attribute {attribute!r} must be a"):
-        DoxygenContext(config, require_enabled_groups=True)
+        DoxygenContext(config, require_full_config=True)
 
 
 def test_doxygen_context_reports_every_problem_at_once():
     with pytest.raises(ValueError) as excinfo:
-        DoxygenContext({}, require_enabled_groups=True)
+        DoxygenContext({}, require_full_config=True)
     message = str(excinfo.value)
     for attribute in ("data", "spec-directory", "groups", "enabled-groups"):
         assert attribute in message, (
             f"{attribute!r} missing from aggregated error")
 
 
-def test_doxygen_context_does_not_require_enabled_groups_to_propose():
+def test_doxygen_context_does_not_require_a_full_config_to_propose():
     DoxygenContext({"data": {}, "spec-directory": "spec", "groups": {}})
 
 
@@ -356,7 +356,7 @@ def test_doxygen_context_reports_bad_elements(attribute, bad_value, expected):
     config = _valid_config()
     config[attribute] = bad_value
     with pytest.raises(ValueError, match=re.escape(expected)):
-        DoxygenContext(config, require_enabled_groups=True)
+        DoxygenContext(config, require_full_config=True)
 
 
 def test_doxygen_context_accepts_a_null_item_to_group_value():
@@ -364,7 +364,7 @@ def test_doxygen_context_accepts_a_null_item_to_group_value():
     # leaves it to inference, so it has to stay valid.
     config = _valid_config()
     config["item-to-group"] = {"id_0": None}
-    DoxygenContext(config, require_enabled_groups=True)
+    DoxygenContext(config, require_full_config=True)
 
 
 def test_clifromsource_reports_an_invalid_config(tmp_path):
@@ -833,6 +833,60 @@ def test_clifromsource_does_not_swallow_a_plain_value_error(
             "specfromsource", "--config-file",
             _write_config(tmp_path, config), "a.xml"
         ])
+
+
+def test_propose_config_proposes_a_skeleton_for_undiscovered_groups(
+        tmp_path, capsys):
+    # Bootstrap from an almost empty config: WidgetAPI is discovered in
+    # the XML but not yet in config["groups"], so it gets a TODO
+    # placeholder. There is no way to guess the real component path from
+    # the name alone.
+    output = _propose(capsys, tmp_path, {"spec-directory": "spec"},
+                      _widget_api_xml_files())
+    proposed = yaml.safe_load(output)["spec-from-source"]
+    assert proposed["groups"]["WidgetAPI"] == {
+        "uid": "/TODO/widgetapi/if/group"
+    }
+    assert proposed["data"] == {}
+    assert proposed["spec-directory"] == "spec"
+    assert proposed["enabled-groups"] == []
+
+
+def test_propose_config_does_not_overwrite_an_existing_group_entry(
+        tmp_path, capsys):
+    config = {
+        "spec-directory": "spec",
+        "groups": {
+            "WidgetAPI": {
+                "uid": "/c/widget/if/group",
+                "remove-prefix": "widget-"
+            }
+        },
+    }
+    output = _propose(capsys, tmp_path, config, _widget_api_xml_files())
+    proposed = yaml.safe_load(output)["spec-from-source"]
+    assert proposed["groups"]["WidgetAPI"] == {
+        "uid": "/c/widget/if/group",
+        "remove-prefix": "widget-"
+    }
+
+
+def test_clifromsource_propose_config_bootstraps_without_a_config_file(
+        monkeypatch, tmp_path, capsys):
+    # No --config-file given and (since cwd is a fresh tmp_path) no
+    # specware.yml discoverable anywhere: --propose-config must still
+    # work, proposing a config from just the Doxygen XML.
+    monkeypatch.chdir(tmp_path)
+    xml_dir = _get_path("source-to-spec/null-item-to-group/xml")
+    clifromsource(
+        ["specfromsource", "--propose-config", "--doxygen-xml-dir", xml_dir])
+    proposed = yaml.safe_load(capsys.readouterr().out)["spec-from-source"]
+    assert proposed["groups"]["WidgetAPI"] == {
+        "uid": "/TODO/widgetapi/if/group"
+    }
+    assert proposed["data"] == {}
+    assert proposed["spec-directory"] == "spec"
+    assert proposed["enabled-groups"] == []
 
 
 def _shared_header_xml_files() -> list[str]:
