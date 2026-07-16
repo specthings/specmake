@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.17.0" xml:lang="en-US">
+  <compounddef id="group__WidgetAPI" kind="group">
+    <compoundname>WidgetAPI</compoundname>
+    <title>Widget API</title>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="group__WidgetAPI_1gaae68e636af61d2637173515e9230ee2d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void widget_set_size</definition>
+        <argsstring>(struct widget *w, size_t size)</argsstring>
+        <name>widget_set_size</name>
+        <param>
+          <type>struct widget *</type>
+          <declname>w</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>size</declname>
+        </param>
+        <briefdescription>
+<para>Sets the size of the widget referenced by <emphasis>w</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername direction="inout">w</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>is the pointer to the widget object. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername direction="in">size</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>is the new size of the widget. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="widget.h" line="16" column="6" declfile="widget.h" declline="16" declcolumn="6"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>This is the Widget API. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

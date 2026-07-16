@@ -72,17 +72,57 @@ def _generate_header(header: DoxygenFile) -> None:
                 enumerator.save()
 
 
+def _reachable_headers(group: DoxygenGroup) -> list[DoxygenFile]:
+    """
+    Find every header file reachable from a group's members.
+
+    A header is reachable directly, when the file itself is a group
+    member via ``@file \\ingroup``, or transitively, when a group
+    member such as a function is declared in that file via a bare
+    ``@ingroup``.
+    """
+    headers: dict[str, DoxygenFile] = {}
+    for group_member in group.members():
+        if group_member.is_header:
+            assert isinstance(group_member, DoxygenFile)
+            headers.setdefault(group_member.doxygen_id, group_member)
+            continue
+        for file in group_member.files:
+            if not file.is_header:
+                continue
+            if not file.group_ids:
+                # Reached only transitively, for example via a function
+                # that carries its own @ingroup with no @file @ingroup on the
+                # header itself: place it under the discovering group, the
+                # same way it would be placed had it been an explicit group
+                # member. If a later group also transitively reaches the
+                # same file through a different member, that first
+                # assignment wins (groups are processed in a fixed,
+                # doxygen_id-sorted order): the file is placed once, under
+                # whichever enabled group's member is encountered first.
+                file.group_ids.append(group.doxygen_id)
+            headers.setdefault(file.doxygen_id, file)
+    return sorted(headers.values())
+
+
 def _generate_groups(ctx: DoxygenContext, config: dict) -> None:
+    # A header carrying several @ingroup blocks, or one reached
+    # transitively by members of different groups, is reachable from
+    # more than one enabled group. Its content does not depend on which
+    # group discovered it, so generate it once for the whole run rather
+    # than rewriting the identical file under every owner.
+    generated_headers: set[str] = set()
     for group in sorted(ctx.items_by_kind["group"].values()):
         assert isinstance(group, DoxygenGroup)
         if group.name not in config["enabled-groups"]:
             continue
         print(group.doxygen_id)
         group.save()
-        for group_member in group.members():
-            if group_member.is_header:
-                assert isinstance(group_member, DoxygenFile)
-                _generate_header(group_member)
+        for header in _reachable_headers(group):
+            if header.doxygen_id in generated_headers:
+                continue
+            generated_headers.add(header.doxygen_id)
+            _generate_header(header)
 
 
 def clifromsource(argv: list[str] = sys.argv) -> None:

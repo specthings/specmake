@@ -1,0 +1,16 @@
+/**
+ * @defgroup ComponentAPIGroup Component API
+ * @brief This is the Component API.
+ */
+
+/**
+ * @defgroup ComponentAPISubGroup Component API Subgroup
+ * @brief This is the Component API subgroup.
+ * @ingroup ComponentAPIGroup
+ */
+
+/**
+ * @defgroup ComponentAPISubSubGroup Component API Subsubgroup
+ * @brief This is the Component API subsubgroup.
+ * @ingroup ComponentAPISubGroup
+ */

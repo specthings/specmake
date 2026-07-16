@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.17.0" xml:lang="en-US">
+  <compounddef id="shared_8h" kind="file" language="C++">
+    <compoundname>shared.h</compoundname>
+    <sectiondef kind="func">
+      <member refid="group__AlphaAPI_1gaalpha0000000000000000000000000000" kind="function"><name>alpha_reset</name></member>
+      <member refid="group__BetaAPI_1gabeta0000000000000000000000000000" kind="function"><name>beta_reset</name></member>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="shared.h"/>
+  </compounddef>
+</doxygen>

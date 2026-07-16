@@ -85,19 +85,48 @@ def _foo_group_xml_files() -> list[str]:
     ]
 
 
+def _nested_group_xml_files() -> list[str]:
+    # nested-groups: a three-level @defgroup/@ingroup chain,
+    # ComponentAPIGroup to ComponentAPISubGroup to
+    # ComponentAPISubSubGroup, nested via @ingroup on the @defgroup
+    # itself (not on any member), with gadget.h a direct member of the
+    # innermost group via @file @ingroup.
+    return [
+        _get_path(f"source-to-spec/nested-groups/xml/{name}") for name in (
+            "default_8dox.xml",
+            "gadget_8h.xml",
+            "group__ComponentAPIGroup.xml",
+            "group__ComponentAPISubGroup.xml",
+            "group__ComponentAPISubSubGroup.xml",
+        )
+    ]
+
+
+def _write_config(tmp_path, config) -> str:
+    config_file = tmp_path / "specware.yml"
+    with open(config_file, "w", encoding="utf-8") as dst:
+        yaml.safe_dump({"spec-from-source": config}, dst)
+    return str(config_file)
+
+
 def _propose(capsys, tmp_path, config, xml_files) -> str:
     """
     Run ``--propose-config`` through the command line interface and
     return what it printed.
     """
-    config_file = tmp_path / "specware.yml"
-    with open(config_file, "w", encoding="utf-8") as dst:
-        yaml.safe_dump({"spec-from-source": config}, dst)
     clifromsource([
         "specfromsource", "--config-file",
-        str(config_file), "--propose-config", *xml_files
+        _write_config(tmp_path, config), "--propose-config", *xml_files
     ])
     return capsys.readouterr().out
+
+
+def _generate(tmp_path, config, xml_files) -> None:
+    """ Run a generation pass through the command line interface. """
+    clifromsource([
+        "specfromsource", "--config-file",
+        _write_config(tmp_path, config), *xml_files
+    ])
 
 
 def _proposed_item_to_group(output: str) -> dict:
@@ -142,3 +171,110 @@ def test_propose_config_emits_a_null_group_as_yaml_null(tmp_path, capsys):
                              }})
     output = _propose(capsys, tmp_path, config, _foo_group_xml_files())
     assert _proposed_item_to_group(output)[_BAD_F] is None
+
+
+def test_nested_group_gets_interface_ingroup_link(tmp_path):
+    spec_dir = tmp_path / "spec"
+    config = {
+        "data": {},
+        "groups": {
+            "ComponentAPIGroup": {
+                "uid": "/if/group"
+            },
+            "ComponentAPISubGroup": {
+                "uid": "/sub/if/group"
+            },
+            "ComponentAPISubSubGroup": {
+                "uid": "/sub/sub/if/group"
+            },
+        },
+        "enabled-groups": [
+            "ComponentAPIGroup", "ComponentAPISubGroup",
+            "ComponentAPISubSubGroup"
+        ],
+        "spec-directory":
+        str(spec_dir),
+    }
+    _generate(tmp_path, config, _nested_group_xml_files())
+
+    with open(spec_dir / "sub" / "if" / "group.yml", encoding="utf-8") as src:
+        sub_group = yaml.safe_load(src)
+    assert sub_group["links"] == [{
+        "role": "interface-ingroup",
+        "uid": "../../if/group"
+    }]
+
+    with open(spec_dir / "sub" / "sub" / "if" / "group.yml",
+              encoding="utf-8") as src:
+        sub_sub_group = yaml.safe_load(src)
+    assert sub_sub_group["links"] == [{
+        "role": "interface-ingroup",
+        "uid": "../../if/group"
+    }]
+
+    # The innermost group's own content is generated exactly once, under
+    # its own directory, not duplicated under either ancestor's, even
+    # though it is also a "member" of its parent, which is in turn a
+    # "member" of the root group.
+    assert (spec_dir / "sub" / "sub" / "if" / "header-gadget.yml").is_file()
+    assert (spec_dir / "sub" / "sub" / "if" / "gadget-init.yml").is_file()
+    assert (spec_dir / "sub" / "sub" / "if" / "gadget-configure.yml").is_file()
+    assert not (spec_dir / "sub" / "if" / "header-gadget.yml").exists()
+    assert not (spec_dir / "if" / "header-gadget.yml").exists()
+
+
+def test_generate_groups_reaches_files_via_member_ingroup_alone(tmp_path):
+    # ingroup-only-member/widget.h has no @file @ingroup block at all: only
+    # widget_set_size's own @ingroup associates it with WidgetAPI. Before
+    # transitive discovery, this produced zero generated files, no error.
+    spec_dir = tmp_path / "spec"
+    config = {
+        "data": {},
+        "groups": {
+            "WidgetAPI": {
+                "uid": "/if/group"
+            }
+        },
+        "enabled-groups": ["WidgetAPI"],
+        "spec-directory": str(spec_dir),
+    }
+    _generate(tmp_path, config, [
+        _get_path(
+            "source-to-spec/ingroup-only-member/xml/group__WidgetAPI.xml"),
+        _get_path("source-to-spec/ingroup-only-member/xml/widget_8h.xml"),
+    ])
+    assert (spec_dir / "if" / "header-widget.yml").is_file()
+    assert (spec_dir / "if" / "widget-set-size.yml").is_file()
+
+
+def _shared_header_xml_files() -> list[str]:
+    # shared-header/shared.h carries two @file @ingroup blocks, so it is
+    # a direct member of both AlphaAPI and BetaAPI.
+    return [
+        _get_path(f"source-to-spec/shared-header/xml/{name}")
+        for name in ("group__AlphaAPI.xml", "group__BetaAPI.xml",
+                     "shared_8h.xml")
+    ]
+
+
+def test_generate_groups_generates_a_shared_header_once(tmp_path, capsys):
+    # A header reachable from two enabled groups used to be saved once
+    # per owning group, rewriting the identical file and listing it
+    # twice.
+    spec_dir = tmp_path / "spec"
+    config = {
+        "data": {},
+        "groups": {
+            "AlphaAPI": {
+                "uid": "/if/alpha"
+            },
+            "BetaAPI": {
+                "uid": "/if/beta"
+            }
+        },
+        "enabled-groups": ["AlphaAPI", "BetaAPI"],
+        "spec-directory": str(spec_dir),
+    }
+    _generate(tmp_path, config, _shared_header_xml_files())
+    output = capsys.readouterr().out
+    assert output.count("/if/header-shared") == 1
