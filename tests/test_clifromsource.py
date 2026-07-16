@@ -109,6 +109,7 @@ def _nested_group_xml_files() -> list[str]:
 
 
 def _write_config(tmp_path, config) -> str:
+    tmp_path.mkdir(parents=True, exist_ok=True)
     config_file = tmp_path / "specware.yml"
     with open(config_file, "w", encoding="utf-8") as dst:
         yaml.safe_dump({"spec-from-source": config}, dst)
@@ -127,11 +128,17 @@ def _propose(capsys, tmp_path, config, xml_files) -> str:
     return capsys.readouterr().out
 
 
-def _generate(tmp_path, config, xml_files, prune: bool = False) -> None:
+def _generate(tmp_path,
+              config,
+              xml_files,
+              prune: bool = False,
+              dry_run: bool = False) -> None:
     """ Run a generation pass through the command line interface. """
     argv = ["specfromsource", "--config-file", _write_config(tmp_path, config)]
     if prune:
         argv.append("--prune")
+    if dry_run:
+        argv.append("--dry-run")
     clifromsource(argv + list(xml_files))
 
 
@@ -1094,6 +1101,134 @@ def test_generate_summary_omits_the_typedef_clause_when_none_skipped(
 
     assert "generated" in output
     assert "typedef(s) skipped" not in output
+
+
+def test_clifromsource_dry_run_rejects_propose_config(tmp_path):
+    config = {
+        "data": {},
+        "groups": {},
+        "spec-directory": str(tmp_path / "spec"),
+        "enabled-groups": [],
+    }
+    with pytest.raises(SystemExit) as excinfo:
+        clifromsource([
+            "specfromsource", "--propose-config", "--dry-run", "--config-file",
+            _write_config(tmp_path, config), "a.xml"
+        ])
+    assert "--dry-run is not compatible with --propose-config" in str(
+        excinfo.value)
+
+
+def test_clifromsource_dry_run_creates_no_spec_directory(tmp_path):
+    spec_dir = tmp_path / "spec"
+    config = {
+        "data": {},
+        "groups": {
+            "WidgetAPI": {
+                "uid": "/if/group"
+            }
+        },
+        "spec-directory": str(spec_dir),
+        "enabled-groups": ["WidgetAPI"],
+    }
+    clifromsource([
+        "specfromsource", "--dry-run", "--config-file",
+        _write_config(tmp_path, config), "--doxygen-xml-dir",
+        _get_path("source-to-spec/null-item-to-group/xml")
+    ])
+    assert not spec_dir.exists()
+
+
+def test_dry_run_writes_nothing_but_reports_what_it_would_generate(
+        capsys, tmp_path):
+    real_dir = tmp_path / "real"
+    _generate(tmp_path / "a", _foo_group_config(real_dir),
+              _foo_group_xml_files())
+    capsys.readouterr()
+    expected = len(list(real_dir.rglob("*.yml")))
+
+    dry_dir = tmp_path / "dry"
+    _generate(tmp_path / "b",
+              _foo_group_config(dry_dir),
+              _foo_group_xml_files(),
+              dry_run=True)
+    output = capsys.readouterr().out
+
+    # The same items a real run produces are reported, but nothing was
+    # written to spec-directory.
+    assert not dry_dir.exists()
+    assert f"would generate {expected} item(s) across 1 group(s)" in output
+    assert "1 typedef(s) skipped as compound aliases" in output
+
+
+def test_prune_dry_run_deletes_nothing_and_leaves_the_manifest_untouched(
+        capsys, tmp_path):
+    spec_dir = tmp_path / "spec"
+    config = {
+        "data": {},
+        "groups": {
+            "QueueAPI": {
+                "uid": "/if/group"
+            }
+        },
+        "enabled-groups": ["QueueAPI"],
+        "spec-directory": str(spec_dir),
+    }
+
+    def queue_xml(revision: str) -> list[str]:
+        return [
+            _get_path(f"source-to-spec/prune-removed-declaration/{revision}"
+                      f"/xml/{name}")
+            for name in ("group__QueueAPI.xml", "queue_8h.xml")
+        ]
+
+    # First run: queue_create and queue_destroy both exist.
+    _generate(tmp_path, config, queue_xml("before"), prune=True)
+    manifest_after_first_run = _read_manifest(spec_dir)
+
+    # Second run: queue_destroy has been removed from the header, but
+    # this is a dry run. Nothing on disk may change.
+    capsys.readouterr()
+    _generate(tmp_path, config, queue_xml("after"), prune=True, dry_run=True)
+    output = capsys.readouterr().out
+
+    assert (spec_dir / "if" / "queue-create.yml").is_file()
+    assert (spec_dir / "if" / "queue-destroy.yml").is_file()
+    assert "would prune 1 stale item(s)" in output
+    assert _read_manifest(spec_dir) == manifest_after_first_run
+
+
+def test_clifromsource_prune_end_to_end(tmp_path):
+    spec_dir = tmp_path / "spec"
+    config = {
+        "data": {},
+        "groups": {
+            "QueueAPI": {
+                "uid": "/if/group"
+            }
+        },
+        "spec-directory": str(spec_dir),
+        "enabled-groups": ["QueueAPI"],
+    }
+    config_file = _write_config(tmp_path, config)
+
+    def run(revision: str) -> None:
+        clifromsource([
+            "specfromsource", "--prune", "--config-file", config_file,
+            "--doxygen-xml-dir",
+            _get_path(
+                f"source-to-spec/prune-removed-declaration/{revision}/xml")
+        ])
+
+    # First run: queue_create and queue_destroy both exist.
+    run("before")
+    assert (spec_dir / "if" / "queue-create.yml").is_file()
+    assert (spec_dir / "if" / "queue-destroy.yml").is_file()
+
+    # Second run: queue_destroy has been removed from the header.
+    run("after")
+    assert (spec_dir / "if" / "queue-create.yml").is_file()
+    assert not (spec_dir / "if" / "queue-destroy.yml").exists()
 
 
 def _shared_header_xml_files() -> list[str]:

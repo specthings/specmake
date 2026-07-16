@@ -86,16 +86,19 @@ def _apply_config(ctx: DoxygenContext, config: dict, config_file: str) -> None:
     print(f"applied proposed configuration to {config_file}")
 
 
-def _generate_header(header: DoxygenFile) -> tuple[list[str], int]:
+def _generate_header(header: DoxygenFile,
+                     dry_run: bool = False) -> tuple[list[str], int]:
     """
     Generate a header and its members.
 
-    Returns every saved UID, and how many typedefs were skipped
+    With ``dry_run``, only reports what would be generated. Returns
+    every (would-be) saved UID, and how many typedefs were skipped
     because they merely alias a compound (struct/union/enum) item
     saved under the same UID.
     """
     print("  ", header.uid)
-    header.save()
+    if not dry_run:
+        header.save()
     uids = [header.uid]
     typedefs_skipped = 0
     for header_member in header.members():
@@ -106,12 +109,14 @@ def _generate_header(header: DoxygenFile) -> tuple[list[str], int]:
             typedefs_skipped += 1
             continue
         print("    ", header_member.uid)
-        header_member.save()
+        if not dry_run:
+            header_member.save()
         uids.append(header_member.uid)
         if isinstance(header_member, DoxygenEnum):
             for enumerator in header_member.members():
                 print("      ", enumerator.uid)
-                enumerator.save()
+                if not dry_run:
+                    enumerator.save()
                 uids.append(enumerator.uid)
     return uids, typedefs_skipped
 
@@ -164,15 +169,17 @@ def _record_owner(generated: dict[str, list[str]], uid: str,
 
 
 def _generate_groups(ctx: DoxygenContext,
-                     config: dict) -> dict[str, list[str]]:
+                     config: dict,
+                     dry_run: bool = False) -> dict[str, list[str]]:
     """
     Generate every enabled group's contents.
 
-    Returns every generated item's UID mapped to the names of the
-    enabled groups that own it, for ``--prune`` to compare against a
-    previous run's manifest. A header reachable from several enabled
-    groups is owned by all of them, so ownership is a list rather than
-    a single name.
+    With ``dry_run``, only reports what would be generated without
+    writing anything. Returns every (would-be) generated item's UID
+    mapped to the names of the enabled groups that own it, for
+    ``--prune`` to compare against a previous run's manifest. A header
+    reachable from several enabled groups is owned by all of them, so
+    ownership is a list rather than a single name.
     """
     generated: dict[str, list[str]] = {}
     # A header carrying several @ingroup blocks, or one reached
@@ -190,7 +197,8 @@ def _generate_groups(ctx: DoxygenContext,
         if group.name not in config["enabled-groups"]:
             continue
         print(group.doxygen_id)
-        group.save()
+        if not dry_run:
+            group.save()
         _record_owner(generated, group.uid, group.name)
         groups_processed += 1
         for header in _reachable_headers(group):
@@ -199,12 +207,14 @@ def _generate_groups(ctx: DoxygenContext,
                 # Counted here rather than per owner, so a header shared
                 # by several groups contributes its skipped typedefs to
                 # the run's total once.
-                uids, header_typedefs_skipped = _generate_header(header)
+                uids, header_typedefs_skipped = _generate_header(
+                    header, dry_run=dry_run)
                 typedefs_skipped += header_typedefs_skipped
                 header_uids[header.doxygen_id] = uids
             for uid in uids:
                 _record_owner(generated, uid, group.name)
-    summary = (f"generated {len(generated)} item(s) across "
+    verb = "would generate" if dry_run else "generated"
+    summary = (f"{verb} {len(generated)} item(s) across "
                f"{groups_processed} group(s)")
     if typedefs_skipped:
         summary += (f", {typedefs_skipped} typedef(s) skipped as "
@@ -248,8 +258,10 @@ def _save_manifest(path: str, manifest: dict[str, list[str]]) -> None:
         dst.write("\n")
 
 
-def _prune(ctx: DoxygenContext, enabled_groups: list[str],
-           generated: dict[str, list[str]]) -> None:
+def _prune(ctx: DoxygenContext,
+           enabled_groups: list[str],
+           generated: dict[str, list[str]],
+           dry_run: bool = False) -> None:
     """
     Remove previously-generated items no longer produced by this run.
 
@@ -261,6 +273,8 @@ def _prune(ctx: DoxygenContext, enabled_groups: list[str],
     owners are enabled is left alone, so a group left out of
     ``enabled-groups`` this time around (by oversight or otherwise)
     never has its previously-generated items pruned out from under it.
+    With ``dry_run``, only reports what would be removed: neither the
+    items nor the manifest itself are touched.
     """
     manifest_path = str(ctx.spec_directory / _MANIFEST_FILENAME)
     previous = _load_manifest(manifest_path)
@@ -273,6 +287,7 @@ def _prune(ctx: DoxygenContext, enabled_groups: list[str],
     }
     spec_directory = ctx.spec_directory.resolve()
     pruned_count = 0
+    verb = "would prune" if dry_run else "pruned"
     for uid in sorted(stale):
         item_path = (ctx.spec_directory / f"{uid[1:]}.yml").resolve()
         if not item_path.is_relative_to(spec_directory):
@@ -283,10 +298,13 @@ def _prune(ctx: DoxygenContext, enabled_groups: list[str],
             print("  skipped pruning", uid, "(escapes spec-directory)")
             continue
         if item_path.is_file():
-            print("  pruned", uid)
-            item_path.unlink()
+            print(f"  {verb}", uid)
+            if not dry_run:
+                item_path.unlink()
             pruned_count += 1
-    print(f"pruned {pruned_count} stale item(s)")
+    print(f"{verb} {pruned_count} stale item(s)")
+    if dry_run:
+        return
     # Entries this run had nothing to say about, because none of their
     # owners took part, carry over untouched. Everything else is
     # replaced by what this run actually produced.
@@ -328,6 +346,8 @@ def _resolve_xml_files(doxygen_xml_files: list[str],
 def _run(args) -> None:
     if args.apply and not args.propose_config:
         raise ConfigError("--apply requires --propose-config")
+    if args.dry_run and args.propose_config:
+        raise ConfigError("--dry-run is not compatible with --propose-config")
     try:
         config, working_directory = load_specware_config(args.config_file)
     except FileNotFoundError as err:
@@ -350,7 +370,8 @@ def _run(args) -> None:
                                        args.doxygen_xml_dir)
         ctx = DoxygenContext(config,
                              require_full_config=not args.propose_config)
-        os.makedirs(ctx.spec_directory, exist_ok=True)
+        if not args.dry_run:
+            os.makedirs(ctx.spec_directory, exist_ok=True)
         ctx.doxygen_xml_to_spec(xml_files)
         if args.propose_config:
             if args.apply:
@@ -358,9 +379,12 @@ def _run(args) -> None:
             else:
                 _propose_config(ctx, config)
         else:
-            generated = _generate_groups(ctx, config)
+            generated = _generate_groups(ctx, config, dry_run=args.dry_run)
             if args.prune:
-                _prune(ctx, config["enabled-groups"], generated)
+                _prune(ctx,
+                       config["enabled-groups"],
+                       generated,
+                       dry_run=args.dry_run)
 
 
 def clifromsource(argv: list[str] = sys.argv) -> None:
@@ -387,6 +411,12 @@ def clifromsource(argv: list[str] = sys.argv) -> None:
             action="store_true",
             help="remove previously generated items no longer produced by "
             "this run, tracked via a manifest file in spec-directory")
+        parser.add_argument(
+            "--dry-run",
+            action="store_true",
+            help="report what would be generated (and pruned, with "
+            "--prune) without writing or deleting anything; not "
+            "compatible with --propose-config")
         parser.add_argument(
             "--doxygen-xml-dir",
             type=str,
