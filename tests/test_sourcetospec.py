@@ -1363,6 +1363,64 @@ def test_append_element_text_ignores_wholly_empty_element():
     assert result.data["brief"] == "Existing text"
 
 
+def _types_api_xml_files() -> list[str]:
+    return [
+        _get_path(f"source-to-spec/typedef-generation/xml/{name}")
+        for name in ("group__TypesAPI.xml", "types_8h.xml")
+    ]
+
+
+def test_typedef_export_shape():
+    config = {
+        "data": {},
+        "groups": {
+            "TypesAPI": {
+                "uid": "/if/group"
+            }
+        },
+        "spec-directory": "spec",
+    }
+    ctx = DoxygenContext(config)
+    ctx.doxygen_xml_to_spec(_types_api_xml_files())
+    widget_size_t = ctx.items_by_name["typedef"]["widget_size_t"][0]
+    data = widget_size_t.export()
+    assert data["interface-type"] == "typedef"
+    assert data["params"] == []
+    assert data["return"] is None
+    assert data["definition"] == {
+        "default": "_ImplementationDefined",
+        "variants": []
+    }
+    # Placed like any other item, with relative links via its group, not
+    # a flat root or absolute UIDs.
+    assert widget_size_t.uid == "/if/widget-size-t"
+    assert data["links"] == [{
+        "role": "interface-placement",
+        "uid": "header-types"
+    }, {
+        "role": "interface-ingroup",
+        "uid": "group"
+    }]
+
+
+def test_typedef_aliases_compound():
+    config = {
+        "data": {},
+        "groups": {
+            "TypesAPI": {
+                "uid": "/if/group"
+            }
+        },
+        "spec-directory": "spec",
+    }
+    ctx = DoxygenContext(config)
+    ctx.doxygen_xml_to_spec(_types_api_xml_files())
+    typedefs = ctx.items_by_name["typedef"]
+    assert typedefs["widget_size_t"][0].aliases_compound is False
+    assert typedefs["widget_handle"][0].aliases_compound is False
+    assert typedefs["tagged_enum"][0].aliases_compound is True
+
+
 def _get_path(path: str) -> str:
     test_dir = Path(__file__).parent
     return str(test_dir / f"{path}")

@@ -433,6 +433,76 @@ def test_propose_config_output_is_usable_verbatim(tmp_path, capsys):
     assert (spec_dir / "if" / "widget-set-size.yml").is_file()
 
 
+def test_generate_groups_generates_typedefs(tmp_path):
+    spec_dir = tmp_path / "spec"
+    config = {
+        "data": {},
+        "groups": {
+            "TypesAPI": {
+                "uid": "/if/group"
+            }
+        },
+        "enabled-groups": ["TypesAPI"],
+        "spec-directory": str(spec_dir),
+    }
+    _generate(tmp_path, config, [
+        _get_path("source-to-spec/typedef-generation/xml/group__TypesAPI.xml"),
+        _get_path("source-to-spec/typedef-generation/xml/types_8h.xml"),
+    ])
+
+    # Genuine standalone typedefs are generated.
+    assert (spec_dir / "if" / "widget-size-t.yml").is_file()
+    assert (spec_dir / "if" / "widget-handle.yml").is_file()
+
+    # tagged_enum has both an enum item and a same-named typedef alias
+    # (`typedef enum tagged_enum { ... } tagged_enum;`); the typedef alias
+    # must not overwrite the enum's own generated content.
+    with open(spec_dir / "if" / "tagged-enum.yml", encoding="utf-8") as src:
+        tagged_enum = yaml.safe_load(src)
+    assert tagged_enum["interface-type"] == "enum"
+
+
+def test_generate_groups_typedef_alias_check_is_scoped_by_group(tmp_path):
+    # networking.h's "status" struct and storage.h's "status" typedef are
+    # unrelated declarations that only coincidentally share a name, each in
+    # its own group and directory: the genuine storage.h typedef must
+    # still be generated, not mistaken for an alias of the unrelated
+    # struct.
+    spec_dir = tmp_path / "spec"
+    config = {
+        "data": {},
+        "groups": {
+            "NetworkingAPI": {
+                "uid": "/net/if/group"
+            },
+            "StorageAPI": {
+                "uid": "/storage/if/group"
+            },
+        },
+        "enabled-groups": ["NetworkingAPI", "StorageAPI"],
+        "spec-directory": str(spec_dir),
+    }
+    _generate(tmp_path, config, [
+        _get_path(f"source-to-spec/typedef-name-collision/xml/{name}")
+        for name in (
+            "group__NetworkingAPI.xml",
+            "group__StorageAPI.xml",
+            "networking_8h.xml",
+            "storage_8h.xml",
+            "structstatus.xml",
+        )
+    ])
+
+    with open(spec_dir / "storage" / "if" / "status.yml",
+              encoding="utf-8") as src:
+        storage_status = yaml.safe_load(src)
+    assert storage_status["interface-type"] == "typedef"
+
+    with open(spec_dir / "net" / "if" / "status.yml", encoding="utf-8") as src:
+        networking_status = yaml.safe_load(src)
+    assert networking_status["interface-type"] == "struct"
+
+
 def _shared_header_xml_files() -> list[str]:
     # shared-header/shared.h carries two @file @ingroup blocks, so it is
     # a direct member of both AlphaAPI and BetaAPI.

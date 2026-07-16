@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.17.0" xml:lang="en-US">
+  <compounddef id="group__StorageAPI" kind="group">
+    <compoundname>StorageAPI</compoundname>
+    <title>Storage API</title>
+    <sectiondef kind="typedef">
+      <memberdef kind="typedef" id="group__StorageAPI_1gaad64636f401daa123fd5687b599be5a4" prot="public" static="no">
+        <type>int</type>
+        <definition>typedef int status</definition>
+        <argsstring></argsstring>
+        <name>status</name>
+        <briefdescription>
+<para>A genuine standalone typedef that happens to share a name with the unrelated networking compound in <ref refid="networking_8h" kindref="compound">networking.h</ref>. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="storage.h" line="14" column="13" bodyfile="storage.h" bodystart="14" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>This is the Storage API. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>
