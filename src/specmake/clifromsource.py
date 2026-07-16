@@ -34,8 +34,8 @@ import yaml
 from specitems import get_arguments
 from specware import load_specware_config
 
-from .sourcetospec import (DoxygenContext, DoxygenEnum, DoxygenGroup,
-                           DoxygenFile, DoxygenTypedef)
+from .sourcetospec import (ConfigError, DoxygenContext, DoxygenEnum,
+                           DoxygenGroup, DoxygenFile, DoxygenTypedef)
 
 
 def _propose_config(ctx: DoxygenContext, config: dict) -> None:
@@ -260,19 +260,45 @@ def _resolve_xml_files(doxygen_xml_files: list[str],
     """
     if doxygen_xml_dir is not None:
         if doxygen_xml_files:
-            raise ValueError(
+            raise ConfigError(
                 "DOXYGEN_XML_FILES and --doxygen-xml-dir are mutually "
                 "exclusive")
         resolved = sorted(glob.glob(os.path.join(doxygen_xml_dir, "*.xml")))
         if not resolved:
-            raise ValueError("no *.xml files found in --doxygen-xml-dir "
-                             f"{doxygen_xml_dir!r}")
+            raise ConfigError("no *.xml files found in --doxygen-xml-dir "
+                              f"{doxygen_xml_dir!r}")
         return resolved
     if not doxygen_xml_files:
-        raise ValueError(
+        raise ConfigError(
             "no Doxygen XML files given: pass DOXYGEN_XML_FILES or "
             "--doxygen-xml-dir")
     return doxygen_xml_files
+
+
+def _run(args) -> None:
+    try:
+        config, working_directory = load_specware_config(args.config_file)
+    except FileNotFoundError as err:
+        raise ConfigError(str(err)) from err
+    try:
+        config = config["spec-from-source"]
+    except KeyError as err:
+        raise ConfigError(
+            f"{args.config_file or 'specware.yml'} is missing the "
+            "top-level 'spec-from-source' attribute") from err
+    with contextlib.chdir(working_directory):
+        xml_files = _resolve_xml_files(args.doxygen_xml_files,
+                                       args.doxygen_xml_dir)
+        ctx = DoxygenContext(config,
+                             require_enabled_groups=not args.propose_config)
+        os.makedirs(ctx.spec_directory, exist_ok=True)
+        ctx.doxygen_xml_to_spec(xml_files)
+        if args.propose_config:
+            _propose_config(ctx, config)
+        else:
+            generated = _generate_groups(ctx, config)
+            if args.prune:
+                _prune(ctx, config["enabled-groups"], generated)
 
 
 def clifromsource(argv: list[str] = sys.argv) -> None:
@@ -308,18 +334,15 @@ def clifromsource(argv: list[str] = sys.argv) -> None:
     args = get_arguments(argv[1:],
                          description=clifromsource.__doc__,
                          add_arguments=(_add_arguments, ))
-    config, working_directory = load_specware_config(args.config_file)
-    config = config["spec-from-source"]
-    with contextlib.chdir(working_directory):
-        xml_files = _resolve_xml_files(args.doxygen_xml_files,
-                                       args.doxygen_xml_dir)
-        ctx = DoxygenContext(config,
-                             require_enabled_groups=not args.propose_config)
-        os.makedirs(ctx.spec_directory, exist_ok=True)
-        ctx.doxygen_xml_to_spec(xml_files)
-        if args.propose_config:
-            _propose_config(ctx, config)
-        else:
-            generated = _generate_groups(ctx, config)
-            if args.prune:
-                _prune(ctx, config["enabled-groups"], generated)
+    try:
+        _run(args)
+    except ConfigError as err:
+        # Every known, anticipated failure mode (a bad --config-file path,
+        # a malformed config, no XML source given, an item-to-group entry
+        # naming an unknown group, ...) is raised as a ConfigError with a
+        # message that already names the offending attribute/item. Surface
+        # that message directly instead of a traceback. Catching only
+        # ConfigError, not ValueError generally, means a ValueError raised
+        # by an actual internal bug elsewhere still surfaces as a
+        # traceback instead of being mistaken for a config problem.
+        sys.exit(f"specfromsource: error: {err}")

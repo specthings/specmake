@@ -35,6 +35,20 @@ from specitems import save_data
 
 _Data = dict[str, Any]
 
+
+class ConfigError(ValueError):
+    """
+    Raised for a ``spec-from-source:`` configuration problem.
+
+    Raised while processing Doxygen XML, for example an item-to-group
+    entry naming an unknown group, as opposed to an internal invariant
+    violation. The CLI entry point catches only this, not every
+    ``ValueError``, so a bug elsewhere that happens to raise a plain
+    ``ValueError`` still surfaces as a traceback instead of being
+    mistaken for a user-facing config error.
+    """
+
+
 _INVALID_NAME_CHARS = re.compile(r"[^a-zA-Z0-9]+")
 
 _FUNCTION_POINTER = re.compile(r"([^(]+)\(\*\)\((.*)")
@@ -729,7 +743,7 @@ def _validate_config(config: dict, require_enabled_groups: bool) -> None:
     """
     Validate a ``spec-from-source:`` configuration upfront.
 
-    Raises a single ``ValueError`` naming every problem found, instead
+    Raises a single ``ConfigError`` naming every problem found, instead
     of letting each one surface separately as a raw crash deep inside a
     later call.
 
@@ -785,7 +799,7 @@ def _validate_config(config: dict, require_enabled_groups: bool) -> None:
 
     if errors:
         problems = "\n".join(f"  - {error}" for error in errors)
-        raise ValueError(
+        raise ConfigError(
             f"invalid 'spec-from-source' configuration:\n{problems}")
 
 
@@ -900,7 +914,26 @@ class DoxygenContext:
                 self.items[member_id].file_ids.add(file.doxygen_id)
 
     def _add_to_group(self, item: DoxygenItem, group_name: str) -> None:
-        group = self.items_by_name["group"][group_name][0]
+        # A caller reaching this with a group_name derived from an
+        # already-discovered group (rather than user-supplied config) can
+        # never miss the lookup below, since that name came from a group
+        # already present in items_by_name, so a lookup miss here always
+        # traces back to user-supplied config (an item-to-group entry or
+        # default-group-name), never an internal invariant failure.
+        #
+        # KeyError is the only miss worth catching: _validate_config()
+        # has already rejected an item-to-group value or a
+        # default-group-name that is not a string, so group_name cannot
+        # be unhashable here and the lookup cannot raise TypeError
+        # instead.
+        try:
+            group = self.items_by_name["group"][group_name][0]
+        except KeyError as err:
+            raise ConfigError(
+                f"cannot associate item {item.doxygen_id!r} with group "
+                f"{group_name!r}: no such group was discovered in the "
+                "Doxygen XML (check item-to-group and default-group-name "
+                "in the configuration)") from err
         assert isinstance(group, DoxygenGroup)
         self.item_to_group[item.doxygen_id] = group_name
         group.member_ids.append(item.doxygen_id)

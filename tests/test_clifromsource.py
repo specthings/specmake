@@ -368,8 +368,9 @@ def test_doxygen_context_accepts_a_null_item_to_group_value():
 
 
 def test_clifromsource_reports_an_invalid_config(tmp_path):
-    with pytest.raises(ValueError, match="invalid 'spec-from-source'"):
+    with pytest.raises(SystemExit) as excinfo:
         _generate(tmp_path, {"groups": {}}, _foo_group_xml_files())
+    assert "invalid 'spec-from-source'" in str(excinfo.value)
 
 
 def test_generate_writes_the_enabled_group_contents(tmp_path):
@@ -713,31 +714,124 @@ def test_doxygen_xml_dir_generates_the_same_items_as_listing_the_files(
 
 
 def test_doxygen_xml_dir_and_listed_files_are_mutually_exclusive(tmp_path):
-    with pytest.raises(ValueError, match="mutually exclusive"):
+    with pytest.raises(SystemExit) as excinfo:
         clifromsource([
             "specfromsource", "--config-file",
             _write_config(tmp_path, _foo_group_config(tmp_path / "spec")),
             "--doxygen-xml-dir", "some/dir", "a.xml"
         ])
+    assert "mutually exclusive" in str(excinfo.value)
 
 
 def test_no_doxygen_xml_files_given_is_rejected(tmp_path):
-    with pytest.raises(ValueError, match="no Doxygen XML files given"):
+    with pytest.raises(SystemExit) as excinfo:
         clifromsource([
             "specfromsource", "--config-file",
             _write_config(tmp_path, _foo_group_config(tmp_path / "spec"))
         ])
+    assert "no Doxygen XML files given" in str(excinfo.value)
 
 
 def test_an_empty_doxygen_xml_dir_is_rejected(tmp_path):
     empty = tmp_path / "empty"
     empty.mkdir()
-    with pytest.raises(ValueError, match=r"no \*\.xml files found"):
+    with pytest.raises(SystemExit) as excinfo:
         clifromsource([
             "specfromsource", "--config-file",
             _write_config(tmp_path, _foo_group_config(tmp_path / "spec")),
             "--doxygen-xml-dir",
             str(empty)
+        ])
+    assert "no *.xml files found" in str(excinfo.value)
+
+
+def test_clifromsource_reports_invalid_config_without_a_traceback(tmp_path):
+    # No "groups" attribute: building the context catches this, and the
+    # wrapper turns it into a clean one-line error instead of an
+    # unhandled traceback.
+    config = {
+        "data": {},
+        "spec-directory": str(tmp_path),
+        "enabled-groups": []
+    }
+    with pytest.raises(SystemExit) as excinfo:
+        clifromsource([
+            "specfromsource", "--config-file",
+            _write_config(tmp_path, config), "--doxygen-xml-dir",
+            _get_path("source-to-spec/null-item-to-group/xml")
+        ])
+    assert "specfromsource: error:" in str(excinfo.value)
+    assert "'groups'" in str(excinfo.value)
+
+
+def test_clifromsource_reports_missing_config_file_without_a_traceback(
+        tmp_path):
+    missing_path = tmp_path / "does-not-exist.yml"
+    with pytest.raises(SystemExit) as excinfo:
+        clifromsource(
+            ["specfromsource", "--config-file",
+             str(missing_path), "a.xml"])
+    assert "specfromsource: error:" in str(excinfo.value)
+
+
+def test_clifromsource_reports_missing_spec_from_source_attribute(tmp_path):
+    config_path = tmp_path / "specware.yml"
+    with open(config_path, "w", encoding="utf-8") as dst:
+        yaml.safe_dump({"some-other-tool": {}}, dst)
+    with pytest.raises(SystemExit) as excinfo:
+        clifromsource(
+            ["specfromsource", "--config-file",
+             str(config_path), "a.xml"])
+    assert "specfromsource: error:" in str(excinfo.value)
+    assert "spec-from-source" in str(excinfo.value)
+
+
+def test_clifromsource_reports_unknown_item_to_group_without_a_traceback(
+        tmp_path):
+    config = {
+        "data": {},
+        "groups": {
+            "FooGroup": {
+                "uid": "/if/group"
+            }
+        },
+        "spec-directory": str(tmp_path / "spec"),
+        "enabled-groups": ["FooGroup"],
+        "item-to-group": {
+            _BAD_F: "NoSuchGroup"
+        },
+    }
+    with pytest.raises(SystemExit) as excinfo:
+        clifromsource([
+            "specfromsource", "--config-file",
+            _write_config(tmp_path, config), "--doxygen-xml-dir",
+            _get_path("source-to-spec/xml")
+        ])
+    assert "specfromsource: error:" in str(excinfo.value)
+    assert "NoSuchGroup" in str(excinfo.value)
+
+
+def test_clifromsource_does_not_swallow_a_plain_value_error(
+        tmp_path, monkeypatch):
+    # A bug that happens to raise a plain ValueError (not ConfigError)
+    # anywhere in the call chain must still surface as a traceback, not
+    # be mistaken for one of the known, anticipated config problems.
+    config = {
+        "data": {},
+        "groups": {},
+        "spec-directory": str(tmp_path / "spec"),
+        "enabled-groups": [],
+    }
+
+    def _raise_plain_value_error(*_args, **_kwargs):
+        raise ValueError("an internal bug, not a config problem")
+
+    monkeypatch.setattr("specmake.clifromsource.DoxygenContext",
+                        _raise_plain_value_error)
+    with pytest.raises(ValueError, match="an internal bug"):
+        clifromsource([
+            "specfromsource", "--config-file",
+            _write_config(tmp_path, config), "a.xml"
         ])
 
 
