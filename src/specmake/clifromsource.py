@@ -41,10 +41,21 @@ def _propose_config(ctx: DoxygenContext, config: dict) -> None:
     config_2["spec-from-source"].pop("item-to-group", None)
     text = yaml.dump(config_2, default_flow_style=False, allow_unicode=True)
     print(text.rstrip())
-    print("  item-to-group:")
-    for doxygen_id, group_ident in sorted(ctx.item_to_group.items()):
-        item = ctx.items[doxygen_id]
-        print(f"    {doxygen_id}: {group_ident} # {item.kind}/{item.name}")
+    if ctx.item_to_group:
+        print("  item-to-group:")
+        for doxygen_id, group_ident in sorted(ctx.item_to_group.items()):
+            item = ctx.items[doxygen_id]
+            # Serialise each entry through yaml rather than formatting it
+            # directly, so a null group and any group name that would
+            # otherwise need quoting both survive a copy-paste back into
+            # the configuration.
+            entry = yaml.safe_dump({
+                doxygen_id: group_ident
+            },
+                                   default_flow_style=False).strip()
+            print(f"    {entry} # {item.kind}/{item.name}")
+    else:
+        print("  item-to-group: {}")
 
 
 def _generate_header(header: DoxygenFile) -> None:

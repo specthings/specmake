@@ -644,8 +644,8 @@ class DoxygenContext:
         self.type_map: dict[str, str] = config.get("type-map") or {}
         self.default_group_name: str | None = config.get("default-group-name")
         self.groups: dict[str, dict[str, str]] = config["groups"]
-        self.item_to_group: dict[str,
-                                 str | None] = config.get("item-to-group", {})
+        self.item_to_group: dict[str, str
+                                 | None] = config.get("item-to-group") or {}
         self.items_by_kind: dict[str, dict[str, "DoxygenItem"]] = {}
         self.items_by_name: dict[str, dict[str, list["DoxygenItem"]]] = {}
         self.items: dict[str, "DoxygenItem"] = {}
