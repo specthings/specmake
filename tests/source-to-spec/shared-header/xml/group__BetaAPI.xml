@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.17.0" xml:lang="en-US">
+  <compounddef id="group__BetaAPI" kind="group">
+    <compoundname>BetaAPI</compoundname>
+    <title>Beta API</title>
+    <innerfile refid="shared_8h">shared.h</innerfile>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="group__BetaAPI_1gabeta0000000000000000000000000000" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void beta_reset</definition>
+        <argsstring>(void)</argsstring>
+        <name>beta_reset</name>
+        <briefdescription>
+<para>Resets the beta subsystem. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="shared.h" line="17" column="6" declfile="shared.h" declline="17" declcolumn="6"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>This is the Beta API. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

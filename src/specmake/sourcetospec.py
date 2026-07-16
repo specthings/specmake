@@ -598,8 +598,8 @@ def _doxygen_id(elem: ElementTree.Element) -> str:
 
 def _relationships(elem: ElementTree.Element, item: DoxygenItem) -> None:
     assert isinstance(item, DoxygenContainer)
-    for member_kind in ("enumvalue", "innerfile", "innerclass", "member",
-                        "memberdef"):
+    for member_kind in ("enumvalue", "innerfile", "innerclass", "innergroup",
+                        "member", "memberdef"):
         for member in elem.findall(f".//{member_kind}"):
             item.member_ids.append(_doxygen_id(member))
 

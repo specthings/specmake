@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.17.0" xml:lang="en-US">
+  <compounddef id="gadget_8h" kind="file" language="C++">
+    <compoundname>gadget.h</compoundname>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="gadget_8h_1aa411f22b650086886d32ff75ab08cf42" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int gadget_init</definition>
+        <argsstring>(void)</argsstring>
+        <name>gadget_init</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="gadget.h" line="7" column="5" declfile="gadget.h" declline="7" declcolumn="5"/>
+      </memberdef>
+      <memberdef kind="function" id="gadget_8h_1a861700904d002738f17e3b84596ca9e3" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int gadget_configure</definition>
+        <argsstring>(int mode)</argsstring>
+        <name>gadget_configure</name>
+        <param>
+          <type>int</type>
+          <declname>mode</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="gadget.h" line="8" column="5" declfile="gadget.h" declline="8" declcolumn="5"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>GADGET_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>GADGET_H</highlight><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7" refid="gadget_8h_1aa411f22b650086886d32ff75ab08cf42" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="gadget_8h_1aa411f22b650086886d32ff75ab08cf42" kindref="member">gadget_init</ref>(<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>);</highlight></codeline>
+<codeline lineno="8" refid="gadget_8h_1a861700904d002738f17e3b84596ca9e3" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="gadget_8h_1a861700904d002738f17e3b84596ca9e3" kindref="member">gadget_configure</ref>(<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>mode<sp/>);</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+    </programlisting>
+    <location file="gadget.h"/>
+  </compounddef>
+</doxygen>
