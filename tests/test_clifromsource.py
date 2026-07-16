@@ -678,6 +678,69 @@ def test_prune_removes_item_for_a_declaration_deleted_from_the_header(
     assert manifest["/if/queue-create"] == ["QueueAPI"]
 
 
+def test_doxygen_xml_dir_generates_the_same_items_as_listing_the_files(
+        tmp_path):
+    config = {
+        "data": {},
+        "groups": {
+            "WidgetAPI": {
+                "uid": "/if/group"
+            }
+        },
+        "enabled-groups": ["WidgetAPI"],
+    }
+
+    def run(name, extra_argv, xml_files) -> list[str]:
+        work = tmp_path / name
+        work.mkdir()
+        spec_dir = work / "spec"
+        config_file = _write_config(work, {
+            **config, "spec-directory": str(spec_dir)
+        })
+        clifromsource(["specfromsource", "--config-file", config_file] +
+                      extra_argv + list(xml_files))
+        return sorted(
+            str(path.relative_to(spec_dir))
+            for path in spec_dir.rglob("*.yml"))
+
+    listed = run("listed", [], _widget_api_xml_files())
+    globbed = run("globbed", [
+        "--doxygen-xml-dir",
+        _get_path("source-to-spec/null-item-to-group/xml")
+    ], [])
+    assert listed
+    assert globbed == listed
+
+
+def test_doxygen_xml_dir_and_listed_files_are_mutually_exclusive(tmp_path):
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        clifromsource([
+            "specfromsource", "--config-file",
+            _write_config(tmp_path, _foo_group_config(tmp_path / "spec")),
+            "--doxygen-xml-dir", "some/dir", "a.xml"
+        ])
+
+
+def test_no_doxygen_xml_files_given_is_rejected(tmp_path):
+    with pytest.raises(ValueError, match="no Doxygen XML files given"):
+        clifromsource([
+            "specfromsource", "--config-file",
+            _write_config(tmp_path, _foo_group_config(tmp_path / "spec"))
+        ])
+
+
+def test_an_empty_doxygen_xml_dir_is_rejected(tmp_path):
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    with pytest.raises(ValueError, match=r"no \*\.xml files found"):
+        clifromsource([
+            "specfromsource", "--config-file",
+            _write_config(tmp_path, _foo_group_config(tmp_path / "spec")),
+            "--doxygen-xml-dir",
+            str(empty)
+        ])
+
+
 def _shared_header_xml_files() -> list[str]:
     # shared-header/shared.h carries two @file @ingroup blocks, so it is
     # a direct member of both AlphaAPI and BetaAPI.
