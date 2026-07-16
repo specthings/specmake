@@ -35,12 +35,28 @@ from specitems import get_arguments
 from specware import load_specware_config
 
 from .sourcetospec import (ConfigError, DoxygenContext, DoxygenEnum,
-                           DoxygenGroup, DoxygenFile, DoxygenTypedef)
+                           DoxygenGroup, DoxygenFile, DoxygenTypedef, _slugify)
+
+
+def _proposed_group_uid(group_name: str) -> str:
+    # There's no way to guess which component a group actually belongs
+    # under from its name alone, so make the placeholder impossible to
+    # miss rather than emit something that merely looks plausible.
+    return f"/TODO/{_slugify(group_name)}/if/group"
 
 
 def _propose_config(ctx: DoxygenContext, config: dict) -> None:
-    config_2 = {"spec-from-source": config}
-    config_2["spec-from-source"].pop("item-to-group", None)
+    proposed = dict(config)
+    proposed.pop("item-to-group", None)
+    proposed.setdefault("data", {})
+    proposed.setdefault("spec-directory", "spec")
+    proposed.setdefault("enabled-groups", [])
+    groups = dict(proposed.get("groups") or {})
+    for group in sorted(ctx.items_by_kind.get("group", {}).values()):
+        groups.setdefault(group.name, {"uid": _proposed_group_uid(group.name)})
+    proposed["groups"] = groups
+
+    config_2 = {"spec-from-source": proposed}
     text = yaml.dump(config_2, default_flow_style=False, allow_unicode=True)
     print(text.rstrip())
     if ctx.item_to_group:
@@ -279,7 +295,13 @@ def _run(args) -> None:
     try:
         config, working_directory = load_specware_config(args.config_file)
     except FileNotFoundError as err:
-        raise ConfigError(str(err)) from err
+        if not args.propose_config or args.config_file is not None:
+            raise ConfigError(str(err)) from err
+        # --propose-config exists to bootstrap a config in the first
+        # place: with no --config-file given and no specware.yml
+        # discovered nearby, propose one from just the Doxygen XML
+        # instead of requiring a placeholder file to already exist.
+        config, working_directory = {"spec-from-source": {}}, "."
     try:
         config = config["spec-from-source"]
     except KeyError as err:
@@ -290,7 +312,7 @@ def _run(args) -> None:
         xml_files = _resolve_xml_files(args.doxygen_xml_files,
                                        args.doxygen_xml_dir)
         ctx = DoxygenContext(config,
-                             require_enabled_groups=not args.propose_config)
+                             require_full_config=not args.propose_config)
         os.makedirs(ctx.spec_directory, exist_ok=True)
         ctx.doxygen_xml_to_spec(xml_files)
         if args.propose_config:

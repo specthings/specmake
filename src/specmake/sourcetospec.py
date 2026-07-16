@@ -54,6 +54,11 @@ _INVALID_NAME_CHARS = re.compile(r"[^a-zA-Z0-9]+")
 _FUNCTION_POINTER = re.compile(r"([^(]+)\(\*\)\((.*)")
 
 
+def _slugify(name: str) -> str:
+    """ Convert a name to the lowercase, hyphenated form used in UIDs. """
+    return _INVALID_NAME_CHARS.sub("-", name.lower())
+
+
 def _strip(text: str | None, default: str | None) -> str | None:
     if text is None:
         return default
@@ -84,8 +89,7 @@ class DoxygenItem:
         """ Is the UID of the item. """
         group = self.group
         prefix = posixpath.dirname(group.uid)
-        name = self.name.lower()
-        name = _INVALID_NAME_CHARS.sub("-", name)
+        name = _slugify(self.name)
         name = name.removeprefix(
             self.ctx.groups.get(group.name, {}).get("remove-prefix", ""))
         return posixpath.join(prefix, name)
@@ -739,7 +743,7 @@ def _validate_type_map(errors: list[str], type_map: dict) -> None:
                           f"be a string, got {to_item!r}")
 
 
-def _validate_config(config: dict, require_enabled_groups: bool) -> None:
+def _validate_config(config: dict, require_full_config: bool) -> None:
     """
     Validate a ``spec-from-source:`` configuration upfront.
 
@@ -754,8 +758,10 @@ def _validate_config(config: dict, require_enabled_groups: bool) -> None:
     reach that code and raise ``TypeError`` well away from the
     configuration that caused it.
 
-    ``enabled-groups`` is only consumed by a real generation run, so
-    its presence is required only when the caller asks for it.
+    ``--propose-config`` does not require a full config: it exists to
+    bootstrap one, so ``data``, ``spec-directory``, ``groups`` and
+    ``enabled-groups`` are only mandatory when ``require_full_config``
+    is set, meaning a real generation run.
     """
     errors: list[str] = []
 
@@ -780,20 +786,23 @@ def _validate_config(config: dict, require_enabled_groups: bool) -> None:
             return False
         return True
 
-    require("data", dict, "dict")
-    require("spec-directory", str, "string")
-    if require("groups", dict, "dict"):
+    def required_unless_bootstrapping(attribute: str, expected_type: type,
+                                      type_name: str) -> bool:
+        if require_full_config:
+            return require(attribute, expected_type, type_name)
+        return optional(attribute, expected_type, type_name)
+
+    required_unless_bootstrapping("data", dict, "dict")
+    required_unless_bootstrapping("spec-directory", str, "string")
+    if required_unless_bootstrapping("groups", dict, "dict"):
         _validate_groups(errors, config["groups"])
     if optional("item-to-group", dict, "dict"):
         _validate_item_to_group(errors, config["item-to-group"])
     if optional("type-map", dict, "dict"):
         _validate_type_map(errors, config["type-map"])
     optional("default-group-name", str, "string")
-    if require_enabled_groups:
-        checked = require("enabled-groups", list, "list of group names")
-    else:
-        checked = optional("enabled-groups", list, "list of group names")
-    if checked:
+    if required_unless_bootstrapping("enabled-groups", list,
+                                     "list of group names"):
         _validate_string_list(errors, "enabled-groups",
                               config["enabled-groups"])
 
@@ -809,20 +818,26 @@ class DoxygenContext:
     # pylint: disable=too-many-instance-attributes
     def __init__(self,
                  config: dict,
-                 require_enabled_groups: bool = False) -> None:
+                 require_full_config: bool = False) -> None:
         # Validate here rather than trusting the caller, so every
         # consumer of this class gets the same named error instead of a
         # crash deep in resolution. Only the caller knows whether this
-        # run consumes enabled-groups, so it says so.
-        _validate_config(config, require_enabled_groups)
-        self.spec_directory = Path(config["spec-directory"])
-        self.data: dict = config["data"]
+        # run needs a full config, so it says so.
+        _validate_config(config, require_full_config)
+        # data/spec-directory/groups default rather than subscript
+        # directly so --propose-config can bootstrap a DoxygenContext
+        # from an empty (or nearly empty) config to discover what to
+        # propose.
+        spec_directory = config.get("spec-directory")
+        self.spec_directory = Path(
+            spec_directory if spec_directory is not None else "spec")
+        self.data: dict = config.get("data") or {}
         # A bare 'type-map:' attribute parses as null, not as an empty
         # dict. Treat it as absent, otherwise _map_types() raises an
         # AttributeError on every declaration it processes.
         self.type_map: dict[str, str] = config.get("type-map") or {}
         self.default_group_name: str | None = config.get("default-group-name")
-        self.groups: dict[str, dict[str, str]] = config["groups"]
+        self.groups: dict[str, dict[str, str]] = config.get("groups") or {}
         self.item_to_group: dict[str, str
                                  | None] = config.get("item-to-group") or {}
         self.items_by_kind: dict[str, dict[str, "DoxygenItem"]] = {}

@@ -1261,6 +1261,16 @@ def test_null_item_to_group_is_treated_as_absent():
     assert not ctx.item_to_group
 
 
+def test_missing_spec_directory_defaults_but_explicit_value_is_respected():
+    ctx = DoxygenContext({"data": {}, "groups": {}})
+    assert ctx.spec_directory == Path("spec")
+
+    # An explicit, if unusual, falsy value must not be silently replaced by
+    # the default. Only an absent/null attribute should default.
+    ctx_2 = DoxygenContext({"data": {}, "groups": {}, "spec-directory": ""})
+    assert ctx_2.spec_directory == Path("")
+
+
 def test_item_to_group_naming_unknown_group_raises_clear_error():
     xml_files = [
         _get_path("source-to-spec/xml/bad_8c.xml"),
