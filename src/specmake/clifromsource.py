@@ -25,6 +25,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import contextlib
+import json
 import os
 import sys
 import yaml
@@ -58,9 +59,11 @@ def _propose_config(ctx: DoxygenContext, config: dict) -> None:
         print("  item-to-group: {}")
 
 
-def _generate_header(header: DoxygenFile) -> None:
+def _generate_header(header: DoxygenFile) -> list[str]:
+    """ Generate a header and its members. Returns every saved UID. """
     print("  ", header.uid)
     header.save()
+    uids = [header.uid]
     for header_member in header.members():
         if (isinstance(header_member, DoxygenTypedef)
                 and header_member.aliases_compound):
@@ -69,10 +72,13 @@ def _generate_header(header: DoxygenFile) -> None:
             continue
         print("    ", header_member.uid)
         header_member.save()
+        uids.append(header_member.uid)
         if isinstance(header_member, DoxygenEnum):
             for enumerator in header_member.members():
                 print("      ", enumerator.uid)
                 enumerator.save()
+                uids.append(enumerator.uid)
+    return uids
 
 
 def _reachable_headers(group: DoxygenGroup) -> list[DoxygenFile]:
@@ -108,24 +114,139 @@ def _reachable_headers(group: DoxygenGroup) -> list[DoxygenFile]:
     return sorted(headers.values())
 
 
-def _generate_groups(ctx: DoxygenContext, config: dict) -> None:
+def _record_owner(generated: dict[str, list[str]], uid: str,
+                  group_name: str) -> None:
+    """
+    Record ``group_name`` as an owner of ``uid``, at most once.
+
+    Two headers in the same group can yield the same UID, for example
+    an enumerator reachable through either of them, so the same owner
+    can be offered for one UID more than once.
+    """
+    owners = generated.setdefault(uid, [])
+    if group_name not in owners:
+        owners.append(group_name)
+
+
+def _generate_groups(ctx: DoxygenContext,
+                     config: dict) -> dict[str, list[str]]:
+    """
+    Generate every enabled group's contents.
+
+    Returns every generated item's UID mapped to the names of the
+    enabled groups that own it, for ``--prune`` to compare against a
+    previous run's manifest. A header reachable from several enabled
+    groups is owned by all of them, so ownership is a list rather than
+    a single name.
+    """
+    generated: dict[str, list[str]] = {}
     # A header carrying several @ingroup blocks, or one reached
     # transitively by members of different groups, is reachable from
     # more than one enabled group. Its content does not depend on which
     # group discovered it, so generate it once for the whole run rather
-    # than rewriting the identical file under every owner.
-    generated_headers: set[str] = set()
+    # than rewriting the identical file under every owner. The UIDs it
+    # produced are cached, because every later owner still has to be
+    # recorded against them.
+    header_uids: dict[str, list[str]] = {}
     for group in sorted(ctx.items_by_kind["group"].values()):
         assert isinstance(group, DoxygenGroup)
         if group.name not in config["enabled-groups"]:
             continue
         print(group.doxygen_id)
         group.save()
+        _record_owner(generated, group.uid, group.name)
         for header in _reachable_headers(group):
-            if header.doxygen_id in generated_headers:
-                continue
-            generated_headers.add(header.doxygen_id)
-            _generate_header(header)
+            uids = header_uids.get(header.doxygen_id)
+            if uids is None:
+                uids = _generate_header(header)
+                header_uids[header.doxygen_id] = uids
+            for uid in uids:
+                _record_owner(generated, uid, group.name)
+    return generated
+
+
+_MANIFEST_FILENAME = ".specfromsource-manifest.json"
+
+
+def _load_manifest(path: str) -> dict[str, list[str]]:
+    if not os.path.isfile(path):
+        return {}
+    with open(path, encoding="utf-8") as src:
+        manifest = json.load(src)
+    if not isinstance(manifest, dict):
+        return {}
+    # A manifest is written by this tool but read back as a plain file
+    # that could be stale, hand-edited, or shared across checkouts, the
+    # same reason pruning refuses to unlink outside spec-directory. A
+    # value that isn't a group name or a list of them yields no owners,
+    # which spares the entry rather than raising on it. A bare name is
+    # what a manifest written before ownership became a list records.
+    owners_by_uid: dict[str, list[str]] = {}
+    for uid, owners in manifest.items():
+        if isinstance(owners, str):
+            owners_by_uid[uid] = [owners]
+        elif isinstance(owners, list):
+            owners_by_uid[uid] = [
+                owner for owner in owners if isinstance(owner, str)
+            ]
+        else:
+            owners_by_uid[uid] = []
+    return owners_by_uid
+
+
+def _save_manifest(path: str, manifest: dict[str, list[str]]) -> None:
+    with open(path, "w", encoding="utf-8") as dst:
+        json.dump(manifest, dst, indent=2, sort_keys=True)
+        dst.write("\n")
+
+
+def _prune(ctx: DoxygenContext, enabled_groups: list[str],
+           generated: dict[str, list[str]]) -> None:
+    """
+    Remove previously-generated items no longer produced by this run.
+
+    Uses a manifest tracking each UID's owning enabled groups from the
+    last ``--prune`` run. A UID is stale once this run produced no such
+    item and at least one of its recorded owners is enabled: that owner
+    is present and no longer generating it, which is what makes the
+    item obsolete rather than merely unvisited. A UID none of whose
+    owners are enabled is left alone, so a group left out of
+    ``enabled-groups`` this time around (by oversight or otherwise)
+    never has its previously-generated items pruned out from under it.
+    """
+    manifest_path = str(ctx.spec_directory / _MANIFEST_FILENAME)
+    previous = _load_manifest(manifest_path)
+    this_run_groups = set(enabled_groups)
+    stale = {
+        uid
+        for uid, owners in previous.items()
+        if uid not in generated and any(owner in this_run_groups
+                                        for owner in owners)
+    }
+    spec_directory = ctx.spec_directory.resolve()
+    for uid in sorted(stale):
+        item_path = (ctx.spec_directory / f"{uid[1:]}.yml").resolve()
+        if not item_path.is_relative_to(spec_directory):
+            # A manifest is trusted state written by a prior run of this
+            # same tool, but it's still just a file on disk that could be
+            # stale, hand-edited, or shared across checkouts. Never unlink
+            # outside spec-directory on its say-so.
+            print("  skipped pruning", uid, "(escapes spec-directory)")
+            continue
+        if item_path.is_file():
+            print("  pruned", uid)
+            item_path.unlink()
+    # Entries this run had nothing to say about, because none of their
+    # owners took part, carry over untouched. Everything else is
+    # replaced by what this run actually produced.
+    new_manifest = {
+        uid: owners
+        for uid, owners in previous.items()
+        if not any(owner in this_run_groups for owner in owners)
+    }
+    new_manifest.update(
+        (uid, sorted(owners)) for uid, owners in generated.items())
+    _save_manifest(manifest_path, new_manifest)
 
 
 def clifromsource(argv: list[str] = sys.argv) -> None:
@@ -142,6 +263,11 @@ def clifromsource(argv: list[str] = sys.argv) -> None:
         parser.add_argument("--propose-config",
                             action="store_true",
                             help="propose a configuration")
+        parser.add_argument(
+            "--prune",
+            action="store_true",
+            help="remove previously generated items no longer produced by "
+            "this run, tracked via a manifest file in spec-directory")
         parser.add_argument("doxygen_xml_files",
                             metavar="DOXYGEN_XML_FILES",
                             nargs="+",
@@ -160,4 +286,6 @@ def clifromsource(argv: list[str] = sys.argv) -> None:
         if args.propose_config:
             _propose_config(ctx, config)
         else:
-            _generate_groups(ctx, config)
+            generated = _generate_groups(ctx, config)
+            if args.prune:
+                _prune(ctx, config["enabled-groups"], generated)
