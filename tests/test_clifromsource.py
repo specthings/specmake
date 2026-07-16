@@ -135,6 +135,19 @@ def _generate(tmp_path, config, xml_files, prune: bool = False) -> None:
     clifromsource(argv + list(xml_files))
 
 
+def _apply(tmp_path, config, xml_files) -> dict:
+    """
+    Run ``--propose-config --apply`` and read the written config back.
+    """
+    config_file = _write_config(tmp_path, config)
+    clifromsource([
+        "specfromsource", "--config-file", config_file, "--propose-config",
+        "--apply", *xml_files
+    ])
+    with open(config_file, encoding="utf-8") as src:
+        return yaml.safe_load(src)["spec-from-source"]
+
+
 def _proposed_item_to_group(output: str) -> dict:
     """
     Parse the proposal's ``item-to-group`` back out of the printed text.
@@ -889,6 +902,157 @@ def test_clifromsource_propose_config_bootstraps_without_a_config_file(
     assert proposed["enabled-groups"] == []
 
 
+def test_apply_writes_the_merged_config_to_the_target_file(tmp_path):
+    config = {
+        "spec-directory": "spec",
+        "groups": {
+            "WidgetAPI": {
+                "uid": "/c/widget/if/group"
+            }
+        },
+    }
+    written = _apply(tmp_path, config, _widget_api_xml_files())
+    # The existing group entry is preserved, not overwritten...
+    assert written["groups"]["WidgetAPI"] == {"uid": "/c/widget/if/group"}
+    # ...and the machine-derivable parts are filled in.
+    assert written["data"] == {}
+    assert written["enabled-groups"] == []
+    assert written["item-to-group"] == {}
+
+
+def test_apply_preserves_active_entries_and_drops_stale_ones(tmp_path):
+    config = {
+        "spec-directory": "spec",
+        "groups": {
+            "FooGroup": {
+                "uid": "/if/group",
+                "remove-prefix": "foobar-"
+            }
+        },
+        "item-to-group": {
+            # bad_f is in no Doxygen group and there is no
+            # default-group-name, so this override is the only thing
+            # putting it in a group. Applying must carry it forward
+            # exactly as configured, not replace it with whatever this
+            # run happens to resolve.
+            _BAD_F: "FooGroup",
+            # Stale from a previous run. bad_8c's function no longer
+            # needs this entry once it is regenerated, and applying must
+            # not carry it forward blindly.
+            "some-stale-doxygen-id": "FooGroup",
+        },
+    }
+    written = _apply(tmp_path, config, _foo_group_xml_files())
+    assert written["item-to-group"] == {_BAD_F: "FooGroup"}
+
+
+def test_apply_preserves_entries_shadowed_by_an_xml_group(tmp_path):
+    # gf_0 already belongs to FooGroup via an explicit Doxygen group, so
+    # this entry is never consulted while resolving groups. It must
+    # still survive the apply unchanged, in case gf_0's group membership
+    # is ever removed from the XML and this override becomes active
+    # again.
+    shadowed = "group__FooGroup_1ga670c7f2490aa4624e8b3ee3d04ce448b"
+    config = {
+        "spec-directory": "spec",
+        "groups": {
+            "FooGroup": {
+                "uid": "/if/group",
+                "remove-prefix": "foobar-"
+            }
+        },
+        "item-to-group": {
+            shadowed: "FooGroup"
+        },
+    }
+    written = _apply(tmp_path, config, _foo_group_xml_files())
+    assert written["item-to-group"] == {shadowed: "FooGroup"}
+
+
+def test_propose_config_ignores_stale_item_to_group_entries(tmp_path, capsys):
+    # A doxygen_id whose declaration was removed from the header since
+    # the entry was written must not crash the lookup or be proposed
+    # again.
+    config = _minimal_config(groups={"FooGroup": {
+        "uid": "/if/group"
+    }},
+                             **{
+                                 "item-to-group": {
+                                     _BAD_F: "FooGroup",
+                                     "no-longer-exists": "FooGroup",
+                                 }
+                             })
+    output = _propose(capsys, tmp_path, config, _foo_group_xml_files())
+    assert f"{_BAD_F}: FooGroup" in output
+    assert "no-longer-exists" not in output
+
+
+def test_clifromsource_apply_requires_propose_config(tmp_path):
+    config = {
+        "data": {},
+        "groups": {},
+        "spec-directory": str(tmp_path / "spec"),
+        "enabled-groups": [],
+    }
+    with pytest.raises(SystemExit) as excinfo:
+        clifromsource([
+            "specfromsource", "--apply", "--config-file",
+            _write_config(tmp_path, config), "a.xml"
+        ])
+    assert "--apply requires --propose-config" in str(excinfo.value)
+
+
+def test_clifromsource_propose_config_apply_end_to_end(tmp_path):
+    config_path = tmp_path / "specware.yml"
+    _write_config(tmp_path, {"spec-directory": "spec"})
+    xml_dir = _get_path("source-to-spec/null-item-to-group/xml")
+    argv = [
+        "specfromsource", "--propose-config", "--apply", "--config-file",
+        str(config_path), "--doxygen-xml-dir", xml_dir
+    ]
+    clifromsource(argv)
+    with open(config_path, encoding="utf-8") as src:
+        written = yaml.safe_load(src)["spec-from-source"]
+    assert written["groups"]["WidgetAPI"] == {
+        "uid": "/TODO/widgetapi/if/group"
+    }
+
+    # Applying again after hand-fixing the placeholder must preserve it,
+    # not regenerate a new TODO.
+    written["groups"]["WidgetAPI"]["uid"] = "/c/widget/if/group"
+    written["enabled-groups"] = ["WidgetAPI"]
+    with open(config_path, "w", encoding="utf-8") as dst:
+        yaml.safe_dump({"spec-from-source": written}, dst)
+    clifromsource(argv)
+    with open(config_path, encoding="utf-8") as src:
+        written_2 = yaml.safe_load(src)["spec-from-source"]
+    assert written_2["groups"]["WidgetAPI"]["uid"] == "/c/widget/if/group"
+    assert written_2["enabled-groups"] == ["WidgetAPI"]
+
+
+def test_clifromsource_propose_config_apply_bootstraps_a_new_file(
+        monkeypatch, tmp_path):
+    # No --config-file and no specware.yml discoverable: --apply must
+    # create a brand new specware.yml in the current directory, the same
+    # bootstrap-from-nothing case --propose-config alone already
+    # handles.
+    monkeypatch.chdir(tmp_path)
+    xml_dir = _get_path("source-to-spec/null-item-to-group/xml")
+    clifromsource([
+        "specfromsource", "--propose-config", "--apply", "--doxygen-xml-dir",
+        xml_dir
+    ])
+    config_path = tmp_path / "specware.yml"
+    assert config_path.is_file()
+    with open(config_path, encoding="utf-8") as src:
+        written = yaml.safe_load(src)["spec-from-source"]
+    assert written["groups"]["WidgetAPI"] == {
+        "uid": "/TODO/widgetapi/if/group"
+    }
+    assert written["data"] == {}
+    assert written["enabled-groups"] == []
+
+
 def _shared_header_xml_files() -> list[str]:
     # shared-header/shared.h carries two @file @ingroup blocks, so it is
     # a direct member of both AlphaAPI and BetaAPI.
@@ -1057,3 +1221,25 @@ def test_prune_ignores_a_manifest_that_is_not_a_mapping(tmp_path):
               prune=True)
 
     assert _read_manifest(spec_dir)["/if/group"] == ["FooGroup"]
+
+
+def test_apply_replaces_null_attributes_with_their_defaults(tmp_path):
+    # A bare 'data:', 'spec-directory:' or 'enabled-groups:' attribute
+    # parses as null. Validation treats null as absent while
+    # bootstrapping, so the proposal has to default it too: writing the
+    # null straight back produces a config the next real generation run
+    # rejects, since that one does require a value.
+    config = {
+        "data": None,
+        "spec-directory": None,
+        "groups": {},
+        "enabled-groups": None,
+    }
+    written = _apply(tmp_path, config, _widget_api_xml_files())
+    assert written["data"] == {}
+    assert written["spec-directory"] == "spec"
+    assert written["enabled-groups"] == []
+
+    # The written config is the real test: it has to survive the
+    # validation a generation run applies.
+    DoxygenContext(written, require_full_config=True)

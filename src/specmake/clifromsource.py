@@ -31,37 +31,22 @@ import os
 import sys
 import yaml
 
-from specitems import get_arguments
+from specitems import atomic_dump_to_file, get_arguments
 from specware import load_specware_config
 
 from .sourcetospec import (ConfigError, DoxygenContext, DoxygenEnum,
-                           DoxygenGroup, DoxygenFile, DoxygenTypedef, _slugify)
-
-
-def _proposed_group_uid(group_name: str) -> str:
-    # There's no way to guess which component a group actually belongs
-    # under from its name alone, so make the placeholder impossible to
-    # miss rather than emit something that merely looks plausible.
-    return f"/TODO/{_slugify(group_name)}/if/group"
+                           DoxygenGroup, DoxygenFile, DoxygenTypedef)
 
 
 def _propose_config(ctx: DoxygenContext, config: dict) -> None:
-    proposed = dict(config)
-    proposed.pop("item-to-group", None)
-    proposed.setdefault("data", {})
-    proposed.setdefault("spec-directory", "spec")
-    proposed.setdefault("enabled-groups", [])
-    groups = dict(proposed.get("groups") or {})
-    for group in sorted(ctx.items_by_kind.get("group", {}).values()):
-        groups.setdefault(group.name, {"uid": _proposed_group_uid(group.name)})
-    proposed["groups"] = groups
-
+    proposed = ctx.proposed_config(config)
     config_2 = {"spec-from-source": proposed}
     text = yaml.dump(config_2, default_flow_style=False, allow_unicode=True)
     print(text.rstrip())
-    if ctx.item_to_group:
+    item_to_group = ctx.resolved_item_to_group()
+    if item_to_group:
         print("  item-to-group:")
-        for doxygen_id, group_ident in sorted(ctx.item_to_group.items()):
+        for doxygen_id, group_ident in item_to_group.items():
             item = ctx.items[doxygen_id]
             # Serialise each entry through yaml rather than formatting it
             # directly, so a null group and any group name that would
@@ -74,6 +59,31 @@ def _propose_config(ctx: DoxygenContext, config: dict) -> None:
             print(f"    {entry} # {item.kind}/{item.name}")
     else:
         print("  item-to-group: {}")
+
+
+def _apply_config(ctx: DoxygenContext, config: dict, config_file: str) -> None:
+    """
+    Write the proposed config directly to ``config_file``.
+
+    ``config_file`` is the same file it was read from; this replaces
+    printing the proposal for manual copy-paste, which is exactly how
+    a bare ``item-to-group:`` attribute (parsed as YAML null rather than
+    ``{}``) used to end up in a config verbatim.
+
+    ``item-to-group`` itself is only ever pruned, never regenerated:
+    an entry the config already had survives as long as its item
+    still exists, regardless of whether this run would have inferred
+    the same group on its own. Writing the full resolved mapping
+    instead would bake every file-inferred and default-group-name
+    assignment in as if it were a manual override, permanently hiding
+    those items from future inference.
+    """
+    proposed = ctx.proposed_config(config)
+    proposed["item-to-group"] = ctx.preserved_item_to_group(config)
+    atomic_dump_to_file(
+        config_file, {"spec-from-source": proposed}, lambda data: yaml.dump(
+            data, default_flow_style=False, allow_unicode=True))
+    print(f"applied proposed configuration to {config_file}")
 
 
 def _generate_header(header: DoxygenFile) -> list[str]:
@@ -292,6 +302,8 @@ def _resolve_xml_files(doxygen_xml_files: list[str],
 
 
 def _run(args) -> None:
+    if args.apply and not args.propose_config:
+        raise ConfigError("--apply requires --propose-config")
     try:
         config, working_directory = load_specware_config(args.config_file)
     except FileNotFoundError as err:
@@ -308,6 +320,7 @@ def _run(args) -> None:
         raise ConfigError(
             f"{args.config_file or 'specware.yml'} is missing the "
             "top-level 'spec-from-source' attribute") from err
+    config_file_name = os.path.basename(args.config_file or "specware.yml")
     with contextlib.chdir(working_directory):
         xml_files = _resolve_xml_files(args.doxygen_xml_files,
                                        args.doxygen_xml_dir)
@@ -316,7 +329,10 @@ def _run(args) -> None:
         os.makedirs(ctx.spec_directory, exist_ok=True)
         ctx.doxygen_xml_to_spec(xml_files)
         if args.propose_config:
-            _propose_config(ctx, config)
+            if args.apply:
+                _apply_config(ctx, config, config_file_name)
+            else:
+                _propose_config(ctx, config)
         else:
             generated = _generate_groups(ctx, config)
             if args.prune:
@@ -337,6 +353,11 @@ def clifromsource(argv: list[str] = sys.argv) -> None:
         parser.add_argument("--propose-config",
                             action="store_true",
                             help="propose a configuration")
+        parser.add_argument(
+            "--apply",
+            action="store_true",
+            help="with --propose-config, write the proposal directly to "
+            "the config file instead of printing it for manual review")
         parser.add_argument(
             "--prune",
             action="store_true",
