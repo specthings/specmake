@@ -1261,6 +1261,43 @@ def test_null_item_to_group_is_treated_as_absent():
     assert not ctx.item_to_group
 
 
+def test_item_to_group_naming_unknown_group_raises_clear_error():
+    xml_files = [
+        _get_path("source-to-spec/xml/bad_8c.xml"),
+        _get_path("source-to-spec/xml/default_8h.xml"),
+        _get_path("source-to-spec/xml/header_8h.xml"),
+        _get_path("source-to-spec/xml/foobar_8h.xml"),
+        _get_path("source-to-spec/xml/group__DefaultGroup.xml"),
+        _get_path("source-to-spec/xml/group__FooGroup.xml"),
+        _get_path("source-to-spec/xml/source_8c.xml"),
+        _get_path("source-to-spec/xml/structs__0.xml"),
+        _get_path("source-to-spec/xml/structgs__0.xml"),
+        _get_path("source-to-spec/xml/structt__0.xml"),
+        _get_path("source-to-spec/xml/structgt__0.xml"),
+        _get_path("source-to-spec/xml/unionu__0.xml"),
+        _get_path("source-to-spec/xml/uniongu__0.xml"),
+        _get_path("source-to-spec/xml/unionu__1.xml"),
+        _get_path("source-to-spec/xml/uniongu__1.xml"),
+    ]
+    config = {
+        "data": {},
+        "groups": {
+            "FooGroup": {
+                "uid": "/if/group"
+            }
+        },
+        "item-to-group": {
+            "bad_8c_1a8cc687906d3e4964fc993ca1bf18472e": "NoSuchGroup"
+        },
+        "spec-directory": "spec",
+    }
+    ctx = DoxygenContext(config)
+    with pytest.raises(ValueError,
+                       match="cannot associate item .* with group "
+                       "'NoSuchGroup'"):
+        ctx.doxygen_xml_to_spec(xml_files)
+
+
 def test_inline_commands_do_not_truncate_text():
     # inline-markup/inline.h's brief uses @a, @b, @c, @p and a line break,
     # each followed by more words: none of that trailing text must be
