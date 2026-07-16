@@ -657,7 +657,7 @@ def test_prune_refuses_to_delete_outside_spec_directory(tmp_path, capsys):
 
 
 def test_prune_removes_item_for_a_declaration_deleted_from_the_header(
-        tmp_path):
+        capsys, tmp_path):
     spec_dir = tmp_path / "spec"
     config = {
         "data": {},
@@ -683,8 +683,11 @@ def test_prune_removes_item_for_a_declaration_deleted_from_the_header(
     assert (spec_dir / "if" / "queue-destroy.yml").is_file()
 
     # Second run: queue_destroy has been removed from the header.
+    capsys.readouterr()
     _generate(tmp_path, config, queue_xml("after"), prune=True)
+    output = capsys.readouterr().out
 
+    assert "pruned 1 stale item(s)" in output
     assert (spec_dir / "if" / "queue-create.yml").is_file()
     assert not (spec_dir / "if" / "queue-destroy.yml").exists()
     manifest = _read_manifest(spec_dir)
@@ -1051,6 +1054,46 @@ def test_clifromsource_propose_config_apply_bootstraps_a_new_file(
     }
     assert written["data"] == {}
     assert written["enabled-groups"] == []
+
+
+def test_generate_prints_an_end_of_run_summary(capsys, tmp_path):
+    spec_dir = tmp_path / "spec"
+    _generate(tmp_path, _foo_group_config(spec_dir), _foo_group_xml_files())
+    output = capsys.readouterr().out
+
+    # header.h's e_0 has a "typedef enum e_0 e_0" alias with the same
+    # target uid as the enum itself: it is the one typedef this fixture
+    # skips as a compound alias.
+    generated = list(spec_dir.rglob("*.yml"))
+    assert f"generated {len(generated)} item(s) across 1 group(s)" in output
+    assert "1 typedef(s) skipped as compound aliases" in output
+
+
+def test_generate_summary_omits_the_typedef_clause_when_none_skipped(
+        capsys, tmp_path):
+    # storage.h's "status" typedef is a genuine typedef, not an alias.
+    # Its only same-named sibling is networking.h's unrelated struct,
+    # which lives in a different group entirely and is not even enabled
+    # here, so unlike the alias case above nothing gets skipped.
+    spec_dir = tmp_path / "spec"
+    config = {
+        "data": {},
+        "groups": {
+            "StorageAPI": {
+                "uid": "/storage/if/group"
+            },
+        },
+        "enabled-groups": ["StorageAPI"],
+        "spec-directory": str(spec_dir),
+    }
+    _generate(tmp_path, config, [
+        _get_path(f"source-to-spec/typedef-name-collision/xml/{name}")
+        for name in ("group__StorageAPI.xml", "storage_8h.xml")
+    ])
+    output = capsys.readouterr().out
+
+    assert "generated" in output
+    assert "typedef(s) skipped" not in output
 
 
 def _shared_header_xml_files() -> list[str]:

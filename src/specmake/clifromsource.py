@@ -86,16 +86,24 @@ def _apply_config(ctx: DoxygenContext, config: dict, config_file: str) -> None:
     print(f"applied proposed configuration to {config_file}")
 
 
-def _generate_header(header: DoxygenFile) -> list[str]:
-    """ Generate a header and its members. Returns every saved UID. """
+def _generate_header(header: DoxygenFile) -> tuple[list[str], int]:
+    """
+    Generate a header and its members.
+
+    Returns every saved UID, and how many typedefs were skipped
+    because they merely alias a compound (struct/union/enum) item
+    saved under the same UID.
+    """
     print("  ", header.uid)
     header.save()
     uids = [header.uid]
+    typedefs_skipped = 0
     for header_member in header.members():
         if (isinstance(header_member, DoxygenTypedef)
                 and header_member.aliases_compound):
             # For example `typedef enum e { ... } e;`. The enum item already
             # covers this under the same name, marked via definition-kind.
+            typedefs_skipped += 1
             continue
         print("    ", header_member.uid)
         header_member.save()
@@ -105,7 +113,7 @@ def _generate_header(header: DoxygenFile) -> list[str]:
                 print("      ", enumerator.uid)
                 enumerator.save()
                 uids.append(enumerator.uid)
-    return uids
+    return uids, typedefs_skipped
 
 
 def _reachable_headers(group: DoxygenGroup) -> list[DoxygenFile]:
@@ -175,6 +183,8 @@ def _generate_groups(ctx: DoxygenContext,
     # produced are cached, because every later owner still has to be
     # recorded against them.
     header_uids: dict[str, list[str]] = {}
+    groups_processed = 0
+    typedefs_skipped = 0
     for group in sorted(ctx.items_by_kind["group"].values()):
         assert isinstance(group, DoxygenGroup)
         if group.name not in config["enabled-groups"]:
@@ -182,13 +192,24 @@ def _generate_groups(ctx: DoxygenContext,
         print(group.doxygen_id)
         group.save()
         _record_owner(generated, group.uid, group.name)
+        groups_processed += 1
         for header in _reachable_headers(group):
             uids = header_uids.get(header.doxygen_id)
             if uids is None:
-                uids = _generate_header(header)
+                # Counted here rather than per owner, so a header shared
+                # by several groups contributes its skipped typedefs to
+                # the run's total once.
+                uids, header_typedefs_skipped = _generate_header(header)
+                typedefs_skipped += header_typedefs_skipped
                 header_uids[header.doxygen_id] = uids
             for uid in uids:
                 _record_owner(generated, uid, group.name)
+    summary = (f"generated {len(generated)} item(s) across "
+               f"{groups_processed} group(s)")
+    if typedefs_skipped:
+        summary += (f", {typedefs_skipped} typedef(s) skipped as "
+                    "compound aliases")
+    print(summary)
     return generated
 
 
@@ -251,6 +272,7 @@ def _prune(ctx: DoxygenContext, enabled_groups: list[str],
                                         for owner in owners)
     }
     spec_directory = ctx.spec_directory.resolve()
+    pruned_count = 0
     for uid in sorted(stale):
         item_path = (ctx.spec_directory / f"{uid[1:]}.yml").resolve()
         if not item_path.is_relative_to(spec_directory):
@@ -263,6 +285,8 @@ def _prune(ctx: DoxygenContext, enabled_groups: list[str],
         if item_path.is_file():
             print("  pruned", uid)
             item_path.unlink()
+            pruned_count += 1
+    print(f"pruned {pruned_count} stale item(s)")
     # Entries this run had nothing to say about, because none of their
     # owners took part, carry over untouched. Everything else is
     # replaced by what this run actually produced.
