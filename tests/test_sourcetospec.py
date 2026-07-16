@@ -25,10 +25,12 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from pathlib import Path
+from xml.etree import ElementTree
 
 import pytest
 
 from specmake import DoxygenContext
+from specmake.sourcetospec import _append_element_text, _Scope, DoxygenItem
 
 _GF_0_EXPECTED_RESULT = {
     "SPDX-License-Identifier":
@@ -1257,6 +1259,108 @@ def test_null_item_to_group_is_treated_as_absent():
     }
     ctx = DoxygenContext(config)
     assert not ctx.item_to_group
+
+
+def test_inline_commands_do_not_truncate_text():
+    # inline-markup/inline.h's brief uses @a, @b, @c, @p and a line break,
+    # each followed by more words: none of that trailing text must be
+    # dropped, only the @a/@b/@c/@p markup itself needs not survive.
+    config = {
+        "data": {},
+        "groups": {
+            "InlineAPI": {
+                "uid": "/if/group"
+            }
+        },
+        "spec-directory": "spec",
+    }
+    ctx = DoxygenContext(config)
+    ctx.doxygen_xml_to_spec([
+        _get_path("source-to-spec/inline-markup/xml/group__InlineAPI.xml"),
+        _get_path("source-to-spec/inline-markup/xml/inline_8h.xml"),
+    ])
+    brief = ctx.items_by_name["function"]["inline_use"][0].brief
+    assert brief is not None
+    for word in (
+            "Sets",
+            "w to a value, uses",
+            "bold text, code",
+            "text, and param",
+            "references, followed by a break",
+            "after the break, all with trailing words after each command.",
+    ):
+        assert word in brief, f"{word!r} missing from brief: {brief!r}"
+
+
+def test_parameternamelist_does_not_leak_into_parameter_description():
+    # <parameternamelist> is an unhandled wrapper around <parametername>
+    # that shares its scope with the sibling <parameterdescription>: it
+    # must not fall through to the generic tail-capturing fallback that
+    # preserves inline-markup text, or its (whitespace) text/tail pollutes
+    # every @param description.
+    config = {
+        "data": {},
+        "groups": {
+            "WidgetAPI": {
+                "uid": "/if/group"
+            }
+        },
+        "spec-directory": "spec",
+    }
+    ctx = DoxygenContext(config)
+    ctx.doxygen_xml_to_spec([
+        _get_path(
+            "source-to-spec/null-item-to-group/xml/group__WidgetAPI.xml"),
+        _get_path("source-to-spec/null-item-to-group/xml/widget_8h.xml"),
+    ])
+    item = ctx.items_by_name["function"]["widget_set_size"][0]
+    # Deliberately not .strip()'d: the leak this guards against is a
+    # leading "\n\n" that only a raw comparison would still catch, since
+    # add_function_like_attributes() strips the final exported value
+    # regardless of whether this fix is in place.
+    description = item.data["param"][0]["description"]
+    assert description == " is the pointer to the widget object.  "
+
+
+def test_xrefsect_is_ignored():
+    # @todo (and @bug, @deprecated, ...) render as <xrefsect>, which carries
+    # its own labelled text (for example "Todo") via further unhandled
+    # child tags.
+    # It must be ignored outright rather than leaking into whatever
+    # brief/description field is the ambient text scope at that point.
+    config = {
+        "data": {},
+        "groups": {
+            "TodoAPI": {
+                "uid": "/if/group"
+            }
+        },
+        "spec-directory": "spec",
+    }
+    ctx = DoxygenContext(config)
+    ctx.doxygen_xml_to_spec([
+        _get_path("source-to-spec/inline-markup/xml/group__TodoAPI.xml"),
+        _get_path("source-to-spec/inline-markup/xml/todo_8h.xml"),
+    ])
+    item = ctx.items_by_name["function"]["todo_use"][0]
+    assert item.brief == "Uses the widget after setup finishes."
+    assert item.description is None
+
+
+def test_append_element_text_ignores_wholly_empty_element():
+    # An inline element with neither its own text nor a tail (for example
+    # a <linebreak/> at the very end of a paragraph) must leave the
+    # accumulated text untouched rather than appending an empty word.
+    scope = _Scope(
+        DoxygenItem(
+            DoxygenContext({
+                "data": {},
+                "groups": {},
+                "spec-directory": "spec",
+            }), "root", "", ""), {"brief": "Existing text"}, "brief")
+    elem = ElementTree.Element("linebreak")
+    result = _append_element_text(elem, scope)
+    assert result.data["brief"] == "Existing text"
 
 
 def _get_path(path: str) -> str:

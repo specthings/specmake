@@ -492,6 +492,15 @@ def _tag_parameterlist(elem: ElementTree.Element, scope: _Scope) -> _Scope:
     return _Scope(scope.item, scope.data, kind)
 
 
+def _tag_parameternamelist(_elem: ElementTree.Element,
+                           scope: _Scope) -> _Scope:
+    # Carries no text of its own. It is a wrapper around <parametername>
+    # that sits inside the same text-accumulating scope as the sibling
+    # <parameterdescription>, so it must not fall through to the generic
+    # tail-capturing fallback in _fill_items.
+    return scope
+
+
 def _tag_parametername(elem: ElementTree.Element, scope: _Scope) -> _Scope:
     scope.data["name"] = elem.text
     try:
@@ -502,13 +511,14 @@ def _tag_parametername(elem: ElementTree.Element, scope: _Scope) -> _Scope:
     return scope
 
 
-def _tag_ref(elem: ElementTree.Element, scope: _Scope) -> _Scope:
-    text = elem.text
-    assert text is not None
+def _append_element_text(elem: ElementTree.Element, scope: _Scope) -> _Scope:
+    """ Appends an element's own text and tail to the current text scope. """
+    text = elem.text or ""
     tail = elem.tail
     if tail is not None:
         text += tail
-    scope.data[scope.key] = f"{scope.data[scope.key].rstrip()} {text}"
+    if text:
+        scope.data[scope.key] = f"{scope.data[scope.key].rstrip()} {text}"
     return scope
 
 
@@ -570,7 +580,8 @@ _TAG_HANDLER = {
     "parameteritem": _tag_parameteritem,
     "parameterlist": _tag_parameterlist,
     "parametername": _tag_parametername,
-    "ref": _tag_ref,
+    "parameternamelist": _tag_parameternamelist,
+    "ref": _append_element_text,
     "sectiondef": _tag_sectiondef,
     "simplesect": _tag_simplesect,
     "title": _tag_title,
@@ -614,7 +625,16 @@ def _get_kind_name(elem: ElementTree.Element) -> tuple[str, str]:
     return kind, name
 
 
-_IGNORE = ("programlisting", "preformatted")
+_IGNORE = (
+    "programlisting",
+    "preformatted",
+    # xrefsect (@todo, @bug, @deprecated, ...) carries its own labelled
+    # text (for example "Todo") via unhandled child tags. Ignoring it
+    # outright prevents that label text and its cross-reference
+    # paragraph from leaking into whatever brief/description field
+    # happens to be the ambient text scope at that point in the tree.
+    "xrefsect",
+)
 
 
 def _fill_items(elem: ElementTree.Element, scope: _Scope) -> None:
@@ -623,6 +643,12 @@ def _fill_items(elem: ElementTree.Element, scope: _Scope) -> None:
     handler = _TAG_HANDLER.get(elem.tag, None)
     if handler is not None:
         scope = handler(elem, scope)
+    elif isinstance(scope.data.get(scope.key), str):
+        # No handler is registered for this tag, but we are accumulating
+        # text for scope.key. Without this, both the element's own text and
+        # everything textually after it in the same field would silently be
+        # dropped, for example any inline Doxygen command other than @ref.
+        scope = _append_element_text(elem, scope)
     for child in elem.findall("*"):
         _fill_items(child, scope)
 
