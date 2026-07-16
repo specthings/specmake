@@ -25,6 +25,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import contextlib
+import glob
 import json
 import os
 import sys
@@ -249,6 +250,31 @@ def _prune(ctx: DoxygenContext, enabled_groups: list[str],
     _save_manifest(manifest_path, new_manifest)
 
 
+def _resolve_xml_files(doxygen_xml_files: list[str],
+                       doxygen_xml_dir: str | None) -> list[str]:
+    """
+    Resolve the Doxygen XML files to process.
+
+    Either from an explicit list or by globbing ``*.xml`` in
+    ``--doxygen-xml-dir``. Exactly one of the two must be given.
+    """
+    if doxygen_xml_dir is not None:
+        if doxygen_xml_files:
+            raise ValueError(
+                "DOXYGEN_XML_FILES and --doxygen-xml-dir are mutually "
+                "exclusive")
+        resolved = sorted(glob.glob(os.path.join(doxygen_xml_dir, "*.xml")))
+        if not resolved:
+            raise ValueError("no *.xml files found in --doxygen-xml-dir "
+                             f"{doxygen_xml_dir!r}")
+        return resolved
+    if not doxygen_xml_files:
+        raise ValueError(
+            "no Doxygen XML files given: pass DOXYGEN_XML_FILES or "
+            "--doxygen-xml-dir")
+    return doxygen_xml_files
+
+
 def clifromsource(argv: list[str] = sys.argv) -> None:
     """
     Generate interface items from Doxygen generated XML files using the
@@ -268,9 +294,15 @@ def clifromsource(argv: list[str] = sys.argv) -> None:
             action="store_true",
             help="remove previously generated items no longer produced by "
             "this run, tracked via a manifest file in spec-directory")
+        parser.add_argument(
+            "--doxygen-xml-dir",
+            type=str,
+            default=None,
+            help="use every *.xml file in this directory instead of "
+            "listing DOXYGEN_XML_FILES individually")
         parser.add_argument("doxygen_xml_files",
                             metavar="DOXYGEN_XML_FILES",
-                            nargs="+",
+                            nargs="*",
                             help="the Doxygen generated XML files")
 
     args = get_arguments(argv[1:],
@@ -279,10 +311,12 @@ def clifromsource(argv: list[str] = sys.argv) -> None:
     config, working_directory = load_specware_config(args.config_file)
     config = config["spec-from-source"]
     with contextlib.chdir(working_directory):
+        xml_files = _resolve_xml_files(args.doxygen_xml_files,
+                                       args.doxygen_xml_dir)
         ctx = DoxygenContext(config,
                              require_enabled_groups=not args.propose_config)
         os.makedirs(ctx.spec_directory, exist_ok=True)
-        ctx.doxygen_xml_to_spec(args.doxygen_xml_files)
+        ctx.doxygen_xml_to_spec(xml_files)
         if args.propose_config:
             _propose_config(ctx, config)
         else:
