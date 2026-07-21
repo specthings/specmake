@@ -638,7 +638,10 @@ class DoxygenContext:
     def __init__(self, config: dict) -> None:
         self.spec_directory = Path(config["spec-directory"])
         self.data: dict = config["data"]
-        self.type_map: dict[str, str] = config.get("type-map", {})
+        # A bare 'type-map:' attribute parses as null, not as an empty
+        # dict. Treat it as absent, otherwise _map_types() raises an
+        # AttributeError on every declaration it processes.
+        self.type_map: dict[str, str] = config.get("type-map") or {}
         self.default_group_name: str | None = config.get("default-group-name")
         self.groups: dict[str, dict[str, str]] = config["groups"]
         self.item_to_group: dict[str,

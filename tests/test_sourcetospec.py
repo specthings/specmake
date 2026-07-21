@@ -1328,3 +1328,40 @@ def test_doxygen_xml_to_spec(tmp_path):
         item.uid
         for item in ctx_2.items_by_name["group"]["DefaultGroup"][0].members()
         if item.kind == "file") == ["/header-default"]
+
+
+def test_doxygen_context_treats_a_null_type_map_as_absent(tmp_path):
+    # A bare 'type-map:' attribute in the configuration parses as null.
+    # The attribute is optional, so validation lets it through, and it
+    # then reaches _map_types() on every declaration.
+    config = {
+        "data": {},
+        "groups": {
+            "FooGroup": {
+                "uid": "/if/group"
+            }
+        },
+        "type-map": None,
+        "spec-directory": str(tmp_path)
+    }
+    ctx = DoxygenContext(config)
+    ctx.doxygen_xml_to_spec([
+        _get_path("source-to-spec/xml/bad_8c.xml"),
+        _get_path("source-to-spec/xml/default_8h.xml"),
+        _get_path("source-to-spec/xml/header_8h.xml"),
+        _get_path("source-to-spec/xml/foobar_8h.xml"),
+        _get_path("source-to-spec/xml/group__DefaultGroup.xml"),
+        _get_path("source-to-spec/xml/group__FooGroup.xml"),
+        _get_path("source-to-spec/xml/source_8c.xml"),
+        _get_path("source-to-spec/xml/structs__0.xml"),
+        _get_path("source-to-spec/xml/structgs__0.xml"),
+        _get_path("source-to-spec/xml/structt__0.xml"),
+        _get_path("source-to-spec/xml/structgt__0.xml"),
+        _get_path("source-to-spec/xml/unionu__0.xml"),
+        _get_path("source-to-spec/xml/uniongu__0.xml"),
+        _get_path("source-to-spec/xml/unionu__1.xml"),
+        _get_path("source-to-spec/xml/uniongu__1.xml")
+    ])
+    for item in ctx.items.values():
+        item.export()
+    assert ctx.type_map == {}
