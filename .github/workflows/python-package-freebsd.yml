@@ -27,10 +27,12 @@ jobs:
       with:
         run: |
           pkg update -f
-          pkg install -y python3 py311-numpy py311-lxml py311-pillow py311-sqlite3 uv cmake gmake git rust
+          pkg install -y python3 py312-numpy py312-lxml py312-pillow py312-sqlite3 uv cmake gmake git rust
           git config --global user.email "you@example.com"
           git config --global user.name "Your Name"
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           export MPLBACKEND=Agg
           export UV_CACHE_DIR="$GITHUB_WORKSPACE/.freebsd/uv"
+          export UV_NO_PYTHON_DOWNLOADS=1
+          export UV_PYTHON=python3
           gmake
