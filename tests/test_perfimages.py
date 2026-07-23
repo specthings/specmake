@@ -24,7 +24,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import multiprocessing
 from pathlib import Path
+
+import pytest
 
 from .util import create_package, get_and_clear_log
 
@@ -48,3 +51,28 @@ def test_perfimages(caplog, tmpdir):
         f"{tmpdir}/pkg/perf-images/a-build-config-key-rtems-req-perf.pdf",
         f"{tmpdir}/pkg/perf-images/a-build-config-key-rtems-req-perf.png"
     ]
+
+
+class _DeadProcess:
+    """ Image worker which dies right away. """
+
+    exitcode = 1
+
+    def __init__(self, target, args, daemon):
+        pass
+
+    def start(self):
+        pass
+
+    def join(self):
+        pass
+
+
+def test_perfimages_worker_died(caplog, tmpdir, monkeypatch):
+    tmp_dir = Path(tmpdir)
+    package = create_package(caplog, tmp_dir, Path("spec-packagebuild"),
+                             ["aggregate-test-results", "performance-images"])
+    uid = "/pkg/deployment/perf-images"
+    monkeypatch.setattr(multiprocessing, "Process", _DeadProcess)
+    with pytest.raises(RuntimeError, match="image workers failed"):
+        package.director.build_package(only=[uid])
