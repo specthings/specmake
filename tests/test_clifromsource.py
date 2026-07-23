@@ -35,6 +35,7 @@ import pytest
 
 from specmake import DoxygenContext
 from specmake.clifromsource import clifromsource
+from specmake.sourcetospec import DoxygenGroup
 
 # bad_f is declared in bad_8c.c, which belongs to no Doxygen group. With
 # no default-group-name configured, nothing associates it with a group
@@ -1316,7 +1317,9 @@ def test_generate_groups_generates_a_shared_header_once(tmp_path, capsys):
         "spec-directory": str(spec_dir),
     }
     _generate(tmp_path, config, _shared_header_xml_files())
-    output = capsys.readouterr().out
+    # Count in the generation listing alone: the manual review section
+    # after it names the same header again by design.
+    output, _, _ = capsys.readouterr().out.partition("\nneeds attention:")
     assert output.count("/if/header-shared") == 1
 
 
@@ -1477,3 +1480,118 @@ def test_apply_replaces_null_attributes_with_their_defaults(tmp_path):
     # The written config is the real test: it has to survive the
     # validation a generation run applies.
     DoxygenContext(written, require_full_config=True)
+
+
+def _needs_attention(output: str) -> dict:
+    """ Parse the 'needs attention' section back into a mapping. """
+    _, _, section = output.partition("needs attention:\n")
+    gaps = {}
+    for line in section.splitlines():
+        uid, _, what = line.strip().partition("  ")
+        gaps[uid] = [entry.strip() for entry in what.split(",")]
+    return gaps
+
+
+def _undocumented_xml_files() -> list[str]:
+    # undocumented: three declarations with no Doxygen comment at all,
+    # covering each combination of parameters and return type: u_0 has
+    # both, u_1 returns void, u_2 takes none.
+    return [
+        _get_path(f"source-to-spec/undocumented/xml/{name}")
+        for name in ("group__UndocumentedAPI.xml", "undocumented_8h.xml")
+    ]
+
+
+def _generate_and_review(tmp_path, capsys, dry_run=False) -> dict:
+    config = {
+        "data": {},
+        "groups": {
+            "UndocumentedAPI": {
+                "uid": "/c/u/if/group"
+            }
+        },
+        "enabled-groups": ["UndocumentedAPI"],
+        "spec-directory": str(tmp_path / "spec"),
+    }
+    _generate(tmp_path, config, _undocumented_xml_files(), dry_run=dry_run)
+    return _needs_attention(capsys.readouterr().out)
+
+
+def test_review_lists_a_group_without_text(tmp_path, capsys):
+    gaps = _generate_and_review(tmp_path, capsys)
+    assert gaps["/c/u/if/group"] == ["missing text"]
+
+
+def test_review_lists_an_undocumented_declaration(tmp_path, capsys):
+    # int u_0(int a) documents nothing, so the tool emits its own brief
+    # placeholder and has neither a parameter nor a return description
+    # to write.
+    gaps = _generate_and_review(tmp_path, capsys)
+    assert gaps["/c/u/if/u-0"] == [
+        "placeholder brief", "undocumented params", "undocumented return"
+    ]
+
+
+def test_review_reports_params_by_description_not_by_count(tmp_path, capsys):
+    # A parameter is missing its description, not its entry: u_1 has a
+    # populated params list and still needs a human, while u_2 takes no
+    # parameters at all and must not be reported for them.
+    gaps = _generate_and_review(tmp_path, capsys)
+    assert "undocumented params" in gaps["/c/u/if/u-1"]
+    assert "undocumented params" not in gaps["/c/u/if/u-2"]
+
+
+def test_review_reports_a_return_only_for_a_non_void_declaration(
+        tmp_path, capsys):
+    # void u_1(int a) has no return to document, unlike int u_2(void).
+    gaps = _generate_and_review(tmp_path, capsys)
+    assert "undocumented return" in gaps["/c/u/if/u-2"]
+    assert "undocumented return" not in gaps["/c/u/if/u-1"]
+
+
+def test_review_is_reported_for_a_dry_run(tmp_path, capsys):
+    gaps = _generate_and_review(tmp_path, capsys, dry_run=True)
+    assert gaps["/c/u/if/u-0"][0] == "placeholder brief"
+    assert not (tmp_path / "spec").exists()
+
+
+def test_review_is_silent_when_nothing_needs_attention(tmp_path, capsys):
+    _generate(
+        tmp_path, {
+            "data": {},
+            "groups": {},
+            "enabled-groups": [],
+            "spec-directory": str(tmp_path / "spec"),
+        }, _undocumented_xml_files())
+    assert "needs attention" not in capsys.readouterr().out
+
+
+def test_review_omits_missing_text_when_a_group_has_one():
+    # Nothing in a Doxygen group supplies text today, so this is the
+    # only way to reach the case. The check stays computed rather than
+    # unconditional so that the report follows the data if the tool
+    # ever learns to derive text.
+    group = DoxygenGroup(None, "group", "id_0", "SomeGroup")
+    group.data = {"brief": "Brief SomeGroup."}
+    assert group._review_gaps({"text": "Text SomeGroup."}) == []
+
+
+def test_review_is_reported_after_pruning(tmp_path, capsys):
+    # What still needs a human is the point of the run, so it has to be
+    # the last thing reported rather than something buried above the
+    # pruning summary.
+    config = {
+        "data": {},
+        "groups": {
+            "UndocumentedAPI": {
+                "uid": "/c/u/if/group"
+            }
+        },
+        "enabled-groups": ["UndocumentedAPI"],
+        "spec-directory": str(tmp_path / "spec"),
+    }
+    _generate(tmp_path, config, _undocumented_xml_files())
+    capsys.readouterr()
+    _generate(tmp_path, config, _undocumented_xml_files(), prune=True)
+    output = capsys.readouterr().out
+    assert output.index("pruned") < output.index("needs attention:")

@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.17.0" xml:lang="en-US">
+  <compounddef id="undocumented_8h" kind="file" language="C++">
+    <compoundname>undocumented.h</compoundname>
+    <sectiondef kind="func">
+      <memberdef kind="function" id="undocumented_8h_1a1b4a5c6b82883e84dc81691f9303efda" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int u_0</definition>
+        <argsstring>(int a)</argsstring>
+        <name>u_0</name>
+        <param>
+          <type>int</type>
+          <declname>a</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="undocumented.h" line="15" column="5" declfile="undocumented.h" declline="15" declcolumn="5"/>
+      </memberdef>
+      <memberdef kind="function" id="undocumented_8h_1aa1d540de0f828faec50d94b526e617b0" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void u_1</definition>
+        <argsstring>(int a)</argsstring>
+        <name>u_1</name>
+        <param>
+          <type>int</type>
+          <declname>a</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="undocumented.h" line="17" column="6" declfile="undocumented.h" declline="17" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="undocumented_8h_1acb317d91d29eecaf2870fedba68347ed" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>int</type>
+        <definition>int u_2</definition>
+        <argsstring>(void)</argsstring>
+        <name>u_2</name>
+        <param>
+          <type>void</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="undocumented.h" line="19" column="5" declfile="undocumented.h" declline="19" declcolumn="5"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>This header file provides the undocumented API. </para>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15" refid="undocumented_8h_1a1b4a5c6b82883e84dc81691f9303efda" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="undocumented_8h_1a1b4a5c6b82883e84dc81691f9303efda" kindref="member">u_0</ref>(<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>a<sp/>);</highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight></codeline>
+<codeline lineno="17" refid="undocumented_8h_1aa1d540de0f828faec50d94b526e617b0" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="undocumented_8h_1aa1d540de0f828faec50d94b526e617b0" kindref="member">u_1</ref>(<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>a<sp/>);</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="19" refid="undocumented_8h_1acb317d91d29eecaf2870fedba68347ed" refkind="member"><highlight class="normal"></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/><ref refid="undocumented_8h_1acb317d91d29eecaf2870fedba68347ed" kindref="member">u_2</ref>(<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>);</highlight></codeline>
+    </programlisting>
+    <location file="undocumented.h"/>
+  </compounddef>
+</doxygen>

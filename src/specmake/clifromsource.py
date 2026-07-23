@@ -29,13 +29,16 @@ import glob
 import json
 import os
 import sys
+from typing import NamedTuple
+
 import yaml
 
 from specitems import atomic_dump_to_file, get_arguments
 from specware import load_specware_config
 
 from .sourcetospec import (ConfigError, DoxygenContext, DoxygenEnum,
-                           DoxygenGroup, DoxygenFile, DoxygenTypedef)
+                           DoxygenGroup, DoxygenFile, DoxygenItem,
+                           DoxygenTypedef)
 
 
 def _propose_config(ctx: DoxygenContext, config: dict) -> None:
@@ -86,20 +89,37 @@ def _apply_config(ctx: DoxygenContext, config: dict, config_file: str) -> None:
     print(f"applied proposed configuration to {config_file}")
 
 
+def _record_gaps(gaps: dict[str, list[str]], item: DoxygenItem) -> None:
+    """ Record an item's manual review gaps, if it has any. """
+    item_gaps = item.review_gaps
+    if item_gaps:
+        gaps[item.uid] = item_gaps
+
+
+class _HeaderResult(NamedTuple):
+    """ What generating one header produced. """
+
+    uids: list[str]
+    typedefs_skipped: int
+    gaps: dict[str, list[str]]
+
+
 def _generate_header(header: DoxygenFile,
-                     dry_run: bool = False) -> tuple[list[str], int]:
+                     dry_run: bool = False) -> _HeaderResult:
     """
     Generate a header and its members.
 
     With ``dry_run``, only reports what would be generated. Returns
-    every (would-be) saved UID, and how many typedefs were skipped
-    because they merely alias a compound (struct/union/enum) item
-    saved under the same UID.
+    every (would-be) saved UID, how many typedefs were skipped because
+    they merely alias a compound (struct/union/enum) item saved under
+    the same UID, and the manual review gaps per UID.
     """
     print("  ", header.uid)
     if not dry_run:
         header.save()
     uids = [header.uid]
+    gaps: dict[str, list[str]] = {}
+    _record_gaps(gaps, header)
     typedefs_skipped = 0
     for header_member in header.members():
         if (isinstance(header_member, DoxygenTypedef)
@@ -112,13 +132,32 @@ def _generate_header(header: DoxygenFile,
         if not dry_run:
             header_member.save()
         uids.append(header_member.uid)
+        _record_gaps(gaps, header_member)
         if isinstance(header_member, DoxygenEnum):
             for enumerator in header_member.members():
                 print("      ", enumerator.uid)
                 if not dry_run:
                     enumerator.save()
                 uids.append(enumerator.uid)
-    return uids, typedefs_skipped
+                _record_gaps(gaps, enumerator)
+    return _HeaderResult(uids, typedefs_skipped, gaps)
+
+
+def _print_gaps(gaps: dict[str, list[str]]) -> None:
+    """
+    Report every item a human still has to complete by hand.
+
+    There is nothing in an undocumented declaration for the tool to
+    invent a description from, so these items are expected rather than
+    wrong. Listing them keeps a bootstrap run's manual review to the
+    items which need it instead of every generated file.
+    """
+    if not gaps:
+        return
+    width = max(len(uid) for uid in gaps)
+    print("\nneeds attention:")
+    for uid in sorted(gaps):
+        print(f"  {uid.ljust(width)}  {', '.join(gaps[uid])}")
 
 
 def _reachable_headers(group: DoxygenGroup) -> list[DoxygenFile]:
@@ -168,18 +207,26 @@ def _record_owner(generated: dict[str, list[str]], uid: str,
         owners.append(group_name)
 
 
+class _GroupsResult(NamedTuple):
+    """ What generating every enabled group produced. """
+
+    generated: dict[str, list[str]]
+    gaps: dict[str, list[str]]
+
+
 def _generate_groups(ctx: DoxygenContext,
                      config: dict,
-                     dry_run: bool = False) -> dict[str, list[str]]:
+                     dry_run: bool = False) -> _GroupsResult:
     """
     Generate every enabled group's contents.
 
     With ``dry_run``, only reports what would be generated without
     writing anything. Returns every (would-be) generated item's UID
     mapped to the names of the enabled groups that own it, for
-    ``--prune`` to compare against a previous run's manifest. A header
-    reachable from several enabled groups is owned by all of them, so
-    ownership is a list rather than a single name.
+    ``--prune`` to compare against a previous run's manifest, and the
+    manual review gaps per UID. A header reachable from several enabled
+    groups is owned by all of them, so ownership is a list rather than
+    a single name.
     """
     generated: dict[str, list[str]] = {}
     # A header carrying several @ingroup blocks, or one reached
@@ -192,6 +239,7 @@ def _generate_groups(ctx: DoxygenContext,
     header_uids: dict[str, list[str]] = {}
     groups_processed = 0
     typedefs_skipped = 0
+    gaps: dict[str, list[str]] = {}
     for group in sorted(ctx.items_by_kind["group"].values()):
         assert isinstance(group, DoxygenGroup)
         if group.name not in config["enabled-groups"]:
@@ -200,6 +248,7 @@ def _generate_groups(ctx: DoxygenContext,
         if not dry_run:
             group.save()
         _record_owner(generated, group.uid, group.name)
+        _record_gaps(gaps, group)
         groups_processed += 1
         for header in _reachable_headers(group):
             uids = header_uids.get(header.doxygen_id)
@@ -207,9 +256,10 @@ def _generate_groups(ctx: DoxygenContext,
                 # Counted here rather than per owner, so a header shared
                 # by several groups contributes its skipped typedefs to
                 # the run's total once.
-                uids, header_typedefs_skipped = _generate_header(
-                    header, dry_run=dry_run)
-                typedefs_skipped += header_typedefs_skipped
+                result = _generate_header(header, dry_run=dry_run)
+                uids = result.uids
+                typedefs_skipped += result.typedefs_skipped
+                gaps.update(result.gaps)
                 header_uids[header.doxygen_id] = uids
             for uid in uids:
                 _record_owner(generated, uid, group.name)
@@ -220,7 +270,7 @@ def _generate_groups(ctx: DoxygenContext,
         summary += (f", {typedefs_skipped} typedef(s) skipped as "
                     "compound aliases")
     print(summary)
-    return generated
+    return _GroupsResult(generated, gaps)
 
 
 _MANIFEST_FILENAME = ".specfromsource-manifest.json"
@@ -416,12 +466,16 @@ def _run(args) -> None:
             else:
                 _propose_config(ctx, config)
         else:
-            generated = _generate_groups(ctx, config, dry_run=args.dry_run)
+            result = _generate_groups(ctx, config, dry_run=args.dry_run)
             if args.prune:
                 _prune(ctx,
                        config["enabled-groups"],
-                       generated,
+                       result.generated,
                        dry_run=args.dry_run)
+            # Last, so that what still needs a human is the final thing
+            # the run reports rather than something buried above the
+            # pruning summary.
+            _print_gaps(result.gaps)
 
 
 def clifromsource(argv: list[str] = sys.argv) -> None:

@@ -192,6 +192,30 @@ class DoxygenItem:
         path.parent.mkdir(parents=True, exist_ok=True)
         save_data(str(path), self.export())
 
+    @property
+    def review_gaps(self) -> list[str]:
+        """ List what a human still has to supply for this item. """
+        return self._review_gaps(self.export())
+
+    def _review_gaps(self, data: dict) -> list[str]:
+        gaps = []
+        if self._get_optional_text("brief") is None:
+            gaps.append("placeholder brief")
+        if any(not param["description"] for param in data.get("params") or []):
+            gaps.append("undocumented params")
+        # Only a function-like item carries the definition mapping with
+        # a declared return type. A compound has a list of members here,
+        # a typedef or a plain define a string, and none of them has a
+        # return to document. A void function has none either, which is
+        # why the declared type decides this and not a null 'return'.
+        definition = data.get("definition")
+        default = definition.get("default") if isinstance(definition,
+                                                          dict) else None
+        if (data.get("return") is None and isinstance(default, dict)
+                and default["return"] is not None):
+            gaps.append("undocumented return")
+        return gaps
+
     def _get_initializer(self) -> str | None:
         body = self.data.get("initializer", None)
         if body is None:
@@ -403,6 +427,12 @@ class DoxygenGroup(DoxygenContainer):
         data["interface-type"] = "group"
         data["identifier"] = self.name
         return data
+
+    def _review_gaps(self, data: dict) -> list[str]:
+        gaps = super()._review_gaps(data)
+        if not data.get("text"):
+            gaps.append("missing text")
+        return gaps
 
 
 class DoxygenStruct(DoxygenCompound):
