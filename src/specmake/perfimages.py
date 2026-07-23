@@ -114,10 +114,17 @@ _PDF_METADATA = {"creationDate": None}
 def _histogram(title: str, base: str, env_data: dict) -> None:
     scale, unit = _scale_and_unit(env_data["q2"])
     scaled_samples = list(scale * sample for sample in env_data["samples"])
+    q123 = [
+        scale * env_data["q1"], scale * env_data["q2"], scale * env_data["q3"]
+    ]
     fig, axes = plt.subplots()
     axes.set_title(title)
     axes.set_xlabel(f"Runtime [{unit}]")
-    axes.set_xlim(scale * env_data["min"], scale * env_data["max"])
+    # Quartiles reported by the target may lie outside the sample range. Keep
+    # them within the limits, otherwise their labels are rendered far off the
+    # canvas and the glyph rasterization fails.
+    axes.set_xlim(min(scale * env_data["min"], *q123),
+                  max(scale * env_data["max"], *q123))
     axes.set_ylabel("Sample Count")
     ymax = len(scaled_samples)
     ymin = 0
@@ -130,9 +137,6 @@ def _histogram(title: str, base: str, env_data: dict) -> None:
               histtype="step",
               color="black",
               cumulative=True)
-    q123 = [
-        scale * env_data["q1"], scale * env_data["q2"], scale * env_data["q3"]
-    ]
     plt.vlines(q123, ymin=ymin, ymax=ymax)
     for i, quartile in enumerate(q123):
         plt.text(quartile, (2 * i + 1) * ymax / 8, f"Q{i + 1}")
