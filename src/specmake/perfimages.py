@@ -213,6 +213,13 @@ class BuildPerformanceImages(DirectoryState):
             processes.append(process)
         for process in processes:
             process.join()
+        failed = [process for process in processes if process.exitcode != 0]
+        if failed:
+            # Workers which died left their work items in the queue. Discard
+            # them, otherwise the queue feeder thread blocks the process exit.
+            work_queue.cancel_join_thread()
+            raise RuntimeError(f"{self.uid}: {len(failed)} of "
+                               f"{len(processes)} image workers failed")
         self.set_files(self._perf_files)
 
         self.description.add(f"""Produce performance images in directory
