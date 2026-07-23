@@ -393,6 +393,62 @@ def test_clifromsource_reports_an_invalid_config(tmp_path):
     assert "invalid 'spec-from-source'" in str(excinfo.value)
 
 
+def _apply_raw(tmp_path, content: str | None) -> dict:
+    """
+    Run ``--propose-config --apply`` against a raw or absent config.
+
+    Writes the file verbatim instead of through ``_write_config``,
+    which always wraps its argument in a ``spec-from-source`` mapping
+    and so cannot express a null or non-mapping configuration.
+    """
+    config_file = tmp_path / "specware.yml"
+    if content is not None:
+        with open(config_file, "w", encoding="utf-8") as dst:
+            dst.write(content)
+    clifromsource([
+        "specfromsource", "--config-file",
+        str(config_file), "--propose-config", "--apply",
+        *_foo_group_xml_files()
+    ])
+    with open(config_file, encoding="utf-8") as src:
+        return yaml.safe_load(src)["spec-from-source"]
+
+
+def test_propose_config_bootstraps_from_a_missing_config_file(tmp_path):
+    assert "FooGroup" in _apply_raw(tmp_path, None)["groups"]
+
+
+def test_propose_config_bootstraps_from_an_empty_config_file(tmp_path):
+    assert "FooGroup" in _apply_raw(tmp_path, "")["groups"]
+
+
+def test_propose_config_bootstraps_from_a_null_spec_from_source(tmp_path):
+    assert "FooGroup" in _apply_raw(tmp_path, "spec-from-source:\n")["groups"]
+
+
+@pytest.mark.parametrize("content", ["hello\n", "- a\n- b\n"])
+def test_propose_config_reports_a_non_mapping_config(tmp_path, content):
+    with pytest.raises(SystemExit) as excinfo:
+        _apply_raw(tmp_path, content)
+    assert "does not contain a mapping" in str(excinfo.value)
+
+
+def test_propose_config_reports_a_non_mapping_spec_from_source(tmp_path):
+    with pytest.raises(SystemExit) as excinfo:
+        _apply_raw(tmp_path, "spec-from-source: hello\n")
+    assert "is not a mapping" in str(excinfo.value)
+
+
+def test_propose_config_reports_a_missing_parent_directory(tmp_path):
+    with pytest.raises(SystemExit) as excinfo:
+        clifromsource([
+            "specfromsource", "--config-file",
+            str(tmp_path / "typo" / "specware.yml"), "--propose-config",
+            "--apply", *_foo_group_xml_files()
+        ])
+    assert "there is no directory" in str(excinfo.value)
+
+
 def test_generate_writes_the_enabled_group_contents(tmp_path):
     spec_dir = tmp_path / "spec"
     config = {

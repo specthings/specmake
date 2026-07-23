@@ -343,6 +343,48 @@ def _resolve_xml_files(doxygen_xml_files: list[str],
     return doxygen_xml_files
 
 
+def _bootstrap_directory(config_file: str | None) -> str:
+    """
+    Return the working directory for a bootstrapped configuration.
+
+    The configuration file does not exist yet, so take the directory it
+    would live in, just like an existing file's directory is used.
+    """
+    if config_file is None:
+        return "."
+    directory = os.path.dirname(config_file) or "."
+    if not os.path.isdir(directory):
+        raise ConfigError(f"cannot bootstrap {config_file}: there is no "
+                          f"directory {directory}")
+    return directory
+
+
+def _spec_from_source(config, config_file: str | None) -> dict:
+    """
+    Return the 'spec-from-source' attribute of the configuration.
+
+    A null configuration file and a null attribute both count as an
+    empty mapping, so that --propose-config can bootstrap from them.
+    """
+    name = config_file or "specware.yml"
+    if config is None:
+        return {}
+    if not isinstance(config, dict):
+        raise ConfigError(f"{name} does not contain a mapping")
+    try:
+        spec_from_source = config["spec-from-source"]
+    except KeyError as err:
+        raise ConfigError(f"{name} is missing the top-level "
+                          "'spec-from-source' attribute") from err
+    if spec_from_source is None:
+        return {}
+    if not isinstance(spec_from_source, dict):
+        raise ConfigError(
+            f"{name} has a 'spec-from-source' attribute which is not a "
+            "mapping")
+    return spec_from_source
+
+
 def _run(args) -> None:
     if args.apply and not args.propose_config:
         raise ConfigError("--apply requires --propose-config")
@@ -351,19 +393,14 @@ def _run(args) -> None:
     try:
         config, working_directory = load_specware_config(args.config_file)
     except FileNotFoundError as err:
-        if not args.propose_config or args.config_file is not None:
+        if not args.propose_config:
             raise ConfigError(str(err)) from err
         # --propose-config exists to bootstrap a config in the first
-        # place: with no --config-file given and no specware.yml
-        # discovered nearby, propose one from just the Doxygen XML
-        # instead of requiring a placeholder file to already exist.
-        config, working_directory = {"spec-from-source": {}}, "."
-    try:
-        config = config["spec-from-source"]
-    except KeyError as err:
-        raise ConfigError(
-            f"{args.config_file or 'specware.yml'} is missing the "
-            "top-level 'spec-from-source' attribute") from err
+        # place: propose one from just the Doxygen XML instead of
+        # requiring a placeholder file to already exist.
+        config = None
+        working_directory = _bootstrap_directory(args.config_file)
+    config = _spec_from_source(config, args.config_file)
     config_file_name = os.path.basename(args.config_file or "specware.yml")
     with contextlib.chdir(working_directory):
         xml_files = _resolve_xml_files(args.doxygen_xml_files,
