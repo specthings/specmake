@@ -258,6 +258,7 @@ The Title
 The \\break \\break Title
 {term}`Term`
 {term}`Terms <Term>`
+{term}`target`
 text
 `blub()`
 text
@@ -702,7 +703,7 @@ This type is used by the following types:
         assert src.read() == """.. SPDX-License-Identifier: CC-BY-SA-4.0
 
 .. Copyright (C) 2023 Alice
-.. Copyright (C) 2020 embedded brains GmbH & Co. KG
+.. Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 
 .. _TermsDefinitionsAndAbbreviatedTerms:
 
@@ -710,6 +711,9 @@ Terms, definitions and abbreviated terms
 ########################################
 
 .. glossary::
+
+    target
+        The target.
 
     Term
         This is the term.
