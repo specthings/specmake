@@ -438,7 +438,7 @@ Initial release.
 
 .. table::
     :class: longtable
-    :widths: 16 26 30 28
+    :widths: 16,26,30,28
 
     +--------------+---------------------+-------------------+-----------+
     | Action       | Name                | Organization      | Signature |
@@ -864,3 +864,25 @@ Epilogue"""
 - `The Title 2, Name <pkg/doc-2/path#label>`__ :cite:`PkgDeploymentDoc2`
 
 - **The Title - More** :cite:`RefMisc`"""
+
+
+def test_contributors_myst(caplog, tmp_path):
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
+                             ["sphinx-builder"])
+    doc = package.director["/pkg/deployment/doc"]
+    doc.mapper.set_format("x.md")
+    assert doc.substitute("${.:/document-contributors}") == """```{eval-rst}
+.. table::
+    :class: longtable
+    :widths: 16,26,30,28
+
+    +--------------+---------------------+-------------------+-----------+
+    | Action       | Name                | Organization      | Signature |
+    +==============+=====================+===================+===========+
+    | Written by   | John Doe            | Some Organization |           |
+    +              +---------------------+-------------------+-----------+
+    |              | Foo Bar             | Bár Organization  |           |
+    +--------------+---------------------+-------------------+-----------+
+    | Super Action | This is a Long Name | Short             |           |
+    +--------------+---------------------+-------------------+-----------+
+```"""
