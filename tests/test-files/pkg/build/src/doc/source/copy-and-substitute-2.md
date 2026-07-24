@@ -18,6 +18,7 @@ ${.:/document-release}
 ${.:/document-title-page-title}
 ${/glossary/term:/term}
 ${/glossary/term:/plural}
+${/glossary/target:/term}
 text
 ${/rtems/if/func:/name}
 text

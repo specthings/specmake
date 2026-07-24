@@ -930,6 +930,10 @@ class SphinxBuilder(DirectoryState):
         document_config = DocumentGlossaryConfig(
             target=target,
             header="Terms, definitions and abbreviated terms",
+            md_source_paths=[
+                str(os.path.join(build_dir, "source")),
+                str(os.path.join(build_dir, "include"))
+            ],
             rest_source_paths=[
                 str(os.path.join(build_dir, "source")),
                 str(os.path.join(build_dir, "include"))
