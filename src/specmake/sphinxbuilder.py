@@ -35,7 +35,7 @@ import shutil
 from typing import Any, Callable, Iterator, Optional
 import yaml
 
-from specitems import (BibTeXCitationProvider, Copyrights,
+from specitems import (ROW_SPAN, BibTeXCitationProvider, Copyrights,
                        DocumentGlossaryConfig, GlossaryConfig, Item, ItemCache,
                        ItemGetValueContext, ItemMapper, ItemValueProvider,
                        Link, SphinxContent, TextContent, generate_glossary,
@@ -113,53 +113,24 @@ def _no_action(_source_dir: str, _build_dir: str,
     pass
 
 
-def _sep(seps: tuple[str, ...], maxi: tuple[int, ...]) -> str:
-    return "+" + "+".join(f"{sep * (val + 2)}"
-                          for sep, val in zip(seps, maxi)) + "+"
-
-
-def _row(row: tuple[str, ...], maxi: tuple[int, ...]) -> str:
-    return "|" + "|".join(f" {cell:{width}} "
-                          for cell, width in zip(row, maxi)) + "|"
-
-
 def _get_contributors(ctx: ItemGetValueContext) -> str:
-    # pylint: disable=too-many-locals
-    rows = [("Action", "Name", "Organization", "Signature")]
-    maxi = tuple(map(len, rows[0]))
+    header = ("Action", "Name", "Organization", "Signature")
+    rows: list[tuple[str | int, str, str, str]] = [header]
+    last_action = ""
     for action in ctx.mapper.substitute_data(
             ctx.item["document-contributors"]):
+        name = action["action"]
         for contributor in action["contributors"]:
             first = contributor["first-name"]
             last = contributor["last-name"]
-            row = (action["action"], f"{first} {last}",
-                   contributor["organization"], "")
-            rows.append(row)
-            row_lengths = tuple(map(len, row))
-            maxi = tuple(map(max, zip(maxi, row_lengths)))
-    sep_0 = _sep(("-", "-", "-", "-"), maxi)
-    sep_1 = _sep(("=", "=", "=", "="), maxi)
-    sep_2 = _sep((" ", "-", "-", "-"), maxi)
-    lines = [sep_0, _row(rows[0], maxi)]
-    last_action = rows[0][0]
-    for row in rows[1:]:
-        if last_action == "Action":
-            lines.append(sep_1)
-            last_action = row[0]
-        elif last_action == row[0]:
-            lines.append(sep_2)
-            row = ("", row[1], row[2], row[3])
-        else:
-            lines.append(sep_0)
-            last_action = row[0]
-        lines.append(_row(row, maxi))
-    lines.append(sep_0)
+            action_cell = ROW_SPAN if name == last_action else name
+            rows.append((action_cell, f"{first} {last}",
+                         contributor["organization"], ""))
+            last_action = name
     mapper = ctx.mapper
     assert isinstance(mapper, BuildItemMapper)
     content = mapper.create_content()
-    with content.directive(
-            "table", options=[":class: longtable", ":widths: 16 26 30 28"]):
-        content.add(lines)
+    content.add_grid_table(rows, widths=[16, 26, 30, 28], header_rows=1)
     return content.join()
 
 
