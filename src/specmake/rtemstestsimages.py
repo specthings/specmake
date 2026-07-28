@@ -41,6 +41,7 @@ from .pkgitems import PackageBuildDirector
 from .testaggregator import TestAggregator
 
 logging.getLogger("matplotlib").setLevel(logging.WARNING)
+logging.getLogger("PIL").setLevel(logging.WARNING)
 
 
 def _default_files(base: str) -> list[str]:
