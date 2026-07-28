@@ -37,6 +37,7 @@ from .pkgitems import PackageBuildDirector
 from .testaggregator import TestAggregator
 
 logging.getLogger("matplotlib").setLevel(logging.WARNING)
+logging.getLogger("PIL").setLevel(logging.WARNING)
 
 
 def environment_order(env_name_data: dict) -> int:
