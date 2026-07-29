@@ -187,6 +187,24 @@ class DoxygenItem:
         data.update(self.ctx.data)
         return data
 
+    def group_config(self) -> dict[str, Any]:
+        """
+        Is the configuration of the group of the item.
+
+        A group item carries the configuration of its own name.  Every
+        other item takes it from the group it belongs to, which may be
+        absent, so resolve it without the exception raised by the group
+        property.
+        """
+        group: DoxygenItem | None
+        if isinstance(self, DoxygenGroup):
+            group = self
+        else:
+            group = next(self.groups, None)
+        if group is None:
+            return {}
+        return self.ctx.groups.get(group.name, {})
+
     def add_extra_links(self, data: dict) -> None:
         """
         Add the links configured for the group of the item.
@@ -200,23 +218,11 @@ class DoxygenItem:
         ``interface-type`` used to select them is set by the subclasses
         after ``export()`` returned.
         """
-        # A group item carries the configuration of its own name.  Every
-        # other item takes it from the group it belongs to, which may be
-        # absent, so resolve it without the exception raised by the group
-        # property.
-        group: DoxygenItem | None
-        if isinstance(self, DoxygenGroup):
-            group = self
-        else:
-            group = next(self.groups, None)
-        if group is None:
-            return
         interface_type = data.get("interface-type")
         # A bare 'extra-links:' attribute parses as null, not as an
         # empty list, so treat it as absent rather than iterating over
         # None.
-        config = self.ctx.groups.get(group.name, {})
-        for link in config.get("extra-links") or []:
+        for link in self.group_config().get("extra-links") or []:
             interface_types = link.get("interface-types")
             if interface_types is not None \
                and interface_type not in interface_types:
@@ -288,7 +294,9 @@ class DoxygenItem:
 
     def _review_gaps(self, data: dict) -> list[str]:
         gaps = []
-        if self._get_optional_text("brief") is None:
+        # An item type without a brief attribute, for example an
+        # unspecified header file, has no brief to complete by hand.
+        if "brief" in data and self._get_optional_text("brief") is None:
             gaps.append("placeholder brief")
         if any(not param["description"] for param in data.get("params") or []):
             gaps.append("undocumented params")
@@ -508,12 +516,32 @@ class DoxygenFile(DoxygenContainer):
     def is_header(self) -> bool:
         return self.name.endswith(".h")
 
+    @property
+    def header_interface_type(self) -> str:
+        """
+        Is the interface type used for the header file item.
+
+        A ``header-file`` item is the source of the generated header,
+        while an ``unspecified-header-file`` item merely refers to a
+        header which already exists and is itself the source of truth.
+        """
+        return self.group_config().get("header-interface-type", "header-file")
+
     def export(self) -> dict:
         data = super().export()
         del data["name"]
-        data["interface-type"] = "header-file"
+        interface_type = self.header_interface_type
+        data["interface-type"] = interface_type
         data["path"] = self.name
-        data["prefix"] = ""
+        if interface_type == "unspecified-header-file":
+            # The header is the source of truth, so the item specifies
+            # no content of its own and has no place in an interface
+            # domain to prefix a generated header with.
+            for key in ("brief", "description", "notes"):
+                del data[key]
+            data["references"] = []
+        else:
+            data["prefix"] = ""
         return data
 
 
@@ -533,6 +561,18 @@ class DoxygenGroup(DoxygenContainer):
     def uid(self) -> str:
         return self.ctx.groups.get(self.name, {}).get("uid",
                                                       f"/{self.name.lower()}")
+
+    @property
+    def generate_item(self) -> bool:
+        """
+        Indicates if a specification item is generated for the group.
+
+        A project may have a hand-written item at the group uid, for
+        example a design group requirement the generated items link to
+        with an interface ingroup role.  Generating the group item would
+        replace it.
+        """
+        return self.group_config().get("generate-group-item", True)
 
     def export(self) -> dict:
         data = super().export()
@@ -893,6 +933,27 @@ def _validate_extra_links(errors: list[str], path: str, links: Any) -> None:
                               interface_types)
 
 
+_HEADER_INTERFACE_TYPES = ("header-file", "unspecified-header-file")
+
+
+def _validate_group_entry(errors: list[str], name: str, entry: dict) -> None:
+    """ Validate a single ``groups`` entry of the configuration. """
+    if entry.get("extra-links") is not None:
+        _validate_extra_links(errors, f"/groups/{name}/extra-links",
+                              entry["extra-links"])
+    generate_group_item = entry.get("generate-group-item")
+    if generate_group_item is not None and not isinstance(
+            generate_group_item, bool):
+        errors.append(f"/groups/{name}/generate-group-item must be a boolean, "
+                      f"got {generate_group_item!r}")
+    header_interface_type = entry.get("header-interface-type")
+    if (header_interface_type is not None
+            and header_interface_type not in _HEADER_INTERFACE_TYPES):
+        expected = " or ".join(repr(t) for t in _HEADER_INTERFACE_TYPES)
+        errors.append(f"/groups/{name}/header-interface-type must be "
+                      f"{expected}, got {header_interface_type!r}")
+
+
 _FILTER_ACTIONS = ("include", "exclude")
 
 
@@ -927,9 +988,8 @@ def _validate_groups(errors: list[str], groups: dict) -> None:
             errors.append(f"/groups has a non-string key {name!r}")
         elif not isinstance(entry, dict):
             errors.append(f"/groups/{name} must be a dict, got {entry!r}")
-        elif entry.get("extra-links") is not None:
-            _validate_extra_links(errors, f"/groups/{name}/extra-links",
-                                  entry["extra-links"])
+        else:
+            _validate_group_entry(errors, name, entry)
 
 
 def _validate_item_to_group(errors: list[str], item_to_group: dict) -> None:
