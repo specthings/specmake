@@ -56,6 +56,8 @@ _INVALID_NAME_CHARS = re.compile(r"[^a-zA-Z0-9]+")
 
 _FUNCTION_POINTER = re.compile(r"([^(]+)\(\*\)\((.*)")
 
+_COMMENT = re.compile(r"/\*.*?\*/|//[^\n]*", re.DOTALL)
+
 
 def _slugify(name: str) -> str:
     """ Convert a name to the lowercase, hyphenated form used in UIDs. """
@@ -443,7 +445,12 @@ class DoxygenDefine(DoxygenItem):
         name is the name of the header it is declared in, in the spelling
         conventionally used for a guard.
         """
-        if self._get_initializer() is not None:
+        # A guard is often followed by a comment explaining it, and
+        # Doxygen reports that comment as the value of the define.  Only
+        # what remains after removing the comments decides whether the
+        # define has a value.
+        initializer = self._get_initializer()
+        if initializer is not None and _COMMENT.sub("", initializer).strip():
             return False
         try:
             file = self.file
