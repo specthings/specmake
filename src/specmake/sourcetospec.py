@@ -27,6 +27,7 @@
 # pylint: disable=too-many-lines
 
 import dataclasses
+import fnmatch
 from pathlib import Path
 import posixpath
 import re
@@ -186,11 +187,99 @@ class DoxygenItem:
         data.update(self.ctx.data)
         return data
 
+    def add_extra_links(self, data: dict) -> None:
+        """
+        Add the links configured for the group of the item.
+
+        Some links cannot be derived from the source, for example the
+        constraint of a directive.  Without them, a regeneration would
+        drop links a previous run had and the items would have to be
+        edited by hand afterwards.
+
+        The links are added here rather than in ``export()``, since the
+        ``interface-type`` used to select them is set by the subclasses
+        after ``export()`` returned.
+        """
+        # A group item carries the configuration of its own name.  Every
+        # other item takes it from the group it belongs to, which may be
+        # absent, so resolve it without the exception raised by the group
+        # property.
+        group: DoxygenItem | None
+        if isinstance(self, DoxygenGroup):
+            group = self
+        else:
+            group = next(self.groups, None)
+        if group is None:
+            return
+        interface_type = data.get("interface-type")
+        # A bare 'extra-links:' attribute parses as null, not as an
+        # empty list, so treat it as absent rather than iterating over
+        # None.
+        config = self.ctx.groups.get(group.name, {})
+        for link in config.get("extra-links") or []:
+            interface_types = link.get("interface-types")
+            if interface_types is not None \
+               and interface_type not in interface_types:
+                continue
+            data["links"].append({"role": link["role"], "uid": link["uid"]})
+
     def save(self) -> None:
         """ Saves the exported item. """
         path = self.ctx.spec_directory / f"{self.uid[1:]}.yml"
         path.parent.mkdir(parents=True, exist_ok=True)
-        save_data(str(path), self.export())
+        data = self.export()
+        self.add_extra_links(data)
+        save_data(str(path), data)
+
+    @property
+    def is_excluded(self) -> bool:
+        """
+        Indicates if the item is left out of the generation.
+
+        An interface item is generated only for what the specification
+        covers.  A declaration which is not part of the interface, for
+        example an include guard or a symbol of a source file which is
+        not built, would otherwise have to be deleted after every run.
+
+        The ``filter`` selects them.  It is a list of ``include`` and
+        ``exclude`` rules, each holding fnmatch patterns.  The rules are
+        evaluated in order and the first one with a matching pattern
+        decides, so a family is included as a whole and the few members
+        which are not part of the interface are excluded by a rule
+        placed before it.
+
+        An item no rule matches stays.  A configuration which specifies
+        its interface therefore ends the filter with an ``exclude`` of
+        ``'*'``.  A filter of excludes alone cannot express that: a
+        register map holds thousands of names, so the rules would have
+        to name each one, and a name added by a later vendor release
+        would enter the interface unnoticed.
+
+        A header file or a group is structural rather than a
+        declaration.  The filter does not apply to it, so that the
+        ``interface-placement`` of an included item still resolves and
+        the header keeps saying that it is delivered.
+        """
+        if self.is_header or isinstance(self, DoxygenGroup):
+            return False
+        for rule in self.ctx.filter:
+            for action, patterns in rule.items():
+                if self.matches_any(patterns):
+                    return action == "exclude"
+        return False
+
+    def matches_any(self, patterns: Any) -> bool:
+        """
+        Indicates if the item name matches one of the fnmatch patterns.
+
+        Uses ``fnmatchcase()`` rather than ``fnmatch()``, which
+        normalises the case of both operands on a case insensitive
+        platform.  A C identifier is case sensitive, so ``FOO_BAR`` and
+        ``foo_bar`` are two different declarations.
+        """
+        return any(
+            fnmatch.fnmatchcase(self.name, pattern)
+            for pattern in patterns or ())
 
     @property
     def review_gaps(self) -> list[str]:
@@ -331,6 +420,30 @@ class DoxygenCompound(DoxygenContainer):
 
 class DoxygenDefine(DoxygenItem):
     """ Represents a Doxygen define item. """
+
+    @property
+    def is_excluded(self) -> bool:
+        return super().is_excluded or self.is_include_guard
+
+    @property
+    def is_include_guard(self) -> bool:
+        """
+        Indicates if the define is the include guard of its own header.
+
+        The guard is an artefact of the header, not a part of the
+        interface.  It is recognised by a define without a value whose
+        name is the name of the header it is declared in, in the spelling
+        conventionally used for a guard.
+        """
+        if self._get_initializer() is not None:
+            return False
+        try:
+            file = self.file
+        except ValueError:
+            return False
+        if not file.is_header:
+            return False
+        return self.name == _INVALID_NAME_CHARS.sub("_", file.name).upper()
 
     def export(self) -> dict:
         data = super().export()
@@ -541,7 +654,11 @@ def _tag_item(elem: ElementTree.Element, scope: _Scope) -> _Scope:
 
 def _tag_add_text(elem: ElementTree.Element, scope: _Scope) -> _Scope:
     text = elem.text
-    if text is not None:
+    # An unhandled container element leaves the ambient scope of the
+    # enclosing item in place, and that scope has no text key.  Drop the
+    # text instead of failing the whole run over a paragraph which
+    # belongs to no documented field.
+    if text is not None and scope.key in scope.data:
         scope.data[scope.key] = f"{scope.data[scope.key]} {text} "
     return scope
 
@@ -714,6 +831,12 @@ _IGNORE = (
     # paragraph from leaking into whatever brief/description field
     # happens to be the ambient text scope at that point in the tree.
     "xrefsect",
+    # inbodydescription holds the comments found inside a function body.
+    # They document the implementation, not the interface, so they must
+    # not reach a brief or description.  Ignoring the element also keeps
+    # its paragraphs away from the ambient text scope of the enclosing
+    # item, which has no text key of its own.
+    "inbodydescription",
 )
 
 
@@ -744,12 +867,69 @@ def _validate_string_list(errors: list[str], path: str, value: list) -> None:
                           f"got {element!r}")
 
 
+def _validate_extra_links(errors: list[str], path: str, links: Any) -> None:
+    if not isinstance(links, list):
+        errors.append(f"{path} must be a list, got {links!r}")
+        return
+    for index, link in enumerate(links):
+        where = f"{path}[{index}]"
+        if not isinstance(link, dict):
+            errors.append(f"{where} must be a dict, got {link!r}")
+            continue
+        for attribute in ["role", "uid"]:
+            if attribute not in link:
+                errors.append(f"{where}/{attribute} is missing")
+            elif not isinstance(link[attribute], str):
+                errors.append(f"{where}/{attribute} must be a string, "
+                              f"got {link[attribute]!r}")
+        interface_types = link.get("interface-types")
+        if interface_types is None:
+            continue
+        if not isinstance(interface_types, list):
+            errors.append(f"{where}/interface-types must be a list or null, "
+                          f"got {interface_types!r}")
+            continue
+        _validate_string_list(errors, f"{where}/interface-types",
+                              interface_types)
+
+
+_FILTER_ACTIONS = ("include", "exclude")
+
+
+def _validate_filter(errors: list[str], path: str, rules: Any) -> None:
+    """ Validate a ``filter``, of the configuration or of a group. """
+    if not isinstance(rules, list):
+        errors.append(f"{path} must be a list, got {rules!r}")
+        return
+    expected = " or ".join(repr(action) for action in _FILTER_ACTIONS)
+    for index, rule in enumerate(rules):
+        where = f"{path}[{index}]"
+        if not isinstance(rule, dict):
+            errors.append(f"{where} must be a dict, got {rule!r}")
+            continue
+        # Exactly one action, since two in one rule would be decided by
+        # the order the mapping happens to have.
+        if len(rule) != 1 or not set(rule) <= set(_FILTER_ACTIONS):
+            errors.append(f"{where} must have exactly one {expected} "
+                          f"attribute, got {sorted(rule)}")
+            continue
+        action, patterns = next(iter(rule.items()))
+        if not isinstance(patterns, list):
+            errors.append(f"{where}/{action} must be a list, "
+                          f"got {patterns!r}")
+            continue
+        _validate_string_list(errors, f"{where}/{action}", patterns)
+
+
 def _validate_groups(errors: list[str], groups: dict) -> None:
     for name, entry in groups.items():
         if not isinstance(name, str):
             errors.append(f"/groups has a non-string key {name!r}")
         elif not isinstance(entry, dict):
             errors.append(f"/groups/{name} must be a dict, got {entry!r}")
+        elif entry.get("extra-links") is not None:
+            _validate_extra_links(errors, f"/groups/{name}/extra-links",
+                                  entry["extra-links"])
 
 
 def _validate_item_to_group(errors: list[str], item_to_group: dict) -> None:
@@ -833,6 +1013,8 @@ def _validate_config(config: dict, require_full_config: bool) -> None:
     if optional("type-map", dict, "dict"):
         _validate_type_map(errors, config["type-map"])
     optional("default-group-name", str, "string")
+    if config.get("filter") is not None:
+        _validate_filter(errors, "/filter", config["filter"])
     if required_unless_bootstrapping("enabled-groups", list,
                                      "list of group names"):
         _validate_string_list(errors, "/enabled-groups",
@@ -876,7 +1058,10 @@ class DoxygenContext:
         # AttributeError on every declaration it processes.
         self.type_map: dict[str, str] = config.get("type-map") or {}
         self.default_group_name: str | None = config.get("default-group-name")
-        self.groups: dict[str, dict[str, str]] = config.get("groups") or {}
+        # A bare 'filter:' attribute parses as null, not as an empty
+        # list, so treat it as absent rather than iterating over None.
+        self.filter: list[dict] = config.get("filter") or []
+        self.groups: dict[str, dict[str, Any]] = config.get("groups") or {}
         # Copied, not aliased: resolution below adds an entry to
         # self.item_to_group for every inferred association, and that
         # must never leak back into the caller's config dict.

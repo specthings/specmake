@@ -25,11 +25,13 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from pathlib import Path
+import re
 from xml.etree import ElementTree
 
 import pytest
 
 from specmake import DoxygenContext
+from specmake import sourcetospec
 from specmake.sourcetospec import _append_element_text, _Scope, DoxygenItem
 
 _GF_0_EXPECTED_RESULT = {
@@ -1585,3 +1587,388 @@ def test_doxygen_context_treats_a_null_type_map_as_absent(tmp_path):
     for item in ctx.items.values():
         item.export()
     assert ctx.type_map == {}
+
+
+_EXTRA_LINKS_XML_FILES = [
+    "source-to-spec/xml/bad_8c.xml",
+    "source-to-spec/xml/default_8h.xml",
+    "source-to-spec/xml/header_8h.xml",
+    "source-to-spec/xml/foobar_8h.xml",
+    "source-to-spec/xml/group__DefaultGroup.xml",
+    "source-to-spec/xml/group__FooGroup.xml",
+    "source-to-spec/xml/source_8c.xml",
+    "source-to-spec/xml/structs__0.xml",
+    "source-to-spec/xml/structgs__0.xml",
+    "source-to-spec/xml/structt__0.xml",
+    "source-to-spec/xml/structgt__0.xml",
+    "source-to-spec/xml/unionu__0.xml",
+    "source-to-spec/xml/uniongu__0.xml",
+    "source-to-spec/xml/unionu__1.xml",
+    "source-to-spec/xml/uniongu__1.xml",
+]
+
+
+def _extra_links_context(tmp_path, extra_links):
+    group: dict = {"uid": "/if/group"}
+    if extra_links is not None:
+        group["extra-links"] = extra_links
+    ctx = DoxygenContext({
+        "data": {},
+        "groups": {
+            "FooGroup": group
+        },
+        "spec-directory": str(tmp_path)
+    })
+    ctx.doxygen_xml_to_spec(
+        [_get_path(path) for path in _EXTRA_LINKS_XML_FILES])
+    return ctx
+
+
+def _saved_links(ctx, kind, name):
+    item = ctx.items_by_name[kind][name][0]
+    data = item.export()
+    item.add_extra_links(data)
+    return data["links"]
+
+
+def test_a_bare_extra_links_attribute_adds_no_link(tmp_path):
+    # A bare 'extra-links:' attribute parses as null.  Every attribute
+    # of the configuration treats that as absent, so a run must not stop
+    # on it.
+    ctx = DoxygenContext({
+        "data": {},
+        "groups": {
+            "FooGroup": {
+                "uid": "/if/group",
+                "extra-links": None
+            }
+        },
+        "spec-directory": str(tmp_path)
+    })
+    ctx.doxygen_xml_to_spec(
+        [_get_path(path) for path in _EXTRA_LINKS_XML_FILES])
+    assert [link["role"] for link in _saved_links(ctx, "function", "gf_1")
+            ] == ["interface-placement", "interface-ingroup"]
+
+
+def test_extra_links_are_added_to_the_selected_interface_types(tmp_path):
+    # The constraint link of a directive cannot be derived from the
+    # source, but it must survive a regeneration.
+    ctx = _extra_links_context(tmp_path, [{
+        "role": "constraint",
+        "uid": "/constraint/directive-ctx-any",
+        "interface-types": ["function"]
+    }])
+    constraint = {"role": "constraint", "uid": "/constraint/directive-ctx-any"}
+    assert constraint in _saved_links(ctx, "function", "gf_1")
+    assert constraint not in _saved_links(ctx, "define", "GD_1")
+    assert constraint not in _saved_links(ctx, "group", "FooGroup")
+
+
+def test_extra_links_without_interface_types_apply_to_every_item(tmp_path):
+    ctx = _extra_links_context(tmp_path, [{
+        "role": "constraint",
+        "uid": "/constraint/any"
+    }])
+    constraint = {"role": "constraint", "uid": "/constraint/any"}
+    assert constraint in _saved_links(ctx, "function", "gf_1")
+    assert constraint in _saved_links(ctx, "define", "GD_1")
+
+
+def test_extra_links_are_absent_without_configuration(tmp_path):
+    ctx = _extra_links_context(tmp_path, None)
+    for link in _saved_links(ctx, "function", "gf_1"):
+        assert link["role"] in ["interface-placement", "interface-ingroup"]
+
+
+def test_saved_item_contains_the_extra_links(tmp_path):
+    ctx = _extra_links_context(tmp_path, [{
+        "role": "constraint",
+        "uid": "/constraint/directive-ctx-any",
+        "interface-types": ["function"]
+    }])
+    ctx.items_by_name["function"]["gf_1"][0].save()
+    content = (tmp_path / "if" / "gf-1.yml").read_text(encoding="utf-8")
+    assert "role: constraint" in content
+    assert "uid: /constraint/directive-ctx-any" in content
+
+
+@pytest.mark.parametrize("extra_links,expected", [
+    ("not-a-list", "/groups/FooGroup/extra-links must be a list"),
+    ([["role"]], "/groups/FooGroup/extra-links[0] must be a dict"),
+    ([{
+        "uid": "/constraint/x"
+    }], "extra-links[0]/role is missing"),
+    ([{
+        "role": "constraint"
+    }], "extra-links[0]/uid is missing"),
+    ([{
+        "role": 1,
+        "uid": "/constraint/x"
+    }], "extra-links[0]/role must be a string"),
+    ([{
+        "role": "constraint",
+        "uid": "/constraint/x",
+        "interface-types": "function"
+    }], "extra-links[0]/interface-types must be a list"),
+    ([{
+        "role": "constraint",
+        "uid": "/constraint/x",
+        "interface-types": [1]
+    }], "extra-links[0]/interface-types[0] must be a string"),
+])
+def test_invalid_extra_links_are_rejected(extra_links, expected):
+    with pytest.raises(ValueError, match=re.escape(expected)):
+        DoxygenContext({
+            "data": {},
+            "groups": {
+                "FooGroup": {
+                    "uid": "/if/group",
+                    "extra-links": extra_links
+                }
+            },
+            "spec-directory": "spec"
+        })
+
+
+_IN_BODY_MEMBERDEF = """<memberdef kind="function" id="m_0">
+  <name>f</name>
+  <briefdescription><para>Brief f().</para></briefdescription>
+  <detaileddescription><para>Description f().</para></detaileddescription>
+  <inbodydescription><para>Body comment of f().</para></inbodydescription>
+</memberdef>"""
+
+
+def _new_item():
+    return DoxygenItem(
+        DoxygenContext({
+            "data": {},
+            "groups": {},
+            "spec-directory": "spec"
+        }), "function", "m_0", "f")
+
+
+def test_in_body_description_does_not_reach_the_documentation():
+    # A comment inside a function body documents the implementation.  It
+    # must not end up in the brief or the description, and it must not
+    # crash the run through the text scope of the enclosing item, which
+    # has no text key.
+    item = _new_item()
+    item.data["brief"] = ""
+    item.data["description"] = ""
+    scope = _Scope(item, item.data, "")
+    for child in ElementTree.fromstring(_IN_BODY_MEMBERDEF).findall("*"):
+        # pylint: disable=protected-access
+        sourcetospec._fill_items(child, scope)
+    assert "Brief f()." in item.data["brief"]
+    assert "Description f()." in item.data["description"]
+    assert "Body comment" not in item.data["brief"]
+    assert "Body comment" not in item.data["description"]
+
+
+def test_text_of_an_unhandled_container_is_dropped():
+    # The ambient scope of an item has no text key.  A paragraph reaching
+    # it belongs to no documented field and must not raise a KeyError.
+    item = _new_item()
+    scope = _Scope(item, item.data, "")
+    # pylint: disable=protected-access
+    result = sourcetospec._tag_add_text(
+        ElementTree.fromstring("<para>Loose text.</para>"), scope)
+    assert result is scope
+    assert "" not in item.data
+
+
+def test_extra_links_are_added_to_the_group_item_itself(tmp_path):
+    # A group item carries the configuration of its own name.  Its link
+    # to the design group is not derivable from the source.
+    ctx = _extra_links_context(tmp_path, [{
+        "role": "interface-ingroup",
+        "uid": "../req/group",
+        "interface-types": ["group"]
+    }])
+    assert {
+        "role": "interface-ingroup",
+        "uid": "../req/group"
+    } in _saved_links(ctx, "group", "FooGroup")
+    assert {
+        "role": "interface-ingroup",
+        "uid": "../req/group"
+    } not in _saved_links(ctx, "function", "gf_1")
+
+
+def _filter_context(tmp_path, rules):
+    config = {
+        "data": {},
+        "groups": {
+            "FooGroup": {
+                "uid": "/if/group"
+            }
+        },
+        "spec-directory": str(tmp_path)
+    }
+    if rules is not None:
+        config["filter"] = rules
+    ctx = DoxygenContext(config)
+    ctx.doxygen_xml_to_spec(
+        [_get_path(path) for path in _EXTRA_LINKS_XML_FILES])
+    return ctx
+
+
+def test_a_filter_excludes_an_item(tmp_path):
+    ctx = _filter_context(tmp_path, [{"exclude": ["GD_1"]}])
+    assert ctx.items_by_name["define"]["GD_1"][0].is_excluded
+    assert not ctx.items_by_name["define"]["D_1"][0].is_excluded
+    assert not ctx.items_by_name["function"]["gf_1"][0].is_excluded
+
+
+def test_a_filter_pattern_is_an_fnmatch_pattern(tmp_path):
+    ctx = _filter_context(tmp_path, [{"exclude": ["GD_*", "gf_[13]"]}])
+    assert ctx.items_by_name["define"]["GD_1"][0].is_excluded
+    assert ctx.items_by_name["function"]["gf_1"][0].is_excluded
+    assert not ctx.items_by_name["function"]["gf_2"][0].is_excluded
+
+
+def test_a_filter_pattern_is_case_sensitive(tmp_path):
+    # A C identifier is case sensitive, so a pattern must not match a
+    # declaration which merely differs in case.
+    ctx = _filter_context(tmp_path, [{"exclude": ["gd_*"]}])
+    assert not ctx.items_by_name["define"]["GD_1"][0].is_excluded
+
+
+def test_the_first_matching_filter_rule_decides(tmp_path):
+    ctx = _filter_context(tmp_path, [{
+        "exclude": ["gf_2"]
+    }, {
+        "include": ["gf_*"]
+    }, {
+        "exclude": ["*"]
+    }])
+    assert not ctx.items_by_name["function"]["gf_1"][0].is_excluded
+    assert ctx.items_by_name["function"]["gf_2"][0].is_excluded
+    assert ctx.items_by_name["define"]["GD_1"][0].is_excluded
+
+
+def test_an_item_no_filter_rule_matches_stays(tmp_path):
+    for rules in [None, [], [{"exclude": ["nothing"]}]]:
+        ctx = _filter_context(tmp_path, rules)
+        assert not ctx.items_by_name["define"]["GD_1"][0].is_excluded
+
+
+def test_a_filter_leaves_a_header_and_a_group_alone(tmp_path):
+    # A header file and a group are structural rather than declarations,
+    # so that an interface placement still resolves.
+    ctx = _filter_context(tmp_path, [{"exclude": ["*"]}])
+    assert not ctx.items_by_name["file"]["header.h"][0].is_excluded
+    assert not ctx.items_by_name["group"]["FooGroup"][0].is_excluded
+    assert ctx.items_by_name["function"]["gf_1"][0].is_excluded
+
+
+def test_a_filter_must_be_a_list_of_one_action_rules(tmp_path):
+    bad_rules = [
+        "gf_*",
+        ["gf_*"],
+        [{
+            "include": ["gf_*"],
+            "exclude": ["gf_2"]
+        }],
+        [{
+            "keep": ["gf_*"]
+        }],
+        [{}],
+        [{
+            "include": "gf_*"
+        }],
+        [{
+            "include": [1]
+        }],
+    ]
+    for bad in bad_rules:
+        with pytest.raises(sourcetospec.ConfigError) as error:
+            _filter_context(tmp_path, bad)
+        assert "filter" in str(error.value), bad
+
+
+def test_a_filter_error_names_its_attribute_path(tmp_path):
+    # The rule which is wrong is named by its place in the
+    # configuration, so that a filter of many rules needs no counting.
+    with pytest.raises(sourcetospec.ConfigError) as error:
+        _filter_context(tmp_path, [{"include": ["gf_*"]}, {"keep": ["gf_2"]}])
+    assert "/filter[1] must have exactly one" in str(error.value)
+
+
+def test_a_filter_pattern_error_names_its_attribute_path(tmp_path):
+    # A pattern sits three levels down, so the path names the rule, the
+    # action and the pattern to point at the one which is wrong.
+    with pytest.raises(sourcetospec.ConfigError) as error:
+        _filter_context(tmp_path, [{"include": ["gf_*", 7]}])
+    assert "/filter[0]/include[1] must be a string" in str(error.value)
+
+
+def _define_in_header(name, header_name, initializer=None):
+    # Doxygen omits an undocumented include guard, so a guard only
+    # reaches the generator when it carries a comment, as in the Xilinx
+    # headers.  Build that shape directly.
+    ctx = DoxygenContext({"data": {}, "groups": {}, "spec-directory": "spec"})
+    header = sourcetospec.DoxygenFile(ctx, "file", "f_0", header_name)
+    ctx.items["f_0"] = header
+    define = sourcetospec.DoxygenDefine(ctx, "define", "d_0", name)
+    if initializer is not None:
+        define.data["initializer"] = initializer
+    define.file_ids.add("f_0")
+    ctx.items["d_0"] = define
+    return define
+
+
+def test_the_include_guard_of_a_header_is_excluded():
+    guard = _define_in_header("XWDTPS_H", "xwdtps.h")
+    assert guard.is_include_guard
+    assert guard.is_excluded
+
+
+def test_an_include_guard_of_a_nested_name_is_excluded():
+    guard = _define_in_header("XWDTPS_HW_H", "xwdtps_hw.h")
+    assert guard.is_include_guard
+
+
+def test_a_define_with_a_value_is_not_an_include_guard():
+    define = _define_in_header("XWDTPS_H", "xwdtps.h", initializer="1")
+    assert not define.is_include_guard
+    assert not define.is_excluded
+
+
+def test_a_define_not_named_after_its_header_is_not_a_guard():
+    define = _define_in_header("XWDTPS_ZMR_OFFSET", "xwdtps.h")
+    assert not define.is_include_guard
+
+
+def test_a_define_of_a_source_file_is_not_an_include_guard():
+    define = _define_in_header("XWDTPS_C", "xwdtps.c")
+    assert not define.is_include_guard
+
+
+def test_a_define_without_a_file_is_not_an_include_guard():
+    ctx = DoxygenContext({"data": {}, "groups": {}, "spec-directory": "spec"})
+    define = sourcetospec.DoxygenDefine(ctx, "define", "d_0", "XWDTPS_H")
+    assert not define.is_include_guard
+
+
+def test_an_item_without_a_group_gets_no_extra_links():
+    # An item which reached no group has no group configuration to take
+    # extra links from.
+    ctx = DoxygenContext({
+        "data": {},
+        "groups": {
+            "FooGroup": {
+                "uid": "/if/group",
+                "extra-links": [{
+                    "role": "constraint",
+                    "uid": "/constraint/x"
+                }]
+            }
+        },
+        "spec-directory": "spec"
+    })
+    item = DoxygenItem(ctx, "function", "m_0", "f")
+    data = {"links": [], "interface-type": "function"}
+    item.add_extra_links(data)
+    assert not data["links"]

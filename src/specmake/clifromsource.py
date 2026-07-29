@@ -122,6 +122,8 @@ def _generate_header(header: DoxygenFile,
     _record_gaps(gaps, header)
     typedefs_skipped = 0
     for header_member in header.members():
+        if header_member.is_excluded:
+            continue
         if (isinstance(header_member, DoxygenTypedef)
                 and header_member.aliases_compound):
             # For example `typedef enum e { ... } e;`. The enum item already
@@ -135,6 +137,8 @@ def _generate_header(header: DoxygenFile,
         _record_gaps(gaps, header_member)
         if isinstance(header_member, DoxygenEnum):
             for enumerator in header_member.members():
+                if enumerator.is_excluded:
+                    continue
                 print("      ", enumerator.uid)
                 if not dry_run:
                     enumerator.save()
