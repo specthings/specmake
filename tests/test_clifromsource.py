@@ -1592,3 +1592,28 @@ def test_review_is_reported_after_pruning(tmp_path, capsys):
     _generate(tmp_path, config, _undocumented_xml_files(), prune=True)
     output = capsys.readouterr().out
     assert output.index("pruned") < output.index("needs attention:")
+
+
+def test_an_excluded_item_is_not_generated(tmp_path):
+    # An excluded declaration must leave no item behind, otherwise it
+    # would have to be deleted after every run.
+    spec_dir = tmp_path / "spec"
+    config = {
+        "data": {},
+        "groups": {
+            "FooGroup": {
+                "uid": "/if/group"
+            }
+        },
+        "enabled-groups": ["FooGroup"],
+        "filter": [{
+            "exclude": ["GD_1", "GE_0_B"]
+        }],
+        "spec-directory": str(spec_dir),
+    }
+    _generate(tmp_path, config, _foo_group_xml_files())
+    assert (spec_dir / "if" / "gd-1.yml").exists() is False
+    assert (spec_dir / "if" / "ge-0-b.yml").exists() is False
+    # Its neighbours are untouched.
+    assert (spec_dir / "if" / "gf-1.yml").is_file()
+    assert (spec_dir / "if" / "ge-0-a.yml").is_file()
