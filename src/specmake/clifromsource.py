@@ -249,10 +249,14 @@ def _generate_groups(ctx: DoxygenContext,
         if group.name not in config["enabled-groups"]:
             continue
         print(group.doxygen_id)
-        if not dry_run:
-            group.save()
-        _record_owner(generated, group.uid, group.name)
-        _record_gaps(gaps, group)
+        if group.generate_item:
+            if not dry_run:
+                group.save()
+            # A suppressed group item is deliberately left out of the
+            # generated set, so --prune never offers to delete the
+            # hand-written item sitting at the group uid.
+            _record_owner(generated, group.uid, group.name)
+            _record_gaps(gaps, group)
         groups_processed += 1
         for header in _reachable_headers(group):
             uids = header_uids.get(header.doxygen_id)

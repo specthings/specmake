@@ -1608,10 +1608,8 @@ _EXTRA_LINKS_XML_FILES = [
 ]
 
 
-def _extra_links_context(tmp_path, extra_links):
-    group: dict = {"uid": "/if/group"}
-    if extra_links is not None:
-        group["extra-links"] = extra_links
+def _foo_group_context(tmp_path, **group):
+    group.setdefault("uid", "/if/group")
     ctx = DoxygenContext({
         "data": {},
         "groups": {
@@ -1622,6 +1620,12 @@ def _extra_links_context(tmp_path, extra_links):
     ctx.doxygen_xml_to_spec(
         [_get_path(path) for path in _EXTRA_LINKS_XML_FILES])
     return ctx
+
+
+def _extra_links_context(tmp_path, extra_links):
+    if extra_links is None:
+        return _foo_group_context(tmp_path)
+    return _foo_group_context(tmp_path, **{"extra-links": extra_links})
 
 
 def _saved_links(ctx, kind, name):
@@ -1972,3 +1976,118 @@ def test_an_item_without_a_group_gets_no_extra_links():
     data = {"links": [], "interface-type": "function"}
     item.add_extra_links(data)
     assert not data["links"]
+
+
+def _header_item(tmp_path, **group):
+    return _foo_group_context(tmp_path,
+                              **group).items_by_name["file"]["header.h"][0]
+
+
+def test_a_header_item_is_a_header_file_by_default(tmp_path):
+    header = _header_item(tmp_path)
+    assert header.header_interface_type == "header-file"
+    data = header.export()
+    assert data["interface-type"] == "header-file"
+    assert data["path"] == "header.h"
+    assert data["prefix"] == ""
+    assert "references" not in data
+    for key in ("brief", "description", "notes"):
+        assert key in data
+
+
+def test_an_unspecified_header_item_specifies_no_content(tmp_path):
+    # The header itself is the source of truth, so the item carries
+    # neither documentation nor a prefix of its own.
+    header = _header_item(
+        tmp_path, **{"header-interface-type": "unspecified-header-file"})
+    assert header.header_interface_type == "unspecified-header-file"
+    data = header.export()
+    assert data["interface-type"] == "unspecified-header-file"
+    assert data["path"] == "header.h"
+    assert data["references"] == []
+    for key in ("brief", "description", "notes", "prefix", "name"):
+        assert key not in data
+
+
+def test_extra_links_select_an_unspecified_header_file(tmp_path):
+    # The interface placement of an unspecified header file is not
+    # derivable from the source and comes from the configuration.
+    ctx = _foo_group_context(
+        tmp_path, **{
+            "header-interface-type":
+            "unspecified-header-file",
+            "extra-links": [{
+                "role": "interface-placement",
+                "uid": "/dev/if/domain",
+                "interface-types": ["unspecified-header-file"]
+            }]
+        })
+    placement = {"role": "interface-placement", "uid": "/dev/if/domain"}
+    assert placement in _saved_links(ctx, "file", "header.h")
+    assert placement not in _saved_links(ctx, "function", "gf_1")
+
+
+def _undocumented_header(**group):
+    group.setdefault("uid", "/if/group")
+    ctx = DoxygenContext({
+        "data": {},
+        "groups": {
+            "FooGroup": group
+        },
+        "spec-directory": "spec"
+    })
+    ctx.items["g_0"] = sourcetospec.DoxygenGroup(ctx, "group", "g_0",
+                                                 "FooGroup")
+    header = sourcetospec.DoxygenFile(ctx, "file", "f_0", "some.h")
+    header.group_ids.append("g_0")
+    ctx.items["f_0"] = header
+    return header
+
+
+def test_an_undocumented_header_file_needs_a_brief():
+    assert _undocumented_header().review_gaps == ["placeholder brief"]
+
+
+def test_an_unspecified_header_file_has_no_brief_to_complete():
+    # The item type has no brief attribute, so there is nothing for a
+    # human to write here.
+    header = _undocumented_header(
+        **{"header-interface-type": "unspecified-header-file"})
+    assert not header.review_gaps
+
+
+def _foo_group(tmp_path, **group):
+    return _foo_group_context(tmp_path,
+                              **group).items_by_name["group"]["FooGroup"][0]
+
+
+def test_a_group_item_is_generated_by_default(tmp_path):
+    assert _foo_group(tmp_path).generate_item
+
+
+def test_the_group_item_generation_can_be_suppressed(tmp_path):
+    assert not _foo_group(tmp_path, **{
+        "generate-group-item": False
+    }).generate_item
+
+
+@pytest.mark.parametrize("entry,expected", [
+    ({
+        "generate-group-item": "yes"
+    }, "/groups/FooGroup/generate-group-item must be a boolean"),
+    ({
+        "header-interface-type": "source-file"
+    }, "/groups/FooGroup/header-interface-type must be"),
+    ({
+        "header-interface-type": 1
+    }, "/groups/FooGroup/header-interface-type must be"),
+])
+def test_invalid_group_settings_are_rejected(entry, expected):
+    with pytest.raises(ValueError, match=expected):
+        DoxygenContext({
+            "data": {},
+            "groups": {
+                "FooGroup": dict(entry, uid="/if/group")
+            },
+            "spec-directory": "spec"
+        })

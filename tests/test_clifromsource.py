@@ -1617,3 +1617,50 @@ def test_an_excluded_item_is_not_generated(tmp_path):
     # Its neighbours are untouched.
     assert (spec_dir / "if" / "gf-1.yml").is_file()
     assert (spec_dir / "if" / "ge-0-a.yml").is_file()
+
+
+def _suppressed_group_config(spec_dir) -> dict:
+    config = _foo_group_config(spec_dir)
+    config["groups"]["FooGroup"]["generate-group-item"] = False
+    return config
+
+
+def test_generate_can_suppress_the_group_item(tmp_path):
+    # The group is still processed with the item left out: its members
+    # are generated and they still link to the group uid.
+    spec_dir = tmp_path / "spec"
+    _generate(tmp_path, _suppressed_group_config(spec_dir),
+              _foo_group_xml_files())
+    assert not (spec_dir / "if" / "group.yml").exists()
+    assert (spec_dir / "if" / "ge-0.yml").is_file()
+    content = (spec_dir / "if" / "gf-0.yml").read_text(encoding="utf-8")
+    assert "role: interface-ingroup" in content
+    assert "uid: group" in content
+
+
+def test_a_suppressed_group_item_is_never_pruned(tmp_path):
+    # A hand-written item lives at the group uid.  Recording it as
+    # generated would make the next --prune run delete it.
+    spec_dir = tmp_path / "spec"
+    (spec_dir / "if").mkdir(parents=True, exist_ok=True)
+    hand_written = spec_dir / "if" / "group.yml"
+    hand_written.write_text("type: requirement\n", encoding="utf-8")
+    config = _suppressed_group_config(spec_dir)
+    _generate(tmp_path, config, _foo_group_xml_files(), prune=True)
+    assert "/if/group" not in _read_manifest(spec_dir)
+    _generate(tmp_path, config, _foo_group_xml_files(), prune=True)
+    assert hand_written.read_text(encoding="utf-8") == "type: requirement\n"
+
+
+def test_generate_writes_an_unspecified_header_file_item(tmp_path):
+    spec_dir = tmp_path / "spec"
+    config = _foo_group_config(spec_dir)
+    config["groups"]["FooGroup"]["header-interface-type"] = (
+        "unspecified-header-file")
+    _generate(tmp_path, config, _foo_group_xml_files())
+    content = (spec_dir / "if" /
+               "header-header.yml").read_text(encoding="utf-8")
+    assert "interface-type: unspecified-header-file" in content
+    assert "references: []" in content
+    assert "prefix:" not in content
+    assert "brief:" not in content
