@@ -1934,6 +1934,17 @@ def test_an_include_guard_of_a_nested_name_is_excluded():
     assert guard.is_include_guard
 
 
+def test_a_guard_followed_by_a_comment_is_still_a_guard():
+    # A guard is often written as `#define X /* why */` and Doxygen
+    # reports the comment as the value of the define.
+    for comment in ["/* by using protection macros */", "// guard", ""]:
+        guard = _define_in_header("XUARTLITE_H",
+                                  "xuartlite.h",
+                                  initializer=comment)
+        assert guard.is_include_guard, comment
+        assert guard.is_excluded, comment
+
+
 def test_a_define_with_a_value_is_not_an_include_guard():
     define = _define_in_header("XWDTPS_H", "xwdtps.h", initializer="1")
     assert not define.is_include_guard
