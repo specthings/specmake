@@ -2202,13 +2202,7 @@ The UnionOnly brief.
 .. code-block:: c
 
     union UnionOnly {
-      int a;
     };
-
-.. rubric:: MEMBERS:
-
-a
-    The UnionOnly member. Description.
 
 .. rubric:: DESCRIPTION:
 

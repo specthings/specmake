@@ -561,14 +561,20 @@ def _document_compound(ctx: _Context) -> None:
             definitions.append(
                 ctx.code_mapper.substitute(definition["definition"],
                                            prefix=prefix_2))
-    decls = align_declarations(definitions)
-    decls = [f"  {decl};" for decl in decls]
+    # A compound may legitimately have no member, for example an opaque
+    # type documented by its typedef alone.  align_declarations() takes
+    # the maximum over the declarations, which raises on an empty list.
+    if definitions:
+        decls = [f"  {decl};" for decl in align_declarations(definitions)]
+    else:
+        decls = []
     _add_type_definition(ctx.content, ctx.item["name"],
                          ctx.item["definition-kind"],
                          ctx.item["interface-type"], decls)
-    ctx.content.add_rubric("MEMBERS:")
-    for member in members:
-        ctx.content.add_definition_item(member[0], member[1])
+    if members:
+        ctx.content.add_rubric("MEMBERS:")
+        for member in members:
+            ctx.content.add_definition_item(member[0], member[1])
     _add_text(ctx, "description", "DESCRIPTION")
     _add_text(ctx, "notes", "NOTES")
     _add_default_links(ctx)

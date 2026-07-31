@@ -853,7 +853,34 @@ def _relationships(elem: ElementTree.Element, item: DoxygenItem) -> None:
             item.member_ids.append(_doxygen_id(member))
 
 
-_RELATIONSHIP_HANDLER = {"file": _relationships, "group": _relationships}
+def _compound_relationships(elem: ElementTree.Element,
+                            item: DoxygenItem) -> None:
+    """
+    Resolve the members which a compound only references.
+
+    Doxygen documents a member of a struct or a union in the compound of
+    that struct when it is declared outside a group, and in the compound
+    of the group when the declaration is inside a group scope.  In the
+    second case the compound of the struct holds a reference to the
+    member instead of its definition, and the member would be lost.
+
+    Only a member of a section definition is followed.  A member
+    definition placed there directly is picked up by the scope while it
+    is parsed, and the list of all members repeats every one of them, so
+    following either would add a member twice.
+    """
+    assert isinstance(item, DoxygenContainer)
+    for section in elem.findall("sectiondef"):
+        for member in section.findall("member"):
+            item.member_ids.append(_doxygen_id(member))
+
+
+_RELATIONSHIP_HANDLER = {
+    "file": _relationships,
+    "group": _relationships,
+    "struct": _compound_relationships,
+    "union": _compound_relationships
+}
 
 _TAG_IS_KIND = {"enumvalue"}
 
