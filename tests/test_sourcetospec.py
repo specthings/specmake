@@ -2102,3 +2102,91 @@ def test_invalid_group_settings_are_rejected(entry, expected):
             },
             "spec-directory": "spec"
         })
+
+
+def _group_filter_context(tmp_path, group_rules, config_rules=None):
+    group: dict = {"uid": "/if/group"}
+    if group_rules is not None:
+        group["filter"] = group_rules
+    config: dict = {
+        "data": {},
+        "groups": {
+            "FooGroup": group
+        },
+        "spec-directory": str(tmp_path)
+    }
+    if config_rules is not None:
+        config["filter"] = config_rules
+    ctx = DoxygenContext(config)
+    ctx.doxygen_xml_to_spec(
+        [_get_path(path) for path in _EXTRA_LINKS_XML_FILES])
+    return ctx
+
+
+def test_a_group_filter_selects_the_items_of_its_group(tmp_path):
+    ctx = _group_filter_context(tmp_path, [{
+        "include": ["gf_*"]
+    }, {
+        "exclude": ["*"]
+    }])
+    assert not ctx.items_by_name["function"]["gf_1"][0].is_excluded
+    assert ctx.items_by_name["define"]["GD_1"][0].is_excluded
+    assert ctx.items_by_name["struct"]["gs_0"][0].is_excluded
+
+
+def test_a_group_filter_leaves_another_group_alone(tmp_path):
+    ctx = _group_filter_context(tmp_path, [{"exclude": ["*"]}])
+    assert not ctx.items_by_name["function"]["bad_f"][0].is_excluded
+
+
+def test_the_configured_filter_is_evaluated_before_the_group_one(tmp_path):
+    # The precedence is the order of the rules, so a configured rule
+    # which matches decides even when the group would include the item.
+    ctx = _group_filter_context(tmp_path, [{
+        "include": ["GD_1"]
+    }], [{
+        "exclude": ["GD_1"]
+    }])
+    assert ctx.items_by_name["define"]["GD_1"][0].is_excluded
+
+
+def test_the_group_filter_decides_what_the_configured_one_skips(tmp_path):
+    ctx = _group_filter_context(tmp_path, [{
+        "exclude": ["GD_1"]
+    }], [{
+        "exclude": ["nothing"]
+    }])
+    assert ctx.items_by_name["define"]["GD_1"][0].is_excluded
+    assert not ctx.items_by_name["define"]["D_1"][0].is_excluded
+
+
+def test_an_item_is_kept_without_a_group_filter(tmp_path):
+    for rules in [None, []]:
+        ctx = _group_filter_context(tmp_path, rules)
+        assert not ctx.items_by_name["define"]["GD_1"][0].is_excluded
+
+
+def test_a_group_filter_leaves_a_header_and_a_group_alone(tmp_path):
+    ctx = _group_filter_context(tmp_path, [{"exclude": ["*"]}])
+    assert not ctx.items_by_name["file"]["header.h"][0].is_excluded
+    assert not ctx.items_by_name["group"]["FooGroup"][0].is_excluded
+
+
+def test_a_group_filter_must_be_a_list_of_one_action_rules(tmp_path):
+    for bad in ["gf_*", [{"keep": ["gf_*"]}], [{"include": "gf_*"}]]:
+        with pytest.raises(sourcetospec.ConfigError) as error:
+            _group_filter_context(tmp_path, bad)
+        assert "filter" in str(error.value), bad
+
+
+def test_a_group_filter_error_names_its_attribute_path(tmp_path):
+    # The path names the group as well, so that a configuration of many
+    # groups says which filter is wrong.
+    with pytest.raises(sourcetospec.ConfigError) as error:
+        _group_filter_context(tmp_path, [{
+            "include": ["gf_*"]
+        }, {
+            "keep": ["gf_2"]
+        }])
+    assert "/groups/FooGroup/filter[1] must have exactly one" in str(
+        error.value)

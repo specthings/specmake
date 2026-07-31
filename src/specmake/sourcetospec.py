@@ -28,6 +28,7 @@
 
 import dataclasses
 import fnmatch
+import itertools
 from pathlib import Path
 import posixpath
 import re
@@ -250,27 +251,31 @@ class DoxygenItem:
         not built, would otherwise have to be deleted after every run.
 
         The ``filter`` selects them.  It is a list of ``include`` and
-        ``exclude`` rules, each holding fnmatch patterns.  The rules are
-        evaluated in order and the first one with a matching pattern
-        decides, so a family is included as a whole and the few members
-        which are not part of the interface are excluded by a rule
-        placed before it.
+        ``exclude`` rules, each holding fnmatch patterns.  The rules of
+        the configuration are evaluated first and the rules of the group
+        of the item after them, as one ordered list, and the first rule
+        with a matching pattern decides.  So a family is included as a
+        whole and the few members which are not part of the interface
+        are excluded by a rule placed before it, and the precedence of
+        the two levels is visible in their order rather than hidden in
+        the name of a setting.
 
-        An item no rule matches stays.  A configuration which specifies
-        its interface therefore ends the filter with an ``exclude`` of
+        An item no rule matches stays.  A group which specifies its
+        interface therefore ends its filter with an ``exclude`` of
         ``'*'``.  A filter of excludes alone cannot express that: a
         register map holds thousands of names, so the rules would have
         to name each one, and a name added by a later vendor release
         would enter the interface unnoticed.
 
         A header file or a group is structural rather than a
-        declaration.  The filter does not apply to it, so that the
+        declaration.  No filter applies to it, so that the
         ``interface-placement`` of an included item still resolves and
         the header keeps saying that it is delivered.
         """
         if self.is_header or isinstance(self, DoxygenGroup):
             return False
-        for rule in self.ctx.filter:
+        for rule in itertools.chain(self.ctx.filter,
+                                    self.group_config().get("filter") or ()):
             for action, patterns in rule.items():
                 if self.matches_any(patterns):
                     return action == "exclude"
@@ -948,6 +953,8 @@ def _validate_group_entry(errors: list[str], name: str, entry: dict) -> None:
     if entry.get("extra-links") is not None:
         _validate_extra_links(errors, f"/groups/{name}/extra-links",
                               entry["extra-links"])
+    if entry.get("filter") is not None:
+        _validate_filter(errors, f"/groups/{name}/filter", entry["filter"])
     generate_group_item = entry.get("generate-group-item")
     if generate_group_item is not None and not isinstance(
             generate_group_item, bool):
