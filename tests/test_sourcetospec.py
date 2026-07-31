@@ -2190,3 +2190,40 @@ def test_a_group_filter_error_names_its_attribute_path(tmp_path):
         }])
     assert "/groups/FooGroup/filter[1] must have exactly one" in str(
         error.value)
+
+
+def test_a_compound_resolves_a_referenced_member():
+    # Doxygen documents the member of a struct in the compound of the
+    # group when the declaration is inside a group scope, and leaves a
+    # reference behind in the compound of the struct.
+    xml = ElementTree.fromstring("""<compounddef id="structFoo" kind="struct">
+      <compoundname>Foo</compoundname>
+      <sectiondef kind="public-attrib">
+        <member refid="group__g_1ga0" kind="variable"><name>a</name></member>
+        <member refid="group__g_1ga1" kind="variable"><name>b</name></member>
+      </sectiondef>
+      <listofallmembers>
+        <member refid="group__g_1ga0"><name>a</name></member>
+      </listofallmembers>
+    </compounddef>""")
+    ctx = DoxygenContext({"data": {}, "groups": {}, "spec-directory": "spec"})
+    item = sourcetospec.DoxygenStruct(ctx, "struct", "structFoo", "Foo")
+    sourcetospec._compound_relationships(xml, item)
+    # The list of all members repeats every member, so following it too
+    # would add one of them twice.
+    assert item.member_ids == ["group__g_1ga0", "group__g_1ga1"]
+
+
+def test_a_compound_with_an_inline_member_gains_nothing():
+    # A member definition placed in the section is picked up by the
+    # scope while it is parsed, so the handler must leave it alone.
+    xml = ElementTree.fromstring("""<compounddef id="structFoo" kind="struct">
+      <compoundname>Foo</compoundname>
+      <sectiondef kind="public-attrib">
+        <memberdef kind="variable" id="structFoo_1a0"><name>a</name></memberdef>
+      </sectiondef>
+    </compounddef>""")
+    ctx = DoxygenContext({"data": {}, "groups": {}, "spec-directory": "spec"})
+    item = sourcetospec.DoxygenStruct(ctx, "struct", "structFoo", "Foo")
+    sourcetospec._compound_relationships(xml, item)
+    assert item.member_ids == []
