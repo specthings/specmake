@@ -26,44 +26,29 @@
 
 import json
 import logging
-import math
-import multiprocessing
 import os
-import re
 from pathlib import Path
-import queue
-import subprocess
-from subprocess import run as subprocess_run
 import tarfile
 import time
-import threading
-from typing import Any, NamedTuple
 
 from specitems import is_enabled, Item, ItemGetValueContext
 
 from .directorystate import DirectoryState
 from .pkgitems import BuildItem, PackageBuildDirector
+from .runtests import (RunnerExecutable, RunnerReport, run_subprocess_tests,
+                       run_tests_with_retries)
 from .testoutputparser import augment_report
 from .util import now_utc
-
-Report = dict[str, Any]
-
-
-class Executable(NamedTuple):
-    """ Represents a test executable. """
-    path: str
-    digest: str
-    timeout: float
 
 
 class TestLog(DirectoryState):
     """ Maintains a test log. """
 
-    def get_reports_by_hash(self) -> tuple[dict[str, Report], str, str]:
+    def get_reports_by_hash(self) -> tuple[dict[str, RunnerReport], str, str]:
         """
         Get the reports by executable hash and the test runner description.
         """
-        reports_by_hash: dict[str, Report] = {}
+        reports_by_hash: dict[str, RunnerReport] = {}
         description = "There is no description available."
         runner_hash = ""
         try:
@@ -87,7 +72,7 @@ class TestRunner(BuildItem):
     def __init__(self, director: PackageBuildDirector, item: Item):
         super().__init__(director, item)
         self._executable = "/dev/null"
-        self._executables: list[Executable] = []
+        self._executables: list[RunnerExecutable] = []
         self.mapper.add_get_value(f"{self.item.type}:/test-executable",
                                   self._get_test_executable)
 
@@ -108,7 +93,8 @@ class TestRunner(BuildItem):
         """
         return self.digest()
 
-    def run_tests(self, executables: list[Executable]) -> list[Report]:
+    def run_tests(self,
+                  executables: list[RunnerExecutable]) -> list[RunnerReport]:
         """
         Run the test executables and returns a list of test reports.
         """
@@ -140,15 +126,16 @@ class TestRunner(BuildItem):
             f"in {config['test-timeout-key']}")
 
     def _get_reports_and_executables(
-            self, target: Item, previous_reports_by_hash: dict[str, Report],
-            report_runner_hash: str,
-            timeout_key: str) -> tuple[list[Report], list[Executable]]:
+            self, target: Item, previous_reports_by_hash: dict[str,
+                                                               RunnerReport],
+            report_runner_hash: str, timeout_key: str
+    ) -> tuple[list[RunnerReport], list[RunnerExecutable]]:
         # pylint: disable=too-many-locals
         timeouts = target.parent("test-timeouts")["timeouts"]
         source = self.input("source")
         assert isinstance(source, DirectoryState)
-        reports: list[Report] = []
-        executables: list[Executable] = []
+        reports: list[RunnerReport] = []
+        executables: list[RunnerExecutable] = []
         do_not_run: set[str] = set(self["do-not-run"])
         for link in self.item.links_to_children("test-runner-do-not-run"):
             do_not_run.update(link["do-not-run"])
@@ -175,7 +162,7 @@ class TestRunner(BuildItem):
                 if name in do_not_run:
                     logging.info("%s: do not run: %s", self.uid, path)
                     report = TestRunner.run_tests(
-                        self, [Executable(path, digest, 0.0)])[0]
+                        self, [RunnerExecutable(path, digest, 0.0)])[0]
                     augment_report(report, report["output"])
                     reports.append(report)
                 else:
@@ -186,7 +173,7 @@ class TestRunner(BuildItem):
                     timeout = timeout_scaler * max(timeout, min_timeout)
                     logging.debug("%s: run with %.1fs timeout: %s", self.uid,
                                   timeout, path)
-                    executables.append(Executable(path, digest, timeout))
+                    executables.append(RunnerExecutable(path, digest, timeout))
             else:
                 logging.info("%s: use previous report for: %s", self.uid, path)
                 report["executable"] = path
@@ -230,57 +217,16 @@ class TestRunner(BuildItem):
         self.description.add(f"""Run tests and produce test result file
 {self.description.path(log.file)}""")
 
-    def _run_tests(self, executables: list[Executable]) -> list[Report]:
-        max_run_count = self["max-retry-count-per-executable"] + 1
-        reports_by_path: dict[str, Report] = {}
-        while executables and max_run_count:
-            self._executables = executables
-            for new_report in self.run_tests(executables):
-                augment_report(new_report, new_report["output"])
-                previous_report = reports_by_path.get(new_report["executable"])
-                if previous_report is not None:
-                    new_report["failed-attempts"] = previous_report.pop(
-                        "failed-attempts", []) + [previous_report]
-                reports_by_path[new_report["executable"]] = new_report
-            next_executables: list[Executable] = []
-            for executable in executables:
-                report = reports_by_path.get(executable.path, None)
-                if report is None:
-                    next_executables.append(executable)
-                    logging.warning("%s: executable '%s': no report", self.uid,
-                                    executable.path)
-                    continue
-                if "error" in report:
-                    next_executables.append(executable)
-                    logging.warning("%s: executable '%s': %s", self.uid,
-                                    executable.path, report["error"])
-                    continue
-                if ("line-begin-of-test" in report["info"]
-                        and "line-end-of-test" not in report["info"]):
-                    next_executables.append(executable)
-                    logging.warning(
-                        "%s: executable '%s': missing end of test line",
-                        self.uid, executable.path)
-                    continue
-                if report.get("gcov-info-hash",
-                              "") != report.get("gcov-info-hash-calculated",
-                                                ""):
-                    next_executables.append(executable)
-                    logging.warning(
-                        "%s: executable '%s': gcov info is corrupt", self.uid,
-                        executable.path)
-                    continue
-                test_suite = report.get("test-suite", {})
-                if test_suite.get("report-hash", "") != test_suite.get(
-                        "report-hash-calculated", ""):
-                    next_executables.append(executable)
-                    logging.warning(
-                        "%s: executable '%s': test suite report is corrupt",
-                        self.uid, executable.path)
-                    continue
-            executables = next_executables
-            max_run_count -= 1
-        return list(reports_by_path.values())
+    def _run_tests_of_attempt(
+            self, executables: list[RunnerExecutable]) -> list[RunnerReport]:
+        self._executables = executables
+        return self.run_tests(executables)
+
+    def _run_tests(self,
+                   executables: list[RunnerExecutable]) -> list[RunnerReport]:
+        return run_tests_with_retries(
+            executables, self._run_tests_of_attempt,
+            self["max-retry-count-per-executable"] + 1, self.uid)
 
 
 class GRMONManualTestRunner(TestRunner):
@@ -300,7 +246,8 @@ class GRMONManualTestRunner(TestRunner):
         return """This test procedure creates an archive with test programs, a
 GRMON test script, and a shell script to run the tests manually."""
 
-    def run_tests(self, executables: list[Executable]) -> list[Report]:
+    def run_tests(self,
+                  executables: list[RunnerExecutable]) -> list[RunnerReport]:
         base = self["script-base-path"]
         dir_name = os.path.basename(base)
         grmon_name = f"{base}.grmon"
@@ -321,57 +268,6 @@ GRMON test script, and a shell script to run the tests manually."""
         raise IOError(f"Run the tests provided by {tar_name}")
 
 
-class _Job:
-    # pylint: disable=too-few-public-methods
-    def __init__(self, executable: Executable, command: list[str]):
-        self.report: Report = {
-            "executable": executable.path,
-            "executable-sha512": executable.digest,
-            "command-line": command
-        }
-        self.timeout = executable.timeout
-
-
-def _worker(work_queue: queue.Queue, item: BuildItem):
-    discard_patterns = item.item["discard-patterns"]
-    while True:
-        try:
-            job = work_queue.get_nowait()
-        except queue.Empty:
-            return
-        logging.info("%s: run: '%s'", item.uid,
-                     "' '".join(job.report["command-line"]))
-        job.report["start-time"] = now_utc()
-        begin = time.monotonic()
-        try:
-            process = subprocess_run(job.report["command-line"],
-                                     check=False,
-                                     stdin=subprocess.DEVNULL,
-                                     stdout=subprocess.PIPE,
-                                     timeout=job.timeout)
-            stdout = process.stdout.decode("latin-1")
-        except subprocess.TimeoutExpired as timeout:
-            job.report["error"] = "timeout"
-            if timeout.stdout is not None:
-                stdout = timeout.stdout.decode("latin-1")
-            else:
-                stdout = ""
-        except Exception as err:  # pylint: disable=broad-exception-caught
-            job.report["error"] = str(err)
-            stdout = ""
-        for pattern in discard_patterns:
-            if is_enabled([Path(job.report["executable"]).name],
-                          pattern["enabled-by"]) and re.search(
-                              pattern["pattern"], stdout, re.DOTALL):
-                job.report["error"] = ("discarded due to "
-                                       f"match with: {pattern['pattern']}")
-        output = stdout.rstrip().replace("\r\n", "\n").split("\n")
-        job.report["output"] = output
-        job.report["duration"] = time.monotonic() - begin
-        logging.debug("%s: done: %s", item.uid, job.report["executable"])
-        work_queue.task_done()
-
-
 class SubprocessTestRunner(TestRunner):
     """ Runs tests in subprocesses. """
 
@@ -388,24 +284,15 @@ building the package and captures the output:
 
     {command}"""
 
-    def run_tests(self, executables: list[Executable]) -> list[Report]:
-        work_queue: queue.Queue[_Job] = queue.Queue()
-        jobs: list[_Job] = []
-        for executable in executables:
-            self._executable = executable.path
-            job = _Job(executable, self["command"])
-            jobs.append(job)
-            work_queue.put(job)
-        worker_count = int(
-            math.ceil(multiprocessing.cpu_count() /
-                      float(self["max-process-count"])))
-        logging.info("%s: use %s worker threads", self.uid, worker_count)
-        for _ in range(min(worker_count, len(executables))):
-            threading.Thread(target=_worker,
-                             args=(work_queue, self),
-                             daemon=True).start()
-        work_queue.join()
-        return [job.report for job in jobs]
+    def _get_command(self, executable: RunnerExecutable) -> list[str]:
+        self._executable = executable.path
+        return self["command"]
+
+    def run_tests(self,
+                  executables: list[RunnerExecutable]) -> list[RunnerReport]:
+        return run_subprocess_tests(executables, self._get_command,
+                                    self.item["discard-patterns"],
+                                    self["max-process-count"], self.uid)
 
     def get_run_command(self, executable: str) -> None | list[str]:
         self._executable = executable

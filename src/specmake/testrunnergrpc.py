@@ -38,7 +38,7 @@ from spectestrunner import (GRPCDescribeTargetRequest, GRPCRunImageRequest,
                             GRPCServiceStub)  # type: ignore
 
 from .pkgitems import PackageBuildDirector
-from .testrunner import Executable, Report, TestRunner
+from .testrunner import RunnerExecutable, RunnerReport, TestRunner
 from .util import now_utc
 
 
@@ -97,7 +97,7 @@ class GRPCTestRunner(TestRunner):
                     f"failed: {err}.")
             return response.description
 
-    def _get_executable_data(self, executable: Executable) -> bytes:
+    def _get_executable_data(self, executable: RunnerExecutable) -> bytes:
         original = Path(executable.path)
         strip = self["strip"]
         if strip is None:
@@ -112,8 +112,9 @@ class GRPCTestRunner(TestRunner):
             return stripped.read_bytes()
 
     # pylint: disable=too-many-locals
-    def run_tests(self, executables: list[Executable]) -> list[Report]:
-        reports: list[Report] = []
+    def run_tests(self,
+                  executables: list[RunnerExecutable]) -> list[RunnerReport]:
+        reports: list[RunnerReport] = []
         target_id = self._get_optional_value("target")
         nm = self["nm"]
         reset = self._get_optional_value("reset")
@@ -126,7 +127,7 @@ class GRPCTestRunner(TestRunner):
                 logging.debug("%s: send request for: %s", self.uid,
                               executable.path)
                 breakpoints = _get_symbols(executable.path, nm)[reset]
-                report: Report = {
+                report: RunnerReport = {
                     "command-line": [],
                     "executable": executable.path,
                     "executable-sha512": executable.digest,

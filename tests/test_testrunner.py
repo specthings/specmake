@@ -34,7 +34,8 @@ import pytest
 from specitems import Item
 
 import specmake
-from specmake import (PackageBuildDirector, Executable, Report, TestRunner)
+from specmake import (PackageBuildDirector, RunnerExecutable, RunnerReport,
+                      TestRunner)
 
 from .util import create_package, get_and_clear_log
 
@@ -46,7 +47,8 @@ class _TestRunner(TestRunner):
     run_round = 0
     run_count = 0
 
-    def run_tests(self, executables: list[Executable]) -> list[Report]:
+    def run_tests(self,
+                  executables: list[RunnerExecutable]) -> list[RunnerReport]:
         run_count = _TestRunner.run_count + 1
         _TestRunner.run_count = run_count
         logging.critical("[%s.%s] run executables: %s", _TestRunner.run_round,
@@ -118,7 +120,7 @@ def _subprocess_run(command, check, stdin, stdout, timeout):
 
 
 def test_testrunner(caplog, tmpdir, monkeypatch):
-    monkeypatch.setattr(specmake.testrunner, "subprocess_run", _subprocess_run)
+    monkeypatch.setattr(specmake.runtests, "subprocess_run", _subprocess_run)
     tmp_dir = Path(tmpdir)
     package = create_package(caplog, tmp_dir, Path("spec-packagebuild"),
                              ["run-tests"])
@@ -132,7 +134,7 @@ def test_testrunner(caplog, tmpdir, monkeypatch):
     exe.touch()
     with pytest.raises(IOError):
         executables = [
-            Executable(
+            RunnerExecutable(
                 str(exe), "QvahP3YJU9bvpd7DYxJDkRBLJWbEFMEoH5Ncwu6UtxA"
                 "_l9EQ1zLW9yQTprx96BTyYE2ew7vV3KECjlRg95Ya6A==", 456)
         ]
@@ -160,16 +162,16 @@ building the package and captures the output:
     foo bar ${test_program}"""
     assert subprocess_runner.get_run_command("exe") == ["foo", "bar", "exe"]
     reports = subprocess_runner.run_tests([
-        Executable(
+        RunnerExecutable(
             "a.exe", "QvahP3YJU9bvpd7DYxJDkRBLJWbEFMEoH5Ncwu6UtxA"
             "_l9EQ1zLW9yQTprx96BTyYE2ew7vV3KECjlRg95Ya6A==", 1),
-        Executable(
+        RunnerExecutable(
             "b.exe", "4VgX6KGWuDyG5vmlO4J-rdbHpOJoIIYLn_3oSk2BKAc"
             "Au5RXTg1IxhHjiPO6Yzl8u4GsWBh0qc3flRwEFcD8_A==", 2),
-        Executable(
+        RunnerExecutable(
             "c.exe", "YtTC0r1DraKOn9vNGppBAVFVTnI9IqS6jFDRBKVucU_"
             "W_dpQF0xtC_mRjGV7t5RSQKhY7l3iDGbeBZJ-lV37bg==", 3),
-        Executable(
+        RunnerExecutable(
             "d.exe", "ZtTC0r1DraKOn9vNGppBAVFVTnI9IqS6jFDRBKVucU_"
             "W_dpQF0xtC_mRjGV7t5RSQKhY7l3iDGbeBZJ-lV37bg==", 4)
     ])
@@ -252,10 +254,10 @@ building the package and captures the output:
     assert ": gcov info is corrupt" in log
     assert ": test suite report is corrupt" in log
     assert ": missing end of test line" in log
-    assert (f"executables: [Executable(path='{build_bsp.directory}"
+    assert (f"executables: [RunnerExecutable(path='{build_bsp.directory}"
             "/a.exe', digest='z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg_SpIdNs6c5H0NE8"
             "XYXysP-DGNKHfuwvY7kxvUdBeoGlODJ6-SfaPg==', timeout=180.0), "
-            f"Executable(path='{build_bsp.directory}/b.exe', "
+            f"RunnerExecutable(path='{build_bsp.directory}/b.exe', "
             "digest='hopqxuHQKT10-tB_bZWVKz4B09MVPbZ3p12Ad5g_1OMNtr_Im3YIqT-yZ"
             "GkjOp8aCVctaHqcXaeLID6xUQQKFQ==', timeout=20.0)]") in log
     test_log = director["/pkg/test-logs/bsp"].json_load()
