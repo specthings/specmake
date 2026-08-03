@@ -1,0 +1,35 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: directory-state-type
+  spec-value: ctrf
+  uid: pkg-directory-state
+spec-description: |
+  Items of this type shall have the following links:
+
+  * There shall be at least one link to a ${pkg-test-aggregator:/spec-name}
+    item with the ${pkg-input-role:/spec-name} and the name
+    ``"test-aggregation"``.  The link target items provide the test results to
+    collect.
+
+  * There shall be exactly one link to a ${pkg-component:/spec-name} item with
+    the ${pkg-input-role:/spec-name} and the name ``"component"``.  The
+    ``package-directory`` attribute of the link target item is the
+    application name of the report.
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      This set of attributes specifies a collector of test results in the
+      Common Test Report Format.  For each target and build configuration of
+      the test aggregation inputs, the collector produces one report file.
+    mandatory-attributes: all
+spec-name: Common Test Report Format Item Type
+spec-type: pkg-ctrf
+type: spec

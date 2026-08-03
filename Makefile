@@ -10,7 +10,7 @@ EXCLUDED_FILES =
 
 PY_SRC_FILES = $(filter-out $(EXCLUDED_FILES), $(wildcard src/$(PACKAGE)/*.py))
 
-PY_ALL_FILES = $(filter-out $(EXCLUDED_FILES), $(PY_SRC_FILES) $(wildcard tests/*.py))
+PY_ALL_FILES = $(filter-out $(EXCLUDED_FILES), $(PY_SRC_FILES) $(wildcard tests/*.py) $(wildcard tests/*/*.py))
 
 all: src/$(PACKAGE)/spec.pickle format analyse check
 

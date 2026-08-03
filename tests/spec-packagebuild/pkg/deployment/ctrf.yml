@@ -1,0 +1,20 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/deployment-directory}/ctrf
+directory-state-type: ctrf
+enabled-by: ctrf
+files: []
+hash: null
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+- hash: null
+  name: test-aggregation
+  role: input
+  uid: ../steps/aggregate-test-results
+pkg-type: directory-state
+type: pkg

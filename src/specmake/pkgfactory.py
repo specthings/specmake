@@ -25,6 +25,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from .archiver import Archiver
+from .ctrfcollector import CTRFCollector
 from .directorystate import DirectoryState, RepositoryState
 from .docbuilder import DocumentBuilder
 from .doxyfile import Doxyfile
@@ -64,6 +65,7 @@ def create_build_item_factory() -> BuildItemFactory:
     factory.add_constructor("pkg/component/generic", GenericPackageComponent)
     factory.add_constructor("pkg/component/rtems", RTEMSPackageComponent)
     factory.add_constructor("pkg/directory-state/archive", Archiver)
+    factory.add_constructor("pkg/directory-state/ctrf", CTRFCollector)
     factory.add_constructor("pkg/directory-state/doxyfile", Doxyfile)
     factory.add_constructor("pkg/directory-state/explicit", DirectoryState)
     factory.add_constructor("pkg/directory-state/gcda-producer", GCDAProducer)

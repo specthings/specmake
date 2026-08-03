@@ -26,6 +26,7 @@ links:
 name: ${.:/arch}-${.:/bsp}${.:/config:dash}-${.:/package-version}
 membench-build-label: build-label
 package-directory: pkg
+package-short: test-package
 package-version: '4'
 params: {}
 prefix-directory: ${.:/tmpdir}
