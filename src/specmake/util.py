@@ -27,12 +27,22 @@
 import argparse
 import datetime
 import itertools
+import json
 import logging
 import os
 import shutil
 from typing import Callable, Iterable, Optional
 
 from specitems import ItemMapper, get_arguments
+
+
+def write_json(path: str, data: dict) -> None:
+    """ Write the data as JSON to the path and make the directory of it. """
+    directory = os.path.dirname(path)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as dst:
+        json.dump(data, dst, sort_keys=True, indent=2)
 
 
 def now_utc() -> str:

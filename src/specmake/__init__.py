@@ -26,6 +26,8 @@
 
 from .archiver import *  # noqa: F401, F403
 from .codecoverage import *  # noqa: F401, F403
+from .ctrf import *  # noqa: F401, F403
+from .ctrfcollector import *  # noqa: F401, F403
 from .dirstatebase import *  # noqa: F401, F403
 from .directorystate import *  # noqa: F401, F403
 from .doxyfile import *  # noqa: F401, F403

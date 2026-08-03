@@ -24,14 +24,16 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import json
 import os
 import logging
+from pathlib import Path
 import re
 
 from specware import load_config, run_command
 
 from specmake import (duration, get_build_arguments, copy_file, copy_files,
-                      now_utc)
+                      now_utc, write_json)
 
 from .util import get_and_clear_log
 
@@ -114,3 +116,17 @@ def test_now_utc():
     assert re.match(
         r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:"
         r"[0-9]{2}\.[0-9]{6}\+00:00$", now) is not None
+
+
+def test_write_json_makes_the_directory(tmpdir):
+    path = Path(tmpdir) / "sub" / "data.json"
+    write_json(str(path), {"a": 1})
+    with open(path, "r", encoding="utf-8") as src:
+        assert json.load(src) == {"a": 1}
+
+
+def test_write_json_without_a_directory(tmpdir, monkeypatch):
+    monkeypatch.chdir(tmpdir)
+    write_json("data.json", {"b": 2})
+    with open(Path(tmpdir) / "data.json", "r", encoding="utf-8") as src:
+        assert json.load(src) == {"b": 2}
