@@ -47,6 +47,7 @@ from .rtems import *  # noqa: F401, F403
 from .rtemstestsimages import *  # noqa: F401, F403
 from .runactions import *  # noqa: F401, F403
 from .runexecutablecmd import *  # noqa: F401, F403
+from .runtests import *  # noqa: F401, F403
 from .sddlinker import *  # noqa: F401, F403
 from .sourcecompare import *  # noqa: F401, F403
 from .sourcetospec import *  # noqa: F401, F403

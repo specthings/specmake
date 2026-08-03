@@ -30,7 +30,7 @@ import os
 import pytest
 
 import specmake
-from specmake import ESATestRunner, Executable, RepositoryState
+from specmake import ESATestRunner, RunnerExecutable, RepositoryState
 
 from .util import create_test_director
 
@@ -313,7 +313,7 @@ to run the test programs on the ``Board`` target board."""
         _GIT_BASE_BRANCH,
         _GIT_DELETE_BRANCH,
     ])
-    runner.run_tests([Executable(str(exe_a), "", 0)])
+    runner.run_tests([RunnerExecutable(str(exe_a), "", 0)])
 
     logging.critical("request without timeout")
     exe_a = tmp_path / "a.exe"
@@ -333,7 +333,7 @@ to run the test programs on the ``Board`` target board."""
         _GIT_BASE_BRANCH,
         _GIT_DELETE_BRANCH,
     ])
-    runner.run_tests([Executable(str(exe_a), "", 1)])
+    runner.run_tests([RunnerExecutable(str(exe_a), "", 1)])
 
     logging.critical("single request")
     exe_a = tmp_path / "a.exe"
@@ -354,9 +354,10 @@ to run the test programs on the ``Board`` target board."""
         _GIT_BASE_BRANCH,
         _GIT_DELETE_BRANCH,
     ])
-    runner.run_tests(
-        [Executable(str(exe_a), "", 1),
-         Executable(str(exe_b), "", 1)])
+    runner.run_tests([
+        RunnerExecutable(str(exe_a), "", 1),
+        RunnerExecutable(str(exe_b), "", 1)
+    ])
 
     logging.critical("split request using timeouts")
     exe_a = tmp_path / "a.exe"
@@ -383,9 +384,10 @@ to run the test programs on the ``Board`` target board."""
         _GIT_BASE_BRANCH,
         _GIT_DELETE_BRANCH,
     ])
-    reports = runner.run_tests(
-        [Executable(str(exe_a), "", 20),
-         Executable(str(exe_b), "", 1)])
+    reports = runner.run_tests([
+        RunnerExecutable(str(exe_a), "", 20),
+        RunnerExecutable(str(exe_b), "", 1)
+    ])
     assert reports[0]["executable"] == str(exe_a)
     assert reports[1]["executable"] == str(exe_b)
 
@@ -418,8 +420,9 @@ to run the test programs on the ``Board`` target board."""
         _GIT_BASE_BRANCH,
         _GIT_DELETE_BRANCH,
     ])
-    reports = runner.run_tests(
-        [Executable(str(exe_a), "", 1),
-         Executable(str(exe_b), "", 20)])
+    reports = runner.run_tests([
+        RunnerExecutable(str(exe_a), "", 1),
+        RunnerExecutable(str(exe_b), "", 20)
+    ])
     assert reports[0]["executable"] == str(exe_b)
     assert reports[1]["executable"] == str(exe_a)

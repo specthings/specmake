@@ -40,10 +40,10 @@ from specware import run_command
 
 from .directorystate import RepositoryState
 from .pkgitems import PackageBuildDirector
-from .testrunner import Executable, Report, TestRunner
+from .testrunner import RunnerExecutable, RunnerReport, TestRunner
 
 
-def _bz2_name(exe: Executable) -> str:
+def _bz2_name(exe: RunnerExecutable) -> str:
     return f"{Path(exe.path).name}.bz2"
 
 
@@ -104,12 +104,12 @@ to run the test programs on the ``{self._target_board()}`` target board."""
 
     def _copy_and_prepare_executables(
             self, working_directory: Path,
-            executables: list[Executable]) -> list[Executable]:
+            executables: list[RunnerExecutable]) -> list[RunnerExecutable]:
         """
         Copy, strip, and compress (bzip2) the executables into the working
         directory.
         """
-        remaining: list[Executable] = []
+        remaining: list[RunnerExecutable] = []
         strip = self["strip-program-path"]
         for exe in executables:
             stripped = working_directory / Path(exe.path).name
@@ -125,8 +125,8 @@ to run the test programs on the ``{self._target_board()}`` target board."""
         return remaining
 
     def _get_request_limit_executable_count(
-            self, iteration: int, remaining: list[Executable],
-            policy: dict) -> tuple[dict, int, list[Executable]]:
+            self, iteration: int, remaining: list[RunnerExecutable],
+            policy: dict) -> tuple[dict, int, list[RunnerExecutable]]:
         if iteration == 0:
             remaining[:] = sorted(remaining, key=lambda x: -x.timeout)
         max_executable_count = policy["max-executable-count"]
@@ -148,10 +148,10 @@ to run the test programs on the ``{self._target_board()}`` target board."""
         }, overall_timeout, todo
 
     def _get_request_use_timeouts(
-            self, _iteration: int, remaining: list[Executable],
-            _policy: dict) -> tuple[dict, int, list[Executable]]:
+            self, _iteration: int, remaining: list[RunnerExecutable],
+            _policy: dict) -> tuple[dict, int, list[RunnerExecutable]]:
         overall_timeout = 0
-        todo: list[Executable] = []
+        todo: list[RunnerExecutable] = []
         max_overall_timeout = self["max-overall-timeout-in-seconds"]
         jobs: list[dict[str, dict[str, int]]] = []
         while remaining:
@@ -178,8 +178,8 @@ to run the test programs on the ``{self._target_board()}`` target board."""
         self,
         working_directory: Path,
         iteration: int,
-        remaining: list[Executable],
-    ) -> tuple[str, int, list[Executable]]:
+        remaining: list[RunnerExecutable],
+    ) -> tuple[str, int, list[RunnerExecutable]]:
         """
         Write the request file to run the prepared remaining executables.
         Returns (request filename, overall timeout, to do executables).
@@ -221,11 +221,11 @@ to run the test programs on the ``{self._target_board()}`` target board."""
                 return
 
     def _add_reports(self, working_directory: Path,
-                     executables: list[Executable],
-                     reports: list[Report]) -> None:
+                     executables: list[RunnerExecutable],
+                     reports: list[RunnerReport]) -> None:
         for exe in executables:
             result_path = working_directory / f"{_bz2_name(exe)}.result.txt"
-            report: Report = {
+            report: RunnerReport = {
                 "executable": exe.path,
                 "executable-sha512": exe.digest,
                 "command-line": [],
@@ -239,8 +239,9 @@ to run the test programs on the ``{self._target_board()}`` target board."""
                                                        "\n").split("\n")
             reports.append(report)
 
-    def run_tests(self, executables: list[Executable]) -> list[Report]:
-        reports: list[Report] = []
+    def run_tests(self,
+                  executables: list[RunnerExecutable]) -> list[RunnerReport]:
+        reports: list[RunnerReport] = []
         repository = self.director[self.item.parent(
             "weak-package-build-dependency").uid]
         assert isinstance(repository, RepositoryState)

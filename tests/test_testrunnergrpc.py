@@ -32,7 +32,7 @@ import pytest
 from specitems import ItemSelection
 
 import specmake
-from specmake import Executable, GRPCTestRunner
+from specmake import RunnerExecutable, GRPCTestRunner
 
 from .util import create_package
 
