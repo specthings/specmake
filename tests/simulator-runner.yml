@@ -1,0 +1,26 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+command:
+- ${/pkg/deployment/python:/executable}
+- ${/pkg/deployment/simulator:/executable}
+- ${.:/test-executable}
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+default-timeout-in-seconds: 4.0
+description: |
+  Run the tests on the ${/glossary/simulator:/term}.
+discard-patterns:
+- enabled-by: true
+  pattern: 'lost the connection'
+do-not-run:
+- do-not-run.exe
+enabled-by: true
+links: []
+max-process-count: 1
+max-retry-count-per-executable: 0
+min-timeout-in-seconds: 1.0
+name: Simulator
+params: {}
+pkg-type: test-runner
+test-runner-type: subprocess
+timeout-scaler: 1.0
+type: pkg
