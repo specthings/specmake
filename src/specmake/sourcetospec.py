@@ -737,42 +737,38 @@ _COMPOUND_TYPEDEF = re.compile(
     r"typedef\s+(enum|struct|union)(\s+[a-zA-Z0-9_]+)?")
 
 
-def _validate_string_list(errors: list[str], attribute: str,
-                          value: list) -> None:
+def _validate_string_list(errors: list[str], path: str, value: list) -> None:
     for index, element in enumerate(value):
         if not isinstance(element, str):
-            errors.append(f"attribute {attribute!r} entry {index} must be a "
-                          f"string, got {element!r}")
+            errors.append(f"{path}[{index}] must be a string, "
+                          f"got {element!r}")
 
 
 def _validate_groups(errors: list[str], groups: dict) -> None:
     for name, entry in groups.items():
         if not isinstance(name, str):
-            errors.append(f"attribute 'groups' has a non-string key {name!r}")
+            errors.append(f"/groups has a non-string key {name!r}")
         elif not isinstance(entry, dict):
-            errors.append(f"attribute 'groups' entry {name!r} must be a dict, "
-                          f"got {entry!r}")
+            errors.append(f"/groups/{name} must be a dict, got {entry!r}")
 
 
 def _validate_item_to_group(errors: list[str], item_to_group: dict) -> None:
     for doxygen_id, group_name in item_to_group.items():
         if not isinstance(doxygen_id, str):
-            errors.append("attribute 'item-to-group' has a non-string key "
-                          f"{doxygen_id!r}")
-        elif group_name is not None and not isinstance(group_name, str):
             errors.append(
-                f"attribute 'item-to-group' value for {doxygen_id!r} must be "
-                f"a string or null, got {group_name!r}")
+                f"/item-to-group has a non-string key {doxygen_id!r}")
+        elif group_name is not None and not isinstance(group_name, str):
+            errors.append(f"/item-to-group/{doxygen_id} must be a string or "
+                          f"null, got {group_name!r}")
 
 
 def _validate_type_map(errors: list[str], type_map: dict) -> None:
     for from_type, to_item in type_map.items():
         if not isinstance(from_type, str):
-            errors.append(
-                f"attribute 'type-map' has a non-string key {from_type!r}")
+            errors.append(f"/type-map has a non-string key {from_type!r}")
         elif not isinstance(to_item, str):
-            errors.append(f"attribute 'type-map' value for {from_type!r} must "
-                          f"be a string, got {to_item!r}")
+            errors.append(f"/type-map/{from_type} must be a string, "
+                          f"got {to_item!r}")
 
 
 def _validate_config(config: dict, require_full_config: bool) -> None:
@@ -794,15 +790,20 @@ def _validate_config(config: dict, require_full_config: bool) -> None:
     bootstrap one, so ``data``, ``spec-directory``, ``groups`` and
     ``enabled-groups`` are only mandatory when ``require_full_config``
     is set, meaning a real generation run.
+
+    A problem names its location as an attribute path relative to the
+    ``spec-from-source`` attribute, for example ``/type-map/uint32_t``.
+    The path uses the syntax of a variable substitution, so it reads the
+    same way as the paths the specification uses elsewhere.
     """
     errors: list[str] = []
 
     def require(attribute: str, expected_type: type, type_name: str) -> bool:
         if attribute not in config:
-            errors.append(f"missing required attribute {attribute!r}")
+            errors.append(f"/{attribute} is missing")
             return False
         if not isinstance(config[attribute], expected_type):
-            errors.append(f"attribute {attribute!r} must be a {type_name}, "
+            errors.append(f"/{attribute} must be a {type_name}, "
                           f"got {config[attribute]!r}")
             return False
         return True
@@ -812,9 +813,8 @@ def _validate_config(config: dict, require_full_config: bool) -> None:
         if value is None:
             return False
         if not isinstance(value, expected_type):
-            errors.append(
-                f"attribute {attribute!r} must be a {type_name} or null, "
-                f"got {value!r}")
+            errors.append(f"/{attribute} must be a {type_name} or null, "
+                          f"got {value!r}")
             return False
         return True
 
@@ -835,7 +835,7 @@ def _validate_config(config: dict, require_full_config: bool) -> None:
     optional("default-group-name", str, "string")
     if required_unless_bootstrapping("enabled-groups", list,
                                      "list of group names"):
-        _validate_string_list(errors, "enabled-groups",
+        _validate_string_list(errors, "/enabled-groups",
                               config["enabled-groups"])
 
     if errors:

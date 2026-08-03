@@ -299,9 +299,7 @@ def test_doxygen_context_accepts_a_valid_config():
 def test_doxygen_context_reports_missing_required_attribute(missing_attribute):
     config = _valid_config()
     del config[missing_attribute]
-    with pytest.raises(
-            ValueError,
-            match=f"missing required attribute {missing_attribute!r}"):
+    with pytest.raises(ValueError, match=f"/{missing_attribute} is missing"):
         DoxygenContext(config, require_full_config=True)
 
 
@@ -317,7 +315,7 @@ def test_doxygen_context_reports_missing_required_attribute(missing_attribute):
 def test_doxygen_context_reports_wrong_type(attribute, bad_value):
     config = _valid_config()
     config[attribute] = bad_value
-    with pytest.raises(ValueError, match=f"attribute {attribute!r} must be a"):
+    with pytest.raises(ValueError, match=f"/{attribute} must be a"):
         DoxygenContext(config, require_full_config=True)
 
 
@@ -341,8 +339,7 @@ def test_doxygen_context_still_checks_enabled_groups_type_when_optional():
         "groups": {},
         "enabled-groups": "FooGroup",
     }
-    with pytest.raises(ValueError,
-                       match="attribute 'enabled-groups' must be a"):
+    with pytest.raises(ValueError, match="/enabled-groups must be a"):
         DoxygenContext(config)
 
 
@@ -352,11 +349,11 @@ def test_doxygen_context_still_checks_enabled_groups_type_when_optional():
 @pytest.mark.parametrize("attribute,bad_value,expected", [
     ("enabled-groups", [{
         "FooGroup": True
-    }], "entry 0 must be a string"),
-    ("enabled-groups", ["FooGroup", 7], "entry 1 must be a string"),
+    }], "/enabled-groups[0] must be a string"),
+    ("enabled-groups", ["FooGroup", 7], "/enabled-groups[1] must be a string"),
     ("groups", {
         "FooGroup": []
-    }, "entry 'FooGroup' must be a dict"),
+    }, "/groups/FooGroup must be a dict"),
     ("groups", {
         7: {}
     }, "non-string key 7"),
@@ -368,7 +365,7 @@ def test_doxygen_context_still_checks_enabled_groups_type_when_optional():
     }, "non-string key 7"),
     ("type-map", {
         "a": 7
-    }, "value for 'a' must be a string"),
+    }, "/type-map/a must be a string"),
     ("type-map", {
         7: "a"
     }, "non-string key 7"),
@@ -841,7 +838,7 @@ def test_clifromsource_reports_invalid_config_without_a_traceback(tmp_path):
             _get_path("source-to-spec/null-item-to-group/xml")
         ])
     assert "specfromsource: error:" in str(excinfo.value)
-    assert "'groups'" in str(excinfo.value)
+    assert "/groups is missing" in str(excinfo.value)
 
 
 def test_clifromsource_reports_missing_config_file_without_a_traceback(
