@@ -42,6 +42,11 @@ def test_stdtailoring(caplog, tmpdir):
     # Check standard and clause references
     assert builder.substitute(
         "${/standard/clause-0:/clause}") == ":ref:`4.3.1.1x <StandardClause0>`"
+    # The label drops the bullet, the target does not: a standard cites a
+    # clause by its section, and the reference still points at the individual
+    # requirement.
+    assert builder.substitute("${/standard/clause-0:/clause-section}"
+                              ) == ":ref:`4.3.1.1 <StandardClause0>`"
     assert builder.substitute(
         "${/standard/clause-0:/clause-long}"
     ) == ":ref:`4.3.1.1x (Clause 0 name) <StandardClause0>`"
