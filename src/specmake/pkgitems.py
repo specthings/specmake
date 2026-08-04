@@ -333,9 +333,12 @@ class BuildItem():
             yield
 
     @property
-    def git_directory(self) -> str:
-        """ Is the package Git directory. """
-        return self.director.package["deployment-directory"]
+    def git_directory(self) -> Optional[str]:
+        """
+        Is the Git directory used to track the build steps or None, if Git is
+        not used.
+        """
+        return self.director.git_directory
 
     def push_component(self, component: "PackageComponent") -> None:
         """
@@ -369,7 +372,7 @@ class BuildItem():
         self.refresh_make_and_input_links()
         self.refresh()
         self.commit("Refresh")
-        assert not self.director.use_git or self.git_is_clean()
+        assert self.git_is_clean()
 
     def build(self, **kwargs) -> None:
         """ Run the build if necessary. """
@@ -651,9 +654,9 @@ class BuildItem():
 
     def git_add(self, what: Union[str, Iterable[str]]) -> None:
         """ Add the files to Git. """
-        if not self.director.use_git:
-            return
         directory = self.git_directory
+        if directory is None:
+            return
         what = to_iterable(what)
         submodules = self.director.submodules
         if submodules:
@@ -675,9 +678,12 @@ class BuildItem():
 
     def git_is_clean(self) -> bool:
         """
-        Return true, if the Git repository is clean, otherwise false.
+        Return true, if the Git repository is clean or Git is not used,
+        otherwise false.
         """
         directory = self.git_directory
+        if directory is None:
+            return True
         stdout: list[str] = []
         status = run_command(["git", "status", "--short"],
                              directory,
@@ -687,9 +693,9 @@ class BuildItem():
 
     def git_commit(self, reason: str) -> None:
         """ Commit the staged files to Git. """
-        if not self.director.use_git:
-            return
         directory = self.git_directory
+        if directory is None:
+            return
         if _git_has_staged_files(directory):
             status = run_command(
                 ["git", "commit", "-m", f"{self.item.uid}: {reason}"],
@@ -949,18 +955,19 @@ def _gather_build_uids_of_package(item: Item, build_uids: set[str]) -> None:
 class PackageBuildDirector(dict):
     """
     The package build director contains the package build state and runs the
-    build.
+    build.  The build steps are tracked in the Git directory.  If it is None,
+    then Git is not used.
     """
 
     def __init__(self,
                  item_cache: ItemCache,
                  package_uid: str,
                  factory: BuildItemFactory,
-                 use_git: Optional[bool] = False) -> None:
+                 git_directory: Optional[str] = None) -> None:
         self.item_cache = item_cache
         self.package_uid = package_uid
         self.factory = factory
-        self.use_git = use_git
+        self.git_directory = git_directory
         self.submodules: tuple[str, ...] = tuple()
         item_cache.top_view.add_get_missing("component", self.get_component)
 

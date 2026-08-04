@@ -73,7 +73,7 @@ def clisubstitute(argv: list[str] = sys.argv) -> None:
                                                type_provider=type_provider)
     logging.info("%s: loading done", package_uid)
     factory = create_build_item_factory()
-    director = PackageBuildDirector(item_cache, package_uid, factory, False)
+    director = PackageBuildDirector(item_cache, package_uid, factory)
     build_item = director.create_with_dependencies(args.uid)
     with build_item.scope():
         for line in sys.stdin:
