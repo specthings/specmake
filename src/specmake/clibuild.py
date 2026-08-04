@@ -47,9 +47,6 @@ def _get_arguments(argv: list[str]) -> argparse.Namespace:
             "--do-not-use-git",
             help="do not use git to track changes in the workspace",
             action="store_true")
-        parser.add_argument("--prefix",
-                            help="the prefix directory",
-                            default="/opt")
         parser.add_argument("--config-directory",
                             help="the configuration directory",
                             default=".")
@@ -100,6 +97,6 @@ def clibuild(argv: list[str] = sys.argv) -> None:
     buildspace_config = BuildspaceConfig(
         spec_directory=os.path.join(deployment_directory, "build", "spec"),
         cache_directory=os.path.join(deployment_directory, "build", "cache"),
-        use_git=not args.do_not_use_git)
+        git_directory=None if args.do_not_use_git else deployment_directory)
     buildspace = export_to_buildspace(workspace, buildspace_config)
     buildspace.director.build_package(args.only, args.force, args.skip)

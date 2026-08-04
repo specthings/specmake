@@ -26,6 +26,7 @@
 
 import logging
 import os
+import shutil
 import pytest
 
 from specware import run_command
@@ -282,6 +283,43 @@ def test_workspace_discard_and_delete_error(tmpdir):
     assert buildspace_2.director["/c"]["directory"] == "foobar"
 
 
+def test_workspace_moved_deployment_directory(tmpdir):
+    old_directory = os.path.join(tmpdir, "old")
+    new_directory = os.path.join(tmpdir, "new")
+    workspace = _create_workspace(tmpdir, "spec-pkg-wk/file/single")
+    package = workspace.director.package
+    package.item["deployment-directory"] = old_directory
+    os.makedirs(old_directory)
+    status = run_command(["git", "init"], old_directory)
+    assert status == 0
+    export_to_buildspace(
+        workspace,
+        BuildspaceConfig(spec_directory=os.path.join(old_directory, "build",
+                                                     "spec"),
+                         cache_directory=os.path.join(old_directory, "build",
+                                                      "cache"),
+                         git_directory=old_directory))
+    commit = _git_commit(old_directory, "HEAD")
+
+    # The buildspace stores the deployment directory of the first export.  It
+    # is stale once the deployment directory moves.
+    shutil.move(old_directory, new_directory)
+    package.item["deployment-directory"] = new_directory
+    buildspace = export_to_buildspace(
+        workspace,
+        BuildspaceConfig(spec_directory=os.path.join(new_directory, "build",
+                                                     "spec"),
+                         cache_directory=os.path.join(new_directory, "build",
+                                                      "cache"),
+                         git_directory=new_directory))
+
+    assert not os.path.exists(old_directory)
+    assert _git_commit(new_directory, "HEAD") != commit
+    assert os.path.exists(os.path.join(new_directory, "file", "c.txt"))
+    assert buildspace.director["/file"].directory == os.path.join(
+        new_directory, "file")
+
+
 def test_workspace_component(tmpdir):
     test_dir = os.path.dirname(__file__)
     workspace_config = WorkspaceConfig(
@@ -340,17 +378,17 @@ def test_workspace_component(tmpdir):
     work_item_b = workspace.director["/pkg/template-item-b"]
     assert isinstance(work_item_b, BuildItem)
 
+    deployment_directory = str(tmpdir)
     buildspace_config = BuildspaceConfig(
         spec_directory=os.path.join(tmpdir, "build", "spec"),
         cache_directory=os.path.join(tmpdir, "build", "cache"),
-        use_git=True,
+        git_directory=deployment_directory,
         verify_specification_format=True)
 
     assert not os.path.exists(
         os.path.join(buildspace_config.spec_directory,
                      "pkg/template-item-a.json"))
 
-    deployment_directory = str(tmpdir)
     status = run_command(["git", "init"], deployment_directory)
     assert status == 0
     package.item["deployment-directory"] = deployment_directory

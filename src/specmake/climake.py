@@ -84,8 +84,7 @@ def climake(argv: list[str] = sys.argv) -> None:
         if status.critical or status.error:
             return
     factory = create_build_item_factory()
-    director = PackageBuildDirector(item_cache,
-                                    uid,
-                                    factory,
-                                    use_git=args.use_git)
+    director = PackageBuildDirector(item_cache, uid, factory)
+    if args.use_git:
+        director.git_directory = director.package["deployment-directory"]
     director.build_only(args.uids, force_patterns=args.force)

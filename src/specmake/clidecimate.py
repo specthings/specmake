@@ -104,7 +104,7 @@ def clidecimate(argv: list[str] = sys.argv) -> None:
                                                type_provider=type_provider)
     logging.info("%s: loading done", package_uid)
     factory = create_build_item_factory()
-    director = PackageBuildDirector(item_cache, package_uid, factory, False)
+    director = PackageBuildDirector(item_cache, package_uid, factory)
     keep: set[str] = set()
     for uid in args.uids:
         directory_state = director.create_with_dependencies(uid)

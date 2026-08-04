@@ -382,7 +382,7 @@ def test_packagebuild(caplog, tmpdir, monkeypatch):
 
     # Test Git support
 
-    director.use_git = False
+    director.git_directory = None
 
     command = []
     c.git_commit("reason")
@@ -392,7 +392,10 @@ def test_packagebuild(caplog, tmpdir, monkeypatch):
     c.git_add(["modules/foobar"])
     assert command == []
 
-    director.use_git = True
+    assert c.git_is_clean()
+    assert command == []
+
+    director.git_directory = str(tmp_dir / "pkg")
     director.submodules = tuple()
 
     staged_files = []

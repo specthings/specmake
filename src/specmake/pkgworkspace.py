@@ -801,10 +801,13 @@ class _UIDs:
 
 @dataclasses.dataclass
 class BuildspaceConfig:
-    """ Represents a buildspace configuration. """
+    """
+    Represents a buildspace configuration.  The build steps are tracked in the
+    Git directory.  If it is None, then Git is not used.
+    """
     spec_directory: str
     cache_directory: str = "cache-buildspace"
-    use_git: bool = False
+    git_directory: Optional[str] = None
     verify_specification_format: bool = False
     factory: BuildItemFactory | None = None
 
@@ -833,7 +836,7 @@ def _create_buildspace(
     if factory is None:
         factory = create_build_item_factory()
     director = PackageBuildDirector(item_cache, package_uid, factory,
-                                    config.use_git)
+                                    config.git_directory)
     return BuildspaceContext(item_cache, director, config.spec_directory)
 
 
