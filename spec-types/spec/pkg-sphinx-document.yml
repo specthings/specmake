@@ -113,7 +113,25 @@ spec-info:
     description: |
       This set of attributes specifies a document using the Sphinx
       documentation framework.
-    mandatory-attributes: all
+    mandatory-attributes:
+    - document-base-path
+    - document-components
+    - document-contributors
+    - document-copyrights
+    - document-html-footer
+    - document-html-help-base-name
+    - document-key
+    - document-latex-footer-right
+    - document-latex-header-left
+    - document-latex-theme
+    - document-license
+    - document-license-map
+    - document-releases
+    - document-title
+    - document-toctree-maxdepth
+    - document-type
+    - output-html
+    - output-pdf
 spec-name: Sphinx Document Item Type
 spec-type: pkg-sphinx-document
 type: spec
