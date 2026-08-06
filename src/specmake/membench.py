@@ -28,7 +28,7 @@ Provides functions for the generation of memory benchmark documentation.
 
 import os
 import re
-from typing import Any, NamedTuple
+from typing import Any, Iterator, NamedTuple
 
 from specitems import (Item, ItemCache, ItemMapper, ROW_SPAN, TextContent,
                        get_reference)
@@ -371,6 +371,32 @@ def _get_size(section_limits: dict[str, tuple[int, int]], key: str) -> int:
     return limits[1] - limits[0]
 
 
+class _ElfSection(NamedTuple):
+    """ Represents a section of an ELF file. """
+    name: str
+    size: int
+    start: int
+    flags: frozenset[str]
+
+
+def _parse_sections(stdout: list[str]) -> Iterator[_ElfSection]:
+    """
+    Parses the ELF sections of an objdump section header dump.  The section
+    flags are on the line which follows the line of the section.  A section
+    without such a line has no flags.
+    """
+    for index, line in enumerate(stdout):
+        match = _SECTION.search(line)
+        if not match:
+            continue
+        next_index = index + 1
+        flags_line = stdout[next_index] if next_index < len(stdout) else ""
+        flags = (flag.strip() for flag in flags_line.split(","))
+        yield _ElfSection(match.group(1), int(match.group(2), 16),
+                          int(match.group(3), 16),
+                          frozenset(flag for flag in flags if flag))
+
+
 def _run_objdump(objdump: str, elf: str) -> list[str]:
     stdout: list[str] = []
     status = run_command([objdump, "-h", elf], stdout=stdout)
@@ -399,18 +425,14 @@ def _get_sections(item: Item, path_to_elf_files: str, objdump: str,
     if not stdout:
         return {}
     section_limits: dict[str, tuple[int, int]] = {}
-    for line in stdout:
-        match = _SECTION.search(line)
-        if match:
-            name = match.group(1)
-            size = int(match.group(2), 16)
-            section = _SECTION_MAP[name]
-            if size != 0 and section:
-                start = int(match.group(3), 16)
-                end = start + size
-                limits = section_limits.get(section, (2**64, 0))
-                section_limits[section] = (min(limits[0],
-                                               start), max(limits[1], end))
+    for elf_section in _parse_sections(stdout):
+        section = _SECTION_MAP[elf_section.name]
+        if elf_section.size != 0 and section:
+            start = elf_section.start
+            end = start + elf_section.size
+            limits = section_limits.get(section, (2**64, 0))
+            section_limits[section] = (min(limits[0],
+                                           start), max(limits[1], end))
     _try_add_workspace(gdb, elf, section_limits)
     return _make_sections(section_limits)
 
