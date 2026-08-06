@@ -26,6 +26,7 @@ Provides functions for the generation of memory benchmark documentation.
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import logging
 import os
 import re
 from typing import Any, Iterator, NamedTuple
@@ -397,6 +398,41 @@ def _parse_sections(stdout: list[str]) -> Iterator[_ElfSection]:
                           frozenset(flag for flag in flags if flag))
 
 
+def _classify_section(elf_section: _ElfSection) -> str | None:
+    """
+    Classifies a section which is not in the ELF section map by the section
+    flags.  Thread-local storage is not part of the static memory usage.
+    """
+    flags = elf_section.flags
+    if "ALLOC" not in flags or "THREAD_LOCAL" in flags:
+        return None
+    if "CODE" in flags:
+        return ".text"
+    if "CONTENTS" not in flags:
+        return ".bss"
+    if "READONLY" in flags:
+        return ".rodata"
+    return ".data"
+
+
+def _get_section(elf: str, elf_section: _ElfSection) -> str | None:
+    """
+    Gets the section which accounts for the ELF section of the ELF file.
+    Sections which are not in the ELF section map are classified by the
+    section flags.
+    """
+    name = elf_section.name
+    try:
+        return _SECTION_MAP[name]
+    except KeyError:
+        pass
+    section = _classify_section(elf_section)
+    logging.warning(
+        "%s: unknown ELF section '%s' with flags '%s' accounted as '%s'", elf,
+        name, ", ".join(sorted(elf_section.flags)), section or "no section")
+    return section
+
+
 def _run_objdump(objdump: str, elf: str) -> list[str]:
     stdout: list[str] = []
     status = run_command([objdump, "-h", elf], stdout=stdout)
@@ -426,8 +462,10 @@ def _get_sections(item: Item, path_to_elf_files: str, objdump: str,
         return {}
     section_limits: dict[str, tuple[int, int]] = {}
     for elf_section in _parse_sections(stdout):
-        section = _SECTION_MAP[elf_section.name]
-        if elf_section.size != 0 and section:
+        if elf_section.size == 0:
+            continue
+        section = _get_section(elf, elf_section)
+        if section:
             start = elf_section.start
             end = start + elf_section.size
             limits = section_limits.get(section, (2**64, 0))
