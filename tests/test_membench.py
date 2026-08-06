@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import logging
+
 from specitems import ItemCache, ItemMapper, SphinxContent
 
 from specmake import (MembenchVariant, gather_object_sizes, gather_sections,
@@ -58,6 +60,71 @@ def run_command(args, cwd=None, stdout=None):
             "                  ALLOC"
         ])
     return 0
+
+
+_OBJDUMP_LINES = [
+    "  0 .text         00000100  00100000  00100000  00010000  2**2",
+    "                  CONTENTS, ALLOC, LOAD, READONLY, CODE",
+    "  1 .sframe       00000010  00100100  00100100  00010100  2**3",
+    "                  CONTENTS, ALLOC, LOAD, READONLY, DATA",
+    "  2 .blue_debug   00000020  00000000  00000000  00010110  2**0",
+    "                  CONTENTS, READONLY, DEBUGGING, OCTETS",
+    "  3 .blue_tls     00000004  00100110  00100110  00010110  2**2",
+    "                  CONTENTS, ALLOC, LOAD, DATA, THREAD_LOCAL",
+    "  4 .blue_code    00000030  00100120  00100120  00010120  2**2",
+    "                  CONTENTS, ALLOC, LOAD, READONLY, CODE",
+    "  5 .blue_rodata  00000040  00100150  00100150  00010150  2**2",
+    "                  CONTENTS, ALLOC, LOAD, READONLY, DATA",
+    "  6 .blue_data    00000050  00200000  00200000  00020000  2**2",
+    "                  CONTENTS, ALLOC, LOAD, DATA",
+    "  7 .blue_bss     00000060  00200050  00200050  00020050  2**2",
+    "                  ALLOC",
+    "  8 .blue_empty   00000000  00200100  00200100  00020100  2**2",
+    "                  CONTENTS, ALLOC, LOAD, DATA",
+    "  9 .blue_no_flags 00000070  00200100  00200100  00020100  2**2",
+]
+
+
+def run_command_2(args, cwd=None, stdout=None):
+    if args[0] == "gdb":
+        return 1
+    if "t0" in args[-1] or "t1" in args[-1]:
+        stdout.extend(_OBJDUMP_LINES)
+        return 0
+    return 1
+
+
+def test_membench_unknown_sections(caplog, tmpdir, monkeypatch):
+    caplog.set_level(logging.WARNING)
+    monkeypatch.setattr("specmake.membench.run_command", run_command_2)
+    item_cache = create_item_cache(tmpdir, "spec-membench")
+    sections_by_uid = gather_sections(item_cache, "path", "objdump", "gdb")
+    sections = {
+        ".text": 0x150,
+        ".rodata": 0x90,
+        ".data": 0x50,
+        ".bss": 0x60,
+        ".noinit": 0
+    }
+    assert sections_by_uid == {"/t0": sections, "/t1": sections}
+    log = caplog.text
+    assert log.count("unknown ELF section '.blue_code'") == 2
+    assert ("unknown ELF section '.blue_debug' with flags 'CONTENTS, "
+            "DEBUGGING, OCTETS, READONLY' accounted as 'no section'") in log
+    assert ("unknown ELF section '.blue_tls' with flags 'ALLOC, CONTENTS, "
+            "DATA, LOAD, THREAD_LOCAL' accounted as 'no section'") in log
+    assert ("unknown ELF section '.blue_code' with flags 'ALLOC, CODE, "
+            "CONTENTS, LOAD, READONLY' accounted as '.text'") in log
+    assert ("unknown ELF section '.blue_bss' with flags 'ALLOC' accounted "
+            "as '.bss'") in log
+    assert ("unknown ELF section '.blue_rodata' with flags 'ALLOC, CONTENTS, "
+            "DATA, LOAD, READONLY' accounted as '.rodata'") in log
+    assert ("unknown ELF section '.blue_data' with flags 'ALLOC, CONTENTS, "
+            "DATA, LOAD' accounted as '.data'") in log
+    assert ("unknown ELF section '.blue_no_flags' with flags '' accounted "
+            "as 'no section'") in log
+    assert ".sframe" not in log
+    assert ".blue_empty" not in log
 
 
 def test_membench(tmpdir, monkeypatch):
