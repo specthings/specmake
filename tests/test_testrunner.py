@@ -26,9 +26,7 @@
 
 import logging
 from pathlib import Path
-import subprocess
 import tarfile
-from typing import NamedTuple
 
 import pytest
 from specitems import Item
@@ -105,22 +103,18 @@ class _TestRunner(TestRunner):
         } for executable in executables]
 
 
-class _Subprocess(NamedTuple):
-    stdout: bytes
-
-
-def _subprocess_run(command, check, stdin, stdout, timeout):
+def _run_executable(command, timeout):
     if command[2] == "a.exe":
         raise Exception("foobar")
     if command[2] == "b.exe":
-        raise subprocess.TimeoutExpired(command[2], timeout, b"")
+        return "", "", 0, "timeout"
     if command[2] == "c.exe":
-        raise subprocess.TimeoutExpired(command[2], timeout, None)
-    return _Subprocess(b"u\r\nv\nw\n")
+        return "", "ee", 5, "timeout"
+    return "u\r\nv\nw\n", "diagnostic", len("diagnostic"), None
 
 
 def test_testrunner(caplog, tmpdir, monkeypatch):
-    monkeypatch.setattr(specmake.runtests, "subprocess_run", _subprocess_run)
+    monkeypatch.setattr(specmake.runtests, "_run_executable", _run_executable)
     tmp_dir = Path(tmpdir)
     package = create_package(caplog, tmp_dir, Path("spec-packagebuild"),
                              ["run-tests"])
@@ -223,6 +217,10 @@ building the package and captures the output:
         "YtTC0r1DraKOn9vNGppBAVFVTnI9IqS6jFDRBKVucU_W"
         "_dpQF0xtC_mRjGV7t5RSQKhY7l3iDGbeBZJ-lV37bg==",
         "output": [""],
+        "standard-error":
+        "ee",
+        "standard-error-size":
+        5,
         "start-time":
         "e"
     }, {
@@ -237,6 +235,8 @@ building the package and captures the output:
         "ZtTC0r1DraKOn9vNGppBAVFVTnI9IqS6jFDRBKVucU_W"
         "_dpQF0xtC_mRjGV7t5RSQKhY7l3iDGbeBZJ-lV37bg==",
         "output": ["u", "v", "w"],
+        "standard-error":
+        "diagnostic",
         "start-time":
         "f"
     }]
