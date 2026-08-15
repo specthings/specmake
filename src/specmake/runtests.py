@@ -31,7 +31,6 @@ from pathlib import Path
 import queue
 import re
 import subprocess
-from subprocess import run as subprocess_run
 import threading
 import time
 from typing import Any, Callable, NamedTuple, Optional
@@ -62,6 +61,70 @@ class _Job:
         self.timeout = executable.timeout
 
 
+class _StreamReader(threading.Thread):
+    """
+    Read a stream of a test runner and keep at most a limit of it.
+
+    The stream must be read while the process runs, since a full pipe blocks
+    the process.  A simulator may write an unbounded amount to its standard
+    error, so everything beyond the limit is read and discarded instead of
+    being stored.
+    """
+
+    # pylint: disable=too-few-public-methods
+    def __init__(self, stream: Any, limit: Optional[int]):
+        super().__init__(daemon=True)
+        self._stream = stream
+        self._limit = limit
+        self._parts: list[bytes] = []
+        self._kept = 0
+        self.size = 0
+
+    def run(self) -> None:
+        while True:
+            data = self._stream.read(65536)
+            if not data:
+                break
+            self.size += len(data)
+            if self._limit is not None:
+                data = data[:max(0, self._limit - self._kept)]
+            if data:
+                self._parts.append(data)
+                self._kept += len(data)
+
+    def get_text(self) -> str:
+        """ Return the kept part of the stream. """
+        return b"".join(self._parts).decode("latin-1")
+
+
+def _run_executable(command: list[str],
+                    timeout: float) -> tuple[str, str, int, Optional[str]]:
+    """
+    Run the command and return its standard output, the kept part of its
+    standard error, the size of its standard error, and an error message.
+    """
+    error: Optional[str] = None
+    with subprocess.Popen(command,
+                          stdin=subprocess.DEVNULL,
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE) as process:
+        assert process.stdout is not None
+        assert process.stderr is not None
+        out = _StreamReader(process.stdout, None)
+        err = _StreamReader(process.stderr, 4096)
+        out.start()
+        err.start()
+        try:
+            process.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            error = "timeout"
+            process.kill()
+            process.wait()
+        out.join()
+        err.join()
+    return out.get_text(), err.get_text(), err.size, error
+
+
 def _worker(work_queue: queue.Queue, discard_patterns: list, uid: str) -> None:
     while True:
         try:
@@ -73,18 +136,14 @@ def _worker(work_queue: queue.Queue, discard_patterns: list, uid: str) -> None:
         job.report["start-time"] = now_utc()
         begin = time.monotonic()
         try:
-            process = subprocess_run(job.report["command-line"],
-                                     check=False,
-                                     stdin=subprocess.DEVNULL,
-                                     stdout=subprocess.PIPE,
-                                     timeout=job.timeout)
-            stdout = process.stdout.decode("latin-1")
-        except subprocess.TimeoutExpired as timeout:
-            job.report["error"] = "timeout"
-            if timeout.stdout is not None:
-                stdout = timeout.stdout.decode("latin-1")
-            else:
-                stdout = ""
+            stdout, stderr, stderr_size, error = _run_executable(
+                job.report["command-line"], job.timeout)
+            if error is not None:
+                job.report["error"] = error
+            if stderr_size > 0:
+                job.report["standard-error"] = stderr
+                if stderr_size > len(stderr):
+                    job.report["standard-error-size"] = stderr_size
         except Exception as err:  # pylint: disable=broad-exception-caught
             job.report["error"] = str(err)
             stdout = ""
