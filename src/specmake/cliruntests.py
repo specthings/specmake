@@ -25,6 +25,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import argparse
+import functools
 import hashlib
 import json
 import logging
@@ -35,12 +36,12 @@ import sys
 import time
 from typing import Any
 
-from specitems import hash_file, load_data
+from specitems import hash_file, is_enabled, load_data
 
 from .ctrf import (CTRF_FAILED, convert_test_log, ctrf_markdown_summary,
                    get_ctrf_tool_version)
 from .runtests import (RunnerExecutable, RunnerReport, run_subprocess_tests,
-                       run_tests_with_retries)
+                       run_tests_with_retries, select_command)
 from .testoutputparser import augment_report
 from .util import now_utc, write_json
 
@@ -58,6 +59,10 @@ example:
       - ${/pkg/deployment/qemu:/directory}/bin/qemu-system-arm
       - -machine
       - ${.:/component/machine}
+      - enabled-by: RTEMS_SMP
+        value:
+        - -RTEMS_SMP
+        - '4'
       - -kernel
       - ${.:/test-executable}
 
@@ -68,12 +73,16 @@ example:
       /pkg/deployment/qemu:/directory: /opt/qemu
       .:/component/machine: xilinx-zynq-a9
 
+  The command uses an argument with a condition only if the enabled set
+  fulfils the condition.  The -E option adds a name to the enabled set,
+  which is empty by default.
+
   Run the test programs of two directories with a machine of the command
-  line:
+  line and with the arguments enabled by RTEMS_SMP:
 
       specruntests --substitutions substitutions.yml \\
-          -D '.:/component/machine=virt' --ctrf report.ctrf.json \\
-          runner.yml tests more-tests
+          -D '.:/component/machine=virt' -E RTEMS_SMP \\
+          --ctrf report.ctrf.json runner.yml tests more-tests
 """
 
 _Data = dict[str, Any]
@@ -102,6 +111,13 @@ def _get_arguments(argv: list[str]) -> argparse.Namespace:
                         "the key without the ${ and }, for example "
                         "-D '/pkg/deployment/qemu:/directory=/opt/qemu'; "
                         "overrides the substitutions file")
+    parser.add_argument("-E",
+                        "--enable",
+                        action="append",
+                        default=[],
+                        metavar="NAME",
+                        help="add the name to the enabled set, which "
+                        "decides the command arguments with a condition")
     parser.add_argument("--test-timeouts",
                         help="the path to a YAML file which provides the "
                         "measured test durations")
@@ -326,15 +342,14 @@ def _gather(
     return reports, executables
 
 
-def _runner_hash(runner: _Data, substitutions: dict[str, str]) -> str:
+def _runner_hash(command: list[str], substitutions: dict[str, str]) -> str:
     state = hashlib.sha512()
     state.update(
-        json.dumps(
-            {
-                "command": runner["command"],
-                "substitutions": substitutions
-            },
-            sort_keys=True).encode("utf-8"))
+        json.dumps({
+            "command": command,
+            "substitutions": substitutions
+        },
+                   sort_keys=True).encode("utf-8"))
     return state.hexdigest()
 
 
@@ -355,16 +370,19 @@ def _run(args: argparse.Namespace) -> _Data:
             f"the item '{args.runner}' is not a subprocess test runner")
     substitutions = _get_substitutions(args)
     timeouts = _get_timeouts(args)
+    enabled_set = set(args.enable)
+    command = select_command(runner["command"],
+                             functools.partial(is_enabled, enabled_set))
 
     def get_command(executable: RunnerExecutable) -> list[str]:
-        return _substitute(runner["command"], substitutions, executable.path)
+        return _substitute(command, substitutions, executable.path)
 
     def run_tests(executables: list[RunnerExecutable]) -> list[RunnerReport]:
         return run_subprocess_tests(executables, get_command,
                                     runner.get("discard-patterns", []),
                                     runner["max-process-count"], _UID)
 
-    runner_hash = _runner_hash(runner, substitutions)
+    runner_hash = _runner_hash(command, substitutions)
     start_time = now_utc()
     begin = time.monotonic()
     reports, executables = _gather(args, runner, timeouts, runner_hash)
@@ -382,9 +400,8 @@ def _run(args: argparse.Namespace) -> _Data:
         "start-time":
         start_time,
         "test-runner-description":
-        _describe(
-            _substitute(runner["command"], substitutions, "${test_program}",
-                        False)),
+        _describe(_substitute(command, substitutions, "${test_program}",
+                              False)),
         "test-runner-hash":
         runner_hash
     }

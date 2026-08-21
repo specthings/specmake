@@ -2,6 +2,8 @@ SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 command:
 - ${/pkg/deployment/python:/executable}
 - ${/pkg/deployment/simulator:/executable}
+- enabled-by: verbose
+  value: --verbose
 - ${.:/test-executable}
 copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG

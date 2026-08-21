@@ -75,7 +75,7 @@ building the package and captures the output:
 
 .. code-block:: none
 
-    foo bar ${test_program}
+    foo --on 1 bar ${test_program}
 .. test-procedures end
 
 .. other-validations begin
@@ -1285,7 +1285,7 @@ building the package and captures the output:
 
 .. code-block:: none
 
-    foo bar ${test_program}
+    foo --on 1 bar ${test_program}
 .. test-procedures end
 
 .. other-validations begin
