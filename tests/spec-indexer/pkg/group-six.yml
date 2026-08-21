@@ -1,0 +1,14 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- hash: null
+  name: index-member
+  path: null
+  role: input-to
+  sort-key: 9
+  title: Section Six
+  uid: index
+pkg-type: index-group
+type: pkg

@@ -1,0 +1,38 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: pkg-type
+  spec-value: index-group
+  uid: pkg-root
+spec-description: |
+  Items of this type shall have the following links:
+
+  * There shall be exactly one link to a ${pkg-index:/spec-name} item or to
+    another ${pkg-index-group:/spec-name} item with the
+    ${pkg-index-member-role:/spec-name}.  The link defines the section title
+    and the section order.  A link to another group makes this group a
+    subsection of it, which lets the sections follow the component hierarchy of
+    the package.
+
+  * There shall be links to a ${pkg-directory-state:/spec-name} item with the
+    ${pkg-index-member-role:/spec-name}.  The link target directory state item
+    defines a document of the section.
+
+  A package component registers its own sections through these links.  A
+  section which holds neither a document nor a subsection is left out of the
+  page.
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      This set of attributes specifies a section of a documentation index page.
+    mandatory-attributes: all
+spec-name: Documentation Index Group Item Type
+spec-type: pkg-index-group
+type: spec

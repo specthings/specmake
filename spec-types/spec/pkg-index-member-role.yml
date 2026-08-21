@@ -1,0 +1,42 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: name
+  spec-value: index-member
+  uid: pkg-input-role
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      path:
+        description: |
+          If the value is present, then it shall be the link target of the
+          index entry relative to the base directory of the link target
+          directory state.  If the value is absent, then the link targets are
+          derived from the ``output-html`` and ``output-pdf`` attributes of the
+          link target item.
+        spec-type: optional-str
+      sort-key:
+        description: |
+          It shall be the sort key of the index entry.  Entries are sorted by
+          the sort key and then by the title.
+        spec-type: int
+      title:
+        description: |
+          If the value is present, then it shall be the title of the index
+          entry.  If the value is absent, then the title is the
+          ``document-normal-title`` of the link target item.
+        spec-type: optional-str
+    description: |
+      It defines the index member role of links and is used to add a section to
+      a documentation index page or a document to a section.
+    mandatory-attributes: all
+spec-name: Documentation Index Member Link Role
+spec-type: pkg-index-member-role
+type: spec
