@@ -34,8 +34,7 @@ spec-info:
         description: |
           It shall be the path to the archive file relative to the base
           directory of the ``"archive"`` directory state production.  The
-          method to compress the archive is determined by the archive file name
-          extension.
+          archive is a tar file compressed with xz.
         spec-type: str
       archive-strip-prefix:
         description: |
