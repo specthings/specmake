@@ -9,7 +9,6 @@ component-type: rtems
 config: smp
 copyrights:
 - Copyright (C) 2020 embedded brains GmbH & Co. KG
-enabled-set: []
 deployment-directory: ${.:/prefix-directory}/${.:/package-directory}
 enabled-by: true
 enabled-set: []

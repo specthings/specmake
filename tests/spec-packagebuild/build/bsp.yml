@@ -9,7 +9,6 @@ cppflags: []
 enabled-by: true
 family: leon3
 includes: []
-enabled-by: true
 install:
 - destination: foo
   source: bar

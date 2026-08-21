@@ -3,7 +3,6 @@ build-directory: ${.:/deployment-directory}/build
 component-type: generic
 copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
-enabled-set: []
 deployment-directory: ${.:/prefix-directory}/${.:/package-directory}
 enabled-by: true
 enabled-set: []
