@@ -43,6 +43,29 @@ from .util import now_utc
 RunnerReport = dict[str, Any]
 
 
+def select_command(command: list,
+                   is_enabled_condition: Callable[[Any], bool]) -> list:
+    """
+    Return the arguments of the command which are enabled.
+
+    An element which defines a condition contributes its value only if
+    is_enabled_condition() accepts the condition.  A value which is a list
+    contributes one argument for each element.  The arguments keep their
+    variables.
+    """
+    arguments: list = []
+    for element in command:
+        if isinstance(element, dict):
+            if not is_enabled_condition(element["enabled-by"]):
+                continue
+            element = element["value"]
+        if isinstance(element, list):
+            arguments.extend(element)
+        else:
+            arguments.append(element)
+    return arguments
+
+
 class RunnerExecutable(NamedTuple):
     """ Represents a test executable. """
     path: str

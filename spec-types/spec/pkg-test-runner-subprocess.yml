@@ -1,6 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
-- Copyright (C) 2023 embedded brains GmbH & Co. KG
+- Copyright (C) 2023, 2026 embedded brains GmbH & Co. KG
 enabled-by: true
 links:
 - role: spec-member
@@ -16,8 +16,12 @@ spec-info:
     attributes:
       command:
         description: |
-          It shall be the test runner subprocess command.
-        spec-type: list-str
+          It shall be the test runner subprocess command.  A variable
+          substitution is performed on the list elements.  Use
+          ``$${.:/test-executable}`` for the test executable.  An element
+          which defines a condition contributes its argument only if the
+          enabled set fulfils this condition.
+        spec-type: pkg-test-runner-subprocess-arg-list
       discard-patterns:
         description: null
         spec-type: pkg-test-runner-subprocess-discard-pattern-list

@@ -24,19 +24,21 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import functools
 import json
 import logging
 import os
 from pathlib import Path
 import tarfile
 import time
+from typing import Any
 
-from specitems import is_enabled, Item, ItemGetValueContext
+from specitems import data_digest, is_enabled, Item, ItemGetValueContext
 
 from .directorystate import DirectoryState
 from .pkgitems import BuildItem, PackageBuildDirector
 from .runtests import (RunnerExecutable, RunnerReport, run_subprocess_tests,
-                       run_tests_with_retries)
+                       run_tests_with_retries, select_command)
 from .testoutputparser import augment_report
 from .util import now_utc
 
@@ -271,11 +273,31 @@ GRMON test script, and a shell script to run the tests manually."""
 class SubprocessTestRunner(TestRunner):
     """ Runs tests in subprocesses. """
 
+    def _is_enabled_item_condition(self, condition: Any) -> bool:
+        return is_enabled(self.enabled_set, self.substitute(condition))
+
+    def _resolve_command(self) -> list[str]:
+        return self.mapper.substitute_flexible_list(
+            self.item["command"],
+            functools.partial(is_enabled, self.enabled_set), self.item)
+
+    def get_runner_hash(self) -> str:
+        # The arguments keep their variables.  A substituted argument carries
+        # the workspace path, so a relocated build directory discards every
+        # test report.
+        return data_digest({
+            "runner":
+            super().get_runner_hash(),
+            "command":
+            select_command(self.item["command"],
+                           self._is_enabled_item_condition)
+        })
+
     def describe(self) -> str:
         executable = "${test_program}"
         self._executable = executable
         command = " ".join(f"'{part}'" if " " in part else part
-                           for part in self["command"])
+                           for part in self._resolve_command())
         return f"""For each test program (indicated by ``{executable}``),
 this test procedure runs the following command as a subprocess on the machine
 building the package and captures the output:
@@ -286,7 +308,7 @@ building the package and captures the output:
 
     def _get_command(self, executable: RunnerExecutable) -> list[str]:
         self._executable = executable.path
-        return self["command"]
+        return self._resolve_command()
 
     def run_tests(self,
                   executables: list[RunnerExecutable]) -> list[RunnerReport]:
@@ -296,4 +318,4 @@ building the package and captures the output:
 
     def get_run_command(self, executable: str) -> None | list[str]:
         self._executable = executable
-        return self["command"]
+        return self._resolve_command()

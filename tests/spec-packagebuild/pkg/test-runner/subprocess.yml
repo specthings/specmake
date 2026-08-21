@@ -1,10 +1,16 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 command:
 - foo
+- enabled-by: true
+  value:
+  - --on
+  - '1'
+- enabled-by: false
+  value: --off
 - bar
 - ${.:/test-executable}
 copyrights:
-- Copyright (C) 2023 embedded brains GmbH & Co. KG
+- Copyright (C) 2023, 2026 embedded brains GmbH & Co. KG
 default-timeout-in-seconds: 90.0
 description: Description.
 discard-patterns:

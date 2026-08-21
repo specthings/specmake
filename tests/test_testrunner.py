@@ -104,11 +104,11 @@ class _TestRunner(TestRunner):
 
 
 def _run_executable(command, timeout):
-    if command[2] == "a.exe":
+    if command[-1] == "a.exe":
         raise Exception("foobar")
-    if command[2] == "b.exe":
+    if command[-1] == "b.exe":
         return "", "", 0, "timeout"
-    if command[2] == "c.exe":
+    if command[-1] == "c.exe":
         return "", "ee", 5, "timeout"
     return "u\r\nv\nw\n", "diagnostic", len("diagnostic"), None
 
@@ -153,8 +153,13 @@ building the package and captures the output:
 
 .. code-block:: none
 
-    foo bar ${test_program}"""
-    assert subprocess_runner.get_run_command("exe") == ["foo", "bar", "exe"]
+    foo --on 1 bar ${test_program}"""
+    assert subprocess_runner.get_run_command("exe") == [
+        "foo", "--on", "1", "bar", "exe"
+    ]
+
+    # The selected arguments contribute to the runner hash
+    assert subprocess_runner.get_runner_hash() != subprocess_runner.digest()
     reports = subprocess_runner.run_tests([
         RunnerExecutable(
             "a.exe", "QvahP3YJU9bvpd7DYxJDkRBLJWbEFMEoH5Ncwu6UtxA"
@@ -178,7 +183,7 @@ building the package and captures the output:
     reports[3]["start-time"] = "f"
     reports[3]["duration"] = 5.
     assert reports == [{
-        "command-line": ["foo", "bar", "a.exe"],
+        "command-line": ["foo", "--on", "1", "bar", "a.exe"],
         "duration":
         2.0,
         "error":
@@ -192,7 +197,7 @@ building the package and captures the output:
         "start-time":
         "c"
     }, {
-        "command-line": ["foo", "bar", "b.exe"],
+        "command-line": ["foo", "--on", "1", "bar", "b.exe"],
         "duration":
         3.,
         "error":
@@ -206,7 +211,7 @@ building the package and captures the output:
         "start-time":
         "d"
     }, {
-        "command-line": ["foo", "bar", "c.exe"],
+        "command-line": ["foo", "--on", "1", "bar", "c.exe"],
         "duration":
         4.,
         "error":
@@ -224,7 +229,7 @@ building the package and captures the output:
         "start-time":
         "e"
     }, {
-        "command-line": ["foo", "bar", "d.exe"],
+        "command-line": ["foo", "--on", "1", "bar", "d.exe"],
         "duration":
         5.,
         'error':

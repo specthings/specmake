@@ -118,10 +118,11 @@ def test_run(tmp_path, capsys):
         "ts-fail.exe", "ts-pass.exe"
     ]
 
-    # The command is fully substituted
+    # The command is fully substituted and drops the disabled argument
     assert reports["hello.exe"]["command-line"][:2] == [
         sys.executable, _SIMULATOR
     ]
+    assert "--verbose" not in reports["hello.exe"]["command-line"]
 
     # The description keeps the test executable placeholder
     description = test_log["test-runner-description"]
@@ -167,6 +168,30 @@ def test_run(tmp_path, capsys):
     assert "# Test results" in out
     assert "## Failures" in out
     assert "CaseFail" in out
+
+
+def test_enable(tmp_path):
+    _make_executables(tmp_path / "tests")
+    _run(tmp_path)
+    without = _load(tmp_path / "test-log.json")
+
+    # The name of the enabled set fulfils the condition of the argument, so
+    # the argument is part of the command and of the description
+    assert _run(tmp_path, "-E", "verbose") == 1
+    with_verbose = _load(tmp_path / "test-log.json")
+    reports = {
+        os.path.basename(report["executable"]): report
+        for report in with_verbose["reports"]
+    }
+    assert reports["hello.exe"]["command-line"] == [
+        sys.executable, _SIMULATOR, "--verbose",
+        str(tmp_path / "tests" / "nested" / "hello.exe")
+    ]
+    assert "--verbose" in with_verbose["test-runner-description"]
+
+    # The command decides the test runner hash, so a report of the run
+    # without the argument is not reusable
+    assert with_verbose["test-runner-hash"] != without["test-runner-hash"]
 
 
 def test_timeout(tmp_path):
