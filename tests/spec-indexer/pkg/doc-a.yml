@@ -1,0 +1,29 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+directory: ${.:/component/prefix-directory}/index
+directory-state-type: explicit
+enabled-by: true
+files:
+- file: doc-a.pdf
+  hash: null
+hash: null
+links:
+- hash: null
+  name: component
+  role: input
+  uid: component
+- hash: null
+  name: source
+  role: input
+  uid: test-files
+- hash: null
+  name: index-member
+  path: doc-a.pdf
+  role: input-to
+  sort-key: 1
+  title: Document A
+  uid: group-one
+pkg-type: directory-state
+type: pkg

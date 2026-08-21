@@ -24,7 +24,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from .archiver import Archiver
+from .archiver import Archiver, IndexGroup, Indexer
 from .ctrfcollector import CTRFCollector
 from .directorystate import DirectoryState, RepositoryState
 from .docbuilder import DocumentBuilder
@@ -69,6 +69,7 @@ def create_build_item_factory() -> BuildItemFactory:
     factory.add_constructor("pkg/directory-state/doxyfile", Doxyfile)
     factory.add_constructor("pkg/directory-state/explicit", DirectoryState)
     factory.add_constructor("pkg/directory-state/gcda-producer", GCDAProducer)
+    factory.add_constructor("pkg/directory-state/index", Indexer)
     factory.add_constructor("pkg/directory-state/item-cache",
                             ItemCacheDirectoryState)
     factory.add_constructor("pkg/directory-state/membench-collector",
@@ -106,6 +107,7 @@ def create_build_item_factory() -> BuildItemFactory:
     factory.add_constructor("pkg/directory-state/test-log", TestLog)
     factory.add_constructor("pkg/directory-state/unpacked-archive",
                             DirectoryState)
+    factory.add_constructor("pkg/index-group", IndexGroup)
     factory.add_constructor("pkg/link-hub", LinkHub)
     factory.add_constructor("pkg/package-changes", PackageChanges)
     factory.add_constructor("pkg/redirection", Redirection)

@@ -11,6 +11,10 @@ links:
   uid: pkg-input-role
 - role: spec-refinement
   spec-key: name
+  spec-value: assets
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
   spec-value: associate
   uid: pkg-input-role
 - role: spec-refinement

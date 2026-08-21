@@ -1,0 +1,51 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: directory-state-type
+  spec-value: index
+  uid: pkg-directory-state
+spec-description: |
+  Items of this type shall have the following links:
+
+  * There shall be links to a ${pkg-index-group:/spec-name} item with the
+    ${pkg-index-member-role:/spec-name}.  The link target group item defines a
+    top level section of the index page.  A group may hold further groups, so
+    the page can nest sections to any depth.
+
+  * There shall be at most one link to a ${pkg-directory-state:/spec-name} item
+    with the ${pkg-input-role:/spec-name} and the name ``"source"``.  The link
+    target directory state item defines the index page template and the style
+    sheet.
+
+  The index page content is available through the ``$${.:/index-body}``
+  variable substitution.  Use an action to copy and substitute the index page
+  template.
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      archive-file:
+        description: |
+          If the value is present, then it shall be the path to the archive
+          file relative to the base directory of the ``"archive"`` directory
+          state production.  The archive contains the files of the index and
+          the files of every directory state reachable through the index
+          groups.  The archive is a tar file compressed with xz.  If the
+          value is absent, then no archive file is produced.
+        spec-type: optional-str
+      archive-strip-prefix:
+        description: |
+          It shall be the prefix to strip from an archive member file path.
+        spec-type: str
+    description: |
+      This set of attributes specifies a documentation index page and an
+      optional archive file of the indexed documents.
+    mandatory-attributes: all
+spec-name: Documentation Index Item Type
+spec-type: pkg-index
+type: spec

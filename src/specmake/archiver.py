@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-""" Builds an archive file from directory states. """
+""" Builds an archive file and a documentation index from directory states. """
 
 # Copyright (C) 2021 EDISOFT
 # Copyright (C) 2020, 2024 embedded brains GmbH & Co. KG
@@ -27,6 +27,7 @@
 
 import base64
 import graphlib
+import html
 import itertools
 import pickle
 import logging
@@ -34,10 +35,12 @@ import lzma
 import os
 import stat
 import tarfile
+from typing import Iterator, Optional
 
-from specitems import save_data
+from specitems import Item, ItemGetValueContext, Link, save_data
 
 from .directorystate import DirectoryState
+from .pkgitems import BuildItem, PackageBuildDirector
 
 _FileInfo = list[tuple[str, str, bool]]
 _ArchiveFiles = dict[str, _FileInfo]
@@ -288,16 +291,9 @@ class Archiver(DirectoryState):
         return ("Create the archive verification script\n"
                 f"{self.description.path(script_path)}.")
 
-    def run(self) -> None:
-        dependencies: dict[str, set[str]] = {}
-        archive_files: _ArchiveFiles = {}
-        for dir_state in self.inputs("member"):
-            assert isinstance(dir_state, DirectoryState)
-            self._gather_files(dir_state, dependencies, archive_files)
-        export_description = self._export_spec(dependencies, archive_files)
-
-        self.set_files((self["archive-file"], ))
-        archive_path = self.file
+    def _create_archive(self, archive_path: str, dependencies: dict[str,
+                                                                    set[str]],
+                        archive_files: _ArchiveFiles) -> str:
         logging.info("%s: create archive: %s", self.uid, archive_path)
         os.makedirs(os.path.dirname(archive_path), exist_ok=True)
         with tarfile.open(archive_path, "w:xz") as tar_file:
@@ -305,9 +301,8 @@ class Archiver(DirectoryState):
 
             # On some Windows versions, symbolic links have to be created after
             # the link target exists.  Sort the files accordingly.
-            dependencies = dict(sorted(dependencies.items()))
             for file_path in graphlib.TopologicalSorter(
-                    dependencies).static_order():
+                    dict(sorted(dependencies.items()))).static_order():
                 try:
                     archive_files[file_path]
                 except KeyError:
@@ -325,8 +320,228 @@ class Archiver(DirectoryState):
                 tar_file, strip_prefix, archive_files)
         logging.info("%s: finished to create archive: %s", self.uid,
                      archive_path)
+        return script_description
+
+    def run(self) -> None:
+        dependencies: dict[str, set[str]] = {}
+        archive_files: _ArchiveFiles = {}
+        for dir_state in self.inputs("member"):
+            assert isinstance(dir_state, DirectoryState)
+            self._gather_files(dir_state, dependencies, archive_files)
+        export_description = self._export_spec(dependencies, archive_files)
+
+        self.set_files((self["archive-file"], ))
+        archive_path = self.file
+        script_description = self._create_archive(archive_path, dependencies,
+                                                  archive_files)
 
         self.description.add(f"""Create the archive file
 {self.description.path(archive_path)}.
 {script_description}
 {export_description}""")
+
+
+_NORMAL_TITLE = "${.:/document-normal-title}"
+
+_IndexTarget = tuple[str, str]
+_IndexEntry = tuple[int, str, Optional[str], list[_IndexTarget]]
+
+_TARGET_LABELS = {".htm": "HTML", ".html": "HTML", ".pdf": "PDF"}
+
+
+def _target_label(path: str) -> str:
+    extension = os.path.splitext(path)[1].lower()
+    label = _TARGET_LABELS.get(extension)
+    if label is None:
+        label = extension.lstrip(".").upper() or "Document"
+    return label
+
+
+def _document_targets(member: DirectoryState) -> list[_IndexTarget]:
+    targets: list[_IndexTarget] = []
+    output_html = member.get("output-html", None)
+    if output_html is not None:
+        targets.append(
+            ("HTML", os.path.normpath(os.path.join(output_html,
+                                                   "index.html"))))
+    output_pdf = member.get("output-pdf", None)
+    if output_pdf is not None:
+        targets.append(("PDF", os.path.normpath(output_pdf)))
+    return targets
+
+
+def _render_targets(title: str, targets: list[_IndexTarget]) -> str:
+    links = "".join(
+        f'<a class="index-target" href="{html.escape(path)}"'
+        f' aria-label="{html.escape(title)} ({html.escape(label)})">'
+        f"{html.escape(label)}</a>" for label, path in targets)
+    return f'<p class="index-targets">{links}</p>'
+
+
+def _render_entry(entry: _IndexEntry) -> str:
+    _, title, key, targets = entry
+    if key is None:
+        badge = ""
+    else:
+        badge = f'<span class="index-key">{html.escape(key)}</span>'
+    return f'''<li class="index-card">
+<p class="index-title">{html.escape(title)}{badge}</p>
+{_render_targets(title, targets)}
+</li>'''
+
+
+def _entry_order(entry: _IndexEntry) -> tuple[int, str]:
+    return (entry[0], entry[1])
+
+
+def _group_order(group: "_IndexNode") -> tuple[int, str]:
+    return (group.sort_key, group.title)
+
+
+class _IndexNode:
+    """ Is a section of the index page. """
+
+    def __init__(self, sort_key: int, title: str) -> None:
+        self.sort_key = sort_key
+        self.title = title
+        self.groups: list["_IndexNode"] = []
+        self.entries: list[_IndexEntry] = []
+
+    def sort(self) -> None:
+        """ Sort the subsections and the entries of the section. """
+        self.groups.sort(key=_group_order)
+        self.entries.sort(key=_entry_order)
+        for group in self.groups:
+            group.sort()
+
+    def render(self, level: int) -> str:
+        """ Render the section and its subsections as HTML. """
+        heading = min(level, 6)
+        parts = [
+            f'<h{heading} class="index-group-title">'
+            f"{html.escape(self.title)}</h{heading}>"
+        ]
+        if self.entries:
+            cards = "\n".join(_render_entry(entry) for entry in self.entries)
+            parts.append(f'<ul class="index-cards">\n{cards}\n</ul>')
+        parts.extend(group.render(level + 1) for group in self.groups)
+        body = "\n".join(parts)
+        return (f'<section class="index-group index-level-{min(level, 6)}">\n'
+                f"{body}\n</section>")
+
+
+class IndexGroup(BuildItem):
+    """ Groups the documents of a documentation index page section. """
+
+
+class Indexer(Archiver):
+    """
+    The indexer produces a documentation index page from its index group
+    members.  It adds the files of the index and the files of the documents of
+    the groups to an optional archive file.
+    """
+
+    def __init__(self, director: PackageBuildDirector, item: Item) -> None:
+        super().__init__(director, item)
+        self.mapper.add_get_value(f"{self.item.type}:/index-body",
+                                  self._get_index_body)
+
+    def _groups(self) -> Iterator[tuple[Link, IndexGroup]]:
+        for link, group in self.input_links("index-member"):
+            assert isinstance(group, IndexGroup)
+            yield link, group
+
+    def _documents(
+        self,
+        group: Optional[IndexGroup] = None
+    ) -> Iterator[tuple[Link, DirectoryState]]:
+        if group is None:
+            links = self.input_links("index-member")
+        else:
+            links = group.input_links("index-member")
+        for link, member in links:
+            if isinstance(member, IndexGroup):
+                yield from self._documents(member)
+            else:
+                assert isinstance(member, DirectoryState)
+                yield link, member
+
+    def _link_value(self, link: Link, key: str) -> Optional[str]:
+        value = link[key]
+        if value is None:
+            return None
+        return self.substitute(value, link.item)
+
+    def _entry(self, link: Link, member: DirectoryState) -> _IndexEntry:
+        title = self._link_value(link, "title")
+        if title is None:
+            if member.item.get("document-title", None) is None:
+                raise ValueError(f"{self.uid}: index member has no title: "
+                                 f"{member.uid}")
+            title = member.substitute(_NORMAL_TITLE)
+        path = self._link_value(link, "path")
+        if path is None:
+            targets = _document_targets(member)
+            if not targets:
+                raise ValueError(f"{self.uid}: index member has no link "
+                                 f"target: {member.uid}")
+        else:
+            targets = [(_target_label(path), path)]
+        base = self.directory
+        entry_targets: list[_IndexTarget] = []
+        for label, path in targets:
+            target_path = os.path.join(member.directory, path)
+            if not os.path.isfile(target_path):
+                raise ValueError(f"{self.uid}: index member {member.uid} has "
+                                 f"no such link target: {target_path}")
+            entry_targets.append((label, os.path.relpath(target_path, base)))
+        return (link["sort-key"], title, member.get("document-key",
+                                                    None), entry_targets)
+
+    def _node(self, link: Link, group: IndexGroup) -> _IndexNode:
+        title = self._link_value(link, "title")
+        if title is None:
+            raise ValueError(f"{self.uid}: index group has no title: "
+                             f"{group.uid}")
+        node = _IndexNode(link["sort-key"], title)
+        for member_link, member in group.input_links("index-member"):
+            if isinstance(member, IndexGroup):
+                child = self._node(member_link, member)
+                if child.groups or child.entries:
+                    node.groups.append(child)
+            else:
+                assert isinstance(member, DirectoryState)
+                node.entries.append(self._entry(member_link, member))
+        return node
+
+    def _get_index_body(self, _ctx: ItemGetValueContext) -> str:
+        root = _IndexNode(0, "")
+        for link, group in self._groups():
+            node = self._node(link, group)
+            if node.groups or node.entries:
+                root.groups.append(node)
+        root.sort()
+        return "\n".join(group.render(2) for group in root.groups)
+
+    def run(self) -> None:
+        DirectoryState.run(self)
+        archive_file = self["archive-file"]
+        if archive_file is None:
+            return
+        try:
+            output = self.output("archive")
+        except KeyError as err:
+            raise ValueError(f"{self.uid}: there is no archive output "
+                             f"directory state") from err
+        assert isinstance(output, DirectoryState)
+        self.load()
+        dependencies: dict[str, set[str]] = {}
+        archive_files: _ArchiveFiles = {}
+        for _, member in self._documents():
+            self._gather_files(member, dependencies, archive_files)
+        self._gather_files(self, dependencies, archive_files)
+        output.set_files((archive_file, ))
+        archive_path = output.file
+        self._create_archive(archive_path, dependencies, archive_files)
+        self.description.add(f"""Create the archive file
+{self.description.path(archive_path)}.""")
