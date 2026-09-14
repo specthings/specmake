@@ -232,7 +232,9 @@ spec:/root
 Do the K
 ########
 
-The do the K description.
+.. code-block:: none
+
+    The do the K description.
 
 .. _L3DoTheKSpecRoot:
 
@@ -296,12 +298,16 @@ spec:/test-suite
 
 This change added the specification item.
 
-.. _L3DoTheM:
+.. _L3DoTheMInSpecYml:
 
-Do the M
-########
+Do the M in spec/\\*/\\*.yml
+##########################
 
-.. _L3DoTheMSpecTestCase:
+.. code-block:: none
+
+    \u200b  The do the M description.
+
+.. _L3DoTheMInSpecYmlSpecTestCase:
 
 spec:/test-case
 ***************
@@ -360,10 +366,6 @@ This change removed the specification item."""
         "${.:/input/spec-compare-registry/spec-item-changes:0:/root}"
     ) == """The following changes are associated with Name v3.
 
-.. topic:: Do the K
-
-    The do the K description.
-
 .. raw:: latex
 
     \\begin{footnotesize}
@@ -372,6 +374,13 @@ This change removed the specification item."""
     :linenos:
     :lineno-start: 1
 
+    Subject: Do the K
+
+    The do the K description.
+
+    ---
+    --- a/spec/root.yml
+    +++ b/spec/root.yml
     @@ -34,17 +34,4 @@ text: |
        No changes.
        No changes.
@@ -395,10 +404,6 @@ This change removed the specification item."""
 
     \\end{footnotesize}
 
-.. topic:: Do the J
-
-    No commit message.
-
 .. raw:: latex
 
     \\begin{footnotesize}
@@ -407,6 +412,13 @@ This change removed the specification item."""
     :linenos:
     :lineno-start: 1
 
+    Subject: Do the J
+
+    No commit message.
+
+    ---
+    --- a/spec/root.yml
+    +++ b/spec/root.yml
     @@ -34,4 +34,17 @@ text: |
        No changes.
        No changes.
@@ -432,10 +444,6 @@ This change removed the specification item."""
 
 The following changes are associated with Name v1.
 
-.. topic:: Do the C
-
-    No commit message.
-
 .. raw:: latex
 
     \\begin{footnotesize}
@@ -444,6 +452,13 @@ The following changes are associated with Name v1.
     :linenos:
     :lineno-start: 1
 
+    Subject: Do the C
+
+    No commit message.
+
+    ---
+    --- a/spec/root.yml
+    +++ b/spec/root.yml
     @@ -20,7 +20,7 @@ text: |
        No changes.
        No changes.
@@ -453,19 +468,6 @@ The following changes are associated with Name v1.
        No changes.
        No changes.
        No changes.
-
-.. raw:: latex
-
-    \\end{footnotesize}
-
-.. raw:: latex
-
-    \\begin{footnotesize}
-
-.. code-block:: diff
-    :linenos:
-    :lineno-start: 10
-
     @@ -33,5 +33,5 @@ text: |
        No changes.
        No changes.
