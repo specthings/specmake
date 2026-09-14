@@ -289,11 +289,62 @@ def _get_commits(config: _CompareSpecsConfig) -> list[_Commit]:
     return parser.finalize()
 
 
+def _commit_message_body(commit: _Commit) -> list[str]:
+    """
+    Return the message of the commit without its subject.
+
+    Git accepts a message which has no empty line between the subject and the
+    body, so the body starts at the second line.
+    """
+    body = commit["message"][1:]
+    while body and not body[0]:
+        body.pop(0)
+    return body
+
+
+def _patch(commit: _Commit) -> list[str]:
+    """
+    Return the commit as the lines of a patch.
+
+    The subject and the message of a commit are foreign text which may hold
+    any character.  A patch presents them in a literal block, so the markup
+    parser reads no character of them.
+    """
+    lines = [f"Subject: {commit['message'][0]}", ""]
+    lines.extend(_commit_message_body(commit) or ["No commit message."])
+    lines.append("")
+    lines.append("---")
+    for diff in commit["diffs"]:
+        lines.append(f"--- {diff['a']}")
+        lines.append(f"+++ {diff['b']}")
+        for chunk in diff["chunks"]:
+            lines.extend(chunk)
+    return lines
+
+
+def _add_literal_block(content: TextContent, lines: list[str]) -> None:
+    """
+    Add the lines as a literal block.
+
+    A directive takes the first line of its content as the reference of the
+    indentation, so a leading space of that line shifts the whole block.  A
+    zero width space in front of it keeps the block in place.
+    """
+    first = lines[0]
+    if first[:1].isspace():
+        first = f"\u200b{first}"
+    with content.directive("code-block", "none"):
+        content.append(first)
+        content.append(lines[1:])
+
+
 def _add_change_log(content: TextContent, config: _CompareSpecsConfig) -> None:
     with content.label_scope(config.current.label):
         for commit in reversed(_get_commits(config)):
-            with content.section(commit["message"][0]):
-                content.add(commit["message"][2:])
+            with content.section(content.escape(commit["message"][0])):
+                body = _commit_message_body(commit)
+                if body:
+                    _add_literal_block(content, body)
                 if not commit["diffs"]:
                     with content.directive("note"):
                         content.add("The modifications of this change are "
@@ -443,20 +494,7 @@ class CompareSpecsRegistry(BuildItem):
                 continue
             content.add(f"The following changes are associated with {name}.")
             for commit in reversed(change["commits"]):
-                message = commit["message"]
-                with content.directive("topic", message[0]):
-                    if len(message) >= 2:
-                        content.append(message[2:])
-                    else:
-                        content.append("No commit message.")
-                for diff in commit["diffs"]:
-                    line_number_start = 1
-                    for chunk in diff["chunks"]:
-                        content.add_code_block(
-                            chunk,
-                            language="diff",
-                            line_number_start=line_number_start)
-                        line_number_start += len(chunk)
+                content.add_code_block(_patch(commit), language="diff")
 
     def add_changes_by_scope(self, content: TextContent, scope: str,
                              revision_key: str) -> None:
