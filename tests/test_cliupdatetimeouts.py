@@ -113,6 +113,33 @@ def test_every_duration_is_kept(tmp_path):
     assert data["timeouts"]["default"]["a.exe"] == [1.5, 1.0]
 
 
+def test_the_lazy_mode_keeps_the_maximum(tmp_path):
+    _spec_directory(tmp_path)
+    first = _report(tmp_path, "one.json", {"a.exe": 1.5})
+    second = _report(tmp_path,
+                     "two.json", {"a.exe": 1.0},
+                     start_time="2026-09-16T11:00:00+00:00")
+    third = _report(tmp_path,
+                    "three.json", {"a.exe": 2.0},
+                    start_time="2026-09-16T12:00:00+00:00")
+    data = _update(tmp_path, [first, second, third], "--lazy")
+
+    assert data["timeouts"]["default"]["a.exe"] == [2.0]
+
+
+def test_the_lazy_mode_saves_nothing_without_a_change(tmp_path):
+    _spec_directory(tmp_path)
+    first = _report(tmp_path, "one.json", {"a.exe": 1.5})
+    _update(tmp_path, [first], "--lazy")
+    before = _item_path(tmp_path).read_text(encoding="utf-8")
+    second = _report(tmp_path,
+                     "two.json", {"a.exe": 1.0},
+                     start_time="2026-09-16T11:00:00+00:00")
+    _update(tmp_path, [second], "--lazy")
+
+    assert _item_path(tmp_path).read_text(encoding="utf-8") == before
+
+
 def test_the_reset_drops_the_durations(tmp_path):
     _spec_directory(tmp_path)
     first = _report(tmp_path, "one.json", {"a.exe": 1.5, "b.exe": 2.5})

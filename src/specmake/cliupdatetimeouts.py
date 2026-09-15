@@ -48,6 +48,17 @@ class _LastUpdate:
     new: datetime.datetime
 
 
+@dataclasses.dataclass
+class _State:
+    """ Hold the items and the update state of a command run. """
+    item_cache: ItemCache
+    reset_done: set[str] = dataclasses.field(default_factory=set)
+    last_updates: dict[str,
+                       _LastUpdate] = dataclasses.field(default_factory=dict)
+    items: dict[str, Item] = dataclasses.field(default_factory=dict)
+    changed: set[str] = dataclasses.field(default_factory=set)
+
+
 def _as_utc(value: datetime.datetime) -> datetime.datetime:
     """
     Get a time as an aware time.
@@ -77,53 +88,71 @@ def _time_of_last_update(item: Item) -> datetime.datetime:
     return _as_utc(value)
 
 
+def _get_duration(report: dict, report_path: str, name: str,
+                  last_update: _LastUpdate) -> float | None:
+    """
+    Get the duration which a test report adds to the timeouts.
+
+    A report without a duration and a report of a run which is older than the
+    last update of the item add nothing.
+    """
+    duration = report.get("execution-duration-in-seconds",
+                          report.get("duration"))
+    if not duration:
+        logging.debug("%s: %s: has no execution duration", report_path, name)
+        return None
+    update_time: str | None = report.get("start-time")
+    if update_time is not None:
+        update_datetime = _as_utc(datetime.datetime.fromisoformat(update_time))
+        if update_datetime <= last_update.old:
+            logging.debug("%s: %s: skip out of date result", report_path, name)
+            return None
+        last_update.new = max(last_update.new, update_datetime)
+    return duration
+
+
 def _update_timeouts(args: argparse.Namespace, report_path: str,
-                     last_update: _LastUpdate, timeouts: dict[str, list[int]],
-                     reports: list) -> None:
-    error_factor = args.error_factor
-    warning_factor = args.warning_factor
+                     last_update: _LastUpdate,
+                     timeouts: dict[str, list[float]], reports: list) -> bool:
+    """ Add the durations of the reports and tell if one of them lands. """
     minimum_timeout = args.minimum_timeout
+    changed = False
     for report in reports:
         name = Path(report["executable"]).name
-        new_duration = report.get("execution-duration-in-seconds",
-                                  report.get("duration"))
-        if not new_duration:
-            logging.debug("%s: %s: has no execution duration", report_path,
-                          name)
+        new_duration = _get_duration(report, report_path, name, last_update)
+        if new_duration is None:
             continue
-        update_time: str | None = report.get("start-time")
-        if update_time is not None:
-            update_datetime = _as_utc(
-                datetime.datetime.fromisoformat(update_time))
-            if update_datetime <= last_update.old:
-                logging.debug("%s: %s: skip out of date result", report_path,
-                              name)
-                continue
-            last_update.new = max(last_update.new, update_datetime)
         durations = timeouts.setdefault(name, [])
-        try:
-            maximum = max(durations)
-        except ValueError:
-            pass
-        else:
-            if new_duration > error_factor * maximum + minimum_timeout:
+        maximum = max(durations, default=None)
+        if maximum is not None:
+            if new_duration > args.error_factor * maximum + minimum_timeout:
                 logging.error(
                     "%s: %s: duration %s is greater than %s * %s + %s",
-                    report_path, name, new_duration, error_factor, maximum,
-                    minimum_timeout)
+                    report_path, name, new_duration, args.error_factor,
+                    maximum, minimum_timeout)
                 continue
-            if new_duration > warning_factor * maximum + minimum_timeout:
+            if new_duration > args.warning_factor * maximum + minimum_timeout:
                 logging.warning(
                     "%s: %s: duration %s is greater than %s * %s + %s",
-                    report_path, name, new_duration, warning_factor, maximum,
-                    minimum_timeout)
+                    report_path, name, new_duration, args.warning_factor,
+                    maximum, minimum_timeout)
+            if args.lazy and new_duration <= maximum:
+                logging.debug("%s: %s: keep the maximum duration: %s",
+                              report_path, name, maximum)
+                continue
+        if args.lazy:
+            durations.clear()
         logging.debug("%s: %s: add duration: %s", report_path, name,
                       new_duration)
         durations.append(new_duration)
+        changed = True
+    return changed
 
 
-def _prepare_timeouts(item: Item, report_path: str, data: dict, reset: bool,
-                      reset_done: set[str]) -> dict[str, list[int]]:
+def _prepare_timeouts(
+        item: Item, report_path: str, data: dict, reset: bool,
+        reset_done: set[str]) -> tuple[dict[str, list[float]], bool]:
+    """ Get the timeouts of the key of the report and tell if they reset. """
     timeout_key = data["timeout-key"]
     logging.info("%s: timeout key: %s", report_path, timeout_key)
     timeouts_of_keys = item.get("timeouts", None)
@@ -131,13 +160,49 @@ def _prepare_timeouts(item: Item, report_path: str, data: dict, reset: bool,
         timeouts_of_keys = {}
         item["timeouts"] = timeouts_of_keys
     reset_key = f"{item.uid} {timeout_key}"
-    if reset and reset_key not in reset_done:
+    do_reset = reset and reset_key not in reset_done
+    if do_reset:
         reset_done.add(reset_key)
-        timeouts = {}
+        timeouts: dict[str, list[float]] = {}
     else:
         timeouts = timeouts_of_keys.get(timeout_key, {})
     timeouts_of_keys[timeout_key] = timeouts
-    return timeouts
+    return timeouts, do_reset
+
+
+def _evaluate_report(args: argparse.Namespace, state: _State,
+                     report_path: str) -> None:
+    """ Add the durations of one test report to the test timeouts item. """
+    logging.info("%s: evaluate reports", report_path)
+    with open(report_path, "r", encoding="utf-8") as src:
+        data = json.load(src)
+    try:
+        target = data["target"]
+    except KeyError:
+        logging.warning("%s: report has no target attribute", report_path)
+        return
+    uid = f"{target.removesuffix('/target')}/{args.test_timeouts}"
+    logging.info("%s: test timeouts item UID: %s", report_path, uid)
+    item = state.item_cache[uid]
+    state.items[uid] = item
+    time_of_last_update = _time_of_last_update(item)
+    last_update = state.last_updates.setdefault(
+        uid, _LastUpdate(time_of_last_update, time_of_last_update))
+    timeouts, do_reset = _prepare_timeouts(item, report_path, data, args.reset,
+                                           state.reset_done)
+    if _update_timeouts(args, report_path, last_update, timeouts,
+                        data["reports"]) or do_reset:
+        state.changed.add(uid)
+
+
+def _save_items(args: argparse.Namespace, state: _State) -> None:
+    """ Save the items which the reports changed. """
+    for uid, item in state.items.items():
+        if args.lazy and uid not in state.changed:
+            logging.info("%s: no timeout changed", uid)
+            continue
+        item["time-of-last-update"] = state.last_updates[uid].new.isoformat()
+        item.save()
 
 
 def _get_arguments(argv: list[str]) -> argparse.Namespace:
@@ -150,6 +215,10 @@ def _get_arguments(argv: list[str]) -> argparse.Namespace:
         parser.add_argument('--reset',
                             action="store_true",
                             help="reset the timeouts")
+        parser.add_argument('--lazy',
+                            action="store_true",
+                            help="keep one duration per test, the maximum, "
+                            "and save an item only if a duration changes")
         parser.add_argument(
             '--test-timeouts',
             type=str,
@@ -196,28 +265,8 @@ def cliupdatetimeouts(argv: list[str] | None = None) -> None:
                                    cache_directory=args.cache_directory,
                                    initialize_links=False,
                                    resolve_proxies=False)
-    item_cache = ItemCache(cache_config)
-    reset_done: set[str] = set()
-    last_updates: dict[str, _LastUpdate] = {}
+    state = _State(ItemCache(cache_config))
     for report_path in args.reports:
-        logging.info("%s: evaluate reports", report_path)
-        with open(report_path, "r", encoding="utf-8") as src:
-            data = json.load(src)
-        try:
-            target = data["target"]
-        except KeyError:
-            logging.warning("%s: report has no target attribute", report_path)
-            continue
-        uid = f"{target.removesuffix('/target')}/{args.test_timeouts}"
-        logging.info("%s: test timeouts item UID: %s", report_path, uid)
-        item = item_cache[uid]
-        time_of_last_update = _time_of_last_update(item)
-        last_update = last_updates.setdefault(
-            uid, _LastUpdate(time_of_last_update, time_of_last_update))
-        timeouts = _prepare_timeouts(item, report_path, data, args.reset,
-                                     reset_done)
-        _update_timeouts(args, report_path, last_update, timeouts,
-                         data["reports"])
-        if not args.dry_run:
-            item["time-of-last-update"] = last_updates[uid].new.isoformat()
-            item.save()
+        _evaluate_report(args, state, report_path)
+    if not args.dry_run:
+        _save_items(args, state)
