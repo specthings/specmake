@@ -271,3 +271,25 @@ def test_a_report_with_a_start_time_without_an_offset(tmp_path):
     # without an offset
     assert data["timeouts"] == {"default": {"a.exe": [1.5]}}
     assert data["time-of-last-update"] == "2026-09-16T10:00:00+00:00"
+
+
+def test_a_report_of_an_error(tmp_path):
+    _spec_directory(tmp_path)
+    path = tmp_path / "one.json"
+    path.write_text(json.dumps({
+        "target":
+        _TARGET,
+        "timeout-key":
+        "default",
+        "reports": [{
+            "executable": "build/a.exe",
+            "duration": 720.0,
+            "error": "timeout",
+            "start-time": "2026-09-16T10:00:00+00:00"
+        }]
+    }),
+                    encoding="utf-8")
+    data = _update(tmp_path, [str(path)])
+
+    # The duration of a run which timed out is the timeout, not a measurement
+    assert data["timeouts"] == {"default": {}}

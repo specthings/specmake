@@ -94,8 +94,14 @@ def _get_duration(report: dict, report_path: str, name: str,
     Get the duration which a test report adds to the timeouts.
 
     A report without a duration and a report of a run which is older than the
-    last update of the item add nothing.
+    last update of the item add nothing.  A run which timed out, which raised
+    an exception or which a discard pattern rejected measures nothing either.
     """
+    error = report.get("error", "")
+    if error:
+        logging.debug("%s: %s: skip the report of an error: %s", report_path,
+                      name, error)
+        return None
     duration = report.get("execution-duration-in-seconds",
                           report.get("duration"))
     if not duration:
