@@ -86,6 +86,14 @@ def test_workspace_archive_invalid_digest(tmpdir):
         _create_buildspace(tmpdir, "spec-pkg-wk/archive/invalid-digest")
 
 
+def test_workspace_archive_config_dir(tmpdir):
+    buildspace, _ = _create_buildspace(tmpdir,
+                                       "spec-pkg-wk/archive/config-dir")
+    archive = buildspace.director["/archive"]
+    with open(os.path.join(archive.directory, "README.md"), "r") as src:
+        assert src.read() == "This is an archive.\nAdded by inline patch.\n"
+
+
 def test_workspace_archive_download(tmpdir):
     buildspace, _ = _create_buildspace(tmpdir, "spec-pkg-wk/archive/download")
     archive = buildspace.director["/archive"]

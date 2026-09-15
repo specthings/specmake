@@ -1,0 +1,33 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+archive-file: ${.:/component/workspace-directory}/config-dir.tar.xz
+archive-hash: Au-9LDp7b8pHmkUDoT_abDkocE-AMXifyILFKuBNimeYBfSjNtxkXXc9L736EV9EhOphkgw75o78SeOBt7Th7A==
+archive-patches:
+- enabled-by: true
+  patch: |
+    From: Sebastian Huber <sebastian.huber@embedded-brains.de>
+    Date: Mon, 15 Sep 2026 09:00:00 +0200
+    Subject: README.md: Update
+
+    --- a/README.md
+    +++ b/README.md
+    @@ -1 +1,2 @@
+     This is an archive.
+    +Added by inline patch.
+  type: inline
+archive-url: []
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+copyrights-by-license: {}
+description: |
+  Description.
+destination-directory: ${.:/component/deployment-directory}/source
+enabled-by: true
+links:
+- hash: null
+  name: component
+  role: input
+  uid: /pkg/component
+pkg-type: workspace
+symbolic-links: []
+type: pkg
+workspace-type: archive
