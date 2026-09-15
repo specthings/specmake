@@ -39,11 +39,42 @@ from specitems import (Item, ItemCache, ItemCacheConfig,
 
 from .util import command_arguments
 
+_EPOCH = datetime.datetime(1970, 1, 1, tzinfo=datetime.timezone.utc)
+
 
 @dataclasses.dataclass
 class _LastUpdate:
     old: datetime.datetime
     new: datetime.datetime
+
+
+def _as_utc(value: datetime.datetime) -> datetime.datetime:
+    """
+    Get a time as an aware time.
+
+    A time without a time zone offset counts as UTC.  Two times compare
+    only if both of them carry an offset.
+    """
+    if value.tzinfo is None:
+        return value.replace(tzinfo=datetime.timezone.utc)
+    return value
+
+
+def _time_of_last_update(item: Item) -> datetime.datetime:
+    """
+    Get the time of the last update of a test timeouts item.
+
+    An item which never ran an update has no such time.  A YAML file states
+    an unquoted timestamp as a datetime and a quoted one as a string.
+    """
+    value = item.get("time-of-last-update", None)
+    if value is None:
+        return _EPOCH
+    if isinstance(value, str):
+        value = datetime.datetime.fromisoformat(value)
+    elif not isinstance(value, datetime.datetime):
+        value = datetime.datetime(value.year, value.month, value.day)
+    return _as_utc(value)
 
 
 def _update_timeouts(args: argparse.Namespace, report_path: str,
@@ -62,7 +93,8 @@ def _update_timeouts(args: argparse.Namespace, report_path: str,
             continue
         update_time: str | None = report.get("start-time")
         if update_time is not None:
-            update_datetime = datetime.datetime.fromisoformat(update_time)
+            update_datetime = _as_utc(
+                datetime.datetime.fromisoformat(update_time))
             if update_datetime <= last_update.old:
                 logging.debug("%s: %s: skip out of date result", report_path,
                               name)
@@ -94,13 +126,17 @@ def _prepare_timeouts(item: Item, report_path: str, data: dict, reset: bool,
                       reset_done: set[str]) -> dict[str, list[int]]:
     timeout_key = data["timeout-key"]
     logging.info("%s: timeout key: %s", report_path, timeout_key)
+    timeouts_of_keys = item.get("timeouts", None)
+    if timeouts_of_keys is None:
+        timeouts_of_keys = {}
+        item["timeouts"] = timeouts_of_keys
     reset_key = f"{item.uid} {timeout_key}"
     if reset and reset_key not in reset_done:
         reset_done.add(reset_key)
         timeouts = {}
     else:
-        timeouts = item["timeouts"].get(timeout_key, {})
-    item["timeouts"][timeout_key] = timeouts
+        timeouts = timeouts_of_keys.get(timeout_key, {})
+    timeouts_of_keys[timeout_key] = timeouts
     return timeouts
 
 
@@ -175,8 +211,7 @@ def cliupdatetimeouts(argv: list[str] | None = None) -> None:
         uid = f"{target.removesuffix('/target')}/{args.test_timeouts}"
         logging.info("%s: test timeouts item UID: %s", report_path, uid)
         item = item_cache[uid]
-        time_of_last_update = datetime.datetime.fromisoformat(
-            item.get("time-of-last-update", "1970-01-01"))
+        time_of_last_update = _time_of_last_update(item)
         last_update = last_updates.setdefault(
             uid, _LastUpdate(time_of_last_update, time_of_last_update))
         timeouts = _prepare_timeouts(item, report_path, data, args.reset,
