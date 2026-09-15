@@ -172,10 +172,10 @@ class _WorkspaceItem(BuildItem):
 
 
 def _apply_patch_file(workspace_directory: str,
-                      unpacked_archive: DirectoryState,
-                      patch_file: str) -> None:
+                      unpacked_archive: DirectoryState, patch_file: str,
+                      git_directory: str) -> None:
     command = [
-        "git", "--git-dir=.", "apply", "-v", "-p", "1",
+        "git", f"--git-dir={git_directory}", "apply", "-v", "-p", "1",
         os.path.join(workspace_directory, patch_file)
     ]
     env = copy.deepcopy(os.environ.copy())
@@ -197,19 +197,24 @@ def _apply_patch_file(workspace_directory: str,
 
 def _apply_patches(workspace_directory: str,
                    unpacked_archive: DirectoryState) -> None:
-    # Do not substitute patches
-    for patch in unpacked_archive.item["archive-patches"]:
-        if not is_enabled(unpacked_archive.enabled_set, patch["enabled-by"]):
-            continue
-        if patch["type"] == "inline":
-            with tempfile.TemporaryDirectory() as name:
-                patch_file = Path(name) / "patch"
-                patch_file.write_bytes(patch["patch"].encode("utf-8"))
+    # An empty git directory of its own keeps git out of a repository which
+    # contains the archive.  Git reads its configuration from that directory,
+    # so no file and no directory of the archive root reaches it.
+    with tempfile.TemporaryDirectory() as git_directory:
+        # Do not substitute patches
+        for patch in unpacked_archive.item["archive-patches"]:
+            if not is_enabled(unpacked_archive.enabled_set,
+                              patch["enabled-by"]):
+                continue
+            if patch["type"] == "inline":
+                with tempfile.TemporaryDirectory() as name:
+                    patch_file = Path(name) / "patch"
+                    patch_file.write_bytes(patch["patch"].encode("utf-8"))
+                    _apply_patch_file(workspace_directory, unpacked_archive,
+                                      str(patch_file), git_directory)
+            else:
                 _apply_patch_file(workspace_directory, unpacked_archive,
-                                  str(patch_file))
-        else:
-            _apply_patch_file(workspace_directory, unpacked_archive,
-                              patch["file"])
+                                  patch["file"], git_directory)
 
 
 class WorkspaceArchive(_WorkspaceItem):
