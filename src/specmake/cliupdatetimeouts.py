@@ -196,6 +196,10 @@ def _evaluate_report(args: argparse.Namespace, state: _State,
         uid, _LastUpdate(time_of_last_update, time_of_last_update))
     timeouts, do_reset = _prepare_timeouts(item, report_path, data, args.reset,
                                            state.reset_done)
+    if do_reset:
+        # The reset drops every measurement, so the time of the last update
+        # holds nothing back.
+        last_update.old = _EPOCH
     if _update_timeouts(args, report_path, last_update, timeouts,
                         data["reports"]) or do_reset:
         state.changed.add(uid)

@@ -293,3 +293,13 @@ def test_a_report_of_an_error(tmp_path):
 
     # The duration of a run which timed out is the timeout, not a measurement
     assert data["timeouts"] == {"default": {}}
+
+
+def test_the_reset_takes_a_report_of_the_last_update(tmp_path):
+    _spec_directory(tmp_path)
+    report = _report(tmp_path, "one.json", {"a.exe": 1.5})
+    _update(tmp_path, [report])
+    data = _update(tmp_path, [report], "--reset")
+
+    # The same report fills the item again, so the reset is repeatable
+    assert data["timeouts"]["default"] == {"a.exe": [1.5]}
