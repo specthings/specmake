@@ -125,6 +125,11 @@ def _get_arguments(argv: list[str]) -> argparse.Namespace:
                         default="default",
                         help="the key of the test timeouts to use "
                         "(default: default)")
+    parser.add_argument("--target",
+                        default="",
+                        help="the UID of the target item which ran the "
+                        "tests; specupdatetimeouts needs it to find the test "
+                        "timeouts item")
     parser.add_argument("-o",
                         "--output",
                         default="test-log.json",
@@ -403,7 +408,7 @@ def _run(args: argparse.Namespace) -> _Data:
         run_tests_with_retries(executables, run_tests,
                                runner["max-retry-count-per-executable"] + 1,
                                _UID))
-    return {
+    test_log: _Data = {
         "duration":
         time.monotonic() - begin,
         "end-time":
@@ -416,8 +421,13 @@ def _run(args: argparse.Namespace) -> _Data:
         _describe(_substitute(command, substitutions, "${test_program}",
                               False)),
         "test-runner-hash":
-        runner_hash
+        runner_hash,
+        "timeout-key":
+        args.timeout_key
     }
+    if args.target:
+        test_log["target"] = args.target
+    return test_log
 
 
 def _write_outputs(args: argparse.Namespace, test_log: _Data) -> int:
