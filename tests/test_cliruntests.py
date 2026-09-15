@@ -222,6 +222,23 @@ def test_test_timeouts(tmp_path):
     assert _run(tmp_path, "--test-timeouts", str(timeouts)) == 0
 
 
+def test_the_target_and_the_timeout_key_reach_the_test_log(tmp_path):
+    _make_executables(tmp_path / "tests")
+    _run(tmp_path, "--target", "/target/sim/target", "--timeout-key", "smp")
+    test_log = _load(tmp_path / "test-log.json")
+
+    # specupdatetimeouts finds the test timeouts item through these two
+    assert test_log["target"] == "/target/sim/target"
+    assert test_log["timeout-key"] == "smp"
+
+
+def test_a_test_log_without_a_target(tmp_path):
+    _make_executables(tmp_path / "tests")
+    _run(tmp_path)
+
+    assert "target" not in _load(tmp_path / "test-log.json")
+
+
 def test_unknown_timeout_key(tmp_path, capsys):
     _make_executables(tmp_path / "tests")
     timeouts = tmp_path / "test-timeouts.yml"
