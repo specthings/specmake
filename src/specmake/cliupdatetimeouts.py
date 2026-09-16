@@ -96,6 +96,10 @@ def _get_duration(report: dict, report_path: str, name: str,
     A report without a duration and a report of a run which is older than the
     last update of the item add nothing.  A run which timed out, which raised
     an exception or which a discard pattern rejected measures nothing either.
+    A run which stopped before the end of test line measures the point of the
+    stop, so it adds nothing.  An output without a begin of test line holds
+    no test report, so nothing tells a duration of the test from a duration
+    of a crash.
     """
     error = report.get("error", "")
     if error:
@@ -107,6 +111,16 @@ def _get_duration(report: dict, report_path: str, name: str,
     if not duration:
         logging.debug("%s: %s: has no execution duration", report_path, name)
         return None
+    info = report.get("info", {})
+    if "line-begin-of-test" in info:
+        if "line-end-of-test" not in info:
+            logging.warning(
+                "%s: %s: skip the report of a run which did not "
+                "end", report_path, name)
+            return None
+    else:
+        logging.warning("%s: %s: the output holds no test report", report_path,
+                        name)
     update_time: str | None = report.get("start-time")
     if update_time is not None:
         update_datetime = _as_utc(datetime.datetime.fromisoformat(update_time))
