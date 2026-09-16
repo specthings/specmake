@@ -50,7 +50,14 @@ def _spec_directory(tmp_path, item=_ITEM):
     return str(tmp_path / "spec")
 
 
-def _report(tmp_path, name, durations, start_time="2026-09-16T10:00:00+00:00"):
+_COMPLETE = {"line-begin-of-test": 0, "line-end-of-test": 1}
+
+
+def _report(tmp_path,
+            name,
+            durations,
+            start_time="2026-09-16T10:00:00+00:00",
+            info=None):
     path = tmp_path / name
     path.write_text(json.dumps({
         "target":
@@ -60,7 +67,8 @@ def _report(tmp_path, name, durations, start_time="2026-09-16T10:00:00+00:00"):
         "reports": [{
             "executable": f"build/{executable}",
             "duration": duration,
-            "start-time": start_time
+            "start-time": start_time,
+            "info": _COMPLETE if info is None else info
         } for executable, duration in durations.items()]
     }),
                     encoding="utf-8")
@@ -251,7 +259,8 @@ def test_a_report_without_a_start_time(tmp_path):
         "default",
         "reports": [{
             "executable": "build/a.exe",
-            "duration": 1.5
+            "duration": 1.5,
+            "info": _COMPLETE
         }]
     }),
                     encoding="utf-8")
@@ -293,6 +302,42 @@ def test_a_report_of_an_error(tmp_path):
 
     # The duration of a run which timed out is the timeout, not a measurement
     assert data["timeouts"] == {"default": {}}
+
+
+def test_a_run_which_did_not_end(tmp_path, capsys):
+    _spec_directory(tmp_path)
+    report = _report(tmp_path,
+                     "one.json", {"a.exe": 1.5},
+                     info={"line-begin-of-test": 0})
+    data = _update(tmp_path, [report])
+
+    # The duration of a run which stopped tells where it stopped
+    assert "skip the report of a run which did not end" in \
+        capsys.readouterr().err
+    assert data["timeouts"] == {"default": {}}
+
+
+def test_a_run_which_did_not_end_keeps_the_durations(tmp_path):
+    _spec_directory(tmp_path)
+    first = _report(tmp_path, "one.json", {"a.exe": 1.5})
+    _update(tmp_path, [first])
+    second = _report(tmp_path,
+                     "two.json", {"a.exe": 2.5},
+                     start_time="2026-09-16T11:00:00+00:00",
+                     info={"line-begin-of-test": 0})
+    data = _update(tmp_path, [second])
+
+    # A stored maximum makes no difference to a run which did not end
+    assert data["timeouts"]["default"]["a.exe"] == [1.5]
+
+
+def test_an_output_without_a_test_report(tmp_path, capsys):
+    _spec_directory(tmp_path)
+    report = _report(tmp_path, "one.json", {"a.exe": 1.5}, info={})
+    data = _update(tmp_path, [report])
+
+    assert "the output holds no test report" in capsys.readouterr().err
+    assert data["timeouts"] == {"default": {"a.exe": [1.5]}}
 
 
 def test_the_reset_takes_a_report_of_the_last_update(tmp_path):
