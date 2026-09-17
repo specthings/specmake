@@ -30,7 +30,7 @@ from typing import Callable, Union
 from specitems import is_enabled, Item, ItemGetValueContext
 
 from .directorystate import DirectoryState
-from .pkgitems import PackageBuildDirector
+from .pkgitems import BuildItem, PackageBuildDirector
 from .util import copy_and_substitute
 
 
@@ -46,6 +46,15 @@ def _add_element(_directory: str, element: str | list[str],
         paths.extend(element)
     else:
         paths.append(element)
+
+
+def _get_base_directory(build_item: BuildItem) -> str:
+    """ Get the base directory of the paths of the doxygen input. """
+    if isinstance(build_item, DirectoryState):
+        return build_item.directory
+    # An input which is not a directory state has no base directory.  Its
+    # relative paths are relative to the working directory of Doxygen.
+    return ""
 
 
 def _add_path(directory: str, element: str | list[str],
@@ -91,9 +100,8 @@ class Doxyfile(DirectoryState):
             add: Callable[[str, Union[str, list[str]], list[str]],
                           None]) -> str:
         paths: list[str] = []
-        for link, directory_state in self.input_links("doxygen"):
-            assert isinstance(directory_state, DirectoryState)
-            directory = directory_state.directory
+        for link, build_item in self.input_links("doxygen"):
+            directory = _get_base_directory(build_item)
             for optional_element in self.substitute(link[key], link.item):
                 if not is_enabled(self.enabled_set,
                                   optional_element["enabled-by"]):
