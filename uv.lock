@@ -1879,11 +1879,11 @@ wheels = [
 
 [[package]]
 name = "platformdirs"
-version = "4.11.8"
+version = "4.11.9"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/53/18/f3bb8ef0d3b930692343da8aa4d3cbcd6749477c053959395ac81965a6e9/platformdirs-4.11.8.tar.gz", hash = "sha256:f23abafea7dd4276d1f29104b83598d7dcc567cafd07c9c951e66665645437fc", size = 37182, upload-time = "2026-09-08T22:20:42.866Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/58/b9/8adc4e1b422b27fd88540ec7bf1f406f77ef393ec070e26fc430e914cde8/platformdirs-4.11.9.tar.gz", hash = "sha256:e2c66a8d384596cd98e3c4aea2d761df7bac95d9d8a2cc3946daa8cdafdaebc1", size = 38345, upload-time = "2026-09-16T13:31:45.259Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f4/e1/5b7b8bbb55084d1425bcb9bc823ff519e1b2be05f6ebb0089e2eacc38413/platformdirs-4.11.8-py3-none-any.whl", hash = "sha256:52f2f181bbfde907966932cc8312d967d02976422d66d537ea16092b8e291081", size = 24027, upload-time = "2026-09-08T22:20:41.537Z" },
+    { url = "https://files.pythonhosted.org/packages/f3/94/803ba86705257d7eedddac4b02eb88a7483b1600e9200c1fefc6f1a9a3ff/platformdirs-4.11.9-py3-none-any.whl", hash = "sha256:0a3958f58a9e30321eaef0a424dd0b77cce242886b36b8aa992f9731ef2d59c1", size = 24472, upload-time = "2026-09-16T13:31:44.049Z" },
 ]
 
 [[package]]
@@ -2301,7 +2301,7 @@ wheels = [
 
 [[package]]
 name = "specitems"
-version = "1.6.22"
+version = "1.6.23"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "mdformat" },
@@ -2312,9 +2312,9 @@ dependencies = [
     { name = "mdformat-tables" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/58/33/ca88c2439fea7112b7aded72e5ee81f2efea82b83ada9564062812b5841b/specitems-1.6.22.tar.gz", hash = "sha256:95506e52ecf8ca8371ad6555182338b8d8b44f0174486d352444236d38be6739", size = 72203, upload-time = "2026-09-15T01:58:29.989Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9f/fd/0beb21fcadeacd877a0f0bf8591b3055f5b52df167cf3fc4a61188eb6f3d/specitems-1.6.23.tar.gz", hash = "sha256:31752fa7fcc0f5c97dd3763ae720365924ebee05fabe8a55758453e32519d0ef", size = 72353, upload-time = "2026-09-17T00:55:43.925Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/15/f5/f8a165f6b3850488b8e0bd8437cbd212d92ed3d33e78651e91394740a39a/specitems-1.6.22-py3-none-any.whl", hash = "sha256:5102c6f450e8dff956d3d85c79c8767046a7b3bfaa7d953e213149a241c10499", size = 99924, upload-time = "2026-09-15T01:58:30.913Z" },
+    { url = "https://files.pythonhosted.org/packages/29/19/6aeaef8abdce6018f5330d908db68d1c0e5bff01a994acec873aa7ba9200/specitems-1.6.23-py3-none-any.whl", hash = "sha256:d49c8bec58932b0b274aa2c99b05deb259bd9f4b77c9ec27263c124a5d01656f", size = 100122, upload-time = "2026-09-17T00:55:44.781Z" },
 ]
 
 [[package]]
@@ -2364,9 +2364,9 @@ dev = [
 requires-dist = [
     { name = "gcovr", specifier = ">=8.6" },
     { name = "matplotlib", specifier = ">=3.10.1" },
-    { name = "specitems", specifier = ">=1.6.22" },
+    { name = "specitems", specifier = ">=1.6.23" },
     { name = "spectestrunner", specifier = ">=0.9.3" },
-    { name = "specware", specifier = ">=1.2.27" },
+    { name = "specware", specifier = ">=1.2.28" },
     { name = "sphinx", specifier = ">=8.2.3" },
     { name = "sphinx-better-subsection", specifier = ">=0.2" },
     { name = "sphinx-rtd-theme", specifier = ">=3.0.2" },
@@ -2415,14 +2415,13 @@ wheels = [
 
 [[package]]
 name = "specware"
-version = "1.2.27"
+version = "1.2.28"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "specitems" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/cf/d1/2d032038597ff08cb7f3202aba41edb69ebbe31796c2b2c14061cc14795c/specware-1.2.27.tar.gz", hash = "sha256:3e79a270863347100628e79443817eff8837fe1c300bcbca3374134520554432", size = 97738, upload-time = "2026-09-15T02:00:03.491Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1e/bd/75ea47f30079fb9786e461d5baff20a47f6cbf62933a331d20734eb11155/specware-1.2.27-py3-none-any.whl", hash = "sha256:5d84dea5f3b64206ef6604d168b130204479f94b0711f8d0e80c1e94a0b6bbb5", size = 114243, upload-time = "2026-09-15T02:00:02.051Z" },
+    { url = "https://files.pythonhosted.org/packages/a1/f3/3da4e850798d43cac4523a271aa24d54a2c921175415c17de364a46b697c/specware-1.2.28-py3-none-any.whl", hash = "sha256:fa787eccc9c41d146468d180137131277fa882d0ba0c9086c581ae60ee0e64f0", size = 114244, upload-time = "2026-09-17T00:57:27.425Z" },
 ]
 
 [[package]]
@@ -2758,11 +2757,11 @@ wheels = [
 
 [[package]]
 name = "urllib3"
-version = "2.7.0"
+version = "2.8.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/53/0c/06f8b233b8fd13b9e5ee11424ef85419ba0d8ba0b3138bf360be2ff56953/urllib3-2.7.0.tar.gz", hash = "sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c", size = 433602, upload-time = "2026-05-07T16:13:18.596Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e3/05/b17359e1cefb4f909b5e40b1b90a496d987258916dbbf88e842c729f510e/urllib3-2.8.0.tar.gz", hash = "sha256:63bf2ead4c879426ebf22ef2a781eeb4aa3b4ae798a0435506f8687fd5bb9b63", size = 458972, upload-time = "2026-09-15T19:29:36.253Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7f/3e/5db95bcf282c52709639744ca2a8b149baccf648e39c8cc87553df9eae0c/urllib3-2.7.0-py3-none-any.whl", hash = "sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897", size = 131087, upload-time = "2026-05-07T16:13:17.151Z" },
+    { url = "https://files.pythonhosted.org/packages/92/9d/c4e665119135114480843e7ab388fa94d8480650450e6f8e26b70d323a4c/urllib3-2.8.0-py3-none-any.whl", hash = "sha256:0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3", size = 135717, upload-time = "2026-09-15T19:29:34.577Z" },
 ]
 
 [[package]]
