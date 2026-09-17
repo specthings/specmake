@@ -218,6 +218,21 @@ def test_a_duration_above_the_warning_factor(tmp_path, capsys):
 
 def test_a_duration_above_the_error_factor(tmp_path, capsys):
     _spec_directory(tmp_path)
+    first = _report(tmp_path, "one.json", {"a.exe": 100.0}, info={})
+    _update(tmp_path, [first])
+    second = _report(tmp_path,
+                     "two.json", {"a.exe": 300.0},
+                     start_time="2026-09-16T11:00:00+00:00",
+                     info={})
+    data = _update(tmp_path, [second])
+
+    # The duration is above 1.9 * 100 + 10 and no complete run backs it up
+    assert "is greater than 1.9 * 100.0 + 10.0" in capsys.readouterr().err
+    assert data["timeouts"]["default"]["a.exe"] == [100.0]
+
+
+def test_a_complete_run_above_the_error_factor(tmp_path, capsys):
+    _spec_directory(tmp_path)
     first = _report(tmp_path, "one.json", {"a.exe": 100.0})
     _update(tmp_path, [first])
     second = _report(tmp_path,
@@ -225,9 +240,12 @@ def test_a_duration_above_the_error_factor(tmp_path, capsys):
                      start_time="2026-09-16T11:00:00+00:00")
     data = _update(tmp_path, [second])
 
-    # The duration is above 1.9 * 100 + 10, so it is not measured
-    assert "is greater than 1.9 * 100.0 + 10.0" in capsys.readouterr().err
-    assert data["timeouts"]["default"]["a.exe"] == [100.0]
+    # A run which reached its end line needs the time which it took
+    err = capsys.readouterr().err
+    assert "take the duration 300.0 of a complete run above 1.9 * 100.0 " \
+        "+ 10.0" in err
+    assert "is greater than 1.2 * 100.0 + 10.0" not in err
+    assert data["timeouts"]["default"]["a.exe"] == [100.0, 300.0]
 
 
 def test_the_dry_run_saves_nothing(tmp_path):
