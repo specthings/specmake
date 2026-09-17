@@ -43,7 +43,8 @@ def test_doxyfile(caplog, tmpdir):
 {tmp_dir}/include/path/0 \\
 {tmp_dir}/include/path/1
 ---
-{tmp_dir}/input/path/0
+{tmp_dir}/input/path/0 \\
+{tmp_dir}/section/input
 ---
 YES
 ---
@@ -51,7 +52,8 @@ NO
 ---
 {tmp_dir}/pkg/build
 ---
-{tmp_dir}/strip/from/path
+{tmp_dir}/strip/from/path \\
+{tmp_dir}/section/strip
 ---
 {tmp_dir}/pkg/build/Doxyfile
 """
