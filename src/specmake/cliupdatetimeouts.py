@@ -88,18 +88,18 @@ def _time_of_last_update(item: Item) -> datetime.datetime:
     return _as_utc(value)
 
 
-def _get_duration(report: dict, report_path: str, name: str,
-                  last_update: _LastUpdate) -> float | None:
+def _get_measurement(report: dict, report_path: str, name: str,
+                     last_update: _LastUpdate) -> tuple[float, bool] | None:
     """
-    Get the duration which a test report adds to the timeouts.
+    Get the duration which a test report adds to the timeouts and tell if
+    the run reached its end.
 
     A report without a duration and a report of a run which is older than the
     last update of the item add nothing.  A run which timed out, which raised
     an exception or which a discard pattern rejected measures nothing either.
     A run which stopped before the end of test line measures the point of the
     stop, so it adds nothing.  An output without a begin of test line holds
-    no test report, so nothing tells a duration of the test from a duration
-    of a crash.
+    no test report.  Its duration lands, and the run counts as incomplete.
     """
     error = report.get("error", "")
     if error:
@@ -115,12 +115,14 @@ def _get_duration(report: dict, report_path: str, name: str,
     if "line-begin-of-test" in info:
         if "line-end-of-test" not in info:
             logging.warning(
-                "%s: %s: skip the report of a run which did not "
-                "end", report_path, name)
+                "%s: %s: skip the report of a run which did "
+                "not end", report_path, name)
             return None
+        complete = True
     else:
         logging.warning("%s: %s: the output holds no test report", report_path,
                         name)
+        complete = False
     update_time: str | None = report.get("start-time")
     if update_time is not None:
         update_datetime = _as_utc(datetime.datetime.fromisoformat(update_time))
@@ -128,34 +130,53 @@ def _get_duration(report: dict, report_path: str, name: str,
             logging.debug("%s: %s: skip out of date result", report_path, name)
             return None
         last_update.new = max(last_update.new, update_datetime)
-    return duration
+    return duration, complete
+
+
+def _check_range(args: argparse.Namespace, report_path: str, name: str,
+                 measurement: tuple[float, bool], maximum: float) -> bool:
+    """
+    Tell if a duration is in range and log why it is not.
+
+    The error factor bounds a duration which no complete run backs up.  A
+    run which reached its end line measures the time which the test needs,
+    so no bound rejects it.
+    """
+    duration, complete = measurement
+    minimum_timeout = args.minimum_timeout
+    if duration > args.error_factor * maximum + minimum_timeout:
+        if not complete:
+            logging.error("%s: %s: duration %s is greater than %s * %s + %s",
+                          report_path, name, duration, args.error_factor,
+                          maximum, minimum_timeout)
+            return False
+        logging.warning(
+            "%s: %s: take the duration %s of a complete run above %s * %s "
+            "+ %s", report_path, name, duration, args.error_factor, maximum,
+            minimum_timeout)
+    elif duration > args.warning_factor * maximum + minimum_timeout:
+        logging.warning("%s: %s: duration %s is greater than %s * %s + %s",
+                        report_path, name, duration, args.warning_factor,
+                        maximum, minimum_timeout)
+    return True
 
 
 def _update_timeouts(args: argparse.Namespace, report_path: str,
                      last_update: _LastUpdate,
                      timeouts: dict[str, list[float]], reports: list) -> bool:
     """ Add the durations of the reports and tell if one of them lands. """
-    minimum_timeout = args.minimum_timeout
     changed = False
     for report in reports:
         name = Path(report["executable"]).name
-        new_duration = _get_duration(report, report_path, name, last_update)
-        if new_duration is None:
+        measurement = _get_measurement(report, report_path, name, last_update)
+        if measurement is None:
             continue
+        new_duration, _ = measurement
         durations = timeouts.setdefault(name, [])
         maximum = max(durations, default=None)
         if maximum is not None:
-            if new_duration > args.error_factor * maximum + minimum_timeout:
-                logging.error(
-                    "%s: %s: duration %s is greater than %s * %s + %s",
-                    report_path, name, new_duration, args.error_factor,
-                    maximum, minimum_timeout)
+            if not _check_range(args, report_path, name, measurement, maximum):
                 continue
-            if new_duration > args.warning_factor * maximum + minimum_timeout:
-                logging.warning(
-                    "%s: %s: duration %s is greater than %s * %s + %s",
-                    report_path, name, new_duration, args.warning_factor,
-                    maximum, minimum_timeout)
             if args.lazy and new_duration <= maximum:
                 logging.debug("%s: %s: keep the maximum duration: %s",
                               report_path, name, maximum)
@@ -266,8 +287,9 @@ def _get_arguments(argv: list[str]) -> argparse.Namespace:
             type=float,
             default=1.9,
             help="a new duration greater than the factor times the current "
-            "maximum duration plus the minimum timeout "
-            "is an error (default: 1.9)")
+            "maximum duration plus the minimum timeout is an error, unless "
+            "the output of the test holds a begin and an end of test line "
+            "(default: 1.9)")
         parser.add_argument("reports",
                             metavar="REPORT",
                             nargs="+",
