@@ -2319,7 +2319,7 @@ wheels = [
 
 [[package]]
 name = "specmake"
-version = "1.5.29.dev1"
+version = "1.5.29"
 source = { editable = "." }
 dependencies = [
     { name = "gcovr" },
@@ -2420,6 +2420,7 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "specitems" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/08/a1/120ab58860d031a0a5c942d3b5a75bb765a67532dc1b533b6c4d0e72e464/specware-1.2.28.tar.gz", hash = "sha256:1efee9d90bf347b557e9965f8cd85ada2ea0ba7703441417671e2655da2b7a43", size = 97736, upload-time = "2026-09-17T00:57:28.753Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a1/f3/3da4e850798d43cac4523a271aa24d54a2c921175415c17de364a46b697c/specware-1.2.28-py3-none-any.whl", hash = "sha256:fa787eccc9c41d146468d180137131277fa882d0ba0c9086c581ae60ee0e64f0", size = 114244, upload-time = "2026-09-17T00:57:27.425Z" },
 ]
