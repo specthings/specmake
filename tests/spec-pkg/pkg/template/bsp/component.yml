@@ -62,9 +62,18 @@ enabled-set-actions:
   value:
   - ${.:/bsp}
   - ${.:/bsp-family}
+- action: add
+  enabled-by: true
+  value:
+  - TEST_CONFIG_FOO
+  - TEST_CONFIG_BAR_BAZ
+  - XTEST_CONFIG_NOPE
 enabled-set-feedback-mapping:
   ${.:/bsp}: pkg.bsp.${.:/component/arch}.${.:/bsp}
   ${.:/bsp-family}: pkg.bsp-family.${.:/component/arch}.${.:/bsp-family}
+  TEST_CONFIG_(.*): pkg.test.config.\1
+  TEST_CONFIG_F(.*): pkg.test.second.\1
+  TEST_CONFIG_UNMATCHED: pkg.test.unmatched
   bsp-feature: pkg.feature.red
   bsp-2-feature: pkg.feature.blue
 links: []

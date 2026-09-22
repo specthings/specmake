@@ -370,7 +370,8 @@ def test_workspace_component(tmpdir):
         "pkg.arch.furch", "pkg.bsp-family.furch.lurch",
         "pkg.bsp-family.furch.lurch-2", "pkg.bsp.furch.blur",
         "pkg.bsp.furch.blur-2", "pkg.feature.blue", "pkg.feature.green",
-        "pkg.feature.red"
+        "pkg.feature.red", "pkg.test.config.bar_baz", "pkg.test.config.foo",
+        "pkg.test.second.oo"
     ]
 
     work_bsp = workspace.director["/pkg/arch/bsp/cfg/component"]
