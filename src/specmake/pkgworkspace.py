@@ -34,6 +34,7 @@ import graphlib
 import logging
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import tempfile
@@ -629,9 +630,12 @@ def _gather_feedback(component: WorkspaceComponent, selection: ItemSelection,
             item.children("add-package-component-template")):
         _gather_feedback(component, selection, template, feedback_set)
     mapping = component.substitute(item["enabled-set-feedback-mapping"])
-    for key in selection.enabled_set:
-        if key in mapping:
-            feedback_set.add(mapping[key])
+    for pattern, replacement in mapping.items():
+        compiled = re.compile(pattern)
+        for key in selection.enabled_set:
+            match = compiled.fullmatch(key)
+            if match is not None:
+                feedback_set.add(match.expand(replacement).lower())
 
 
 def _prepare_components(director: PackageBuildDirector,
