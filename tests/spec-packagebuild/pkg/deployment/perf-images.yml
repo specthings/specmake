@@ -1,12 +1,12 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
 - Copyright (C) 2025 embedded brains GmbH & Co. KG
-copyrights-by-license: {}
 directory: ${.:/component/deployment-directory}/perf-images
 directory-state-type: performance-images
 enabled-by: performance-images
 files: []
 hash: null
+license-info: []
 links:
 - hash: null
   name: component

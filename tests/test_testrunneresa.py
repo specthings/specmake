@@ -192,7 +192,7 @@ def test_testrunneresa(monkeypatch, tmp_path):
             "branch": "b",
             "commit": "a412700fd90e6195c255aea2048ae2ef37244df5",
             "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
-            "copyrights-by-license": {},
+            "license-info": [],
             "description": "d",
             "directory": str(tmp_path),
             "directory-state-type": "repository",

@@ -303,7 +303,7 @@ def test_not_run_coverage(caplog, tmpdir, monkeypatch):
 
 
 def test_a_section_without_a_measured_group():
-    content = SphinxContent()
+    content = SphinxContent(context="CC-BY-SA-4.0")
     add_not_run_section(content, "Scope", [{
         "executables": ["a.exe"],
         "justification": "The target has no device for it.\n",
@@ -364,7 +364,7 @@ def test_an_excluded_test_of_two_scopes_counts_once():
         "executables": ["a.exe", "b.exe"],
         "justification": "The target has no device for it.\n"
     }]
-    content = SphinxContent()
+    content = SphinxContent(context="CC-BY-SA-4.0")
     add_coverage_across_targets(
         content, _Mapper(),
         {"/target/simulator": {

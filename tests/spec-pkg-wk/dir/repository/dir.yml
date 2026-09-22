@@ -1,7 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
-copyrights-by-license: {}
 copy-to-buildspace-actions:
 - action: copy-and-substitute
   enabled-by: true
@@ -29,6 +28,7 @@ file-mappings:
   replacement: rs
 - pattern: e$
   replacement: re
+license-info: []
 links:
 - hash: null
   name: component

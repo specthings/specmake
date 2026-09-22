@@ -29,10 +29,10 @@ import os
 from pathlib import Path
 
 import pytest
-from specitems import ItemGetValueContext
+from specitems import EmptyItemCache, Item, ItemGetValueContext
 
 import specmake
-from specmake import PackageComponent
+from specmake import DirectoryState, PackageComponent
 
 from .util import create_package
 
@@ -89,10 +89,6 @@ def test_sphinxbuilder(caplog, tmp_path, monkeypatch):
         "${.:/document-author}") == "embedded brains GmbH & Co. KG"
     assert doc.substitute("${.:/document-year}") == "2020"
 
-    # The mapper holds the licenses of the taken parts in state which every
-    # mapper shares, and the builder clears it before each run, so clear it
-    # to get the state of a document which takes no part
-    doc.mapper.copyrights_by_license.clear()
     assert doc.substitute("${.:/document-third-party-licenses}") == ""
     assert doc.substitute(
         "${.:/document-copyright}") == "2020 embedded brains GmbH & Co. KG"
@@ -491,6 +487,10 @@ The specification item types have the following hierarchy:
 
 - :ref:`SpecTypeRootItemType`
 
+  - :ref:`SpecTypeLicenseItemType`
+
+  - :ref:`SpecTypeToolConfigurationItemType`
+
 .. _SpecificationItemTypes:
 
 Specification item types
@@ -519,7 +519,7 @@ format. All explicit attributes shall be specified. The explicit attributes for
 this type are:
 
 SPDX-License-Identifier
-    The attribute value shall be a :ref:`SpecTypeSPDXLicenseIdentifier`. It
+    The attribute value shall be a :ref:`SpecTypeSPDXLicenseExpression`. It
     shall be the license of the item.
 
 copyrights
@@ -543,6 +543,77 @@ type
     ECSS-E-ST-10-06 and possible future applications of other standards.  This
     attribute is used for type refinements.
 
+This type is refined by the following types:
+
+- :ref:`SpecTypeLicenseItemType`
+
+- :ref:`SpecTypeToolConfigurationItemType`
+
+.. _SpecTypeLicenseItemType:
+
+License Item Type
+^^^^^^^^^^^^^^^^^
+
+This type refines the :ref:`SpecTypeRootItemType` through the ``type``
+attribute if the value is ``license``. This set of attributes specifies a
+license which a work may take.  The tooling uses the item to present the
+license of a work.  It also uses the item to list the license of a foreign
+part. The following explicit attributes are mandatory:
+
+- ``identifier``
+
+- ``name``
+
+- ``reproduce-text``
+
+- ``text``
+
+- ``uri``
+
+The explicit attributes for this type are:
+
+identifier
+    The attribute value shall be a :ref:`SpecTypeSPDXLicenseIdentifier`. It
+    shall be the SPDX license identifier of the license.
+
+name
+    The attribute value shall be a string. It shall be the full name of the
+    license.
+
+reproduce-text
+    The attribute value shall be a boolean. It shall be true, if a work under
+    this license shall reproduce the license text, otherwise it shall be false.
+    A work which reproduces no text states the identifier and the optional uri.
+
+text
+    The attribute value shall be an optional string. If the value is present,
+    then it shall be the license text.  The value shall be present, if
+    reproduce-text is true.
+
+uri
+    The attribute value shall be an optional string. If the value is present,
+    then it shall be the uniform resource identifier of the license.
+
+.. _SpecTypeToolConfigurationItemType:
+
+Tool Configuration Item Type
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This type refines the :ref:`SpecTypeRootItemType` through the ``type``
+attribute if the value is ``tool-config``. This set of attributes specifies the
+configuration of the tools.  The file specitems.yml of a tree holds one such
+item.  A tool reads the item cache and performs every task of its own type. All
+explicit attributes shall be specified. The explicit attributes for this type
+are:
+
+item-cache
+    The attribute value shall be a :ref:`SpecTypeToolItemCache`. It shall be
+    the item cache of the configuration.
+
+tasks
+    The attribute value shall be a list. Each list element shall be a
+    :ref:`SpecTypeToolTask`. It shall be the tasks of the configuration.
+
 .. _SpecificationAttributeSetsAndValueTypes:
 
 Specification attribute sets and value types
@@ -557,13 +628,13 @@ The value shall be a string. It shall be a copyright statement of a copyright
 holder of the specification item. The value
 
 - shall match with the regular expression
-  "``^\\s*Copyright\\s+\\(C\\)\\s+[0-9]+,\\s*[0-9]+\\s+.+\\s*$``",
+  "``^\s*Copyright\s+\(C\)\s+[0-9]+,\s*[0-9]+\s+.+\s*$``",
 
 - or, shall match with the regular expression
-  "``^\\s*Copyright\\s+\\(C\\)\\s+[0-9]+\\s*-\\s*[0-9]+\\s+.+\\s*$``",
+  "``^\s*Copyright\s+\(C\)\s+[0-9]+\s*-\s*[0-9]+\s+.+\s*$``",
 
 - or, shall match with the regular expression
-  "``^\\s*Copyright\\s+\\(C\\)\\s+[0-9]+\\s+.+\\s*$``".
+  "``^\s*Copyright\s+\(C\)\s+[0-9]+\s+.+\s*$``".
 
 This type is used by the following types:
 
@@ -667,40 +738,299 @@ This type is used by the following types:
 
 - :ref:`SpecTypeRootItemType`
 
+- :ref:`SpecTypeToolTask`
+
+.. _SpecTypeSPDXLicenseExpression:
+
+SPDX License Expression
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The value shall be a string. It shall be an SPDX license expression as defined
+by SPDX 2.3, section "SPDX license expressions".  Every identifier shall be on
+the SPDX License List or it shall be a license reference such as
+``LicenseRef-ECSS``.  Every identifier shall be in its canonical form, so a
+deprecated form such as ``GPL-2.0+`` is invalid.  A work takes one license, so
+an expression of ``A AND B`` permits no work.
+
+This type is used by the following types:
+
+- :ref:`SpecTypeRootItemType`
+
 .. _SpecTypeSPDXLicenseIdentifier:
 
 SPDX License Identifier
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The value shall be a string. It defines the license of the item expressed
-though an SPDX License Identifier. The value
-
-- shall be equal to "``Apache-2.0``",
-
-- or, shall be equal to "``CC-BY-SA-4.0``",
-
-- or, shall be equal to "``CC-BY-SA-4.0 OR BSD-2-Clause``",
-
-- or, shall be equal to "``CC-BY-SA-4.0 OR BSD-2-Clause OR MIT``",
-
-- or, shall be equal to "``CC-BY-SA-4.0 OR BSD-2-Clause OR Apache-2.0 OR
-  GPL-2.0-or-later``",
-
-- or, shall be equal to "``CC-BY-SA-4.0 OR MIT``",
-
-- or, shall be equal to "``BSD-2-Clause``",
-
-- or, shall be equal to "``BSD-2-Clause OR MIT``",
-
-- or, shall be equal to "``ECSS``",
-
-- or, shall be equal to "``ESA UNCLASSIFIED - For Official Use``",
-
-- or, shall be equal to "``MIT``".
+The value shall be a string. It shall be a single SPDX license identifier.  The
+identifier shall be on the SPDX License List or it shall be a license reference
+such as ``LicenseRef-ECSS``.
 
 This type is used by the following types:
 
-- :ref:`SpecTypeRootItemType`
+- :ref:`SpecTypeLicenseItemType`
+
+- :ref:`SpecTypeToolGlossaryTask`
+
+- :ref:`SpecTypeToolSpecificationDocumentationTask`
+
+.. _SpecTypeToolGlossaryDocument:
+
+Tool Glossary Document
+^^^^^^^^^^^^^^^^^^^^^^
+
+This set of attributes specifies the glossary of one document. Only the
+``target`` attribute is mandatory. The explicit attributes for this type are:
+
+header
+    The attribute value shall be a string. It shall be the header of the
+    document glossary.
+
+md-source-paths
+    The attribute value shall be a list of strings. It shall be the paths of
+    the Markdown sources which the glossary covers.
+
+rest-source-paths
+    The attribute value shall be a list of strings. It shall be the paths of
+    the reST sources which the glossary covers.
+
+target
+    The attribute value shall be a string. It shall be the target file of the
+    document glossary.
+
+This type is used by the following types:
+
+- :ref:`SpecTypeToolGlossaryTask`
+
+.. _SpecTypeToolGlossaryTask:
+
+Tool Glossary Task
+^^^^^^^^^^^^^^^^^^
+
+This type refines the :ref:`SpecTypeToolTask` through the ``task-type``
+attribute if the value is ``glossary``. This set of attributes specifies a
+glossary task. The following explicit attributes are mandatory:
+
+- ``license``
+
+- ``project-groups``
+
+The explicit attributes for this type are:
+
+accepted-licenses
+    The attribute value shall be a list of strings. It shall be the licenses
+    which the produced files accept for a part whose license expression permits
+    not the license.
+
+automatically-generated-warning
+    The attribute value shall be a string. It shall be the warning which every
+    produced file carries. An empty warning adds no comment block to a file.
+
+documents
+    The attribute value shall be a list. Each list element shall be a
+    :ref:`SpecTypeToolGlossaryDocument`. It shall be the document glossaries.
+
+license
+    The attribute value shall be a :ref:`SpecTypeSPDXLicenseIdentifier`. It
+    shall be the license of the produced files.
+
+project-groups
+    The attribute value shall be a list. Each list element shall be an
+    :ref:`SpecTypeUID`. It shall be the UIDs of the glossary group items of the
+    project.
+
+project-header
+    The attribute value shall be a string. It shall be the header of the
+    project glossary.
+
+project-target
+    The attribute value shall be an optional string. If the value is present,
+    then it shall be the target file of the project glossary.
+
+.. _SpecTypeToolItemCache:
+
+Tool Item Cache
+^^^^^^^^^^^^^^^
+
+This set of attributes specifies the item cache of a configuration.  A
+configuration which states no path states an empty item cache. None of the
+explicit attributes is mandatory, they are all optional. The explicit
+attributes for this type are:
+
+cache-directory
+    The attribute value shall be a string. It shall be the directory of the
+    item cache.
+
+enabled-set
+    The attribute value shall be a list of strings. It shall be the enabled set
+    of the item cache.
+
+initialize-links
+    The attribute value shall be a boolean. It shall be true, if the item cache
+    initializes the links of the items, otherwise it shall be false.
+
+paths
+    The attribute value shall be a :ref:`SpecTypeToolItemCachePaths`. It shall
+    be the specification item directories.  A dictionary maps a directory to
+    the UID prefix of the items which it holds.
+
+permissive-type-errors
+    The attribute value shall be a boolean. It shall be true, if a type error
+    is a warning, otherwise it shall be false.
+
+resolve-proxies
+    The attribute value shall be a boolean. It shall be true, if the item cache
+    resolves the proxy items, otherwise it shall be false.
+
+spec-type-root-uid
+    The attribute value shall be an optional string. If the value is present,
+    then it shall be the UID of the root specification type item.
+
+This type is used by the following types:
+
+- :ref:`SpecTypeToolConfigurationItemType`
+
+.. _SpecTypeToolItemCachePaths:
+
+Tool Item Cache Paths
+^^^^^^^^^^^^^^^^^^^^^
+
+A value of this type shall be of one of the following variants:
+
+- The value may be a set of attributes. A dictionary maps a specification item
+  directory to the UID prefix of the items which it holds. Generic attributes
+  may be specified. Each generic attribute key shall be a string. Each generic
+  attribute value shall be a string.
+
+- The value may be a list. Each list element shall be a string. A list gives
+  the specification item directories.  The items of a directory take the UID
+  prefix which their path gives.
+
+This type is used by the following types:
+
+- :ref:`SpecTypeToolItemCache`
+
+.. _SpecTypeToolSpecificationDocumentationTask:
+
+Tool Specification Documentation Task
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This type refines the :ref:`SpecTypeToolTask` through the ``task-type``
+attribute if the value is ``spec-documentation``. This set of attributes
+specifies a specification documentation task. The following explicit attributes
+are mandatory:
+
+- ``license``
+
+- ``target``
+
+The explicit attributes for this type are:
+
+accepted-licenses
+    The attribute value shall be a list of strings. It shall be the licenses
+    which the produced file accepts for a part whose license expression permits
+    not the license.
+
+automatically-generated-warning
+    The attribute value shall be a string. It shall be the warning which the
+    produced file carries. An empty warning adds no comment block to a file.
+
+hierarchy-subsection-name
+    The attribute value shall be a string. It shall be the name of the
+    hierarchy subsection.
+
+hierarchy-text
+    The attribute value shall be a string. It shall be the text which
+    introduces the hierarchy.
+
+ignore
+    The attribute value shall be a string. It shall be a regular expression.
+    The documentation leaves out a type whose name it matches.
+
+item-types-subsection-name
+    The attribute value shall be a string. It shall be the name of the item
+    types subsection.
+
+label-prefix
+    The attribute value shall be a string. It shall be the prefix of the labels
+    of the documented types.
+
+license
+    The attribute value shall be a :ref:`SpecTypeSPDXLicenseIdentifier`. It
+    shall be the license of the produced file.
+
+root-type-uid
+    The attribute value shall be a string. It shall be the UID of the root
+    specification type item.
+
+section-label-prefix
+    The attribute value shall be a string. It shall be the prefix of the labels
+    of the sections.
+
+section-name
+    The attribute value shall be a string. It shall be the name of the section.
+
+target
+    The attribute value shall be a string. It shall be the target file of the
+    documentation.
+
+value-types-subsection-name
+    The attribute value shall be a string. It shall be the name of the value
+    types subsection.
+
+.. _SpecTypeToolSpecificationVerificationTask:
+
+Tool Specification Verification Task
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This type refines the :ref:`SpecTypeToolTask` through the ``task-type``
+attribute if the value is ``spec-verification``. This set of attributes
+specifies a specification verification task. All explicit attributes shall be
+specified. The explicit attributes for this type are:
+
+root-type
+    The attribute value shall be a string. It shall be the UID of the root
+    specification type item.
+
+.. _SpecTypeToolTask:
+
+Tool Task
+^^^^^^^^^
+
+This set of attributes specifies a task of a tool.  The configuration carries a
+list of tasks.  A tool performs every task of its type. The following explicit
+attributes are mandatory:
+
+- ``task-name``
+
+- ``task-type``
+
+The explicit attributes for this type are:
+
+params
+    The attribute value may have any type. If the value is present, then it
+    shall be the parameters of the task.  A task uses them as substitution
+    variables.
+
+task-name
+    The attribute value shall be a :ref:`SpecTypeName`. It shall be the name of
+    the task.  The name shall be unique within the configuration.  The messages
+    of a tool use it to name the task.
+
+task-type
+    The attribute value shall be a :ref:`SpecTypeName`. It shall be the type of
+    the task.  This attribute is used for type refinements.
+
+This type is refined by the following types:
+
+- :ref:`SpecTypeToolGlossaryTask`
+
+- :ref:`SpecTypeToolSpecificationDocumentationTask`
+
+- :ref:`SpecTypeToolSpecificationVerificationTask`
+
+This type is used by the following types:
+
+- :ref:`SpecTypeToolConfigurationItemType`
 
 .. _SpecTypeUID:
 
@@ -712,6 +1042,8 @@ The value shall be a string. It shall be a valid absolute or relative item UID.
 This type is used by the following types:
 
 - :ref:`SpecTypeLink`
+
+- :ref:`SpecTypeToolGlossaryTask`
 .. end specdoc
 
 .. begin spec-name
@@ -723,7 +1055,8 @@ This type is used by the following types:
         assert src.read() == """.. SPDX-License-Identifier: CC-BY-SA-4.0
 
 .. Copyright (C) 2023 Alice
-.. Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
+.. Copyright (C) 2023 Bob
+.. Copyright (C) 2019, 2026 embedded brains GmbH & Co. KG
 
 .. _TermsDefinitionsAndAbbreviatedTerms:
 
@@ -739,16 +1072,48 @@ Terms, definitions and abbreviated terms
         This is the term.
 """
     doc_deployment = director["/pkg/deployment/doc"]
-    assert doc_deployment["copyrights-by-license"] == {
-        "BSD-2-Clause": [
+    assert doc_deployment["license-info"] == [{
+        "copyrights": [
             "Copyright (C) 2023 Bob",
             "Copyright (C) 2023 embedded brains GmbH & Co. KG"
-        ]
-    }
+        ],
+        "expressions": ["BSD-2-Clause"],
+        "license":
+        "BSD-2-Clause",
+        "provenance": ["/rtems/if/func"]
+    }]
 
     _set_enabled_set(package, ["sphinx-builder-2"])
     doc_2 = director["/pkg/deployment/doc-2"]
-    assert doc_2.substitute("${.:/document-bsd-2-clause-copyrights}") == ""
+    assert doc_2.substitute("${.:/document-license-text:BSD-2-Clause}") == ""
+    assert doc_2.substitute(
+        "${.:/document-license-text:CC-BY-SA-4.0}").endswith(
+            "\n\nThe text of the license is at "
+            "https://spdx.org/licenses/CC-BY-SA-4.0.html.")
+    license_item = director.item_cache["/license/cc-by-sa-4.0"]
+    license_item["uri"] = None
+    assert doc_2.substitute("${.:/document-license-text:CC-BY-SA-4.0}") == (
+        "| © 2023 embedded brains GmbH & Co. KG")
+    license_item["uri"] = "https://spdx.org/licenses/CC-BY-SA-4.0.html"
+    with pytest.raises(ValueError, match="needs the license as its argument"):
+        doc_2.substitute("${.:/document-license-text}")
+    early = Item(
+        EmptyItemCache(), "/early", {
+            "SPDX-License-Identifier": "BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2020 Carol"]
+        })
+    doc_2.register_part(early)
+    assert doc_2.substitute("${.:/document-license-text:BSD-2-Clause}"
+                            ).startswith("| © 2020 Carol\n")
+    part = Item(
+        EmptyItemCache(), "/part", {
+            "SPDX-License-Identifier": "GPL-2.0-only",
+            "copyrights": ["Copyright (C) 2020 John Doe"]
+        })
+    with monkeypatch.context() as patch:
+        patch.setattr(doc_2, "get_parts_of_document", lambda: [part])
+        with pytest.raises(ValueError, match="covers not every part of it"):
+            doc_2.run()
     assert doc_2.substitute(
         "${/spec/root:/spec-name}"
     ) == f"`Root Item Type <{tmp_path}/pkg/doc/index.html#spectyperootitemtype>`__"
@@ -906,3 +1271,27 @@ def test_contributors_myst(caplog, tmp_path):
     | Super Action | This is a Long Name | Short             |           |
     +--------------+---------------------+-------------------+-----------+
 ```"""
+
+
+def test_sphinxbuilder_rejects_a_file_header(caplog, tmp_path, monkeypatch):
+    monkeypatch.setattr(specmake.sphinxbuilder, "run_command", _run_command)
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
+                             ["sphinx-builder"])
+    director = package.director
+    doc = director["/pkg/deployment/doc"]
+    source = doc.input("source")
+    assert isinstance(source, DirectoryState)
+    path = Path(source.directory) / "source" / "copy-and-substitute.rst"
+    path.write_text(".. Copyright (C) 2020 John Doe\n", encoding="utf-8")
+    with pytest.raises(ValueError) as err:
+        doc.run()
+    assert str(err.value) == (
+        f"/pkg/deployment/doc: the file {path} carries no header of the "
+        "expected shape: a line '.. SPDX-License-Identifier: <expression>', "
+        "a blank line, the lines '.. Copyright (C) ...' and a blank line")
+    path.write_text(
+        ".. SPDX-License-Identifier: GPL-2.0-only\n\n"
+        ".. Copyright (C) 2020 John Doe\n\n",
+        encoding="utf-8")
+    with pytest.raises(ValueError, match="permits neither"):
+        doc.run()

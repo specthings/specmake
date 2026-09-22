@@ -22,9 +22,24 @@ spec-info:
         description: |
           It shall be the enabled set of the component.
         spec-type: list-str
+      accepted-licenses:
+        description: |
+          It shall be the licenses which a work of the component accepts for a
+          part whose license expression permits not the license of the work.
+          A component which states none takes the accepted licenses of its
+          parent component.  A root component which states none accepts no
+          license.
+        spec-type: pkg-accepted-licenses
+      license:
+        description: |
+          It shall be the license of a work of the component.  A component
+          which states none takes the license of its parent component.
+        spec-type: spdx-license-identifier
     description: |
       This set of attributes specifies a package component.
-    mandatory-attributes: all
+    mandatory-attributes:
+    - component-type
+    - enabled-set
     generic-attributes:
       description: null
       key-spec-type: name

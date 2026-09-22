@@ -1,9 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
-copyrights-by-license:
-  CC-BY-SA-4.0 OR BSD-2-Clause:
-  - Copyright (C) 2026 embedded brains GmbH & Co. KG
 directory: ${.:/component/deployment-directory}/doc-djf-tr-dummy-2
 directory-state-type: sphinx
 document-base-path: /
@@ -19,8 +16,8 @@ document-latex-geometry: geometry
 document-latex-header-left: header left
 document-latex-sphinxsetup: sphinxsetup
 document-latex-theme: manual
+document-accepted-licenses: []
 document-license: CC-BY-SA-4.0
-document-license-map: {}
 document-releases: []
 document-title: TR
 document-toctree-maxdepth: 4
@@ -28,6 +25,13 @@ document-type: test-report
 enabled-by: package-manual
 files: []
 hash: null
+license-info:
+- copyrights:
+  - Copyright (C) 2026 embedded brains GmbH & Co. KG
+  expressions:
+  - BSD-2-Clause
+  license: BSD-2-Clause
+  provenance: []
 links:
 - hash: null
   name: component

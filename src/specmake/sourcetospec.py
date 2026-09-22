@@ -210,9 +210,7 @@ class DoxygenItem:
                 "uid": group.uid_relative_to(self.uid)
             })
         data = {
-            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
             "brief": self.brief,
-            "copyrights": [],
             "description": self.description,
             "enabled-by": True,
             "index-entries": [],
@@ -223,6 +221,15 @@ class DoxygenItem:
         }
         data.update(self.ctx.data)
         data.update(self.group_config().get("data") or {})
+        # A generated item copies the prose of its header, so it carries the
+        # license and the copyrights of that header.  The tooling knows
+        # neither, so a task which states neither generates no item.
+        for attribute in ("SPDX-License-Identifier", "copyrights"):
+            if attribute not in data:
+                raise ConfigError(
+                    f"the task states no {attribute} of a generated item: "
+                    f"add it to the data of the task or of the group of "
+                    f"{self.kind} {self.name}")
         return data
 
     def config_group_name(self) -> str | None:
@@ -1113,211 +1120,7 @@ def _fill_items(elem: ElementTree.Element, scope: _Scope) -> None:
 _COMPOUND_TYPEDEF = re.compile(
     r"typedef\s+(enum|struct|union)(\s+[a-zA-Z0-9_]+)?")
 
-
-def _validate_string_list(errors: list[str], path: str, value: list) -> None:
-    for index, element in enumerate(value):
-        if not isinstance(element, str):
-            errors.append(f"{path}[{index}] must be a string, "
-                          f"got {element!r}")
-
-
-def _validate_extra_links(errors: list[str], path: str, links: Any) -> None:
-    if not isinstance(links, list):
-        errors.append(f"{path} must be a list, got {links!r}")
-        return
-    for index, link in enumerate(links):
-        where = f"{path}[{index}]"
-        if not isinstance(link, dict):
-            errors.append(f"{where} must be a dict, got {link!r}")
-            continue
-        for attribute in ["role", "uid"]:
-            if attribute not in link:
-                errors.append(f"{where}/{attribute} is missing")
-            elif not isinstance(link[attribute], str):
-                errors.append(f"{where}/{attribute} must be a string, "
-                              f"got {link[attribute]!r}")
-        for attribute in ["interface-types", "names"]:
-            patterns = link.get(attribute)
-            if patterns is None:
-                continue
-            if not isinstance(patterns, list):
-                errors.append(f"{where}/{attribute} must be a list or null, "
-                              f"got {patterns!r}")
-                continue
-            _validate_string_list(errors, f"{where}/{attribute}", patterns)
-
-
 _HEADER_INTERFACE_TYPES = ("header-file", "unspecified-header-file")
-
-
-def _validate_group_entry(errors: list[str], name: str, entry: dict) -> None:
-    """ Validate a single ``groups`` entry of the configuration. """
-    if entry.get("extra-links") is not None:
-        _validate_extra_links(errors, f"/groups/{name}/extra-links",
-                              entry["extra-links"])
-    data = entry.get("data")
-    if data is not None and not isinstance(data, dict):
-        errors.append(f"/groups/{name}/data must be a dict or null, "
-                      f"got {data!r}")
-    if entry.get("filter") is not None:
-        _validate_filter(errors, f"/groups/{name}/filter", entry["filter"])
-    generate_group_item = entry.get("generate-group-item")
-    if generate_group_item is not None and not isinstance(
-            generate_group_item, bool):
-        errors.append(f"/groups/{name}/generate-group-item must be a boolean, "
-                      f"got {generate_group_item!r}")
-    header_interface_type = entry.get("header-interface-type")
-    if (header_interface_type is not None
-            and header_interface_type not in _HEADER_INTERFACE_TYPES):
-        expected = " or ".join(repr(t) for t in _HEADER_INTERFACE_TYPES)
-        errors.append(f"/groups/{name}/header-interface-type must be "
-                      f"{expected}, got {header_interface_type!r}")
-
-
-_FILTER_ACTIONS = ("include", "exclude")
-
-
-def _validate_filter(errors: list[str], path: str, rules: Any) -> None:
-    """ Validate a ``filter``, of the configuration or of a group. """
-    if not isinstance(rules, list):
-        errors.append(f"{path} must be a list, got {rules!r}")
-        return
-    expected = " or ".join(repr(action) for action in _FILTER_ACTIONS)
-    for index, rule in enumerate(rules):
-        where = f"{path}[{index}]"
-        if not isinstance(rule, dict):
-            errors.append(f"{where} must be a dict, got {rule!r}")
-            continue
-        # Exactly one action, since two in one rule would be decided by
-        # the order the mapping happens to have.
-        if len(rule) != 1 or not set(rule) <= set(_FILTER_ACTIONS):
-            errors.append(f"{where} must have exactly one {expected} "
-                          f"attribute, got {sorted(rule)}")
-            continue
-        action, patterns = next(iter(rule.items()))
-        if not isinstance(patterns, list):
-            errors.append(f"{where}/{action} must be a list, "
-                          f"got {patterns!r}")
-            continue
-        _validate_string_list(errors, f"{where}/{action}", patterns)
-
-
-def _validate_groups(errors: list[str], groups: dict) -> None:
-    for name, entry in groups.items():
-        if not isinstance(name, str):
-            errors.append(f"/groups has a non-string key {name!r}")
-        elif not isinstance(entry, dict):
-            errors.append(f"/groups/{name} must be a dict, got {entry!r}")
-        else:
-            _validate_group_entry(errors, name, entry)
-
-
-def _validate_item_to_group(errors: list[str], item_to_group: dict) -> None:
-    for doxygen_id, group_name in item_to_group.items():
-        if not isinstance(doxygen_id, str):
-            errors.append(
-                f"/item-to-group has a non-string key {doxygen_id!r}")
-        elif group_name is not None and not isinstance(group_name, str):
-            errors.append(f"/item-to-group/{doxygen_id} must be a string or "
-                          f"null, got {group_name!r}")
-
-
-def _validate_item_to_uid(errors: list[str], item_to_uid: dict) -> None:
-    for doxygen_id, name in item_to_uid.items():
-        if not isinstance(doxygen_id, str):
-            errors.append(f"/item-to-uid has a non-string key {doxygen_id!r}")
-        elif not isinstance(name, str):
-            errors.append(f"/item-to-uid/{doxygen_id} must be a string, "
-                          f"got {name!r}")
-        elif not name or "/" in name:
-            errors.append(f"/item-to-uid/{doxygen_id} must be one UID "
-                          f"component, got {name!r}")
-
-
-def _validate_type_map(errors: list[str], type_map: dict) -> None:
-    for from_type, to_item in type_map.items():
-        if not isinstance(from_type, str):
-            errors.append(f"/type-map has a non-string key {from_type!r}")
-        elif not isinstance(to_item, str):
-            errors.append(f"/type-map/{from_type} must be a string, "
-                          f"got {to_item!r}")
-
-
-def _validate_config(config: dict, require_full_config: bool) -> None:
-    """
-    Validate a ``spec-from-source:`` configuration upfront.
-
-    Raises a single ``ConfigError`` naming every problem found, instead
-    of letting each one surface separately as a raw crash deep inside a
-    later call.
-
-    Every attribute this module indexes or iterates into is checked
-    down to its elements. A group name is looked up in a dict, an
-    enabled group ends up in a set, and a type-map pair is handed to
-    ``str.replace``, so an element of the wrong type would otherwise
-    reach that code and raise ``TypeError`` well away from the
-    configuration that caused it.
-
-    ``--propose-config`` does not require a full config: it exists to
-    bootstrap one, so ``data``, ``spec-directory``, ``groups`` and
-    ``enabled-groups`` are only mandatory when ``require_full_config``
-    is set, meaning a real generation run.
-
-    A problem names its location as an attribute path relative to the
-    ``spec-from-source`` attribute, for example ``/type-map/uint32_t``.
-    The path uses the syntax of a variable substitution, so it reads the
-    same way as the paths the specification uses elsewhere.
-    """
-    errors: list[str] = []
-
-    def require(attribute: str, expected_type: type, type_name: str) -> bool:
-        if attribute not in config:
-            errors.append(f"/{attribute} is missing")
-            return False
-        if not isinstance(config[attribute], expected_type):
-            errors.append(f"/{attribute} must be a {type_name}, "
-                          f"got {config[attribute]!r}")
-            return False
-        return True
-
-    def optional(attribute: str, expected_type: type, type_name: str) -> bool:
-        value = config.get(attribute)
-        if value is None:
-            return False
-        if not isinstance(value, expected_type):
-            errors.append(f"/{attribute} must be a {type_name} or null, "
-                          f"got {value!r}")
-            return False
-        return True
-
-    def required_unless_bootstrapping(attribute: str, expected_type: type,
-                                      type_name: str) -> bool:
-        if require_full_config:
-            return require(attribute, expected_type, type_name)
-        return optional(attribute, expected_type, type_name)
-
-    required_unless_bootstrapping("data", dict, "dict")
-    required_unless_bootstrapping("spec-directory", str, "string")
-    if required_unless_bootstrapping("groups", dict, "dict"):
-        _validate_groups(errors, config["groups"])
-    if optional("item-to-group", dict, "dict"):
-        _validate_item_to_group(errors, config["item-to-group"])
-    if optional("item-to-uid", dict, "dict"):
-        _validate_item_to_uid(errors, config["item-to-uid"])
-    if optional("type-map", dict, "dict"):
-        _validate_type_map(errors, config["type-map"])
-    optional("default-group-name", str, "string")
-    if config.get("filter") is not None:
-        _validate_filter(errors, "/filter", config["filter"])
-    if required_unless_bootstrapping("enabled-groups", list,
-                                     "list of group names"):
-        _validate_string_list(errors, "/enabled-groups",
-                              config["enabled-groups"])
-
-    if errors:
-        problems = "\n".join(f"  - {error}" for error in errors)
-        raise ConfigError(
-            f"invalid 'spec-from-source' configuration:\n{problems}")
 
 
 def _proposed_group_uid(group_name: str) -> str:
@@ -1331,18 +1134,11 @@ class DoxygenContext:
     """ Represents the Doxygen context. """
 
     # pylint: disable=too-many-instance-attributes
-    def __init__(self,
-                 config: dict,
-                 require_full_config: bool = False) -> None:
-        # Validate here rather than trusting the caller, so every
-        # consumer of this class gets the same named error instead of a
-        # crash deep in resolution. Only the caller knows whether this
-        # run needs a full config, so it says so.
-        _validate_config(config, require_full_config)
-        # data/spec-directory/groups default rather than subscript
-        # directly so --propose-config can bootstrap a DoxygenContext
-        # from an empty (or nearly empty) config to discover what to
-        # propose.
+    def __init__(self, config: dict) -> None:
+        # The configuration item carries the shape of the task, so the
+        # verification of the item format checks it.  An attribute defaults
+        # rather than subscripts directly, so --propose-config can bootstrap a
+        # context from an empty configuration to discover what to propose.
         spec_directory = config.get("spec-directory")
         self.spec_directory = Path(
             spec_directory if spec_directory is not None else "spec")

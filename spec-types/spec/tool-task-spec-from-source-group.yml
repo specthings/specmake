@@ -1,0 +1,50 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      extra-links:
+        description: |
+          It shall be the links which the task adds to a generated item of the
+          group.
+        spec-type: tool-task-spec-from-source-link-list
+      filter:
+        description: |
+          It shall select the names which the group takes.
+        spec-type: tool-task-spec-from-source-filter-list
+      data:
+        description: |
+          It shall be the license and the copyrights of an item of the group.
+        spec-type: tool-task-spec-from-source-data
+      generate-group-item:
+        description: |
+          It shall be true, if the task generates the group item, otherwise it
+          shall be false.
+        spec-type: bool
+      header-interface-type:
+        description: |
+          It shall be the interface type of a header file of the group.
+        spec-type: name
+      remove-prefix:
+        description: |
+          It shall be the prefix which the task removes from the name of an
+          item of the group.
+        spec-type: str
+      uid:
+        description: |
+          It shall be the UID of the group item.
+        spec-type: str
+    description: |
+      This set of attributes specifies one group of the generated items.
+    mandatory-attributes:
+    - uid
+spec-name: Tool Specification From Source Group
+spec-type: tool-task-spec-from-source-group
+type: spec

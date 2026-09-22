@@ -37,9 +37,6 @@ spec-info:
           It shall be the archive download timeout in seconds.  The default is
           20 minutes.
         spec-type: int
-      copyrights-by-license:
-        description: null
-        spec-type: pkg-copyrights-by-license
       description:
         description: |
           It shall be the description of the archive.
@@ -48,6 +45,12 @@ spec-info:
         description: |
           It shall be the destination directory.
         spec-type: str
+      license-files:
+        description: null
+        spec-type: pkg-license-files
+      license-info:
+        description: null
+        spec-type: pkg-license-info-list
       symbolic-links:
         description: |
           It shall be the list of symbolic links added to the unpacked archive.
@@ -59,9 +62,9 @@ spec-info:
     - archive-hash
     - archive-patches
     - archive-url
-    - copyrights-by-license
     - description
     - destination-directory
+    - license-info
     - symbolic-links
 spec-name: Workspace Archive Item Type
 spec-type: pkg-workspace-archive

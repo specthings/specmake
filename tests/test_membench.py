@@ -136,7 +136,7 @@ def test_membench(tmpdir, monkeypatch):
     sections_by_uid = gather_sections(item_cache, "path", "objdump", "gdb")
     sections_by_uid_2 = gather_sections(item_cache, "path-2", "objdump", "gdb")
     root = item_cache["/r0"]
-    content = SphinxContent()
+    content = SphinxContent(context="CC-BY-SA-4.0")
     generate(content, sections_by_uid, root, ["r0", "r4"], ItemMapper(root))
     assert str(content) == """.. _BenchmarksBasedOnSpecT0:
 
@@ -306,7 +306,7 @@ The Blue Green description.
 
     \\end{scriptsize}
 """
-    content = SphinxContent()
+    content = SphinxContent(context="CC-BY-SA-4.0")
     generate_tables(content, sections_by_uid, root, ["r0", "r4"])
     assert str(content) == """.. _BenchmarksBasedOnSpecT0:
 
@@ -382,7 +382,7 @@ benchmark.
 
     \\end{scriptsize}
 """
-    content = SphinxContent()
+    content = SphinxContent(context="CC-BY-SA-4.0")
     root_2 = item_cache["/r1"]
     generate_variants_table(
         content, {

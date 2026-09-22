@@ -1,0 +1,37 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      interface-types:
+        description: |
+          It shall be the interface types of the items which get the link.
+        spec-type: list-str
+      names:
+        description: |
+          It shall be the patterns of the names which get the link.
+        spec-type: list-str
+      role:
+        description: |
+          It shall be the role of the link.
+        spec-type: str
+      uid:
+        description: |
+          It shall be the UID of the link target.
+        spec-type: str
+    description: |
+      This set of attributes specifies a link which the task adds to a
+      generated item.
+    mandatory-attributes:
+    - role
+    - uid
+spec-name: Tool Specification From Source Link
+spec-type: tool-task-spec-from-source-link
+type: spec

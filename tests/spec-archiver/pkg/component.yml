@@ -1,5 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 build-directory: ${.:/deployment-directory}/build
+license: CC-BY-SA-4.0
 component-type: generic
 copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
@@ -8,6 +9,8 @@ enabled-by: true
 enabled-set: []
 enabled-set-actions: []
 enabled-set-feedback-mapping: {}
+accepted-licenses:
+- BSD-2-Clause
 links: []
 package-directory: pkg
 params: {}

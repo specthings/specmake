@@ -225,8 +225,9 @@ class WorkspaceArchive(_WorkspaceItem):
         data = _make_directory_state_data(self.item, "unpacked-archive")
         data["archive-file"] = os.path.basename(self["archive-file"])
         self.copy_attributes(
-            data, ("archive-hash", "archive-patches", "archive-url",
-                   "copyrights-by-license", "description", "symbolic-links"))
+            data,
+            ("archive-hash", "archive-patches", "archive-url", "license-files",
+             "license-info", "description", "symbolic-links"))
         return data
 
     def _download(self, archive_file: str, actual_digest: str | None,
@@ -318,7 +319,7 @@ class WorkspaceDirectory(_WorkspaceItem, DirectoryState):
     def prepare_buildspace_data(self) -> dict:
         data = _make_directory_state_data(self.item, "explicit")
         self.copy_attributes(data, ("directory-state-load-before-use",
-                                    "copyrights-by-license", "params"))
+                                    "license-files", "license-info", "params"))
         return data
 
     def _copy_to_buildspace_actions(self,
@@ -352,7 +353,7 @@ class WorkspaceDirectoryRepository(WorkspaceDirectory):
                     "origin-url"):
             data[key] = None
         self.copy_attributes(data, ("directory-state-load-before-use",
-                                    "copyrights-by-license", "params"))
+                                    "license-files", "license-info", "params"))
         return data
 
     def copy_to_buildspace(self, buildspace_item: BuildItem) -> None:
@@ -465,10 +466,10 @@ class WorkspaceRepository(_WorkspaceItem):
         data = _make_directory_state_data(self.item, "repository")
         data["commit"] = self["commit"]
         data["origin-commit"] = self["origin-commit"]
-        self.copy_attributes(
-            data,
-            ("branch", "copyrights-by-license", "description", "origin-branch",
-             "origin-commit", "origin-commit-url", "origin-url"))
+        self.copy_attributes(data,
+                             ("branch", "license-files", "license-info",
+                              "description", "origin-branch", "origin-commit",
+                              "origin-commit-url", "origin-url"))
         return data
 
     def copy_to_buildspace(self, buildspace_item: BuildItem) -> None:

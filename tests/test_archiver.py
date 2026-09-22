@@ -60,6 +60,8 @@ def test_archiver(caplog, tmp_path):
     with tarfile.open(archive_0.file, "r:*") as archive_0:
         assert archive_0.getnames() == [
             "dir/a.txt", "dir/e.txt", "dir/subdir/c.txt", "dir/subdir/d.txt",
+            "pkg/spec/license/bsd-2-clause.yml",
+            "pkg/spec/license/cc-by-sa-4.0.yml", "pkg/spec/license/mit.yml",
             "pkg/spec/pkg/a.yml", "pkg/spec/pkg/archive-0.yml",
             "pkg/spec/pkg/archive-1.yml", "pkg/spec/pkg/b.yml",
             "pkg/spec/pkg/component.yml", "pkg/spec/pkg/e.yml",

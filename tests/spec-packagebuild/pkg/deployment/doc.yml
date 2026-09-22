@@ -1,7 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
 - Copyright (C) 2023, 2026 embedded brains GmbH & Co. KG
-copyrights-by-license: {}
 directory: ${.:/component/deployment-directory}/doc
 directory-state-type: sphinx
 document-base-path: ${/pkg/component:/prefix-directory}
@@ -55,9 +54,9 @@ document-latex-geometry: geometry
 document-latex-header-left: header left
 document-latex-sphinxsetup: sphinxsetup
 document-latex-theme: manual
+document-accepted-licenses:
+- BSD-2-Clause
 document-license: CC-BY-SA-4.0
-document-license-map:
-  CC-BY-SA-4.0 OR BSD-2-Clause: CC-BY-SA-4.0
 document-releases:
 - changes: Initial release.
   date: '1970-01-01'
@@ -74,6 +73,7 @@ document-type: generic
 enabled-by: sphinx-builder
 files: []
 hash: null
+license-info: []
 links:
 - citation-group-key: the-group
   role: citation-group-member

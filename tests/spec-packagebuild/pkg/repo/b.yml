@@ -3,13 +3,13 @@ branch: pkg
 commit: 52f06822b8921ad825cb593b792eab7640e26cde
 copyrights:
 - Copyright (C) 2020 embedded brains GmbH & Co. KG
-copyrights-by-license: {}
 description: B
 directory: ${.:/component/deployment-directory}/build/src/b
 directory-state-type: repository
 enabled-by: true
 files: []
 hash: null
+license-info: []
 links:
 - role: repository
   uid: ../component

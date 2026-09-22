@@ -32,7 +32,8 @@ import re
 import sys
 
 from specitems import load_data, save_data
-from specware import load_config, run_command
+from specitems import load_config
+from specware import run_command
 
 from specmake import (command_arguments, command_name, duration,
                       get_build_arguments, copy_file, copy_files, now_utc,

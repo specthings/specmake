@@ -8,7 +8,6 @@ build-spec-directories: []
 build-uids: []
 copyrights:
 - Copyright (C) 2023, 2025 embedded brains GmbH & Co. KG
-copyrights-by-license: {}
 directory: ${.:/component/deployment-directory}/sub-repo
 directory-state-type: repository-subset
 enabled-by: true
@@ -20,6 +19,7 @@ extra-files:
 files: []
 hash: null
 include-test-header: true
+license-info: []
 links:
 - hash: null
   name: component

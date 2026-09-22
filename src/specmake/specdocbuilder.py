@@ -1055,13 +1055,10 @@ class SpecDocumentBuilder(DocumentBuilder):
         """ Get the items of this document. """
         return self.spec.get_related_interfaces_and_requirements()
 
-    def register_item_copyrights(self) -> None:
+    def get_parts_of_document(self) -> list[Item]:
         if not self.documents_items:
-            return
-        for item in self.get_items_of_document():
-            self.mapper.copyrights_by_license.setdefault(
-                item["SPDX-License-Identifier"],
-                set()).update(item["copyrights"])
+            return []
+        return self.get_items_of_document()
 
     def add_item_changes(self, content: TextContent, item: Item) -> None:
         """ Add the item changes to the content. """
@@ -1073,8 +1070,6 @@ class SpecDocumentBuilder(DocumentBuilder):
     def add_item(self, content: TextContent, item: Item) -> None:
         """ Add the item documentation to the content. """
         content.register_license_and_copyrights_of_item(item)
-        self.mapper.copyrights_by_license.setdefault(
-            item["SPDX-License-Identifier"], set()).update(item["copyrights"])
         with self.mapper.scope(item):
             with content.section(item.spec, label=spec_label(item)):
                 _ITEM_DOCUMENTER[item.type](_Context(content, item,

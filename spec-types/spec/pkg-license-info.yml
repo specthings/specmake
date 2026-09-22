@@ -1,0 +1,38 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      copyrights:
+        description: |
+          It shall be the copyrights of the parts which the work takes under
+          the license.
+        spec-type: copyrights
+      expressions:
+        description: |
+          It shall be the license expressions of the parts which the work
+          takes under the license.
+        spec-type: pkg-license-expression-list
+      license:
+        description: |
+          It shall be the license under which the work takes the parts.
+        spec-type: spdx-license-identifier
+      provenance:
+        description: |
+          It shall be the origins of the parts which the work takes under the
+          license.
+        spec-type: list-str
+    description: |
+      This set of attributes states the parts of a work which the work takes
+      under one license.
+    mandatory-attributes: all
+spec-name: License Information
+spec-type: pkg-license-info
+type: spec

@@ -74,14 +74,15 @@ spec-info:
         description: |
           It shall be the document LaTeX theme (for example: ``manual`` or ``howto``).
         spec-type: str
+      document-accepted-licenses:
+        description: |
+          It shall be the licenses which the document accepts for a part whose
+          license expression permits not the license of the document.
+        spec-type: pkg-accepted-licenses
       document-license:
         description: |
-          It shall be the document license.
+          It shall be the license of the document.
         spec-type: spdx-license-identifier
-      document-license-map:
-        description: |
-          It shall be the document license map.
-        spec-type: pkg-document-license-map
       document-releases:
         description: null
         spec-type: pkg-sphinx-release-list
@@ -124,8 +125,8 @@ spec-info:
     - document-latex-footer-right
     - document-latex-header-left
     - document-latex-theme
+    - document-accepted-licenses
     - document-license
-    - document-license-map
     - document-releases
     - document-title
     - document-toctree-maxdepth

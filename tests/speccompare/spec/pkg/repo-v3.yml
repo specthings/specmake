@@ -4,16 +4,17 @@ clone-depth: null
 commit: 9379cc24cd03040fcf09988dcf679e88e67ab46b
 copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
-copyrights-by-license:
-  description: |
-    Description v3.
-  files:
-  - README.md
 description: |
   Description.
 destination-directory: ${.:/component/tmpdir}/repo-v3
 directory: file://${.:/component/tmpdir}/repo
 enabled-by: true
+license-files:
+  description: |
+    Description v3.
+  files:
+  - README.md
+license-info: []
 links:
 - hash: null
   name: component

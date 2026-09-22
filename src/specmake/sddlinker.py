@@ -45,7 +45,7 @@ def _add_variant(content: CContent, mapper: SpecMapper, variant: dict) -> None:
             for item in sorted(variant["items"])
         ]
         line = "This design element is related to"
-        content_2 = CContent()
+        content_2 = content.fragment()
         if len(links) > 1:
             line = f"{line}:"
             content_2.add_list(links, line)
@@ -62,7 +62,7 @@ class SDDLinker(DirectoryState):
         self.mapper.base_path = self.directory
 
     def run(self):
-        content = CContent()
+        content = CContent(self.mapper.context)
         link_hub = self.input("link-hub")
         assert isinstance(link_hub, LinkHub)
         mapper = self.mapper

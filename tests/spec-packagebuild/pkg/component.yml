@@ -5,6 +5,7 @@ bsp-extra: extra
 bsp-family: leon3
 bsp-qual-only: qual-only
 build-directory: ${.:/deployment-directory}/build
+license: CC-BY-SA-4.0
 component-type: rtems
 config: smp
 copyrights:
@@ -15,6 +16,8 @@ enabled-set: []
 enabled-set-actions: []
 enabled-set-feedback-mapping: {}
 ident: ${.:/arch}/${.:/bsp}${.:/config:slash}/${.:/package-version}
+accepted-licenses:
+- BSD-2-Clause
 links:
 - role: glossary
   uid: /glossary/group

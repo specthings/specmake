@@ -52,7 +52,7 @@ def test_sourcecompare(caplog, tmpdir):
                                   file_to_review={},
                                   renamed={},
                                   label="Label")
-    content = specitems.SphinxContent()
+    content = specitems.SphinxContent(context="CC-BY-SA-4.0")
     compare_sources(content, config)
     assert str(content) == """.. _LabelUnchangedFiles:
 
@@ -84,7 +84,7 @@ Unchanged files
                                     },
                                     renamed={"renamed-from": "renamed-to"},
                                     label="Label")
-    content_2 = specitems.SphinxContent()
+    content_2 = specitems.SphinxContent(context="CC-BY-SA-4.0")
     compare_sources(content_2, config_2)
     assert str(content_2) == """.. _LabelReviews:
 

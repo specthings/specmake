@@ -336,6 +336,14 @@ def test_packagebuild(caplog, tmpdir, monkeypatch):
         "${/pkg/sub/s/component:/component/whoami}") == "sub-sub-s"
     assert c.substitute(
         "${/pkg/sub/s/link-hub:/component/whoami}") == "sub-sub-s"
+    licenses = director["/pkg/sub/s/link-hub"].content_context.licenses
+    assert licenses.primary == "CC-BY-SA-4.0"
+    assert licenses.accepted == ["BSD-2-Clause"]
+    root = director["/pkg/component"].item
+    accepted = root.data.pop("accepted-licenses")
+    licenses = director["/pkg/sub/t/link-hub"].content_context.licenses
+    root["accepted-licenses"] = accepted
+    assert licenses.accepted == []
     assert c.substitute(
         "${/pkg/sub/t/link-hub:/component/whoami}") == "sub-sub-t"
     with c.component_scope(subcomponent):
@@ -482,7 +490,7 @@ def test_builditemmapper():
     data = {
         "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
         "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
-        "copyrights-by-license": {},
+        "license-info": [],
         "directory": "",
         "directory-state-type": "explicit",
         "enabled-by": True,
@@ -551,7 +559,7 @@ def test_builditem_transformer():
     data = {
         "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
         "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
-        "copyrights-by-license": {},
+        "license-info": [],
         "directory": "",
         "directory-state-type": "explicit",
         "enabled-by": True,

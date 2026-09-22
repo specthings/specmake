@@ -16,15 +16,13 @@ spec-info:
         spec-type: str
       files:
         description: |
-          If the value is present, then it shall be the list of license files.
+          It shall be the list of license files.
         spec-type: list-str
     description: |
-      This set of attributes contains associated copyrights by license.
-    generic-attributes:
-      description: null
-      key-spec-type: spdx-license-identifier
-      value-spec-type: copyrights
-    mandatory-attributes: none
-spec-name: Copyrights by License
-spec-type: pkg-copyrights-by-license
+      This set of attributes states the license files of a directory.  The
+      package document reproduces each file.
+    mandatory-attributes:
+    - files
+spec-name: License Files
+spec-type: pkg-license-files
 type: spec

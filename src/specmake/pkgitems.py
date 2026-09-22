@@ -40,12 +40,13 @@ import subprocess
 from typing import (Any, Callable, Iterable, Iterator, NamedTuple, Optional,
                     Type, Union)
 
-from specitems import (EnabledSet, Item, ItemCache, ItemDataByUID,
-                       ItemGetValueContext, ItemGetValue, ItemMapper,
-                       ItemSelection, ItemView, Link, MarkdownContent,
-                       SphinxContent, SphinxMapper, TextContent,
-                       link_is_enabled, augment_glossary_terms, data_digest,
-                       is_enabled, pickle_load_data_by_uid, to_iterable)
+from specitems import (ContentContext, EnabledSet, Item, ItemCache,
+                       ItemDataByUID, ItemGetValue, ItemGetValueContext,
+                       ItemMapper, ItemSelection, ItemView, LicenseAggregate,
+                       LicenseProvider, Link, MarkdownContent, SphinxContent,
+                       SphinxMapper, TextContent, augment_glossary_terms,
+                       data_digest, is_enabled, link_is_enabled,
+                       pickle_load_data_by_uid, to_iterable)
 from specware import SpecWareTypeProvider, run_command
 
 
@@ -119,6 +120,50 @@ _Formatter = tuple[Type[TextContent], Callable[[str], str],
                    Callable[["BuildItemMapper", str, str],
                             str], Callable[[str, str], str]]
 
+
+def get_component_item(director: "PackageBuildDirector", item: Item) -> Item:
+    """
+    Get the component item of the item.
+
+    A component is its own component.  An item which states no component
+    input belongs to the package.
+
+    Args:
+        director: The package build director.
+        item: The item.
+
+    Returns:
+        The component item.
+    """
+    if item.type.startswith("pkg/component"):
+        return item
+    try:
+        return build_item_input(item, "component")
+    except KeyError:
+        return director.item_cache[director.package_uid]
+
+
+def _get_accepted_licenses(component: "PackageComponent") -> list[str]:
+    while "accepted-licenses" not in component.item:
+        try:
+            component = component.parent("")
+        except KeyError:
+            return []
+    return component.substitute(component.item["accepted-licenses"])
+
+
+def _create_content_context(item: Item, component: "PackageComponent",
+                            provider: LicenseProvider) -> ContentContext:
+    the_license = item.get("document-license", None)
+    accepted = item.get("document-accepted-licenses", None)
+    if the_license is None:
+        the_license = component["license"]
+        accepted = _get_accepted_licenses(component)
+    return ContentContext(
+        LicenseAggregate(the_license, accepted or [], item.uid), None,
+        provider)
+
+
 _FORMATTER: dict[str, _Formatter] = {
     ".md": (MarkdownContent, _code_markdown, _link_markdown, _ref_markdown),
     ".rst": (SphinxContent, _code_sphinx, _link_sphinx, _ref_sphinx),
@@ -168,7 +213,16 @@ class BuildItemMapper(SphinxMapper):
 
     # pylint: disable=too-many-instance-attributes
     def __init__(self, item: Item, build_item: "BuildItem") -> None:
-        super().__init__(item)
+        """
+        Initialize the mapper.
+
+        Args:
+            item: The item which the mapper maps.
+            build_item: The build item of the item.
+        """
+        # The context property takes the context of the build item, which
+        # needs its component and is therefore not available yet.
+        super().__init__(item, "CC-BY-SA-4.0")
         self.build_item = build_item
         self.base_path = "/"
         self.topic_as_definition = False
@@ -181,6 +235,13 @@ class BuildItemMapper(SphinxMapper):
         self.add_value_transformer("relpath", _relpath)
         self.add_value_transformer("slash", _slash)
 
+    @property
+    def context(self) -> ContentContext:
+        return self.build_item.content_context
+
+    def register_part(self, item: Item) -> None:
+        self.build_item.register_part(item)
+
     def set_format(self, path: str) -> None:
         """ Set the content format. """
         the_format = os.path.splitext(path)[1]
@@ -189,12 +250,11 @@ class BuildItemMapper(SphinxMapper):
          self.format_reference) = _FORMATTER[self.format]
         self.format_link = functools.partial(format_link, self)
 
-    def create_content(
-            self,
-            section_level: int = 0,
-            the_license: str | set[str] | None = None) -> TextContent:
-        return self.content_constructor(section_level, the_license,
-                                        self.topic_as_definition)
+    def create_content(self, section_level: int = 0) -> TextContent:
+        return self.content_constructor(
+            section_level,
+            context=self.context,
+            topic_as_definition=self.topic_as_definition)
 
     def get_link(self, item: Item, document_key: None | str = None) -> str:
         """
@@ -234,6 +294,7 @@ class _Resource(NamedTuple):
 class BuildItem():
     """ Represents a package build item. """
 
+    # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-public-methods
     @classmethod
     def prepare_factory(cls, _factory: "BuildItemFactory",
@@ -256,8 +317,9 @@ class BuildItem():
         my_type = self.item.type
         self.mapper.add_get_value(f"{my_type}:/input", self._get_input)
         self.mapper.add_get_value(f"{my_type}:/output", self._get_output)
-        self.description = SphinxContent()
-        self.description.add(item.get("build-description", None))
+        self._content_context: Optional[ContentContext] = None
+        self._description: Optional[SphinxContent] = None
+        self._initial_description = item.get("build-description", None)
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, BuildItem):
@@ -401,9 +463,45 @@ class BuildItem():
         """ Get a reference to the build item description. """
         return self.description.reference(self.label(), self.item.spec)
 
+    def register_part(self, item: Item) -> None:
+        """
+        Register the item as a part of the work of the build item.
+
+        A build item which produces no document registers nothing.
+
+        Args:
+            item: The item which the mapper of the build item maps.
+        """
+
+    @property
+    def content_context(self) -> ContentContext:
+        """
+        Is the content context of the text which the build item produces.
+
+        A document states its license itself.  Every other build item takes
+        the license and the accepted licenses from its component.
+        """
+        if self._content_context is None:
+            self._content_context = _create_content_context(
+                self.item, self.component, self.director.license_provider)
+        return self._content_context
+
+    @property
+    def description(self) -> SphinxContent:
+        """
+        Is the build item description.
+
+        The description takes the context of the build item, which needs its
+        component, so it is built on the first use.
+        """
+        if self._description is None:
+            self._description = SphinxContent(context=self.content_context)
+            self._description.add(self._initial_description)
+        return self._description
+
     def clear_description(self) -> None:
         """ Clear the build item description. """
-        self.description = SphinxContent()
+        self._description = SphinxContent(context=self.content_context)
 
     def _store_description(self) -> None:
         description = "\n".join(self.description)
@@ -971,7 +1069,20 @@ class PackageBuildDirector(dict):
         self.factory = factory
         self.git_directory = git_directory
         self.submodules: tuple[str, ...] = tuple()
+        self._license_provider: Optional[LicenseProvider] = None
         item_cache.top_view.add_get_missing("component", self.get_component)
+
+    @property
+    def license_provider(self) -> LicenseProvider:
+        """
+        Is the presentation of the licenses of the item cache.
+
+        The buildspace takes its items from the workspace after the director
+        exists, so the presentation is built on the first use.
+        """
+        if self._license_provider is None:
+            self._license_provider = LicenseProvider(self.item_cache.values())
+        return self._license_provider
 
     def __missing__(self, uid: str) -> BuildItem:
         logging.info("%s: create build item", uid)
@@ -1025,14 +1136,7 @@ class PackageBuildDirector(dict):
 
     def get_component(self, item: Item) -> PackageComponent:
         """ Get the component associated with the item. """
-        if item.type.startswith("pkg/component"):
-            component_item = item
-        else:
-            try:
-                component_item = build_item_input(item, "component")
-            except KeyError:
-                return self.package
-        component = self[component_item.uid]
+        component = self[get_component_item(self, item).uid]
         assert isinstance(component, PackageComponent)
         return component
 
@@ -1082,6 +1186,7 @@ class PackageBuildDirector(dict):
         package = self.package
         with item_cache.selection(package.selection):
             build_uids = self._gather_ordered_build_uids_of_package(only)
+            self._check_license_items(build_uids)
             for build_order, uid in enumerate(build_uids):
                 item = item_cache[uid]
                 item.view["package-build-order"] = build_order
@@ -1098,6 +1203,23 @@ class PackageBuildDirector(dict):
                     kwargs["component"] = component
                     kwargs["force"] = is_forced
                     getattr(builder, method)(**kwargs)
+
+    def _check_license_items(self, build_uids: list[str]) -> None:
+        failed = False
+        for uid in build_uids:
+            item = self.item_cache[uid]
+            component = item.view["component"]
+            with component.scope():
+                try:
+                    _create_content_context(
+                        item, component,
+                        self.license_provider).check_license_items()
+                except (KeyError, ValueError) as err:
+                    logging.error("%s", err)
+                    failed = True
+        if failed:
+            raise ValueError(f"{self.package_uid}: the package states not "
+                             "every license which its works may take")
 
     def build_package(self,
                       only: Optional[list[str]] = None,

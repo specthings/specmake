@@ -3,7 +3,6 @@ branch: pkg
 commit: a412700fd90e6195c255aea2048ae2ef37244df5
 copyrights:
 - Copyright (C) 2023 embedded brains GmbH & Co. KG
-copyrights-by-license: {}
 description: A
 directory: ${.:/component/tmpdir}/spec
 directory-state-type: repository
@@ -12,6 +11,7 @@ files:
 - hash:
   file: root.yml
 hash: null
+license-info: []
 links:
 - role: repository
   uid: ../component
