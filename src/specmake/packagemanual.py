@@ -32,8 +32,7 @@ from typing import Iterator
 
 from specitems import (Copyrights, Item, ItemGetValueContext, Link, ROW_SPAN,
                        TextContent, make_label)
-from specware import (BSD_2_CLAUSE_LICENSE, MIT_LICENSE, gather_api_items,
-                      run_command)
+from specware import (gather_api_items, run_command)
 
 from .archiver import Archiver
 from .directorystate import DirectoryState, RepositoryState
@@ -47,8 +46,6 @@ from .testrunner import TestLog
 
 _EnvToStats = dict[str, tuple[float, float, float]]
 _ItemToEnvStats = dict[str, _EnvToStats]
-
-_LICENSE_LISTING = {"BSD-2-Clause": BSD_2_CLAUSE_LICENSE, "MIT": MIT_LICENSE}
 
 
 def _run_pkg_config(content: TextContent, cmd: list[str]) -> None:
@@ -80,13 +77,12 @@ def _environment_order(name: str) -> int:
 def _add_licenses(content: TextContent, deployment_directory: str,
                   member: DirectoryState,
                   license_listing: dict[str, Copyrights]) -> None:
-    copyrights_by_license = member["copyrights-by-license"]
-    files = copyrights_by_license.get("files", None)
-    if files is not None:
+    if "license-files" in member:
+        license_files = member["license-files"]
         directory = os.path.relpath(member.directory, deployment_directory)
         with content.section(f"Directory - {directory}"):
-            content.add(copyrights_by_license.get("description", None))
-            for name in files:
+            content.add(license_files.get("description", None))
+            for name in license_files["files"]:
                 with content.section(f"File - {name}"):
                     content.add(f"""The license file
 {content.path(os.path.join(directory, name))}
@@ -96,9 +92,9 @@ is applicable to this directory or parts of the directory:""")
                     with open(file_path, "r", encoding="utf-8") as src:
                         content.add_code_block(src.readlines(),
                                                line_number_start=-1)
-    for the_license in license_listing:
-        license_listing[the_license].register(
-            copyrights_by_license.get(the_license, []))
+    for info in member["license-info"]:
+        license_listing.setdefault(info["license"],
+                                   Copyrights()).register(info["copyrights"])
 
 
 def _get_performance_environments(
@@ -394,25 +390,33 @@ repository.""")
         archiver = self.input("archive")
         assert isinstance(archiver, Archiver)
         with self.section_content(ctx) as (content, _):
-            license_listing = {
-                "BSD-2-Clause": Copyrights(),
-                "MIT": Copyrights()
-            }
+            license_listing: dict[str, Copyrights] = {}
             deployment_directory = self.substitute(
                 "${.:/component/deployment-directory}")
             content.add(f"""All directories and file paths in this section are
-relative to {content.path(deployment_directory)}.""")
+relative to {content.path(deployment_directory)}.  A delivered file states
+the license of its work only.  This section states the other licenses of its
+parts, so read a delivered file together with this section.""")
             for member in archiver.inputs("member"):
                 assert isinstance(member, DirectoryState)
                 _add_licenses(content, deployment_directory, member,
                               license_listing)
-            for the_license, copyrights in license_listing.items():
-                if copyrights:
-                    with content.section(f"{the_license} copyrights"):
-                        content.add(copyrights.get_statements("| ©"))
-                        content.add_code_block(
-                            _LICENSE_LISTING[the_license].split("\n"),
-                            line_number_start=-1)
+            provider = self.director.license_provider
+            for the_license in sorted(license_listing):
+                copyrights = license_listing[the_license]
+                if not copyrights:
+                    continue
+                with content.section(f"{the_license} copyrights"):
+                    content.add(copyrights.get_statements("| ©"))
+                    text = provider.text_of(the_license)
+                    if text is not None:
+                        content.add_code_block(text.split("\n"),
+                                               line_number_start=-1)
+                    else:
+                        uri = provider.uri_of(the_license)
+                        if uri is not None:
+                            content.add(
+                                f"The text of the license is at {uri}.")
             return content.join()
 
     def _get_targets(self, ctx: ItemGetValueContext) -> str:

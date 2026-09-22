@@ -18,9 +18,6 @@ spec-info:
         description: |
           It shall be the list of actions to run.
         spec-type: pkg-action-list
-      copyrights-by-license:
-        description: null
-        spec-type: pkg-copyrights-by-license
       directory:
         description: |
           It shall be the path to the directory.  A variable substitution is
@@ -50,6 +47,12 @@ spec-info:
           list and the directory path, otherwise the directory state is
           invalid.
         spec-type: optional-sha512
+      license-files:
+        description: null
+        spec-type: pkg-license-files
+      license-info:
+        description: null
+        spec-type: pkg-license-info-list
       params:
         description: |
           It shall be an optional set of parameters which may be used for
@@ -62,11 +65,11 @@ spec-info:
     description: |
       This set of attributes specifies a directory state.
     mandatory-attributes:
-    - copyrights-by-license
     - directory
     - directory-state-type
     - files
     - hash
+    - license-info
 spec-name: Directory State Item Type
 spec-type: pkg-directory-state
 type: spec

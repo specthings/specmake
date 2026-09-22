@@ -412,7 +412,8 @@ def ctrf_markdown_summary(report: _Data, max_failures: int = 50) -> str:
     """
     results = report["results"]
     summary = results["summary"]
-    content = CommonMarkContent()
+    # The summary goes to the standard output and states no license.
+    content = CommonMarkContent(context="CC-BY-SA-4.0")
     content.add_header("Test results")
     content.add_simple_table([["Tests", "Passed", "Failed", "Skipped"],
                               [

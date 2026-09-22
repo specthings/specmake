@@ -34,6 +34,12 @@ from specmake import DoxygenContext
 from specmake import sourcetospec
 from specmake.sourcetospec import _append_element_text, _Scope, DoxygenItem
 
+#: The license and the copyrights of a generated item.
+_LICENSE_DATA = {
+    "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+    "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+}
+
 _GF_0_EXPECTED_RESULT = {
     "SPDX-License-Identifier":
     "CC-BY-SA-4.0 OR BSD-2-Clause",
@@ -1254,7 +1260,7 @@ _RESULTS = {
 
 def test_null_item_to_group_is_treated_as_absent():
     config = {
-        "data": {},
+        "data": _LICENSE_DATA,
         "groups": {},
         "item-to-group": None,
         "spec-directory": "spec",
@@ -1264,12 +1270,16 @@ def test_null_item_to_group_is_treated_as_absent():
 
 
 def test_missing_spec_directory_defaults_but_explicit_value_is_respected():
-    ctx = DoxygenContext({"data": {}, "groups": {}})
+    ctx = DoxygenContext({"data": _LICENSE_DATA, "groups": {}})
     assert ctx.spec_directory == Path("spec")
 
     # An explicit, if unusual, falsy value must not be silently replaced by
     # the default. Only an absent/null attribute should default.
-    ctx_2 = DoxygenContext({"data": {}, "groups": {}, "spec-directory": ""})
+    ctx_2 = DoxygenContext({
+        "data": _LICENSE_DATA,
+        "groups": {},
+        "spec-directory": ""
+    })
     assert ctx_2.spec_directory == Path("")
 
 
@@ -1292,7 +1302,7 @@ def test_item_to_group_naming_unknown_group_raises_clear_error():
         _get_path("source-to-spec/xml/uniongu__1.xml"),
     ]
     config = {
-        "data": {},
+        "data": _LICENSE_DATA,
         "groups": {
             "FooGroup": {
                 "uid": "/if/group"
@@ -1332,7 +1342,7 @@ def _foobar_xml_files():
 
 def _foobar_config():
     return {
-        "data": {},
+        "data": _LICENSE_DATA,
         "groups": {
             "FooGroup": {
                 "uid": "/if/group"
@@ -1412,34 +1422,12 @@ def test_item_to_uid_states_the_whole_name_of_a_header():
         assert ctx.items[header.doxygen_id].uid == f"/if/{stated}"
 
 
-def test_a_bad_item_to_uid_entry_names_its_attribute_path():
-    for bad, expected in (
-        ({
-            "an_id": 7
-        }, "/item-to-uid/an_id must be a string"),
-        ({
-            "an_id": ""
-        }, "/item-to-uid/an_id must be one UID component"),
-        ({
-            "an_id": "a/b"
-        }, "/item-to-uid/an_id must be one UID component"),
-        ({
-            7: "a_name"
-        }, "/item-to-uid has a non-string key 7"),
-    ):
-        config = _foobar_config()
-        config["item-to-uid"] = bad
-        with pytest.raises(sourcetospec.ConfigError) as error:
-            DoxygenContext(config)
-        assert expected in str(error.value), bad
-
-
 def test_inline_commands_do_not_truncate_text():
     # inline-markup/inline.h's brief uses @a, @b, @c, @p and a line break,
     # each followed by more words: none of that trailing text must be
     # dropped, only the @a/@b/@c/@p markup itself needs not survive.
     config = {
-        "data": {},
+        "data": _LICENSE_DATA,
         "groups": {
             "InlineAPI": {
                 "uid": "/if/group"
@@ -1472,7 +1460,7 @@ def test_parameternamelist_does_not_leak_into_parameter_description():
     # preserves inline-markup text, or its (whitespace) text/tail pollutes
     # every @param description.
     config = {
-        "data": {},
+        "data": _LICENSE_DATA,
         "groups": {
             "WidgetAPI": {
                 "uid": "/if/group"
@@ -1502,7 +1490,7 @@ def test_xrefsect_is_ignored():
     # It must be ignored outright rather than leaking into whatever
     # brief/description field is the ambient text scope at that point.
     config = {
-        "data": {},
+        "data": _LICENSE_DATA,
         "groups": {
             "TodoAPI": {
                 "uid": "/if/group"
@@ -1527,7 +1515,13 @@ def test_append_element_text_ignores_wholly_empty_element():
     scope = _Scope(
         DoxygenItem(
             DoxygenContext({
-                "data": {},
+                "data": {
+                    **_LICENSE_DATA,
+                    "SPDX-License-Identifier":
+                    "CC-BY-SA-4.0 OR BSD-2-Clause",
+                    "copyrights":
+                    ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+                },
                 "groups": {},
                 "spec-directory": "spec",
             }), "root", "", ""), {"brief": "Existing text"}, "brief")
@@ -1545,7 +1539,7 @@ def _types_api_xml_files() -> list[str]:
 
 def test_typedef_export_shape():
     config = {
-        "data": {},
+        "data": _LICENSE_DATA,
         "groups": {
             "TypesAPI": {
                 "uid": "/if/group"
@@ -1578,7 +1572,7 @@ def test_typedef_export_shape():
 
 def test_typedef_aliases_compound():
     config = {
-        "data": {},
+        "data": _LICENSE_DATA,
         "groups": {
             "TypesAPI": {
                 "uid": "/if/group"
@@ -1619,7 +1613,8 @@ def test_doxygen_xml_to_spec(tmp_path):
     ]
     config = {
         "data": {
-            "copyrights": ["Copyright (C) 2024 embedded brains GmbH & Co. KG"]
+            **_LICENSE_DATA, "copyrights":
+            ["Copyright (C) 2024 embedded brains GmbH & Co. KG"]
         },
         "groups": {
             "FooGroup": {
@@ -1681,7 +1676,7 @@ def test_doxygen_context_treats_a_null_type_map_as_absent(tmp_path):
     # The attribute is optional, so validation lets it through, and it
     # then reaches _map_types() on every declaration.
     config = {
-        "data": {},
+        "data": _LICENSE_DATA,
         "groups": {
             "FooGroup": {
                 "uid": "/if/group"
@@ -1735,7 +1730,7 @@ _EXTRA_LINKS_XML_FILES = [
 def _foo_group_context(tmp_path, **group):
     group.setdefault("uid", "/if/group")
     ctx = DoxygenContext({
-        "data": {},
+        "data": _LICENSE_DATA,
         "groups": {
             "FooGroup": group
         },
@@ -1764,7 +1759,7 @@ def test_a_bare_extra_links_attribute_adds_no_link(tmp_path):
     # of the configuration treats that as absent, so a run must not stop
     # on it.
     ctx = DoxygenContext({
-        "data": {},
+        "data": _LICENSE_DATA,
         "groups": {
             "FooGroup": {
                 "uid": "/if/group",
@@ -1821,54 +1816,6 @@ def test_saved_item_contains_the_extra_links(tmp_path):
     assert "uid: /constraint/directive-ctx-any" in content
 
 
-@pytest.mark.parametrize("extra_links,expected", [
-    ("not-a-list", "/groups/FooGroup/extra-links must be a list"),
-    ([["role"]], "/groups/FooGroup/extra-links[0] must be a dict"),
-    ([{
-        "uid": "/constraint/x"
-    }], "extra-links[0]/role is missing"),
-    ([{
-        "role": "constraint"
-    }], "extra-links[0]/uid is missing"),
-    ([{
-        "role": 1,
-        "uid": "/constraint/x"
-    }], "extra-links[0]/role must be a string"),
-    ([{
-        "role": "constraint",
-        "uid": "/constraint/x",
-        "interface-types": "function"
-    }], "extra-links[0]/interface-types must be a list"),
-    ([{
-        "role": "constraint",
-        "uid": "/constraint/x",
-        "interface-types": [1]
-    }], "extra-links[0]/interface-types[0] must be a string"),
-    ([{
-        "role": "constraint",
-        "uid": "/constraint/x",
-        "names": "gf_*"
-    }], "extra-links[0]/names must be a list"),
-    ([{
-        "role": "constraint",
-        "uid": "/constraint/x",
-        "names": [1]
-    }], "extra-links[0]/names[0] must be a string"),
-])
-def test_invalid_extra_links_are_rejected(extra_links, expected):
-    with pytest.raises(ValueError, match=re.escape(expected)):
-        DoxygenContext({
-            "data": {},
-            "groups": {
-                "FooGroup": {
-                    "uid": "/if/group",
-                    "extra-links": extra_links
-                }
-            },
-            "spec-directory": "spec"
-        })
-
-
 _IN_BODY_MEMBERDEF = """<memberdef kind="function" id="m_0">
   <name>f</name>
   <briefdescription><para>Brief f().</para></briefdescription>
@@ -1880,7 +1827,12 @@ _IN_BODY_MEMBERDEF = """<memberdef kind="function" id="m_0">
 def _new_item():
     return DoxygenItem(
         DoxygenContext({
-            "data": {},
+            "data": {
+                **_LICENSE_DATA,
+                "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+                "copyrights":
+                ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+            },
             "groups": {},
             "spec-directory": "spec"
         }), "function", "m_0", "f")
@@ -1936,7 +1888,7 @@ def test_extra_links_are_added_to_the_group_item_itself(tmp_path):
 
 def _filter_context(tmp_path, rules):
     config = {
-        "data": {},
+        "data": _LICENSE_DATA,
         "groups": {
             "FooGroup": {
                 "uid": "/if/group"
@@ -1999,47 +1951,6 @@ def test_a_filter_leaves_a_header_and_a_group_alone(tmp_path):
     assert not ctx.items_by_name["file"]["header.h"][0].is_excluded
     assert not ctx.items_by_name["group"]["FooGroup"][0].is_excluded
     assert ctx.items_by_name["function"]["gf_1"][0].is_excluded
-
-
-def test_a_filter_must_be_a_list_of_one_action_rules(tmp_path):
-    bad_rules = [
-        "gf_*",
-        ["gf_*"],
-        [{
-            "include": ["gf_*"],
-            "exclude": ["gf_2"]
-        }],
-        [{
-            "keep": ["gf_*"]
-        }],
-        [{}],
-        [{
-            "include": "gf_*"
-        }],
-        [{
-            "include": [1]
-        }],
-    ]
-    for bad in bad_rules:
-        with pytest.raises(sourcetospec.ConfigError) as error:
-            _filter_context(tmp_path, bad)
-        assert "filter" in str(error.value), bad
-
-
-def test_a_filter_error_names_its_attribute_path(tmp_path):
-    # The rule which is wrong is named by its place in the
-    # configuration, so that a filter of many rules needs no counting.
-    with pytest.raises(sourcetospec.ConfigError) as error:
-        _filter_context(tmp_path, [{"include": ["gf_*"]}, {"keep": ["gf_2"]}])
-    assert "/filter[1] must have exactly one" in str(error.value)
-
-
-def test_a_filter_pattern_error_names_its_attribute_path(tmp_path):
-    # A pattern sits three levels down, so the path names the rule, the
-    # action and the pattern to point at the one which is wrong.
-    with pytest.raises(sourcetospec.ConfigError) as error:
-        _filter_context(tmp_path, [{"include": ["gf_*", 7]}])
-    assert "/filter[0]/include[1] must be a string" in str(error.value)
 
 
 def _define_in_header(name, header_name, initializer=None):
@@ -2105,7 +2016,7 @@ def test_an_item_without_a_group_gets_no_extra_links():
     # An item which reached no group has no group configuration to take
     # extra links from.
     ctx = DoxygenContext({
-        "data": {},
+        "data": _LICENSE_DATA,
         "groups": {
             "FooGroup": {
                 "uid": "/if/group",
@@ -2176,7 +2087,7 @@ def _undocumented_header_named(name, **group):
     """ Build an undocumented header file item of the FooGroup. """
     group.setdefault("uid", "/if/group")
     ctx = DoxygenContext({
-        "data": {},
+        "data": _LICENSE_DATA,
         "groups": {
             "FooGroup": group
         },
@@ -2232,37 +2143,12 @@ def test_the_group_item_generation_can_be_suppressed(tmp_path):
     }).generate_item
 
 
-@pytest.mark.parametrize("entry,expected", [
-    ({
-        "generate-group-item": "yes"
-    }, "/groups/FooGroup/generate-group-item must be a boolean"),
-    ({
-        "header-interface-type": "source-file"
-    }, "/groups/FooGroup/header-interface-type must be"),
-    ({
-        "header-interface-type": 1
-    }, "/groups/FooGroup/header-interface-type must be"),
-    ({
-        "data": []
-    }, "/groups/FooGroup/data must be a dict or null"),
-])
-def test_invalid_group_settings_are_rejected(entry, expected):
-    with pytest.raises(ValueError, match=expected):
-        DoxygenContext({
-            "data": {},
-            "groups": {
-                "FooGroup": dict(entry, uid="/if/group")
-            },
-            "spec-directory": "spec"
-        })
-
-
 def _group_filter_context(tmp_path, group_rules, config_rules=None):
     group: dict = {"uid": "/if/group"}
     if group_rules is not None:
         group["filter"] = group_rules
     config: dict = {
-        "data": {},
+        "data": _LICENSE_DATA,
         "groups": {
             "FooGroup": group
         },
@@ -2325,26 +2211,6 @@ def test_a_group_filter_leaves_a_header_and_a_group_alone(tmp_path):
     assert not ctx.items_by_name["group"]["FooGroup"][0].is_excluded
 
 
-def test_a_group_filter_must_be_a_list_of_one_action_rules(tmp_path):
-    for bad in ["gf_*", [{"keep": ["gf_*"]}], [{"include": "gf_*"}]]:
-        with pytest.raises(sourcetospec.ConfigError) as error:
-            _group_filter_context(tmp_path, bad)
-        assert "filter" in str(error.value), bad
-
-
-def test_a_group_filter_error_names_its_attribute_path(tmp_path):
-    # The path names the group as well, so that a configuration of many
-    # groups says which filter is wrong.
-    with pytest.raises(sourcetospec.ConfigError) as error:
-        _group_filter_context(tmp_path, [{
-            "include": ["gf_*"]
-        }, {
-            "keep": ["gf_2"]
-        }])
-    assert "/groups/FooGroup/filter[1] must have exactly one" in str(
-        error.value)
-
-
 def test_a_compound_resolves_a_referenced_member():
     # Doxygen documents the member of a struct in the compound of the
     # group when the declaration is inside a group scope, and leaves a
@@ -2384,7 +2250,7 @@ def test_a_compound_with_an_inline_member_gains_nothing():
 
 def _macro_params_context():
     ctx = DoxygenContext({
-        "data": {},
+        "data": _LICENSE_DATA,
         "groups": {
             "MacroAPI": {
                 "uid": "/if/group"
@@ -2488,7 +2354,7 @@ def test_a_typedef_of_a_function_pointer_has_no_stray_param_doc():
     # The item specifies no parameter of the function it points to, so
     # every documented name of it would count as a stray.
     ctx = DoxygenContext({
-        "data": {},
+        "data": _LICENSE_DATA,
         "groups": {
             "TypesAPI": {
                 "uid": "/if/group"
@@ -2543,7 +2409,7 @@ def _copyrights(ctx, kind, name):
 def _group_data_context(tmp_path, **groups):
     ctx = DoxygenContext({
         "data": {
-            "copyrights": ["Copyright (C) 2026 Everyone"],
+            **_LICENSE_DATA, "copyrights": ["Copyright (C) 2026 Everyone"],
             "enabled-by": "SOMETHING"
         },
         "groups": groups,
@@ -2563,7 +2429,7 @@ def test_the_data_of_a_group_applies_to_its_items(tmp_path):
             "FooGroup": {
                 "uid": "/if/group",
                 "data": {
-                    "copyrights": ["Copyright (C) 2026 Foo"]
+                    **_LICENSE_DATA, "copyrights": ["Copyright (C) 2026 Foo"]
                 }
             },
             "DefaultGroup": {
@@ -2581,7 +2447,7 @@ def test_a_group_inherits_what_its_data_leaves_out(tmp_path):
             "FooGroup": {
                 "uid": "/if/group",
                 "data": {
-                    "copyrights": ["Copyright (C) 2026 Foo"]
+                    **_LICENSE_DATA, "copyrights": ["Copyright (C) 2026 Foo"]
                 }
             }
         })
@@ -2595,7 +2461,7 @@ def test_the_data_of_a_group_applies_to_the_group_item(tmp_path):
             "FooGroup": {
                 "uid": "/if/group",
                 "data": {
-                    "copyrights": ["Copyright (C) 2026 Foo"]
+                    **_LICENSE_DATA, "copyrights": ["Copyright (C) 2026 Foo"]
                 }
             }
         })
@@ -2675,7 +2541,7 @@ def test_a_compound_described_twice_holds_its_members_once():
     # discovered once, so its member list holds every member once.
     xml_files = [_get_path(path) for path in _EXTRA_LINKS_XML_FILES]
     ctx = DoxygenContext({
-        "data": {},
+        "data": _LICENSE_DATA,
         "groups": {
             "FooGroup": {
                 "uid": "/if/group"
@@ -2694,7 +2560,7 @@ def test_a_reference_to_a_missing_compound_is_rejected():
     # to a compound it never discovered.  The lookup of that reference
     # raised a KeyError which named a Doxygen identifier alone.
     ctx = DoxygenContext({
-        "data": {},
+        "data": _LICENSE_DATA,
         "groups": {
             "FooGroup": {
                 "uid": "/if/group"

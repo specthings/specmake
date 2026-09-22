@@ -24,8 +24,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# pylint: disable=too-many-lines
+
 from contextlib import contextmanager
 import fnmatch
+import functools
 import itertools
 import logging
 import os
@@ -35,13 +38,13 @@ import shutil
 from typing import Any, Callable, Iterator, Optional
 import yaml
 
-from specitems import (ROW_SPAN, BibTeXCitationProvider, Copyrights,
+from specitems import (ContentContext, ROW_SPAN, BibTeXCitationProvider,
                        DocumentGlossaryConfig, GlossaryConfig, Item, ItemCache,
                        ItemGetValueContext, ItemMapper, ItemValueProvider,
                        Link, SphinxContent, TextContent, generate_glossary,
-                       get_value_subprocess, is_enabled, list_terms,
-                       to_iterable)
-from specware import BSD_2_CLAUSE_LICENSE, run_command
+                       LicenseAggregate, LicenseProvider, get_value_subprocess,
+                       is_enabled, list_terms, to_iterable)
+from specware import run_command
 
 from .directorystate import DirectoryState
 from .pkgitems import (BuildItem, BuildItemFactory, BuildItemMapper,
@@ -55,6 +58,8 @@ _PUSH_ENABLED_BY = re.compile(r"^\${\.:/push-enabled-by:(.+)}$")
 _POP_ENABLED_BY = re.compile(r"^\${\.:/pop-enabled-by")
 
 _EXTENSIONS = (".md", ".rst")
+
+_COMMENT = {".md": "%", ".rst": ".."}
 
 _HEADERS = {
     ".md":
@@ -171,6 +176,17 @@ def _get_document_author(ctx: ItemGetValueContext) -> str:
 
 def _get_document_year(ctx: ItemGetValueContext) -> str:
     return _document_year(ctx.item, ctx.mapper)
+
+
+def _get_license_text_lines(provider: LicenseProvider,
+                            the_license: str) -> list[str]:
+    text = provider.text_of(the_license)
+    if text is not None:
+        return ["", text]
+    uri = provider.uri_of(the_license)
+    if uri is not None:
+        return ["", f"The text of the license is at {uri}."]
+    return []
 
 
 def _get_latex_title(ctx: ItemGetValueContext) -> str:
@@ -355,16 +371,13 @@ class SphinxBuilder(DirectoryState):
                  director: PackageBuildDirector,
                  item: Item,
                  mapper: Optional[BuildItemMapper] = None) -> None:
+        self._licenses: Optional[LicenseAggregate] = None
         super().__init__(director, item, mapper)
         self.mapper.base_path = self["document-base-path"]
         self._whoami = self["document-key"]
         self._index: list[str] = []
         self._section_level_stack: list[int] = [2]
         self._section_lifo: list[BuildItem] = [self]
-        self.content_license: set[str] = {self["document-license"]}
-        for source_license in self["document-license-map"].keys():
-            for the_license in source_license.split(" OR "):
-                self.content_license.add(the_license)
         self.file_path = ""
         my_type = self.item.type
         self.mapper.add_get_value(f"{my_type}:/subcomponent-list",
@@ -379,9 +392,8 @@ class SphinxBuilder(DirectoryState):
                                   _get_document_copyright)
         self.mapper.add_get_value(f"{my_type}:/document-copyrights",
                                   self._get_document_copyrights)
-        self.mapper.add_get_value(
-            f"{my_type}:/document-bsd-2-clause-copyrights",
-            self._get_document_bsd_2_clause_copyrights)
+        self.mapper.add_get_value(f"{my_type}:/document-license-text",
+                                  self._get_document_license_text)
         self.mapper.add_get_value(f"{my_type}:/document-third-party-licenses",
                                   self._get_document_third_party_licenses)
         self.mapper.add_get_value(f"{my_type}:/document-normal-title",
@@ -449,18 +461,35 @@ class SphinxBuilder(DirectoryState):
                                                    component)
                 self._add_to_index(component)
 
-    def register_item_copyrights(self) -> None:
+    def get_parts_of_document(self) -> list[Item]:
         """
-        Register the licenses and the copyrights of the items which the
-        document holds.
+        Get the items which the document documents.
 
-        The front matter of a document names them, and a component which
-        comes later documents the items, so a caller registers them first.
+        The front matter of a document names their licenses and copyrights,
+        and a component which comes later documents the items, so the run
+        registers them first.
         """
+        return []
+
+    def register_part(self, item: Item) -> None:
+        self._aggregate().register(item["SPDX-License-Identifier"],
+                                   item["copyrights"], item.uid)
+
+    def _register_parts_of_document(self) -> None:
+        failed = False
+        for item in self.get_parts_of_document():
+            try:
+                self.register_part(item)
+            except ValueError as err:
+                logging.error("%s", err)
+                failed = True
+        if failed:
+            raise ValueError(f"{self.uid}: the license of the document "
+                             "covers not every part of it")
 
     def run(self) -> None:
-        self.mapper.copyrights_by_license.clear()
-        self.register_item_copyrights()
+        self._licenses = self._new_aggregate()
+        self._register_parts_of_document()
 
         source = self.input("source")
         assert isinstance(source, DirectoryState)
@@ -508,11 +537,16 @@ class SphinxBuilder(DirectoryState):
             src_path = os.path.join(build_dir, "build", "html")
             destination.copy_tree(src_path, output)
 
-        my_license = self["document-license"]
-        destination["copyrights-by-license"] = dict(
-            (key, value.get_statements())
-            for key, value in self._get_copyrights().items()
-            if key != my_license)
+        destination["license-info"] = [{
+            "copyrights":
+            entry.copyrights.get_statements(),
+            "expressions":
+            sorted(entry.expressions),
+            "license":
+            entry.the_license,
+            "provenance":
+            sorted(entry.provenance)
+        } for entry in self._aggregate().foreign()]
 
         self.description.add(f"""Produce documents in
 {self.description.path(destination.directory)} using sources from
@@ -585,26 +619,34 @@ class SphinxBuilder(DirectoryState):
             content.add(self._index)
         return content.join()
 
-    def _get_copyrights(self) -> dict[str, Copyrights]:
-        my_license = self["document-license"]
-        copyrights: dict[str, Copyrights] = {}
-        copyrights.setdefault(my_license, Copyrights()).register(
-            self["document-copyrights"])
-        license_map = self["document-license-map"]
-        for key, statements in self.mapper.copyrights_by_license.items():
-            the_license = license_map.get(key, key)
-            copyrights.setdefault(the_license, Copyrights()).register([
-                license_map.get(statement, statement)
-                for statement in statements
-            ])
-        return copyrights
+    def _new_aggregate(self) -> LicenseAggregate:
+        licenses = self.content_context.for_work(self.uid).licenses
+        licenses.register_copyrights(self["document-copyrights"])
+        return licenses
+
+    def _aggregate(self) -> LicenseAggregate:
+        """
+        Get the license and copyright information of the document.
+
+        The document itself is a part of the aggregate, and so is every part
+        which the mapper maps.  A run starts with a new aggregate.
+        """
+        if self._licenses is None:
+            self._licenses = self._new_aggregate()
+        return self._licenses
+
+    def _document_context(self) -> ContentContext:
+        """ Get the context of a file which is a part of the document. """
+        context = self.content_context
+        return ContentContext(self._aggregate(),
+                              context.automatically_generated_warning,
+                              context.provider)
 
     def _get_document_copyrights(self, ctx: ItemGetValueContext) -> str:
-        my_license = self["document-license"]
-        assert " OR " not in my_license
-        copyrights = self._get_copyrights()
         prefix = ctx.args if ctx.args else ""
-        return "\n".join(copyrights[my_license].get_statements(f"{prefix}| ©"))
+        statements = self._aggregate().copyrights_of().get_statements(
+            f"{prefix}| ©")
+        return "\n".join(statements)
 
     def _get_document_third_party_licenses(self,
                                            ctx: ItemGetValueContext) -> str:
@@ -615,10 +657,7 @@ class SphinxBuilder(DirectoryState):
         The result is empty where the document takes no such part, so a
         document of one license states nothing.
         """
-        my_license = self["document-license"]
-        copyrights = self._get_copyrights()
-        others = sorted(the_license for the_license in copyrights
-                        if the_license != my_license)
+        others = self._aggregate().foreign()
         if not others:
             return ""
         prefix = ctx.args if ctx.args else ""
@@ -630,24 +669,34 @@ class SphinxBuilder(DirectoryState):
             f"{prefix}the source through a generator and carries the",
             f"{prefix}changes which this document needs.", ""
         ]
-        for the_license in others:
-            lines.append(f"{prefix}{the_license}:")
+        for entry in others:
+            lines.append(f"{prefix}{entry.the_license}:")
             lines.append("")
-            lines.extend(
-                copyrights[the_license].get_statements(f"{prefix}| \u00a9"))
+            lines.extend(entry.copyrights.get_statements(f"{prefix}| \u00a9"))
             lines.append("")
         return "\n".join(lines[:-1])
 
-    def _get_document_bsd_2_clause_copyrights(
-            self, _ctx: ItemGetValueContext) -> str:
-        copyrights = self._get_copyrights()
-        the_license = "BSD-2-Clause"
-        if the_license not in copyrights:
-            return ""
-        statements = "\n".join(copyrights[the_license].get_statements("| ©"))
-        return f"""{statements}
+    def _get_document_license_text(self, ctx: ItemGetValueContext) -> str:
+        """
+        Get the copyrights and the text of one license of the document.
 
-{BSD_2_CLAUSE_LICENSE}"""
+        The argument names the license.  The result is empty where no part of
+        the document takes it.  A license which the document reproduces not
+        gets a reference to its uniform resource identifier, if it has one.
+        """
+        the_license = ctx.args
+        if not the_license:
+            raise ValueError(f"{self.uid}: the document license text needs "
+                             "the license as its argument")
+        aggregate = self._aggregate()
+        copyrights = aggregate.copyrights_of(the_license)
+        if not copyrights:
+            return ""
+        lines = copyrights.get_statements("| ©")
+        lines.extend(
+            _get_license_text_lines(self.director.license_provider,
+                                    the_license))
+        return "\n".join(lines)
 
     @property
     def section_level(self) -> int:
@@ -685,8 +734,7 @@ class SphinxBuilder(DirectoryState):
         """
         with self.section_level_scope(ctx) as args:
             yield (self.mapper.create_content(
-                section_level=self.section_level,
-                the_license=self.content_license), args)
+                section_level=self.section_level), args)
 
     def _add_section_content(self, content: TextContent,
                              section: BuildItem) -> None:
@@ -860,14 +908,22 @@ class SphinxBuilder(DirectoryState):
 
     def _get_build_description(self, ctx: ItemGetValueContext) -> str:
         with self.section_level_scope(ctx) as args:
-            content = SphinxContent(self.section_level)
+            content = SphinxContent(self.section_level,
+                                    context=self.mapper.context)
             assert args
             self.director.add_build_description(content, args.split(":"))
             return content.join()
 
     def _register_text_copyrights(self, path: str, text: str) -> None:
-        match = _HEADERS[os.path.splitext(path)[1]].match(text)
-        assert match
+        extension = os.path.splitext(path)[1]
+        match = _HEADERS[extension].match(text)
+        if match is None:
+            comment = _COMMENT[extension]
+            raise ValueError(
+                f"{self.uid}: the file {path} carries no header of the "
+                f"expected shape: a line '{comment} "
+                "SPDX-License-Identifier: <expression>', a blank line, the "
+                f"lines '{comment} Copyright (C) ...' and a blank line")
         the_license = match.group(1)
         statements = [
             statement.partition(" ")[2]
@@ -875,8 +931,10 @@ class SphinxBuilder(DirectoryState):
         ]
         logging.info("%s: register license %s with copyrights %s", self.uid,
                      the_license, statements)
-        self.mapper.copyrights_by_license.setdefault(the_license,
-                                                     set()).update(statements)
+        try:
+            self._aggregate().register(the_license, statements, path)
+        except ValueError as err:
+            raise ValueError(f"{self.uid}: {err}") from err
 
     def _do_copy(self, source_dir: str, build_dir: str, file: str) -> None:
         src_file = os.path.join(source_dir, file)
@@ -956,5 +1014,7 @@ class SphinxBuilder(DirectoryState):
         config = GlossaryConfig(project_groups=component["glossary-groups"],
                                 documents=[document_config])
         self.mapper.set_format(target)
-        generate_glossary(config, self.item.cache, self.mapper,
-                          self.mapper.content_constructor)
+        generate_glossary(
+            config, self.item.cache, self.mapper,
+            functools.partial(self.mapper.content_constructor,
+                              context=self._document_context()))

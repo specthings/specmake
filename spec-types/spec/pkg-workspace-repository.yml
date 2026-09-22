@@ -27,9 +27,6 @@ spec-info:
         description: |
           It shall be the commit of the branch in the source repository.
         spec-type: str
-      copyrights-by-license:
-        description: null
-        spec-type: pkg-copyrights-by-license
       description:
         description: |
           It shall be the description of the repository.
@@ -42,6 +39,12 @@ spec-info:
         description: |
           It shall be the source directory in the workspace.
         spec-type: str
+      license-files:
+        description: null
+        spec-type: pkg-license-files
+      license-info:
+        description: null
+        spec-type: pkg-license-info-list
       origin-branch:
         description: |
           It shall be the origin branch name.
@@ -77,7 +80,21 @@ spec-info:
         spec-type: pkg-symbolic-link-list
     description: |
       This set of attributes specifies a workspace repository.
-    mandatory-attributes: all
+    mandatory-attributes:
+    - branch
+    - clone-depth
+    - commit
+    - description
+    - destination-directory
+    - directory
+    - license-info
+    - origin-branch
+    - origin-commit
+    - origin-commit-url
+    - origin-fetch
+    - origin-url
+    - post-clone-commands
+    - symbolic-links
 spec-name: Workspace Repository Item Type
 spec-type: pkg-workspace-repository
 type: spec

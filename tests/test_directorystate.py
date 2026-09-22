@@ -83,7 +83,7 @@ def test_directorystate(caplog, tmpdir, monkeypatch, _change_cwd):
         "CC-BY-SA-4.0 OR BSD-2-Clause",
         "copyrights":
         ["Copyright (C) 2020, 2023 embedded brains GmbH & Co. KG"],
-        "copyrights-by-license": {},
+        "license-info": [],
         "directory":
         base,
         "directory-state-type":
@@ -113,7 +113,7 @@ def test_directorystate(caplog, tmpdir, monkeypatch, _change_cwd):
     item.file = str(item_file)
     dir_state = director["/directory-state"]
     assert dir_state.directory == base
-    assert dir_state.digest() == "iRq64x4DHVvsuXXfE2wW6FWinS5utMjTGcDJkoMCfBY="
+    assert dir_state.digest() == "Oq9DDj3aCGylXTt8LnHWr74ZBVGQCjJl_zFAcPX0YFs="
     assert not dir_state.is_present()
     assert dir_state.has_changed(Link(item, {"hash": "blub"}))
     overall_hash = dir_state.lazy_load()
@@ -125,7 +125,6 @@ def test_directorystate(caplog, tmpdir, monkeypatch, _change_cwd):
         assert f"""SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
 - Copyright (C) 2020, 2023 embedded brains GmbH & Co. KG
-copyrights-by-license: {{}}
 directory: {base}
 directory-state-type: explicit
 enabled-by: true
@@ -135,6 +134,7 @@ files:
 - file: glossary/t.yml
   hash: {_T_YML_HASH}
 hash: SrJDe4-ewVrM9BV9ttASllPsrXz2r_-ts9urtVeBa9s7JuBORQrvuPyW-hvsef80a8HvKvfeNSOmAh2eQ2_aag==
+license-info: []
 links: []
 pkg-type: directory-state
 type: pkg
@@ -161,7 +161,7 @@ type: pkg
 
     dir_state.set_files(["doc.rst"])
     dir_state.add_files(["glossary/t.yml"])
-    assert dir_state.digest() == "iRq64x4DHVvsuXXfE2wW6FWinS5utMjTGcDJkoMCfBY="
+    assert dir_state.digest() == "Oq9DDj3aCGylXTt8LnHWr74ZBVGQCjJl_zFAcPX0YFs="
     overall_hash = dir_state.lazy_load()
     assert overall_hash == "SrJDe4-ewVrM9BV9ttASllPsrXz2r_-ts9urtVeBa9s7JuBORQrvuPyW-hvsef80a8HvKvfeNSOmAh2eQ2_aag=="
     overall_hash = dir_state.lazy_load()
@@ -214,7 +214,7 @@ type: pkg
         "CC-BY-SA-4.0 OR BSD-2-Clause",
         "copyrights":
         ["Copyright (C) 2020, 2023 embedded brains GmbH & Co. KG"],
-        "copyrights-by-license": {},
+        "license-info": [],
         "directory":
         base,
         "directory-state-type":
@@ -247,7 +247,7 @@ type: pkg
     dir_state_2.set_files([])
     assert list(dir_state_2.files()) == []
     assert dir_state_2.digest(
-    ) == "_mhN0f3Vya1kxL2DnDRikyYBoMRKOLt5gtCMdVXFwO0="
+    ) == "Sa0MihZjonQXyhZIy_1dRhO8Kvw3uixYveIkBTi9pYE="
     overall_hash = dir_state_2.load()
     assert overall_hash == "MC661WGYFYfEcrM30WKz76mmgBys6Yg7EEJKtn-khBVN8rqabUB40zYZ8LqJ_ruJAyuhd8oVTxYaNyyo8L9IoQ=="
 
@@ -333,7 +333,7 @@ type: pkg
         "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
         "copyrights":
         ["Copyright (C) 2020, 2023 embedded brains GmbH & Co. KG"],
-        "copyrights-by-license": {},
+        "license-info": [],
         "directory": str(tmpdir),
         "directory-state-type": "explicit",
         "enabled-by": True,
@@ -510,7 +510,7 @@ type: pkg
             "branch": "b",
             "commit": "a412700fd90e6195c255aea2048ae2ef37244df5",
             "copyrights": ["Copyright (C) 2023 embedded brains GmbH & Co. KG"],
-            "copyrights-by-license": {},
+            "license-info": [],
             "description": "d",
             "directory": "x",
             "directory-state-type": "repository",
@@ -542,7 +542,7 @@ def test_directorystate_glob():
         "SPDX-License-Identifier":
         "CC-BY-SA-4.0 OR BSD-2-Clause",
         "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
-        "copyrights-by-license": {},
+        "license-info": [],
         "directory":
         base,
         "directory-state-type":
@@ -597,7 +597,7 @@ def test_directorystate_load_before_use():
     data = {
         "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
         "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
-        "copyrights-by-license": {},
+        "license-info": [],
         "directory": base,
         "directory-state-type": "explicit",
         "enabled-by": True,
@@ -633,7 +633,7 @@ def test_directorystate_input_file_list():
             "SPDX-License-Identifier":
             "CC-BY-SA-4.0 OR BSD-2-Clause",
             "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
-            "copyrights-by-license": {},
+            "license-info": [],
             "directory":
             base,
             "directory-state-type":
@@ -664,7 +664,7 @@ def test_directorystate_input_file_list():
             "SPDX-License-Identifier":
             "CC-BY-SA-4.0 OR BSD-2-Clause",
             "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
-            "copyrights-by-license": {},
+            "license-info": [],
             "directory":
             base,
             "directory-state-type":
@@ -695,7 +695,7 @@ def test_directorystate_input_file_list():
             "SPDX-License-Identifier":
             "CC-BY-SA-4.0 OR BSD-2-Clause",
             "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
-            "copyrights-by-license": {},
+            "license-info": [],
             "directory":
             base,
             "directory-state-type":

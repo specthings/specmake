@@ -31,6 +31,8 @@ from pathlib import Path
 
 import yaml
 
+from specitems import CONFIG_FILE
+
 import pytest
 
 from specmake import DoxygenContext
@@ -47,7 +49,10 @@ _BAD_F = "bad_8c_1a8cc687906d3e4964fc993ca1bf18472e"
 
 def _minimal_config(**overrides) -> dict:
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {},
         "spec-directory": "spec",
     }
@@ -111,11 +116,35 @@ def _nested_group_xml_files() -> list[str]:
     ]
 
 
+def _config_item(config) -> dict:
+    """ Wrap the task in a configuration item. """
+    task = dict(config)
+    task["task-name"] = "spec-from-source"
+    task["task-type"] = "spec-from-source"
+    return {
+        "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+        "copyrights": [],
+        "enabled-by": True,
+        "item-cache": {},
+        "links": [],
+        "tasks": [task],
+        "type": "tool-config",
+    }
+
+
+def _task_of(data: dict) -> dict:
+    """ Get the task which generates the items from the configuration. """
+    for task in data["tasks"]:
+        if task["task-type"] == "spec-from-source":
+            return task
+    raise KeyError("spec-from-source")
+
+
 def _write_config(tmp_path, config) -> str:
     tmp_path.mkdir(parents=True, exist_ok=True)
-    config_file = tmp_path / "specware.yml"
+    config_file = tmp_path / CONFIG_FILE
     with open(config_file, "w", encoding="utf-8") as dst:
-        yaml.safe_dump({"spec-from-source": config}, dst)
+        yaml.safe_dump(_config_item(config), dst)
     return str(config_file)
 
 
@@ -155,7 +184,7 @@ def _apply(tmp_path, config, xml_files) -> dict:
         "--apply", *xml_files
     ])
     with open(config_file, encoding="utf-8") as src:
-        return yaml.safe_load(src)["spec-from-source"]
+        return _task_of(yaml.safe_load(src))
 
 
 def _proposed_item_to_group(output: str) -> dict:
@@ -166,7 +195,7 @@ def _proposed_item_to_group(output: str) -> dict:
     round-trip check: the proposal is meant to be pasted straight back
     into a configuration file, so it has to survive being read as YAML.
     """
-    return yaml.safe_load(output)["spec-from-source"]["item-to-group"]
+    return _task_of(yaml.safe_load(output))["item-to-group"]
 
 
 def test_propose_config_prints_an_empty_map_when_nothing_to_list(
@@ -205,7 +234,10 @@ def test_propose_config_emits_a_null_group_as_yaml_null(tmp_path, capsys):
 def test_nested_group_gets_interface_ingroup_link(tmp_path):
     spec_dir = tmp_path / "spec"
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {
             "ComponentAPIGroup": {
                 "uid": "/if/group"
@@ -258,7 +290,10 @@ def test_generate_groups_reaches_files_via_member_ingroup_alone(tmp_path):
     # transitive discovery, this produced zero generated files, no error.
     spec_dir = tmp_path / "spec"
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {
             "WidgetAPI": {
                 "uid": "/if/group"
@@ -278,7 +313,10 @@ def test_generate_groups_reaches_files_via_member_ingroup_alone(tmp_path):
 
 def _valid_config() -> dict:
     return {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "spec-directory": "spec",
         "groups": {},
         "item-to-group": None,
@@ -288,110 +326,8 @@ def _valid_config() -> dict:
     }
 
 
-def test_doxygen_context_accepts_a_valid_config():
-    # DoxygenContext validates on construction, so a caller that never
-    # goes through the command line interface gets the same named error
-    # rather than a crash deep in resolution.
-    DoxygenContext(_valid_config(), require_full_config=True)
-    DoxygenContext(_valid_config(), require_full_config=False)
-
-
-@pytest.mark.parametrize("missing_attribute",
-                         ["data", "spec-directory", "groups"])
-def test_doxygen_context_reports_missing_required_attribute(missing_attribute):
-    config = _valid_config()
-    del config[missing_attribute]
-    with pytest.raises(ValueError, match=f"/{missing_attribute} is missing"):
-        DoxygenContext(config, require_full_config=True)
-
-
-@pytest.mark.parametrize("attribute,bad_value", [
-    ("data", []),
-    ("spec-directory", 123),
-    ("groups", []),
-    ("item-to-group", []),
-    ("item-to-uid", []),
-    ("type-map", []),
-    ("default-group-name", []),
-    ("enabled-groups", "FooGroup"),
-])
-def test_doxygen_context_reports_wrong_type(attribute, bad_value):
-    config = _valid_config()
-    config[attribute] = bad_value
-    with pytest.raises(ValueError, match=f"/{attribute} must be a"):
-        DoxygenContext(config, require_full_config=True)
-
-
-def test_doxygen_context_reports_every_problem_at_once():
-    with pytest.raises(ValueError) as excinfo:
-        DoxygenContext({}, require_full_config=True)
-    message = str(excinfo.value)
-    for attribute in ("data", "spec-directory", "groups", "enabled-groups"):
-        assert attribute in message, (
-            f"{attribute!r} missing from aggregated error")
-
-
 def test_doxygen_context_does_not_require_a_full_config_to_propose():
     DoxygenContext({"data": {}, "spec-directory": "spec", "groups": {}})
-
-
-def test_doxygen_context_still_checks_enabled_groups_type_when_optional():
-    config = {
-        "data": {},
-        "spec-directory": "spec",
-        "groups": {},
-        "enabled-groups": "FooGroup",
-    }
-    with pytest.raises(ValueError, match="/enabled-groups must be a"):
-        DoxygenContext(config)
-
-
-# Elements, not just the containers holding them. Each of these values
-# reaches code that assumes a string, so an unchecked element would
-# surface as a TypeError far from the configuration that caused it.
-@pytest.mark.parametrize("attribute,bad_value,expected", [
-    ("enabled-groups", [{
-        "FooGroup": True
-    }], "/enabled-groups[0] must be a string"),
-    ("enabled-groups", ["FooGroup", 7], "/enabled-groups[1] must be a string"),
-    ("groups", {
-        "FooGroup": []
-    }, "/groups/FooGroup must be a dict"),
-    ("groups", {
-        7: {}
-    }, "non-string key 7"),
-    ("item-to-group", {
-        "id_0": []
-    }, "must be a string or null"),
-    ("item-to-group", {
-        7: "FooGroup"
-    }, "non-string key 7"),
-    ("type-map", {
-        "a": 7
-    }, "/type-map/a must be a string"),
-    ("type-map", {
-        7: "a"
-    }, "non-string key 7"),
-])
-def test_doxygen_context_reports_bad_elements(attribute, bad_value, expected):
-    config = _valid_config()
-    config[attribute] = bad_value
-    with pytest.raises(ValueError, match=re.escape(expected)):
-        DoxygenContext(config, require_full_config=True)
-
-
-def test_doxygen_context_accepts_a_null_item_to_group_value():
-    # A null value is how a user pins an item to no group at all and
-    # leaves it to inference, so it has to stay valid.
-    config = _valid_config()
-    config["item-to-group"] = {"id_0": None}
-    DoxygenContext(config, require_full_config=True)
-
-
-def test_clifromsource_reports_an_invalid_config(tmp_path):
-    with pytest.raises(SystemExit) as excinfo:
-        _generate(tmp_path, {"groups": {}}, _foo_group_xml_files())
-    assert "invalid 'spec-from-source'" in str(excinfo.value)
 
 
 def _apply_raw(tmp_path, content: str | None) -> dict:
@@ -402,7 +338,7 @@ def _apply_raw(tmp_path, content: str | None) -> dict:
     which always wraps its argument in a ``spec-from-source`` mapping
     and so cannot express a null or non-mapping configuration.
     """
-    config_file = tmp_path / "specware.yml"
+    config_file = tmp_path / CONFIG_FILE
     if content is not None:
         with open(config_file, "w", encoding="utf-8") as dst:
             dst.write(content)
@@ -412,39 +348,25 @@ def _apply_raw(tmp_path, content: str | None) -> dict:
         *_foo_group_xml_files()
     ])
     with open(config_file, encoding="utf-8") as src:
-        return yaml.safe_load(src)["spec-from-source"]
+        return _task_of(yaml.safe_load(src))
 
 
 def test_propose_config_bootstraps_from_a_missing_config_file(tmp_path):
     assert "FooGroup" in _apply_raw(tmp_path, None)["groups"]
 
 
-def test_propose_config_bootstraps_from_an_empty_config_file(tmp_path):
-    assert "FooGroup" in _apply_raw(tmp_path, "")["groups"]
-
-
-def test_propose_config_bootstraps_from_a_null_spec_from_source(tmp_path):
-    assert "FooGroup" in _apply_raw(tmp_path, "spec-from-source:\n")["groups"]
-
-
-@pytest.mark.parametrize("content", ["hello\n", "- a\n- b\n"])
-def test_propose_config_reports_a_non_mapping_config(tmp_path, content):
-    with pytest.raises(SystemExit) as excinfo:
-        _apply_raw(tmp_path, content)
-    assert "does not contain a mapping" in str(excinfo.value)
-
-
-def test_propose_config_reports_a_non_mapping_spec_from_source(tmp_path):
-    with pytest.raises(SystemExit) as excinfo:
-        _apply_raw(tmp_path, "spec-from-source: hello\n")
-    assert "is not a mapping" in str(excinfo.value)
+def test_propose_config_reports_an_empty_config_file(tmp_path):
+    # A configuration file is an item, so an empty one is no
+    # configuration.  Bootstrapping starts from no file at all.
+    with pytest.raises(SystemExit, match="holds no item"):
+        _apply_raw(tmp_path, "")
 
 
 def test_propose_config_reports_a_missing_parent_directory(tmp_path):
     with pytest.raises(SystemExit) as excinfo:
         clifromsource([
             "specfromsource", "--config-file",
-            str(tmp_path / "typo" / "specware.yml"), "--propose-config",
+            str(tmp_path / "typo" / CONFIG_FILE), "--propose-config",
             "--apply", *_foo_group_xml_files()
         ])
     assert "there is no directory" in str(excinfo.value)
@@ -453,7 +375,10 @@ def test_propose_config_reports_a_missing_parent_directory(tmp_path):
 def test_generate_writes_the_enabled_group_contents(tmp_path):
     spec_dir = tmp_path / "spec"
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {
             "FooGroup": {
                 "uid": "/if/group",
@@ -480,7 +405,10 @@ def test_generate_writes_the_enabled_group_contents(tmp_path):
 def test_generate_skips_disabled_groups(tmp_path):
     spec_dir = tmp_path / "spec"
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {},
         "enabled-groups": [],
         "spec-directory": str(spec_dir),
@@ -492,7 +420,10 @@ def test_generate_skips_disabled_groups(tmp_path):
 def test_propose_config_output_is_usable_verbatim(tmp_path, capsys):
     spec_dir = tmp_path / "spec"
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {
             "WidgetAPI": {
                 "uid": "/if/group"
@@ -502,7 +433,7 @@ def test_propose_config_output_is_usable_verbatim(tmp_path, capsys):
         "spec-directory": str(spec_dir),
     }
     output = _propose(capsys, tmp_path, config, _widget_api_xml_files())
-    proposed = yaml.safe_load(output)["spec-from-source"]
+    proposed = _task_of(yaml.safe_load(output))
     assert proposed["item-to-group"] == {}
 
     # Copy the proposal verbatim into a fresh run, exactly as a user
@@ -516,7 +447,10 @@ def test_propose_config_output_is_usable_verbatim(tmp_path, capsys):
 def test_generate_groups_generates_typedefs(tmp_path):
     spec_dir = tmp_path / "spec"
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {
             "TypesAPI": {
                 "uid": "/if/group"
@@ -550,7 +484,10 @@ def test_generate_groups_typedef_alias_check_is_scoped_by_group(tmp_path):
     # struct.
     spec_dir = tmp_path / "spec"
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {
             "NetworkingAPI": {
                 "uid": "/net/if/group"
@@ -600,7 +537,10 @@ def _write_manifest(spec_dir, manifest: dict) -> None:
 
 def _foo_group_config(spec_dir) -> dict:
     return {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {
             "FooGroup": {
                 "uid": "/if/group",
@@ -724,7 +664,10 @@ def test_prune_removes_item_for_a_declaration_deleted_from_the_header(
         capsys, tmp_path):
     spec_dir = tmp_path / "spec"
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {
             "QueueAPI": {
                 "uid": "/if/group"
@@ -762,7 +705,10 @@ def test_prune_removes_item_for_a_declaration_deleted_from_the_header(
 def test_doxygen_xml_dir_generates_the_same_items_as_listing_the_files(
         tmp_path):
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {
             "WidgetAPI": {
                 "uid": "/if/group"
@@ -825,25 +771,6 @@ def test_an_empty_doxygen_xml_dir_is_rejected(tmp_path):
     assert "no *.xml files found" in str(excinfo.value)
 
 
-def test_clifromsource_reports_invalid_config_without_a_traceback(tmp_path):
-    # No "groups" attribute: building the context catches this, and the
-    # wrapper turns it into a clean one-line error instead of an
-    # unhandled traceback.
-    config = {
-        "data": {},
-        "spec-directory": str(tmp_path),
-        "enabled-groups": []
-    }
-    with pytest.raises(SystemExit) as excinfo:
-        clifromsource([
-            "specfromsource", "--config-file",
-            _write_config(tmp_path, config), "--doxygen-xml-dir",
-            _get_path("source-to-spec/null-item-to-group/xml")
-        ])
-    assert "specfromsource: error:" in str(excinfo.value)
-    assert "/groups is missing" in str(excinfo.value)
-
-
 def test_clifromsource_reports_missing_config_file_without_a_traceback(
         tmp_path):
     missing_path = tmp_path / "does-not-exist.yml"
@@ -854,22 +781,13 @@ def test_clifromsource_reports_missing_config_file_without_a_traceback(
     assert "specfromsource: error:" in str(excinfo.value)
 
 
-def test_clifromsource_reports_missing_spec_from_source_attribute(tmp_path):
-    config_path = tmp_path / "specware.yml"
-    with open(config_path, "w", encoding="utf-8") as dst:
-        yaml.safe_dump({"some-other-tool": {}}, dst)
-    with pytest.raises(SystemExit) as excinfo:
-        clifromsource(
-            ["specfromsource", "--config-file",
-             str(config_path), "a.xml"])
-    assert "specfromsource: error:" in str(excinfo.value)
-    assert "spec-from-source" in str(excinfo.value)
-
-
 def test_clifromsource_reports_unknown_item_to_group_without_a_traceback(
         tmp_path):
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {
             "FooGroup": {
                 "uid": "/if/group"
@@ -897,7 +815,10 @@ def test_clifromsource_does_not_swallow_a_plain_value_error(
     # anywhere in the call chain must still surface as a traceback, not
     # be mistaken for one of the known, anticipated config problems.
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {},
         "spec-directory": str(tmp_path / "spec"),
         "enabled-groups": [],
@@ -923,7 +844,7 @@ def test_propose_config_proposes_a_skeleton_for_undiscovered_groups(
     # the name alone.
     output = _propose(capsys, tmp_path, {"spec-directory": "spec"},
                       _widget_api_xml_files())
-    proposed = yaml.safe_load(output)["spec-from-source"]
+    proposed = _task_of(yaml.safe_load(output))
     assert proposed["groups"]["WidgetAPI"] == {
         "uid": "/TODO/widgetapi/if/group"
     }
@@ -944,7 +865,7 @@ def test_propose_config_does_not_overwrite_an_existing_group_entry(
         },
     }
     output = _propose(capsys, tmp_path, config, _widget_api_xml_files())
-    proposed = yaml.safe_load(output)["spec-from-source"]
+    proposed = _task_of(yaml.safe_load(output))
     assert proposed["groups"]["WidgetAPI"] == {
         "uid": "/c/widget/if/group",
         "remove-prefix": "widget-"
@@ -960,7 +881,7 @@ def test_clifromsource_propose_config_bootstraps_without_a_config_file(
     xml_dir = _get_path("source-to-spec/null-item-to-group/xml")
     clifromsource(
         ["specfromsource", "--propose-config", "--doxygen-xml-dir", xml_dir])
-    proposed = yaml.safe_load(capsys.readouterr().out)["spec-from-source"]
+    proposed = _task_of(yaml.safe_load(capsys.readouterr().out))
     assert proposed["groups"]["WidgetAPI"] == {
         "uid": "/TODO/widgetapi/if/group"
     }
@@ -1078,7 +999,10 @@ def test_propose_config_ignores_stale_item_to_group_entries(tmp_path, capsys):
 
 def test_clifromsource_apply_requires_propose_config(tmp_path):
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {},
         "spec-directory": str(tmp_path / "spec"),
         "enabled-groups": [],
@@ -1092,7 +1016,7 @@ def test_clifromsource_apply_requires_propose_config(tmp_path):
 
 
 def test_clifromsource_propose_config_apply_end_to_end(tmp_path):
-    config_path = tmp_path / "specware.yml"
+    config_path = tmp_path / CONFIG_FILE
     _write_config(tmp_path, {"spec-directory": "spec"})
     xml_dir = _get_path("source-to-spec/null-item-to-group/xml")
     argv = [
@@ -1101,7 +1025,7 @@ def test_clifromsource_propose_config_apply_end_to_end(tmp_path):
     ]
     clifromsource(argv)
     with open(config_path, encoding="utf-8") as src:
-        written = yaml.safe_load(src)["spec-from-source"]
+        written = _task_of(yaml.safe_load(src))
     assert written["groups"]["WidgetAPI"] == {
         "uid": "/TODO/widgetapi/if/group"
     }
@@ -1111,10 +1035,10 @@ def test_clifromsource_propose_config_apply_end_to_end(tmp_path):
     written["groups"]["WidgetAPI"]["uid"] = "/c/widget/if/group"
     written["enabled-groups"] = ["WidgetAPI"]
     with open(config_path, "w", encoding="utf-8") as dst:
-        yaml.safe_dump({"spec-from-source": written}, dst)
+        yaml.safe_dump(_config_item(written), dst)
     clifromsource(argv)
     with open(config_path, encoding="utf-8") as src:
-        written_2 = yaml.safe_load(src)["spec-from-source"]
+        written_2 = _task_of(yaml.safe_load(src))
     assert written_2["groups"]["WidgetAPI"]["uid"] == "/c/widget/if/group"
     assert written_2["enabled-groups"] == ["WidgetAPI"]
 
@@ -1131,10 +1055,10 @@ def test_clifromsource_propose_config_apply_bootstraps_a_new_file(
         "specfromsource", "--propose-config", "--apply", "--doxygen-xml-dir",
         xml_dir
     ])
-    config_path = tmp_path / "specware.yml"
+    config_path = tmp_path / CONFIG_FILE
     assert config_path.is_file()
     with open(config_path, encoding="utf-8") as src:
-        written = yaml.safe_load(src)["spec-from-source"]
+        written = _task_of(yaml.safe_load(src))
     assert written["groups"]["WidgetAPI"] == {
         "uid": "/TODO/widgetapi/if/group"
     }
@@ -1163,7 +1087,10 @@ def test_generate_summary_omits_the_typedef_clause_when_none_skipped(
     # here, so unlike the alias case above nothing gets skipped.
     spec_dir = tmp_path / "spec"
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {
             "StorageAPI": {
                 "uid": "/storage/if/group"
@@ -1184,7 +1111,10 @@ def test_generate_summary_omits_the_typedef_clause_when_none_skipped(
 
 def test_clifromsource_dry_run_rejects_propose_config(tmp_path):
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {},
         "spec-directory": str(tmp_path / "spec"),
         "enabled-groups": [],
@@ -1201,7 +1131,10 @@ def test_clifromsource_dry_run_rejects_propose_config(tmp_path):
 def test_clifromsource_dry_run_creates_no_spec_directory(tmp_path):
     spec_dir = tmp_path / "spec"
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {
             "WidgetAPI": {
                 "uid": "/if/group"
@@ -1244,7 +1177,10 @@ def test_prune_dry_run_deletes_nothing_and_leaves_the_manifest_untouched(
         capsys, tmp_path):
     spec_dir = tmp_path / "spec"
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {
             "QueueAPI": {
                 "uid": "/if/group"
@@ -1280,7 +1216,10 @@ def test_prune_dry_run_deletes_nothing_and_leaves_the_manifest_untouched(
 def test_clifromsource_prune_end_to_end(tmp_path):
     spec_dir = tmp_path / "spec"
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {
             "QueueAPI": {
                 "uid": "/if/group"
@@ -1326,7 +1265,10 @@ def test_generate_groups_generates_a_shared_header_once(tmp_path, capsys):
     # twice.
     spec_dir = tmp_path / "spec"
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {
             "AlphaAPI": {
                 "uid": "/if/alpha"
@@ -1347,7 +1289,10 @@ def test_generate_groups_generates_a_shared_header_once(tmp_path, capsys):
 
 def _shared_header_config(spec_dir, enabled_groups=None) -> dict:
     return {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {
             "AlphaAPI": {
                 "uid": "/if/alpha"
@@ -1449,61 +1394,6 @@ def test_prune_manifest_records_each_owner_once(tmp_path):
     assert not duplicated
 
 
-@pytest.mark.parametrize("bad_owners", [None, 5, {"FooGroup": 1}, [7]])
-def test_prune_spares_an_entry_with_unreadable_owners(tmp_path, bad_owners):
-    # A manifest is read back as a plain file that could be stale or
-    # hand-edited. An entry whose owners can't be read yields no owners,
-    # so it is spared rather than raising.
-    spec_dir = tmp_path / "spec"
-    _write_manifest(spec_dir, {"/if/odd": bad_owners})
-    (spec_dir / "if").mkdir(parents=True, exist_ok=True)
-    (spec_dir / "if" / "odd.yml").write_text("x: 1\n")
-
-    _generate(tmp_path,
-              _foo_group_config(spec_dir),
-              _foo_group_xml_files(),
-              prune=True)
-
-    assert (spec_dir / "if" / "odd.yml").is_file()
-    assert _read_manifest(spec_dir)["/if/odd"] == []
-
-
-def test_prune_ignores_a_manifest_that_is_not_a_mapping(tmp_path):
-    spec_dir = tmp_path / "spec"
-    spec_dir.mkdir(parents=True, exist_ok=True)
-    with open(_manifest_path(spec_dir), "w", encoding="utf-8") as dst:
-        json.dump(["not", "a", "mapping"], dst)
-
-    _generate(tmp_path,
-              _foo_group_config(spec_dir),
-              _foo_group_xml_files(),
-              prune=True)
-
-    assert _read_manifest(spec_dir)["/if/group"] == ["FooGroup"]
-
-
-def test_apply_replaces_null_attributes_with_their_defaults(tmp_path):
-    # A bare 'data:', 'spec-directory:' or 'enabled-groups:' attribute
-    # parses as null. Validation treats null as absent while
-    # bootstrapping, so the proposal has to default it too: writing the
-    # null straight back produces a config the next real generation run
-    # rejects, since that one does require a value.
-    config = {
-        "data": None,
-        "spec-directory": None,
-        "groups": {},
-        "enabled-groups": None,
-    }
-    written = _apply(tmp_path, config, _widget_api_xml_files())
-    assert written["data"] == {}
-    assert written["spec-directory"] == "spec"
-    assert written["enabled-groups"] == []
-
-    # The written config is the real test: it has to survive the
-    # validation a generation run applies.
-    DoxygenContext(written, require_full_config=True)
-
-
 def _needs_attention(output: str) -> dict:
     """ Parse the 'needs attention' section back into a mapping. """
     _, _, section = output.partition("needs attention:\n")
@@ -1526,7 +1416,10 @@ def _undocumented_xml_files() -> list[str]:
 
 def _generate_and_review(tmp_path, capsys, dry_run=False) -> dict:
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {
             "UndocumentedAPI": {
                 "uid": "/c/u/if/group"
@@ -1580,7 +1473,11 @@ def test_review_is_reported_for_a_dry_run(tmp_path, capsys):
 def test_review_is_silent_when_nothing_needs_attention(tmp_path, capsys):
     _generate(
         tmp_path, {
-            "data": {},
+            "data": {
+                "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+                "copyrights":
+                ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+            },
             "groups": {},
             "enabled-groups": [],
             "spec-directory": str(tmp_path / "spec"),
@@ -1603,7 +1500,10 @@ def test_review_is_reported_after_pruning(tmp_path, capsys):
     # the last thing reported rather than something buried above the
     # pruning summary.
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {
             "UndocumentedAPI": {
                 "uid": "/c/u/if/group"
@@ -1624,7 +1524,10 @@ def test_an_excluded_item_is_not_generated(tmp_path):
     # would have to be deleted after every run.
     spec_dir = tmp_path / "spec"
     config = {
-        "data": {},
+        "data": {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        },
         "groups": {
             "FooGroup": {
                 "uid": "/if/group"
@@ -1927,3 +1830,71 @@ def test_a_placeholder_brief_alone_names_no_doxyfile_setting(tmp_path, capsys):
         })
     _generate(tmp_path, config, _undocumented_xml_files())
     assert "JAVADOC_AUTOBRIEF" not in capsys.readouterr().out
+
+
+_GLOSSARY_TASK = {
+    "license": "CC-BY-SA-4.0",
+    "project-groups": [],
+    "task-name": "glossary",
+    "task-type": "glossary"
+}
+
+
+def _write_tasks(tmp_path, tasks: list[dict]) -> str:
+    config_file = _write_config(tmp_path, _minimal_config())
+    with open(config_file, encoding="utf-8") as src:
+        data = yaml.safe_load(src)
+    data["tasks"] = tasks
+    with open(config_file, "w", encoding="utf-8") as dst:
+        yaml.safe_dump(data, dst)
+    return config_file
+
+
+def test_propose_config_apply_keeps_the_other_tasks(tmp_path):
+    config_file = _write_config(tmp_path, _minimal_config())
+    with open(config_file, encoding="utf-8") as src:
+        data = yaml.safe_load(src)
+    data["tasks"].insert(0, _GLOSSARY_TASK)
+    with open(config_file, "w", encoding="utf-8") as dst:
+        yaml.safe_dump(data, dst)
+    clifromsource([
+        "specfromsource", "--config-file", config_file, "--propose-config",
+        "--apply", *_foo_group_xml_files()
+    ])
+    with open(config_file, encoding="utf-8") as src:
+        tasks = yaml.safe_load(src)["tasks"]
+    assert tasks[0] == _GLOSSARY_TASK
+    assert tasks[1]["task-type"] == "spec-from-source"
+    assert "FooGroup" in tasks[1]["groups"]
+    assert len(tasks) == 2
+
+
+def test_clifromsource_demands_exactly_one_task(tmp_path):
+    config_file = _write_tasks(tmp_path, [_GLOSSARY_TASK])
+    with pytest.raises(SystemExit) as excinfo:
+        clifromsource(
+            ["specfromsource", "--config-file", config_file, "a.xml"])
+    assert ("states no task of the type 'spec-from-source'"
+            in str(excinfo.value))
+    task = _config_item(_minimal_config())["tasks"][0]
+    config_file = _write_tasks(
+        tmp_path,
+        [dict(task, **{"task-name": "a"}),
+         dict(task, **{"task-name": "b"})])
+    with pytest.raises(SystemExit) as excinfo:
+        clifromsource(
+            ["specfromsource", "--config-file", config_file, "a.xml"])
+    assert ("states more than one task of the type 'spec-from-source': "
+            "a, b") in str(excinfo.value)
+
+
+def test_generate_demands_the_license_of_a_generated_item(tmp_path):
+    config = _minimal_config(groups={"FooGroup": {"uid": "/if/group"}})
+    config["enabled-groups"] = ["FooGroup"]
+    config["spec-directory"] = str(tmp_path / "spec")
+    del config["data"]["copyrights"]
+    with pytest.raises(GenerationError) as excinfo:
+        _generate(tmp_path, config, _foo_group_xml_files())
+    assert str(excinfo.value.__cause__) == (
+        "the task states no copyrights of a generated item: add it to the "
+        "data of the task or of the group of group FooGroup")

@@ -1,11 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
 - Copyright (C) 2023, 2026 embedded brains GmbH & Co. KG
-copyrights-by-license:
-  BSD-2-Clause:
-  - Copyright (C) 2023 Alice
-  files:
-  - dir/a.txt
 directory: ${.:/component/prefix-directory}
 directory-state-type: explicit
 enabled-by: true
@@ -17,6 +12,16 @@ files:
 - file: dir/subdir/d.txt
   hash: null
 hash: null
+license-files:
+  files:
+  - dir/a.txt
+license-info:
+- copyrights:
+  - Copyright (C) 2023 Alice
+  expressions:
+  - BSD-2-Clause
+  license: BSD-2-Clause
+  provenance: []
 links:
 - hash: null
   name: component

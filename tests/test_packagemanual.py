@@ -112,9 +112,22 @@ def _subprocess_run(args, stdin, stdout, stderr, shell, cwd, check, encoding):
     return cp
 
 
-def _clear_copyrights_by_license(ctx: ItemGetValueContext) -> str:
-    ctx.item.cache["/pkg/source/a"]["copyrights-by-license"] = {}
-    return "clear copyrights by license"
+def _change_license_info(ctx: ItemGetValueContext) -> str:
+    item = ctx.item.cache["/pkg/source/a"]
+    item["license-info"] = [{
+        "copyrights": ["Copyright (C) 2026 Carol"],
+        "expressions": ["CC-BY-SA-4.0"],
+        "license": "CC-BY-SA-4.0",
+        "provenance": []
+    }, {
+        "copyrights": [],
+        "expressions": ["MIT"],
+        "license": "MIT",
+        "provenance": []
+    }]
+    item.data.pop("license-files")
+    ctx.item.cache["/license/cc-by-sa-4.0"]["uri"] = None
+    return "change license info"
 
 
 def _format_path(tmp_dir: Path, path: str) -> str:
@@ -158,8 +171,8 @@ def test_packagemanual(caplog, tmpdir, monkeypatch):
     director["/pkg/source/doc-package-manual"].load()
     director["/pkg/test-logs/membench-2"].load()
     pm = director["/pkg/deployment/doc-package-manual"]
-    pm.mapper.add_get_value(f"{pm.item.type}:/clear-copyrights-by-license",
-                            _clear_copyrights_by_license)
+    pm.mapper.add_get_value(f"{pm.item.type}:/change-license-info",
+                            _change_license_info)
     director.build_package()
     pm_build = Path(director["/pkg/build/doc-package-manual"].directory)
     pm_index = pm_build / "source" / "index.rst"
@@ -654,7 +667,9 @@ At the time when the package of this version was produced, the following open is
     \\end{{footnotesize}}
 .. license-info
 All directories and file paths in this section are
-relative to {_format_path(tmp_dir, 'pkg')}.
+relative to {_format_path(tmp_dir, 'pkg')}.  A delivered file states
+the license of its work only.  This section states the other licenses of its
+parts, so read a delivered file together with this section.
 
 .. _Directory:
 
@@ -719,11 +734,29 @@ BSD-2-Clause copyrights
 .. raw:: latex
 
     \\end{{footnotesize}}
-.. clear-copyrights-by-license
-clear copyrights by license
+
+.. _CCBYSA40Copyrights:
+
+CC-BY-SA-4.0 copyrights
+-----------------------
+
+| © 2026 Carol
+
+The text of the license is at https://spdx.org/licenses/CC-BY-SA-4.0.html.
+.. change-license-info
+change license info
 .. license-info
 All directories and file paths in this section are
-relative to {_format_path(tmp_dir, 'pkg')}.
+relative to {_format_path(tmp_dir, 'pkg')}.  A delivered file states
+the license of its work only.  This section states the other licenses of its
+parts, so read a delivered file together with this section.
+
+.. _CCBYSA40Copyrights:
+
+CC-BY-SA-4.0 copyrights
+-----------------------
+
+| © 2026 Carol
 .. build-description
 .. _PackageItemPkgComponent:
 

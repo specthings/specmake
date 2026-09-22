@@ -25,48 +25,94 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import contextlib
+import copy
 import glob
 import io
 import json
 import os
 import sys
-from typing import Iterator, NamedTuple
+from typing import Iterator, NamedTuple, Optional
 
 import yaml
 
-from specitems import atomic_dump_to_file, get_arguments
-from specware import load_specware_config
+from specitems import (CONFIG_FILE, Item, atomic_dump_to_file,
+                       find_config_file, get_arguments, load_config_item,
+                       yield_tasks)
 
+from .pkgitems import BuildItemTypeProvider
 from .sourcetospec import (ConfigError, DoxygenContext, DoxygenEnum,
                            DoxygenGroup, DoxygenFile, DoxygenItem,
                            DoxygenTypedef, EMPTY_BRIEF_GAP)
 from .util import command_arguments
 
+#: The attributes which every task carries.
+_TASK_KEYS = ("task-name", "task-type", "params")
 
-def _propose_config(ctx: DoxygenContext, config: dict) -> None:
-    proposed = ctx.proposed_config(config)
-    config_2 = {"spec-from-source": proposed}
-    text = yaml.dump(config_2, default_flow_style=False, allow_unicode=True)
-    print(text.rstrip())
-    item_to_group = ctx.resolved_item_to_group()
-    if item_to_group:
-        print("  item-to-group:")
-        for doxygen_id, group_ident in item_to_group.items():
-            item = ctx.items[doxygen_id]
-            # Serialise each entry through yaml rather than formatting it
-            # directly, so a null group and any group name that would
-            # otherwise need quoting both survive a copy-paste back into
-            # the configuration.
-            entry = yaml.safe_dump({
-                doxygen_id: group_ident
-            },
-                                   default_flow_style=False).strip()
-            print(f"    {entry} # {item.kind}/{item.name}")
+#: The name and the type of the task which generates the items.
+_TASK_NAME = "spec-from-source"
+
+
+def _config_data(config_item: Optional[Item], task: dict) -> dict:
+    """
+    Build the data of the configuration item around the task.
+
+    A tree which carries no configuration gets one with an empty item cache,
+    so a user states the specification item directories afterwards.
+    """
+    if config_item is None:
+        data: dict = {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": [],
+            "enabled-by": True,
+            "item-cache": {},
+            "links": [],
+            "tasks": [],
+            "type": "tool-config",
+        }
     else:
-        print("  item-to-group: {}")
+        data = copy.deepcopy(config_item.data)
+    task = dict(task)
+    task["task-name"] = _TASK_NAME
+    task["task-type"] = _TASK_NAME
+    tasks = list(data.get("tasks", []))
+    for index, other in enumerate(tasks):
+        if other.get("task-type") == _TASK_NAME:
+            tasks[index] = task
+            break
+    else:
+        tasks.append(task)
+    data["tasks"] = tasks
+    return data
 
 
-def _apply_config(ctx: DoxygenContext, config: dict, config_file: str) -> None:
+def _annotate_item_to_group(text: str, ctx: DoxygenContext) -> str:
+    """
+    Name the declaration of every item-to-group entry in a comment.
+
+    A reader of the proposal has to tell which declaration an opaque Doxygen
+    identifier belongs to.
+    """
+    lines = []
+    for line in text.split("\n"):
+        item = ctx.items.get(line.strip().split(":")[0], None)
+        if item is not None and line.startswith("    "):
+            line = f"{line} # {item.kind}/{item.name}"
+        lines.append(line)
+    return "\n".join(lines)
+
+
+def _propose_config(ctx: DoxygenContext, config: dict,
+                    config_item: Optional[Item]) -> None:
+    task = ctx.proposed_config(config)
+    task["item-to-group"] = ctx.resolved_item_to_group()
+    text = yaml.dump(_config_data(config_item, task),
+                     default_flow_style=False,
+                     allow_unicode=True)
+    print(_annotate_item_to_group(text, ctx).rstrip())
+
+
+def _apply_config(ctx: DoxygenContext, config: dict, config_file: str,
+                  config_item: Optional[Item]) -> None:
     """
     Write the proposed config directly to ``config_file``.
 
@@ -83,10 +129,10 @@ def _apply_config(ctx: DoxygenContext, config: dict, config_file: str) -> None:
     assignment in as if it were a manual override, permanently hiding
     those items from future inference.
     """
-    proposed = ctx.proposed_config(config)
-    proposed["item-to-group"] = ctx.preserved_item_to_group(config)
+    task = ctx.proposed_config(config)
+    task["item-to-group"] = ctx.preserved_item_to_group(config)
     atomic_dump_to_file(
-        config_file, {"spec-from-source": proposed}, lambda data: yaml.dump(
+        config_file, _config_data(config_item, task), lambda data: yaml.dump(
             data, default_flow_style=False, allow_unicode=True))
     print(f"applied proposed configuration to {config_file}")
 
@@ -549,28 +595,27 @@ def _bootstrap_directory(config_file: str | None) -> str:
 
 def _spec_from_source(config, config_file: str | None) -> dict:
     """
-    Return the 'spec-from-source' attribute of the configuration.
+    Return the task which generates the items from the source.
 
-    A null configuration file and a null attribute both count as an
-    empty mapping, so that --propose-config can bootstrap from them.
+    A null configuration counts as an empty mapping, so that
+    --propose-config can bootstrap from it.
     """
-    name = config_file or "specware.yml"
+    name = config_file or CONFIG_FILE
     if config is None:
         return {}
-    if not isinstance(config, dict):
-        raise ConfigError(f"{name} does not contain a mapping")
-    try:
-        spec_from_source = config["spec-from-source"]
-    except KeyError as err:
-        raise ConfigError(f"{name} is missing the top-level "
-                          "'spec-from-source' attribute") from err
-    if spec_from_source is None:
-        return {}
-    if not isinstance(spec_from_source, dict):
-        raise ConfigError(
-            f"{name} has a 'spec-from-source' attribute which is not a "
-            "mapping")
-    return spec_from_source
+    tasks = list(yield_tasks(config, "spec-from-source"))
+    if not tasks:
+        raise ConfigError(f"{name} states no task of the type "
+                          "'spec-from-source'")
+    if len(tasks) > 1:
+        names = ", ".join(task["task-name"] for task in tasks)
+        raise ConfigError(f"{name} states more than one task of the type "
+                          f"'spec-from-source': {names}")
+    return {
+        key: value
+        for key, value in tasks[0].items()
+        if key not in ("task-name", "task-type", "params")
+    }
 
 
 def _run(args) -> None:
@@ -579,30 +624,35 @@ def _run(args) -> None:
     if args.dry_run and args.propose_config:
         raise ConfigError("--dry-run is not compatible with --propose-config")
     try:
-        config, working_directory = load_specware_config(args.config_file)
+        config_item = load_config_item(args.config_file,
+                                       BuildItemTypeProvider({}))
+        working_directory = str(find_config_file(args.config_file).parent)
     except FileNotFoundError as err:
         if not args.propose_config:
             raise ConfigError(str(err)) from err
         # --propose-config exists to bootstrap a config in the first
         # place: propose one from just the Doxygen XML instead of
         # requiring a placeholder file to already exist.
-        config = None
+        config_item = None
         working_directory = _bootstrap_directory(args.config_file)
-    config = _spec_from_source(config, args.config_file)
-    config_file_name = os.path.basename(args.config_file or "specware.yml")
+    except ValueError as err:
+        # A file which exists states a configuration, so a problem of it is a
+        # configuration problem whatever the run does.
+        raise ConfigError(str(err)) from err
+    config = _spec_from_source(config_item, args.config_file)
+    config_file_name = os.path.basename(args.config_file or CONFIG_FILE)
     with contextlib.chdir(working_directory):
         xml_files = _resolve_xml_files(args.doxygen_xml_files,
                                        args.doxygen_xml_dir)
-        ctx = DoxygenContext(config,
-                             require_full_config=not args.propose_config)
+        ctx = DoxygenContext(config)
         if not args.dry_run:
             os.makedirs(ctx.spec_directory, exist_ok=True)
         ctx.doxygen_xml_to_spec(xml_files)
         if args.propose_config:
             if args.apply:
-                _apply_config(ctx, config, config_file_name)
+                _apply_config(ctx, config, config_file_name, config_item)
             else:
-                _propose_config(ctx, config)
+                _propose_config(ctx, config, config_item)
         else:
             # Resolve every item before the first write, so a UID which
             # two items claim stops the run with nothing generated and

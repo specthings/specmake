@@ -1,0 +1,29 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      SPDX-License-Identifier:
+        description: |
+          It shall be the license of a generated item.  The item takes the
+          license of the header which its prose comes from.
+        spec-type: spdx-license-expression
+      copyrights:
+        description: |
+          It shall be the copyright statements of a generated item.
+        spec-type: copyrights
+    description: |
+      This set of attributes specifies the license and the copyrights of a
+      generated item.  A task which bootstraps a configuration states none of
+      them, and a run which generates an item demands both.
+    mandatory-attributes: none
+spec-name: Tool Specification From Source Data
+spec-type: tool-task-spec-from-source-data
+type: spec

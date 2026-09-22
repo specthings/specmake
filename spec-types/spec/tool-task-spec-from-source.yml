@@ -1,0 +1,61 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: task-type
+  spec-value: spec-from-source
+  uid: tool-task
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      data:
+        description: |
+          It shall be the license and the copyrights of a generated item.
+        spec-type: tool-task-spec-from-source-data
+      default-group-name:
+        description: |
+          It shall be the name of the group which takes an item of no group.
+        spec-type: str
+      enabled-groups:
+        description: |
+          It shall be the names of the groups which the task generates.
+        spec-type: list-str
+      filter:
+        description: |
+          It shall select the names which the task takes from the source.
+        spec-type: tool-task-spec-from-source-filter-list
+      groups:
+        description: |
+          It shall be the groups of the generated items.
+        spec-type: tool-task-spec-from-source-groups
+      item-to-group:
+        description: |
+          It shall map the name of a source item to a group name.
+        spec-type: tool-task-spec-from-source-item-to-group
+      item-to-uid:
+        description: |
+          It shall map the name of a source item to the UID of its item.
+        spec-type: str-to-str
+      spec-directory:
+        description: |
+          It shall be the directory which takes the generated items.
+        spec-type: str
+      type-map:
+        description: |
+          It shall map a type name of the source to a type name of the items.
+        spec-type: str-to-str
+    description: |
+      This set of attributes specifies a task which generates specification
+      items from the source of another project.  A task states no attribute
+      while it bootstraps a configuration, and a run which generates an item
+      demands the data of that item.
+    mandatory-attributes: none
+spec-name: Tool Specification From Source Task
+spec-type: tool-task-spec-from-source
+type: spec

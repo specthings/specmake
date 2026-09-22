@@ -107,7 +107,7 @@ class SpamrManager(DocumentBuilder):
             command.append(self.mapper.substitute(argument))
         stdout: List[str] = []
         run_command(command, stdout=stdout)
-        content = SphinxContent()
+        content = SphinxContent(context=self.mapper.context)
         for line in stdout:
             if not (("Checking " in line) or (" files checked " in line)):
                 with content.directive("code-block", value="bash"):
@@ -145,7 +145,7 @@ class SpamrManager(DocumentBuilder):
             for requirement_uid in sorted(not_validated_requirements):
                 report.append(requirement_uid + "\n")
 
-        content = SphinxContent()
+        content = SphinxContent(context=self.mapper.context)
         content.add(report)
         return content.join()
 
@@ -180,7 +180,7 @@ class SpamrManager(DocumentBuilder):
         else:
             report.append("This metric is NOK")
 
-        content = SphinxContent()
+        content = SphinxContent(context=self.mapper.context)
         content.add(report)
         return content.join()
 
@@ -193,7 +193,7 @@ class SpamrManager(DocumentBuilder):
         return tbd_reqs
 
     def _requirements_completeness(self, _ctx: ItemGetValueContext) -> Any:
-        content = SphinxContent()
+        content = SphinxContent(context=self.mapper.context)
         number_tbds = len(self._get_tbd_requirements())
         requirement_count = len(self._get_related_requirements())
         req_comp = number_tbds / requirement_count
@@ -216,7 +216,7 @@ class SpamrManager(DocumentBuilder):
         assert isinstance(build, DirectoryState)
         build_dir = build.directory
 
-        content = SphinxContent()
+        content = SphinxContent(context=self.mapper.context)
         sections: List[str] = []
         command_section = ["grep", r"\*\*\*\*\*$", "filename"]
         tbd_docs: List[str] = []
@@ -308,12 +308,13 @@ class SpamrManager(DocumentBuilder):
                         if len(metrics) != 1:
                             if not metrics_result:
                                 incorrect_metrics_files.append(metrics_file)
-                            content = SphinxContent()
+                            content = SphinxContent(
+                                context=self.mapper.context)
                             with content.directive("code-block", value="text"):
                                 content.add(metrics)
                             all_metrics = all_metrics + "\n\n" + content.join()
 
-        wrong_files_content = SphinxContent()
+        wrong_files_content = SphinxContent(context=self.mapper.context)
         wrong_files_content.add("The following files contain errors in the " +
                                 "the metrics. For more details see the " +
                                 "above report of each file.\n\n")
@@ -377,7 +378,7 @@ class SpamrManager(DocumentBuilder):
 
     def _code_size(self, _ctx: ItemGetValueContext) -> Any:
         # Action status
-        sphinx_content = SphinxContent()
+        sphinx_content = SphinxContent(context=self.mapper.context)
         actions = ["Actions issued", "Actions closed", "Actions open"]
         actions_count = [0, 0, 0]
         for issue in sorted(self.item.cache.values()):
@@ -418,7 +419,7 @@ class SpamrManager(DocumentBuilder):
         return sphinx_content.join()
 
     def _sprs_and_ncrws(self, _ctx: ItemGetValueContext) -> str:
-        sphinx_content = SphinxContent()
+        sphinx_content = SphinxContent(context=self.mapper.context)
         existing_rids = False
         sphinx_content.add("The following RIDs are currently open:")
         for issue in sorted(self.item.cache.values()):
@@ -437,7 +438,7 @@ class SpamrManager(DocumentBuilder):
         return output[existing_rids]
 
     def _spr_ncr_status(self, _ctx: ItemGetValueContext) -> str:
-        sphinx_content = SphinxContent()
+        sphinx_content = SphinxContent(context=self.mapper.context)
         actions = ["Actions issued", "Actions closed", "Actions open"]
         actions_gitlab = [0, 0, 0]
         actions_rtems = [0, 0, 0]
@@ -466,7 +467,7 @@ class SpamrManager(DocumentBuilder):
         return sphinx_content.join()
 
     def _vv_coverage_unit_integration(self, _ctx: ItemGetValueContext) -> str:
-        sphinx_content = SphinxContent()
+        sphinx_content = SphinxContent(context=self.mapper.context)
         test_cases = _get_test_cases_by_type(self.item.cache, self.enabled_set,
                                              "unit-test")
         spec = self.input("spec")

@@ -16,7 +16,7 @@ ${.:/document-author}
 
 ${.:/document-copyrights}
 
-${.:/document-bsd-2-clause-copyrights}
+${.:/document-license-text:BSD-2-Clause}
 
 ${.:/document-third-party-licenses}
 

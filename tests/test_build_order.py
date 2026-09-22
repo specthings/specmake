@@ -27,11 +27,12 @@
 import logging
 from pathlib import Path
 
+import pytest
 from specitems import Item, Link
 
 from specmake import BuildItem, PackageBuildDirector
 
-from .util import create_package
+from .util import create_package, get_and_clear_log
 
 
 class _TestItem(BuildItem):
@@ -465,3 +466,27 @@ def test_build_order(caplog, tmpdir):
         "R:/j",
         "R:/a",
     ]
+
+
+def test_build_order_license_check(caplog, tmpdir):
+    package = create_package(caplog,
+                             Path(tmpdir) / "a",
+                             Path("spec-build-order"),
+                             license_items=False)
+    director = package.director
+    director.factory.add_constructor("pkg/test", _TestItem)
+    with pytest.raises(ValueError, match="states not every license"):
+        director.build_package()
+    assert _TestItem.pop_order() == []
+    assert "which the work /b may take" in get_and_clear_log(caplog)
+    package = create_package(caplog,
+                             Path(tmpdir) / "b", Path("spec-build-order"))
+    director = package.director
+    director.factory.add_constructor("pkg/test", _TestItem)
+    root = director.item_cache["/pkg/component"]
+    root.data.pop("license")
+    with pytest.raises(ValueError, match="states not every license"):
+        director.build_package()
+    log = get_and_clear_log(caplog)
+    assert "cannot get component value for 'license'" in log
+    assert _TestItem.pop_order() == []

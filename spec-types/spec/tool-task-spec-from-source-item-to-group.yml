@@ -1,0 +1,24 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      It shall map the name of a source item to a group name.  A null group
+      name states that the item belongs to no group, so the task generates no
+      item for it.
+    generic-attributes:
+      description: null
+      key-spec-type: str
+      value-spec-type: optional-str
+    mandatory-attributes: none
+spec-name: Tool Specification From Source Item To Group
+spec-type: tool-task-spec-from-source-item-to-group
+type: spec

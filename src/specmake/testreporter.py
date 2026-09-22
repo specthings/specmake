@@ -193,7 +193,8 @@ class _TestProperty(NamedTuple):
 class _TestContext:
     # pylint: disable=too-many-instance-attributes
     def __init__(self, reporter: "TestReporter"):
-        self.content = SphinxContent()
+        self.context = reporter.mapper.context
+        self.content = SphinxContent(context=self.context)
         self.enabled_set = reporter.enabled_set
         self.expected_failures: _Failures = {}
         self.unexpected_failures: _Failures = {}
@@ -431,7 +432,7 @@ reported test information.""")
         file_name = os.path.basename(data["report-file"])
         self.content.add(file_name)
         content = self.content
-        self.content = SphinxContent()
+        self.content = SphinxContent(context=self.context)
         yield file_name
         self.content.write(
             os.path.join(os.path.dirname(file_path), f"{file_name}.rst"))

@@ -1,0 +1,27 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      exclude:
+        description: |
+          It shall be the patterns of the names which the task leaves out.
+        spec-type: list-str
+      include:
+        description: |
+          It shall be the patterns of the names which the task takes.
+        spec-type: list-str
+    description: |
+      This set of attributes selects the names which the task takes from the
+      source.
+    mandatory-attributes: none
+spec-name: Tool Specification From Source Filter
+spec-type: tool-task-spec-from-source-filter
+type: spec

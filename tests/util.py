@@ -72,12 +72,18 @@ def create_package(caplog: Any,
                    tmp_dir: Path,
                    spec_dir: Path,
                    enabled_set: list[str] | None = None,
-                   workspace_dir: str = "test-files") -> PackageComponent:
+                   workspace_dir: str = "test-files",
+                   license_items: bool = True) -> PackageComponent:
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
     if enabled_set is None:
         enabled_set = []
     test_dir = Path(__file__).parent
+    spec_directories = [str(test_dir / spec_dir)]
+    if license_items:
+        spec_directories.append(str(test_dir / "spec-license"))
     workspace_config = WorkspaceConfig(
-        spec_directories=[str(test_dir / spec_dir)],
+        spec_directories=spec_directories,
         workspace_directory=str(test_dir / workspace_dir),
         cache_directory=str(tmp_dir / "cache-workspace"),
         enabled_set=enabled_set,
@@ -159,6 +165,8 @@ def create_test_director() -> PackageBuildDirector:
             "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
             "enabled-by": True,
             "enabled-set": [],
+            "accepted-licenses": ["BSD-2-Clause"],
+            "license": "CC-BY-SA-4.0",
             "links": [],
             "name": "Name",
             "pkg-type": "component",

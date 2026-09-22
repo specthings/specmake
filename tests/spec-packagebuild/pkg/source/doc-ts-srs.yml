@@ -1,7 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
-copyrights-by-license: {}
 directory: ${.:/component/build-directory}/src/doc-ts-srs
 directory-state-type: explicit
 enabled-by: true
@@ -9,6 +8,7 @@ files:
 - file: source/index.rst
   hash: null
 hash: null
+license-info: []
 links:
 - hash: null
   name: component

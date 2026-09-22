@@ -23,9 +23,6 @@ spec-info:
           It shall be the list of actions to run when the state is copied to
           the buildspace.
         spec-type: pkg-action-list
-      copyrights-by-license:
-        description: null
-        spec-type: pkg-copyrights-by-license
       destination-directory:
         description: |
           It shall be the destination directory.
@@ -53,6 +50,12 @@ spec-info:
       files:
         description: null
         spec-type: pkg-file-state-list
+      license-files:
+        description: null
+        spec-type: pkg-license-files
+      license-info:
+        description: null
+        spec-type: pkg-license-info-list
       params:
         description: |
           It shall be an optional set of parameters which may be used for
@@ -64,9 +67,9 @@ spec-info:
     description: |
       This set of attributes specifies a workspace directory.
     mandatory-attributes:
-    - copyrights-by-license
     - destination-directory
     - directory
+    - license-info
 spec-name: Workspace Directory Item Type
 spec-type: pkg-workspace-directory
 type: spec

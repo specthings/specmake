@@ -60,8 +60,8 @@ ${.:/change-list}
 ${.:/open-issues}
 .. license-info
 ${.:/license-info}
-.. clear-copyrights-by-license
-${.:/clear-copyrights-by-license}
+.. change-license-info
+${.:/change-license-info}
 .. license-info
 ${.:/license-info}
 .. build-description
