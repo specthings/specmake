@@ -1622,7 +1622,7 @@ Interface
     .. code-block:: c
 
         typedef struct {
-          int b;
+          int a;
         } Struct;
 
 Members
@@ -1668,6 +1668,12 @@ Interface
 
         typedef struct StructBoth {
           int a;
+          union {
+            struct {
+              long c;
+            } b;
+            unsigned int e;
+          };
         } StructBoth;
 
 Members
@@ -1678,6 +1684,12 @@ Members
         +-+-+
         | a | The StructBoth member. |
         | | Description. |
+        +-+-+
+        | b | The StructBoth nested struct. |
+        +-+-+
+        | b.c | The StructBoth nested member. |
+        +-+-+
+        | e | The StructBoth union member. |
         +-+-+
 
 Description
