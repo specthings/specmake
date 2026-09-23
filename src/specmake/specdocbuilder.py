@@ -585,40 +585,70 @@ def _document_register_block(ctx: _Context) -> None:
     _add_validations(ctx)
 
 
-def _document_compound(ctx: _Context) -> None:
-    _add_brief(ctx)
-    _document_unspecified(ctx)
+def _compound_member(ctx: _Context, member: dict,
+                     prefix: str) -> tuple[str, Any]:
     enabled_set = frozenset(f"defined({enable})"
                             for enable in ctx.spec.enabled_set)
-    members = []
-    definitions = []
-    for index, member in enumerate(ctx.item["definition"]):
-        prefix = f"definition[{index}]"
-        for variant in member["variants"]:
-            if is_enabled(enabled_set,
-                          ctx.mapper.substitute_data(variant["enabled-by"])):
-                prefix_2 = f"{prefix}/variants[{index}]/definition"
-                definition = variant["definition"]
-                break
+    for index, variant in enumerate(member["variants"]):
+        if is_enabled(enabled_set,
+                      ctx.mapper.substitute_data(variant["enabled-by"])):
+            return f"{prefix}/variants[{index}]/definition", variant[
+                "definition"]
+    return f"{prefix}/default", member["default"]
+
+
+def _align_compound_entries(entries: list[str | list[str]]) -> list[str]:
+    decls = iter(
+        align_declarations(
+            [entry for entry in entries if isinstance(entry, str)]))
+    lines: list[str] = []
+    for entry in entries:
+        if isinstance(entry, str):
+            lines.append(f"{next(decls)};")
         else:
-            prefix_2 = f"{prefix}/default"
-            definition = member["default"]
-        if definition is not None:
+            lines.extend(entry)
+    return lines
+
+
+def _compound_members(ctx: _Context, compound_members: list[dict], prefix: str,
+                      scope: str, members: list[tuple[str, str]]) -> list[str]:
+    entries: list[str | list[str]] = []
+    for index, member in enumerate(compound_members):
+        prefix_2, definition = _compound_member(
+            ctx, member, os.path.join(prefix, f"definition[{index}]"))
+        if definition is None:
+            continue
+        name = definition["name"]
+        if name:
             text = definition["brief"].strip()
             if definition["description"]:
                 text += "\n" + definition["description"].strip()
-            members.append((definition["name"],
-                            ctx.mapper.substitute(text, prefix=prefix_2)))
-            definitions.append(
+            members.append(
+                (f"{scope}{name}", ctx.mapper.substitute(text,
+                                                         prefix=prefix_2)))
+        if definition["kind"] == "member":
+            entries.append(
                 ctx.code_mapper.substitute(definition["definition"],
                                            prefix=prefix_2))
-    # A compound may legitimately have no member, for example an opaque
-    # type documented by its typedef alone.  align_declarations() takes
-    # the maximum over the declarations, which raises on an empty list.
-    if definitions:
-        decls = [f"  {decl};" for decl in align_declarations(definitions)]
-    else:
-        decls = []
+        else:
+            # The members of an anonymous compound belong to the scope of
+            # the enclosing compound.
+            entries.append([f"{definition['kind']} {{"] + [
+                f"  {line}" for line in _compound_members(
+                    ctx, definition["definition"], prefix_2,
+                    f"{scope}{name}." if name else scope, members)
+            ] + [f"}} {name};" if name else "};"])
+    return _align_compound_entries(entries)
+
+
+def _document_compound(ctx: _Context) -> None:
+    _add_brief(ctx)
+    _document_unspecified(ctx)
+    members: list[tuple[str, str]] = []
+    decls = [
+        f"  {line}" for line in _compound_members(ctx, ctx.item["definition"],
+                                                  "", "", members)
+    ]
     _add_type_definition(ctx.content, ctx.item["name"],
                          ctx.item["definition-kind"],
                          ctx.item["interface-type"], decls)

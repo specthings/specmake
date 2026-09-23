@@ -13,6 +13,58 @@ definition:
     kind: member
     name: a
   variants: []
+- default:
+    brief: |
+      The StructBoth union.
+    definition:
+    - default:
+        brief: |
+          The StructBoth nested struct.
+        definition:
+        - default:
+            brief: |
+              The StructBoth nested member.
+            definition: long ${.:name}
+            description: null
+            kind: member
+            name: c
+          variants: []
+        - default: null
+          variants:
+          - definition:
+              brief: |
+                The disabled StructBoth nested member.
+              definition: int ${.:name}
+              description: null
+              kind: member
+              name: d
+            enabled-by: false
+        description: null
+        kind: struct
+        name: b
+      variants: []
+    - default: null
+      variants:
+      - definition:
+          brief: |
+            The disabled StructBoth union member.
+          definition: int ${.:name}
+          description: null
+          kind: member
+          name: f
+        enabled-by: false
+      - definition:
+          brief: |
+            The StructBoth union member.
+          definition: unsigned int ${.:name}
+          description: null
+          kind: member
+          name: e
+        enabled-by: true
+    description: null
+    kind: union
+    name: ''
+  variants: []
 definition-kind: typedef-and-struct
 description: |
   Description.
