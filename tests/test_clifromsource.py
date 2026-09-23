@@ -1898,3 +1898,29 @@ def test_generate_demands_the_license_of_a_generated_item(tmp_path):
     assert str(excinfo.value.__cause__) == (
         "the task states no copyrights of a generated item: add it to the "
         "data of the task or of the group of group FooGroup")
+
+
+def test_prune_spares_a_manifest_entry_of_another_shape(tmp_path):
+    spec_dir = tmp_path / "spec"
+    spec_dir.mkdir()
+    _manifest_path(spec_dir).write_text("[]", encoding="utf-8")
+    _generate(tmp_path,
+              _foo_group_config(spec_dir),
+              _foo_group_xml_files(),
+              prune=True)
+    assert (spec_dir / "if" / "group.yml").is_file()
+    for name in ("name", "list", "other"):
+        (spec_dir / "if" / f"{name}.yml").write_text("stale: true\n")
+    _manifest_path(spec_dir).write_text(json.dumps({
+        "/if/name": "FooGroup",
+        "/if/list": ["FooGroup", 1],
+        "/if/other": 2
+    }),
+                                        encoding="utf-8")
+    _generate(tmp_path,
+              _foo_group_config(spec_dir),
+              _foo_group_xml_files(),
+              prune=True)
+    assert not (spec_dir / "if" / "name.yml").exists()
+    assert not (spec_dir / "if" / "list.yml").exists()
+    assert (spec_dir / "if" / "other.yml").is_file()
