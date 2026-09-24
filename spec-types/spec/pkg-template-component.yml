@@ -25,7 +25,8 @@ spec-info:
           component in full.  The tool expands the match in the replacement
           and converts the result to lower case.  The result is an enabled set
           key of the upper-level component.  Several patterns may match one
-          key.
+          key.  A value which a variable substitution inserts into a key is
+          part of the regular expression.
         spec-type: str-to-str
     description: |
       This set of attributes specifies a component template.

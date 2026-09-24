@@ -632,11 +632,25 @@ def _gather_feedback(component: WorkspaceComponent, selection: ItemSelection,
         _gather_feedback(component, selection, template, feedback_set)
     mapping = component.substitute(item["enabled-set-feedback-mapping"])
     for pattern, replacement in mapping.items():
-        compiled = re.compile(pattern)
+        try:
+            compiled = re.compile(pattern)
+        except re.error as err:
+            raise ValueError(
+                f"{component.uid}: the enabled set feedback mapping of "
+                f"{item.uid} states the invalid pattern '{pattern}': "
+                f"{err}") from err
         for key in selection.enabled_set:
             match = compiled.fullmatch(key)
-            if match is not None:
+            if match is None:
+                continue
+            try:
                 feedback_set.add(match.expand(replacement).lower())
+            except re.error as err:
+                raise ValueError(
+                    f"{component.uid}: the enabled set feedback mapping of "
+                    f"{item.uid} states the invalid replacement "
+                    f"'{replacement}' of the pattern '{pattern}' for the "
+                    f"enabled set key '{key}': {err}") from err
 
 
 def _prepare_components(director: PackageBuildDirector,
