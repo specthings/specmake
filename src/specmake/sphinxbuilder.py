@@ -472,6 +472,11 @@ class SphinxBuilder(DirectoryState):
         return []
 
     def register_part(self, item: Item) -> None:
+        if self._content_context is None:
+            # The substitution of the document license maps parts ahead of
+            # the aggregate which needs that license.  A run starts with a
+            # new aggregate.
+            return
         self._aggregate().register(item["SPDX-License-Identifier"],
                                    item["copyrights"], item.uid)
 
