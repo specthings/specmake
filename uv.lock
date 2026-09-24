@@ -2388,7 +2388,7 @@ requires-dist = [
     { name = "matplotlib", specifier = ">=3.10.1" },
     { name = "specitems", specifier = ">=1.7.0" },
     { name = "spectestrunner", specifier = ">=0.9.3" },
-    { name = "specware", specifier = ">=1.3.1" },
+    { name = "specware", specifier = ">=1.3.2" },
     { name = "sphinx", specifier = ">=8.2.3" },
     { name = "sphinx-better-subsection", specifier = ">=0.2" },
     { name = "sphinx-rtd-theme", specifier = ">=3.0.2" },
@@ -2437,14 +2437,14 @@ wheels = [
 
 [[package]]
 name = "specware"
-version = "1.3.1"
+version = "1.3.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "specitems" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/18/2c/c0d5964dfa96f4c60dc68f98fb6edd15533d178b4cc192528180a9a367d3/specware-1.3.1.tar.gz", hash = "sha256:0bca73613bf5565bc827b7b037098c3e930b71d736ebcbba169245a7d035dd15", size = 102303, upload-time = "2026-09-24T02:33:29.259Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a2/5a/378ced7a1c018c73ec35169bbe0b0bd9307c382642d22a8b13671a712d51/specware-1.3.2.tar.gz", hash = "sha256:4374dc50dbd0698dd5df393d9488d081efb76ee68bd5cb2896072101b0d21527", size = 102456, upload-time = "2026-09-24T04:10:24.836Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/49/ab/d4abba31afddde2f6f1f1ceb3cc400a44039f5a4f3bd64a4f7c7e9c6510a/specware-1.3.1-py3-none-any.whl", hash = "sha256:c757d9085ad9c43f744861014a0c2a45aecbe35c0ebc30b42e4d5a8fd0450a64", size = 119401, upload-time = "2026-09-24T02:33:30.3Z" },
+    { url = "https://files.pythonhosted.org/packages/aa/6c/9b1674a3f0e4a1f44d02308d633ac69635a2748c33239b9ece00321c80eb/specware-1.3.2-py3-none-any.whl", hash = "sha256:c7e9247376f79755cf7bb593c9ecf909602c3ac02ffccf7164874b6e6bebc03d", size = 119550, upload-time = "2026-09-24T04:10:23.518Z" },
 ]
 
 [[package]]
