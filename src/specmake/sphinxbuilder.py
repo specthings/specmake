@@ -681,8 +681,9 @@ class SphinxBuilder(DirectoryState):
         Get the copyrights and the text of one license of the document.
 
         The argument names the license.  The result is empty where no part of
-        the document takes it.  A license which the document reproduces not
-        gets a reference to its uniform resource identifier, if it has one.
+        the document takes it.  A license whose text the document does not
+        reproduce gets a reference to its uniform resource identifier, if it
+        has one.
         """
         the_license = ctx.args
         if not the_license:
