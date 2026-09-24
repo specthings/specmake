@@ -436,3 +436,40 @@ def test_workspace_component(tmpdir):
     workspace.director.remove("/pkg/source/delete-me")
     buildspace_3 = export_to_buildspace(workspace, buildspace_config)
     assert "/pkg/source/delete-me" not in buildspace_3.cache
+
+
+def _create_component_workspace(tmpdir, mapping: str):
+    test_dir = os.path.dirname(__file__)
+    spec_dirs = []
+    for name in ("spec-pkg", "spec-pkg-component"):
+        spec_dir = os.path.join(tmpdir, name)
+        shutil.copytree(os.path.join(test_dir, name), spec_dir)
+        spec_dirs.append(spec_dir)
+    template = os.path.join(tmpdir, "spec-pkg", "pkg", "template", "bsp",
+                            "component.yml")
+    with open(template, "r", encoding="utf-8") as src:
+        text = src.read()
+    text = text.replace("  bsp-feature: pkg.feature.red\n",
+                        f"  bsp-feature: pkg.feature.red\n{mapping}\n")
+    with open(template, "w", encoding="utf-8") as dst:
+        dst.write(text)
+    return create_workspace(
+        WorkspaceConfig(spec_directories=spec_dirs,
+                        workspace_directory=os.path.join(
+                            test_dir, "workspace"),
+                        cache_directory=os.path.join(tmpdir, "cache")))
+
+
+def test_workspace_component_invalid_feedback_mapping(tmpdir):
+    with pytest.raises(ValueError) as err:
+        _create_component_workspace(os.path.join(tmpdir, "a"),
+                                    "  TEST_CONFIG_(.*: pkg")
+    assert ("the enabled set feedback mapping of /pkg/template/bsp/component "
+            "states the invalid pattern 'TEST_CONFIG_(.*': missing ), "
+            "unterminated subpattern") in str(err.value)
+    with pytest.raises(ValueError) as err:
+        _create_component_workspace(os.path.join(tmpdir, "b"),
+                                    "  TEST_CONFIG_(F)(.*): pkg.\\3")
+    assert ("states the invalid replacement 'pkg.\\3' of the pattern "
+            "'TEST_CONFIG_(F)(.*)' for the enabled set key 'TEST_CONFIG_FOO': "
+            "invalid group reference 3") in str(err.value)
