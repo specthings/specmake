@@ -1084,6 +1084,8 @@ Terms, definitions and abbreviated terms
     }]
 
     _set_enabled_set(package, ["sphinx-builder-2"])
+    director.item_cache["/pkg/deployment/doc-2"]["document-license"] = (
+        "${.:/component/license}")
     doc_2 = director["/pkg/deployment/doc-2"]
     assert doc_2.substitute("${.:/document-license-text:BSD-2-Clause}") == ""
     assert doc_2.substitute(

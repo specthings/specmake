@@ -155,10 +155,13 @@ def _get_accepted_licenses(component: "PackageComponent") -> list[str]:
 def _create_content_context(item: Item, component: "PackageComponent",
                             provider: LicenseProvider) -> ContentContext:
     the_license = item.get("document-license", None)
-    accepted = item.get("document-accepted-licenses", None)
     if the_license is None:
         the_license = component["license"]
         accepted = _get_accepted_licenses(component)
+    else:
+        the_license = component.substitute(the_license, item)
+        accepted = component.substitute(
+            item.get("document-accepted-licenses", None), item)
     return ContentContext(
         LicenseAggregate(the_license, accepted or [], item.uid), None,
         provider)
