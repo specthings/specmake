@@ -37,7 +37,8 @@ from specitems import (COL_SPAN, EnabledSet, GenericContent, Item,
                        Link, link_is_enabled, make_label, TextContent)
 from specware import (CodeMapper, TransitionMap, PreCondsOfPostCond,
                       align_declarations, document_directive, document_option,
-                      forward_declaration)
+                      forward_declaration, get_interface_container,
+                      get_register_block_layout)
 
 from .docbuilder import DocumentBuilder
 from .pkgitems import PackageBuildDirector
@@ -126,18 +127,29 @@ def _add_links(ctx: _Context,
                down_phrase: str,
                down_prefix: str = "This",
                is_link_enabled: Callable[[Link], bool] = link_is_enabled,
-               down_name: str | None = None) -> None:
+               down_name: str | None = None,
+               down_parent_role: str | None = None) -> None:
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-positional-arguments
     # pylint: disable=too-many-locals
     up_items = [
-        link.item for link in ctx.item.links_to_parents(up_parent_role)
+        link.item for link in itertools.chain(
+            ctx.item.links_to_parents(up_parent_role),
+            ctx.item.links_to_children(down_parent_role or []))
         if is_link_enabled(link)
     ]
     down_items = [
-        link.item for link in ctx.item.links_to_children(up_parent_role)
+        link.item for link in itertools.chain(
+            ctx.item.links_to_children(up_parent_role),
+            ctx.item.links_to_parents(down_parent_role or []))
         if is_link_enabled(link)
     ]
+    if down_parent_role is not None:
+        # A link of the down parent role relates the same items as a link of
+        # the up parent role in the other direction.  The order of the items
+        # does not depend on the item which holds the link.
+        up_items.sort(key=lambda item: item.uid)
+        down_items.sort(key=lambda item: item.uid)
     kind = get_kind(ctx.item)
     if down_name is None:
         if up_items or down_items:
@@ -172,7 +184,14 @@ def _add_default_links(ctx: _Context) -> None:
                "Interface placement",
                "is placed into",
                "contains",
-               down_name="Interface members")
+               down_name="Interface members",
+               down_parent_role="register-block-host")
+    _add_links(ctx,
+               "register-block-base",
+               "Register block base",
+               "is derived from",
+               "is the base of",
+               down_name="Register block derivatives")
     _add_links(ctx,
                "interface-function",
                "Interface function",
@@ -236,7 +255,7 @@ def _document_unspecified(ctx: _Context,
                           postfix: str = "") -> None:
     kind = get_kind(ctx.item)
     name = f"{prefix}{ctx.item['name']}{postfix}"
-    container = ctx.item.parent('interface-placement')
+    container = get_interface_container(ctx.item)
     container_kind = get_kind(container)
     with ctx.content.topic("Requirement"):
         ctx.content.wrap(
@@ -560,13 +579,14 @@ def _document_register_block(ctx: _Context) -> None:
     _document_unspecified(ctx)
     rows: list[tuple[str | int, ...]] = [("Register block", COL_SPAN),
                                          ("Offset", "Register")]
-    for member in ctx.item["definition"]:
+    layout = get_register_block_layout(ctx.item)
+    for member in (part.data for part in layout.definition):
         definition = _definition(member, ctx.mapper, ctx.spec.enabled_set)
         count = definition["count"]
         array = f"[ {count} ]" if count > 1 else ""
         rows.append((f"{member['offset']:#x}", f"{definition['name']}{array}"))
     ctx.content.add_grid_table(rows, [20, 80], header_rows=2)
-    for reg in ctx.item["registers"]:
+    for reg in (part.data for part in layout.registers):
         rows = [(f"{reg['name']} (register)", COL_SPAN),
                 (f"Bits [0:{reg['width'] - 1}]", f"{reg['brief'].strip()}")]
         for bits in reg["bits"]:

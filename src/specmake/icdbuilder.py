@@ -27,6 +27,7 @@
 import itertools
 
 from specitems import Item, ItemGetValueContext, TextContent
+from specware import get_interface_members
 
 from .pkgitems import PackageBuildDirector
 from .specdocbuilder import SpecDocumentBuilder
@@ -34,7 +35,7 @@ from .specdocbuilder import SpecDocumentBuilder
 
 def _visit_domain(item: Item, interfaces: list[Item]) -> None:
     interfaces.append(item)
-    for item_2 in itertools.chain(item.children("interface-placement"),
+    for item_2 in itertools.chain(get_interface_members(item),
                                   item.parents("interface-enumerator")):
         _visit_domain(item_2, interfaces)
 

@@ -36,6 +36,7 @@ from specware import (augment_with_test_case_links, augment_with_test_links,
                       get_items_by_type_map, get_item_types_by_prefix,
                       get_items_by_types, get_interface_items,
                       get_interface_and_requirement_items,
+                      get_register_block_hosts, get_register_block_identifier,
                       get_requirement_items, is_validation_by_test,
                       recursive_is_enabled, validate)
 
@@ -99,6 +100,18 @@ def _name_design_group(name_to_item: dict[str, Item], item: Item) -> None:
     _add_unique_name(name_to_item, item, f"group/{identifier}")
 
 
+def _name_register_block(name_to_item: dict[str, Item], item: Item) -> None:
+    if not item.enabled:
+        return
+    _name_default(name_to_item, item)
+    if item.get("identifier", None) is None and not any(
+            link.data.get("identifier", None) is not None
+            for link in get_register_block_hosts(item)):
+        return
+    _add_unique_name(name_to_item, item,
+                     f"group/{get_register_block_identifier(item)}")
+
+
 def _name_ident_group(name_to_item: dict[str, Item], item: Item) -> None:
     if not item.enabled:
         return
@@ -152,7 +165,7 @@ _NAME: dict[str, Callable[[dict[str, Item], Item], None]] = {
     "interface/group": _name_group,
     "interface/header-file": _name_header,
     "interface/macro": _name_default,
-    "interface/register-block": _name_group,
+    "interface/register-block": _name_register_block,
     "interface/struct": _name_type,
     "interface/typedef": _name_type,
     "interface/union": _name_type,

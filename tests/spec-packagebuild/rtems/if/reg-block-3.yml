@@ -6,55 +6,52 @@ copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
 description: null
 enabled-by: true
-identifier: RegBlock2
+identifier: RegBlock3
 index-entries: []
 interface-type: register-block
 links:
 - role: interface-ingroup
   uid: group
+- role: register-block-base
+  uid: reg-block-2
 definition:
 - default:
     count: 1
-    name: REG_BLOCK_2_A
-  offset: 0x0
+    name: REG_BLOCK_3_C
+  offset: 0x8
   variants: []
-- default:
-    count: 1
-    name: REG_BLOCK_2_B
-  offset: 0x4
-  variants: []
-register-prefix: RegBlock2
-register-block-group: Reg Block 2
+register-prefix: RegBlock3
+register-block-group: Reg Block 3
 register-block-size: 16
 registers:
+- bits:
+  - default:
+    - properties: [r, w]
+      brief: null
+      description: null
+      name: BITS_B3
+      start: 0
+      width: 8
+    variants: []
+  brief: |
+    REG_BLOCK_2_B bits of the derived register block.
+  description: null
+  name: REG_BLOCK_2_B
+  width: 32
 - bits:
   - default:
     - properties: [r]
       brief: null
       description: null
-      name: BITS_A
-      start: 0
-      width: 32
+      name: BITS_C
+      start: 4
+      width: 4
     variants: []
   brief: |
-    REG_BLOCK_2_A bits.
+    REG_BLOCK_3_C bits.
   description: null
-  name: REG_BLOCK_2_A
+  name: REG_BLOCK_3_C
   width: 32
-- bits:
-  - default:
-    - properties: [w]
-      brief: null
-      description: null
-      name: BITS_B
-      start: 27
-      width: 5
-    variants: []
-  brief: |
-    REG_BLOCK_2_B bits.
-  description: null
-  name: REG_BLOCK_2_B
-  width: 32
-name: reg_block_2
+name: reg_block_3
 notes: null
 type: interface

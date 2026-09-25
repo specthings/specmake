@@ -28,7 +28,10 @@ from pathlib import Path
 
 import pytest
 
+from specitems import EmptyItemCache
+
 from specmake import RTEMSItemCache
+from specmake.rtems import _name_register_block
 
 from tests import util
 
@@ -86,9 +89,9 @@ component.
         "/rtems/if/group", "/rtems/if/group-2", "/rtems/if/group-a",
         "/rtems/if/group-acfg", "/rtems/if/group-b", "/rtems/if/header",
         "/rtems/if/header-2", "/rtems/if/obj", "/rtems/if/reg-block",
-        "/rtems/if/reg-block-2", "/rtems/if/struct", "/rtems/if/struct-both",
-        "/rtems/if/struct-only", "/rtems/if/typedef", "/rtems/if/union",
-        "/rtems/if/union-both", "/rtems/if/union-only",
+        "/rtems/if/reg-block-2", "/rtems/if/reg-block-3", "/rtems/if/struct",
+        "/rtems/if/struct-both", "/rtems/if/struct-only", "/rtems/if/typedef",
+        "/rtems/if/union", "/rtems/if/union-both", "/rtems/if/union-only",
         "/rtems/if/unspec-define", "/rtems/if/unspec-enum",
         "/rtems/if/unspec-enumerator", "/rtems/if/unspec-function",
         "/rtems/if/unspec-group", "/rtems/if/unspec-header",
@@ -127,9 +130,9 @@ component.
         "/rtems/if/group", "/rtems/if/group-2", "/rtems/if/group-a",
         "/rtems/if/group-acfg", "/rtems/if/group-b", "/rtems/if/header",
         "/rtems/if/header-2", "/rtems/if/obj", "/rtems/if/reg-block",
-        "/rtems/if/reg-block-2", "/rtems/if/struct", "/rtems/if/struct-both",
-        "/rtems/if/struct-only", "/rtems/if/typedef", "/rtems/if/union",
-        "/rtems/if/union-both", "/rtems/if/union-only",
+        "/rtems/if/reg-block-2", "/rtems/if/reg-block-3", "/rtems/if/struct",
+        "/rtems/if/struct-both", "/rtems/if/struct-only", "/rtems/if/typedef",
+        "/rtems/if/union", "/rtems/if/union-both", "/rtems/if/union-only",
         "/rtems/if/unspec-define", "/rtems/if/unspec-enum",
         "/rtems/if/unspec-enumerator", "/rtems/if/unspec-function",
         "/rtems/if/unspec-group", "/rtems/if/unspec-header",
@@ -172,3 +175,40 @@ def test_rtems_item_cache_errors(caplog, tmpdir):
              r"specify the same interface group: the_enum")
     with pytest.raises(ValueError, match=match):
         director["/pkg/steps/rtems-item-cache"]
+
+
+def _register_block(enabled_by: bool, links: list[dict], **kwargs) -> dict:
+    return {
+        "enabled-by": enabled_by,
+        "interface-type": "register-block",
+        "links": links,
+        "type": "interface",
+        **kwargs
+    }
+
+
+def test_rtems_name_register_block():
+    item_cache = EmptyItemCache()
+    item_cache.add_items({
+        "/h":
+        _register_block(True, [{
+            "identifier": "HostId",
+            "role": "register-block-host",
+            "style": "default",
+            "uid": "hosted"
+        }]),
+        "/hosted":
+        _register_block(True, []),
+        "/no-identifier":
+        _register_block(True, []),
+        "/disabled":
+        _register_block(False, [], identifier="Disabled"),
+        "/own":
+        _register_block(True, [], identifier="Own"),
+    })
+    name_to_item: dict = {}
+    for uid in ["/hosted", "/no-identifier", "/disabled", "/own"]:
+        _name_register_block(name_to_item, item_cache[uid])
+    assert sorted(name_to_item) == [
+        "Hosted", "NoIdentifier", "Own", "group/HostId", "group/Own"
+    ]

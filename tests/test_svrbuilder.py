@@ -35,7 +35,7 @@ def test_svrbuilder(caplog, tmpdir):
         ["aggregate-test-results", "link-hub", "djf-svr"])
     svr_builder = package.director["/pkg/deployment/doc-djf-svr"]
     assert isinstance(svr_builder, SVRBuilder)
-    assert len(svr_builder.get_items_of_document()) == 64
+    assert len(svr_builder.get_items_of_document()) == 65
     assert text == """.. SPDX-License-Identifier: CC-BY-SA-4.0
 
 .. Copyright (C) 2026 embedded brains GmbH & Co. KG

@@ -180,6 +180,8 @@ validations, so the corresponding table entries are N/A.
     + + +-+-+
     | | | `/rtems/if/reg-block-2`_ | **not validated** group member |
     + + +-+-+
+    | | | `/rtems/if/reg-block-3`_ | **not validated** group member |
+    + + +-+-+
     | | | `/rtems/if/struct`_ | **not validated** group member |
     + + +-+-+
     | | | `/rtems/if/struct-both`_ | **not validated** group member |
@@ -244,6 +246,8 @@ validations, so the corresponding table entries are N/A.
     + + +-+-+
     | | | `/rtems/if/reg-block-2`_ | **not validated** interface placement |
     + + +-+-+
+    | | | `/rtems/if/reg-block-3`_ | **not validated** interface placement |
+    + + +-+-+
     | | | `/rtems/if/struct`_ | **not validated** interface placement |
     + + +-+-+
     | | | `/rtems/if/struct-both`_ | **not validated** interface placement |
@@ -263,6 +267,8 @@ validations, so the corresponding table entries are N/A.
     | _`/rtems/if/reg-block` | **not validated** | N/A | N/A |
     +-+-+-+-+
     | _`/rtems/if/reg-block-2` | **not validated** | N/A | N/A |
+    +-+-+-+-+
+    | _`/rtems/if/reg-block-3` | **not validated** | N/A | N/A |
     +-+-+-+-+
     | _`/rtems/if/struct` | **not validated** | N/A | N/A |
     +-+-+-+-+
@@ -982,6 +988,9 @@ Group memberships
     - `reg_block_2
       </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2>`__
 
+    - `reg_block_3
+      </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock3>`__
+
     - `Struct
       </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifstruct>`__
 
@@ -1044,6 +1053,10 @@ Validations
 
     - `reg_block_2
       </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2>`__
+      (**not validated** group member)
+
+    - `reg_block_3
+      </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock3>`__
       (**not validated** group member)
 
     - `Struct
@@ -1302,6 +1315,9 @@ Interface members
     - `reg_block_2
       </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2>`__
 
+    - `reg_block_3
+      </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock3>`__
+
     - `Struct
       </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifstruct>`__
 
@@ -1361,6 +1377,10 @@ Validations
 
     - `reg_block_2
       </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2>`__
+      (**not validated** interface placement)
+
+    - `reg_block_3
+      </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock3>`__
       (**not validated** interface placement)
 
     - `Struct
@@ -1602,6 +1622,89 @@ Group membership
 Interface placement
     This register block is placed into the header file `<blub.h>
     </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifheader>`__.
+
+Register block derivatives
+    This register block is the base of the register block `reg_block_3
+    </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock3>`__.
+
+Validation
+    This register block is **not validated**.
+
+.. _SpecRtemsIfRegBlock3:
+
+spec:/rtems/if/reg-block-3
+--------------------------
+
+This structure defines the Reg Block 3 register block memory map.
+
+Requirement
+    The `<blub.h>
+    </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifheader>`__
+    header file shall provide the register block ``reg_block_3``.
+
+.. table::
+    :class: longtable
+    :widths: 20,80
+
+    +-+-+
+    | Register block |
+    +-+-+
+    | Offset | Register |
+    +=+=+
+    | 0x0 | REG_BLOCK_2_A |
+    +-+-+
+    | 0x4 | REG_BLOCK_2_B |
+    +-+-+
+    | 0x8 | REG_BLOCK_3_C |
+    +-+-+
+
+.. table::
+    :class: longtable
+    :widths: 20,80
+
+    +-+-+
+    | REG_BLOCK_2_A (register) |
+    +-+-+
+    | Bits [0:31] | REG_BLOCK_2_A bits. |
+    +=+=+
+    | [0:31] | BITS_A |
+    +-+-+
+
+.. table::
+    :class: longtable
+    :widths: 20,80
+
+    +-+-+
+    | REG_BLOCK_2_B (register) |
+    +-+-+
+    | Bits [0:31] | REG_BLOCK_2_B bits of the derived register block. |
+    +=+=+
+    | [0:7] | BITS_B3 |
+    +-+-+
+
+.. table::
+    :class: longtable
+    :widths: 20,80
+
+    +-+-+
+    | REG_BLOCK_3_C (register) |
+    +-+-+
+    | Bits [0:31] | REG_BLOCK_3_C bits. |
+    +=+=+
+    | [4:7] | BITS_C |
+    +-+-+
+
+Group membership
+    This register block is a member of the interface group `Blub
+    </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup>`__.
+
+Interface placement
+    This register block is placed into the header file `<blub.h>
+    </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifheader>`__.
+
+Register block base
+    This register block is derived from the register block `reg_block_2
+    </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2>`__.
 
 Validation
     This register block is **not validated**.

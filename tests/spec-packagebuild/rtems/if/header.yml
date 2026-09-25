@@ -11,6 +11,12 @@ links:
   uid: domain
 - role: interface-ingroup
   uid: group
+- role: register-block-host
+  style: default
+  uid: reg-block-2
+- role: register-block-host
+  style: default
+  uid: reg-block-3
 path: blub.h
 prefix: bar/more
 type: interface
