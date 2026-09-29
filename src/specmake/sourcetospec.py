@@ -675,6 +675,11 @@ class DoxygenEnumValue(DoxygenItem):
 class DoxygenFile(DoxygenContainer):
     """ Represents a Doxygen file item. """
 
+    def __init__(self, ctx: "DoxygenContext", kind: str, doxygen_id: str,
+                 name: str) -> None:
+        super().__init__(ctx, kind, doxygen_id, name)
+        self.path = name
+
     @property
     def uid(self) -> str:
         """
@@ -721,7 +726,7 @@ class DoxygenFile(DoxygenContainer):
         del data["name"]
         interface_type = self.header_interface_type
         data["interface-type"] = interface_type
-        data["path"] = self.name
+        data["path"] = self.path
         if interface_type == "unspecified-header-file":
             # The header is the source of truth, so the item specifies
             # no content of its own and has no place in an interface
@@ -1035,6 +1040,21 @@ def _relationships(elem: ElementTree.Element, item: DoxygenItem) -> None:
             item.add_member(_doxygen_id(member))
 
 
+def _file_relationships(elem: ElementTree.Element, item: DoxygenItem) -> None:
+    """
+    Take the path of the file and resolve its members.
+
+    The location of a file is its path after the ``STRIP_FROM_PATH`` of the
+    Doxyfile.  A Doxyfile which strips the include directories gives the path
+    by which a source file includes the header.
+    """
+    assert isinstance(item, DoxygenFile)
+    location = elem.find("location")
+    assert location is not None
+    item.path = location.attrib["file"]
+    _relationships(elem, item)
+
+
 def _compound_relationships(elem: ElementTree.Element,
                             item: DoxygenItem) -> None:
     """
@@ -1058,7 +1078,7 @@ def _compound_relationships(elem: ElementTree.Element,
 
 
 _RELATIONSHIP_HANDLER = {
-    "file": _relationships,
+    "file": _file_relationships,
     "group": _relationships,
     "struct": _compound_relationships,
     "union": _compound_relationships

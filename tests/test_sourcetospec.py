@@ -2051,6 +2051,18 @@ def test_a_header_item_is_a_header_file_by_default(tmp_path):
         assert key in data
 
 
+def test_a_header_item_takes_its_path_from_the_location(tmp_path):
+    # A Doxyfile which strips the include directory gives the path by
+    # which a source file includes the header.
+    header = _header_item(tmp_path)
+    elem = ElementTree.fromstring(
+        '<compounddef kind="file"><compoundname>header.h</compoundname>'
+        '<location file="sub/dir/header.h"/></compounddef>')
+    sourcetospec._file_relationships(elem, header)
+    assert header.name == "header.h"
+    assert header.export()["path"] == "sub/dir/header.h"
+
+
 def test_an_unspecified_header_item_specifies_no_content(tmp_path):
     # The header itself is the source of truth, so the item carries
     # neither documentation nor a prefix of its own.
