@@ -178,7 +178,10 @@ def _add_default_links(ctx: _Context) -> None:
                "is refined by",
                down_name="Refined by")
     _add_links(ctx, ["interface-ingroup", "interface-ingroup-hidden"],
-               "Group membership", "is a member of", "contains")
+               "Group membership",
+               "is a member of",
+               "contains",
+               down_parent_role="interface-group-member")
     _add_links(ctx,
                "interface-placement",
                "Interface placement",

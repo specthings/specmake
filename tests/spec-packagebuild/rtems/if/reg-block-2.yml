@@ -9,9 +9,7 @@ enabled-by: true
 identifier: RegBlock2
 index-entries: []
 interface-type: register-block
-links:
-- role: interface-ingroup
-  uid: group
+links: []
 definition:
 - default:
     count: 1

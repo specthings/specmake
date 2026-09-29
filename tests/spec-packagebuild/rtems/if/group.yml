@@ -12,6 +12,8 @@ interface-type: group
 links:
 - role: interface-placement
   uid: header
+- role: interface-group-member
+  uid: reg-block-2
 - role: requirement-refinement
   uid: /req/api
 name: Blub
