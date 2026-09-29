@@ -90,68 +90,69 @@ def _add_sdd_link(ctx: _Context) -> None:
                             f"{ctx.mapper.format_link(name, path)}.")
 
 
-def _add_parent_links(ctx: _Context, parents: list[Item], kind: str,
-                      parent_role: str) -> None:
+def _add_up_links(ctx: _Context, up_items: list[Item], kind: str,
+                  up_phrase: str) -> None:
     get_link = ctx.mapper.get_link
-    if len(parents) == 1:
-        parent = parents[0]
-        parent_kind = get_kind(parent)
-        ctx.content.wrap(f"This {kind} {parent_role} the "
-                         f"{parent_kind} {get_link(parent)}.")
-    elif len(parents) > 1:
-        ctx.content.add_list([get_link(parent) for parent in parents],
-                             f"This {kind} {parent_role} the following items:")
+    if len(up_items) == 1:
+        up_item = up_items[0]
+        up_kind = get_kind(up_item)
+        ctx.content.wrap(f"This {kind} {up_phrase} the "
+                         f"{up_kind} {get_link(up_item)}.")
+    elif len(up_items) > 1:
+        ctx.content.add_list([get_link(up_item) for up_item in up_items],
+                             f"This {kind} {up_phrase} the following items:")
 
 
-def _add_child_links(ctx: _Context, children: list[Item], kind: str,
-                     child_role: str, child_prefix: str) -> None:
+def _add_down_links(ctx: _Context, down_items: list[Item], kind: str,
+                    down_phrase: str, down_prefix: str) -> None:
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-positional-arguments
     get_link = ctx.mapper.get_link
-    if len(children) == 1:
-        child = children[0]
-        child_kind = get_kind(child)
-        ctx.content.wrap(f"{child_prefix} {kind} {child_role} the "
-                         f"{child_kind} {get_link(child)}.")
-    elif len(children) > 1:
+    if len(down_items) == 1:
+        down_item = down_items[0]
+        down_kind = get_kind(down_item)
+        ctx.content.wrap(f"{down_prefix} {kind} {down_phrase} the "
+                         f"{down_kind} {get_link(down_item)}.")
+    elif len(down_items) > 1:
         ctx.content.add_list(
-            [get_link(child) for child in children],
-            f"{child_prefix} {kind} {child_role} the following items:")
+            [get_link(down_item) for down_item in down_items],
+            f"{down_prefix} {kind} {down_phrase} the following items:")
 
 
 def _add_links(ctx: _Context,
-               role: str | list[str],
+               up_parent_role: str | list[str],
                name: str,
-               parent_role: str,
-               child_role: str,
-               child_prefix: str = "This",
+               up_phrase: str,
+               down_phrase: str,
+               down_prefix: str = "This",
                is_link_enabled: Callable[[Link], bool] = link_is_enabled,
-               child_name: str | None = None) -> None:
+               down_name: str | None = None) -> None:
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-positional-arguments
     # pylint: disable=too-many-locals
-    parents = [
-        link.item for link in ctx.item.links_to_parents(role)
+    up_items = [
+        link.item for link in ctx.item.links_to_parents(up_parent_role)
         if is_link_enabled(link)
     ]
-    children = [
-        link.item for link in ctx.item.links_to_children(role)
+    down_items = [
+        link.item for link in ctx.item.links_to_children(up_parent_role)
         if is_link_enabled(link)
     ]
     kind = get_kind(ctx.item)
-    if child_name is None:
-        if parents or children:
-            plural = "s" if len(parents) + len(children) > 1 else ""
+    if down_name is None:
+        if up_items or down_items:
+            plural = "s" if len(up_items) + len(down_items) > 1 else ""
             with ctx.content.topic(f"{name}{plural}"):
-                _add_parent_links(ctx, parents, kind, parent_role)
-                _add_child_links(ctx, children, kind, child_role, child_prefix)
+                _add_up_links(ctx, up_items, kind, up_phrase)
+                _add_down_links(ctx, down_items, kind, down_phrase,
+                                down_prefix)
         return
-    if parents:
+    if up_items:
         with ctx.content.topic(name):
-            _add_parent_links(ctx, parents, kind, parent_role)
-    if children:
-        with ctx.content.topic(child_name):
-            _add_child_links(ctx, children, kind, child_role, child_prefix)
+            _add_up_links(ctx, up_items, kind, up_phrase)
+    if down_items:
+        with ctx.content.topic(down_name):
+            _add_down_links(ctx, down_items, kind, down_phrase, down_prefix)
 
 
 def _add_default_links(ctx: _Context) -> None:
@@ -163,7 +164,7 @@ def _add_default_links(ctx: _Context) -> None:
                "Refines",
                "refines",
                "is refined by",
-               child_name="Refined by")
+               down_name="Refined by")
     _add_links(ctx, ["interface-ingroup", "interface-ingroup-hidden"],
                "Group membership", "is a member of", "contains")
     _add_links(ctx,
@@ -171,13 +172,13 @@ def _add_default_links(ctx: _Context) -> None:
                "Interface placement",
                "is placed into",
                "contains",
-               child_name="Interface members")
+               down_name="Interface members")
     _add_links(ctx,
                "interface-function",
                "Interface function",
                "specifies the function of",
                "is specified by",
-               child_prefix="The function of this")
+               down_prefix="The function of this")
     _add_links(ctx, "function-implementation", "Function implementation",
                "uses functions implemented by",
                "implements a function used by")
