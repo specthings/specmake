@@ -322,19 +322,17 @@ executable.  The executable file had an SHA512 digest of
         self.check_property(rows, info, key, "compiler-version")
 
     def _check_build_info(self, rows: list[list[str]], info: dict) -> None:
-        for option in [
-                "RTEMS_DEBUG", "RTEMS_MULTIPROCESSING", "RTEMS_PARAVIRT",
-                "RTEMS_POSIX_API", "RTEMS_PROFILING", "RTEMS_SMP"
-        ]:
+        for option in ("RTEMS_DEBUG", "RTEMS_MULTIPROCESSING",
+                       "RTEMS_PARAVIRT", "RTEMS_POSIX_API", "RTEMS_PROFILING",
+                       "RTEMS_SMP"):
             self.check(rows, info, option, "build",
                        _listed(option in self.enabled_set),
                        functools.partial(_option, option))
 
     def check_build_options(self, rows: list[list[str]], info: dict) -> None:
         """ Check the test suite build options. """
-        for option in [
-                "debug", "multiprocessing", "posix-api", "profiling", "smp"
-        ]:
+        for option in ("debug", "multiprocessing", "posix-api", "profiling",
+                       "smp"):
             key = f"rtems-{option}"
             name = key.replace("-", "_").upper()
             self.check(rows, info, name, key,

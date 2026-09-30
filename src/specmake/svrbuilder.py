@@ -40,7 +40,7 @@ from .testaggregator import get_test_result_status
 
 _DEFINE_NOT_DEFINED = "requirement/functional/interface-define-not-defined"
 
-_GROUP = ["interface/group", "requirement/non-functional/design-group"]
+_GROUP = ("interface/group", "requirement/non-functional/design-group")
 
 
 def _gather_design_components(item: Item, components: list[Item]) -> None:
@@ -247,6 +247,6 @@ class SVRBuilder(SpecDocumentBuilder):
             label = membench.substitute(link["build-label"])
             sections_by_uid = membench.json_load()[label]["membench"]
             root = self.item.cache["/rtems/req/mem-basic"]
-            table_pivots = ["/rtems/req/mem-smp-1"]
+            table_pivots = ("/rtems/req/mem-smp-1", )
             generate(content, sections_by_uid, root, table_pivots, self.mapper)
             return "\n".join(content)

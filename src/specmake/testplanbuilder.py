@@ -331,10 +331,8 @@ itself.""")
 
     def _get_not_validated_by_test(self, _ctx: ItemGetValueContext) -> str:
         content = self.mapper.create_content(section_level=2)
-        types = [
-            "validation/by-analysis", "validation/by-inspection",
-            "validation/by-review-of-design"
-        ]
+        types = ("validation/by-analysis", "validation/by-inspection",
+                 "validation/by-review-of-design")
         items: list[Item] = []
         for item in self.spec.get_related_items_by_type(types):
             items.extend(parent for parent in item.parents("validation"))

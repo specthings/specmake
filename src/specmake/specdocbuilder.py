@@ -121,7 +121,7 @@ def _add_down_links(ctx: _Context, down_items: list[Item], kind: str,
 
 
 def _add_links(ctx: _Context,
-               up_parent_role: str | list[str],
+               up_parent_role: str | tuple[str, ...],
                name: str,
                up_phrase: str,
                down_phrase: str,
@@ -135,13 +135,13 @@ def _add_links(ctx: _Context,
     up_items = [
         link.item for link in itertools.chain(
             ctx.item.links_to_parents(up_parent_role),
-            ctx.item.links_to_children(down_parent_role or []))
+            ctx.item.links_to_children(down_parent_role or ()))
         if is_link_enabled(link)
     ]
     down_items = [
         link.item for link in itertools.chain(
             ctx.item.links_to_children(up_parent_role),
-            ctx.item.links_to_parents(down_parent_role or []))
+            ctx.item.links_to_parents(down_parent_role or ()))
         if is_link_enabled(link)
     ]
     if down_parent_role is not None:
@@ -177,7 +177,7 @@ def _add_default_links(ctx: _Context) -> None:
                "refines",
                "is refined by",
                down_name="Refined by")
-    _add_links(ctx, ["interface-ingroup", "interface-ingroup-hidden"],
+    _add_links(ctx, ("interface-ingroup", "interface-ingroup-hidden"),
                "Group membership",
                "is a member of",
                "contains",

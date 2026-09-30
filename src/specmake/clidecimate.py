@@ -77,7 +77,7 @@ def clidecimate(argv: list[str] | None = None) -> None:
     def _add_arguments(parser):
         parser.add_argument(
             "--item-format",
-            choices=["JSON", "YAML"],
+            choices=("JSON", "YAML"),
             type=str.upper,
             default="JSON",
             help="the specification item format (default: JSON)")

@@ -538,7 +538,7 @@ def _generate_paragraphs(content: TextContent, sections_by_uid: SectionsByUID,
 
 
 def _generate_tables(content: TextContent, sections_by_uid: SectionsByUID,
-                     root: Item, table_pivots: list[str]) -> list[Item]:
+                     root: Item, table_pivots: tuple[str, ...]) -> list[Item]:
     root_items = _gather_benchmarks(root)
     _generate_table(content, sections_by_uid, root_items)
     for pivot_uid in table_pivots:
@@ -551,7 +551,7 @@ def _generate_tables(content: TextContent, sections_by_uid: SectionsByUID,
 
 
 def generate_tables(content: TextContent, sections_by_uid: SectionsByUID,
-                    root: Item, table_pivots: list[str]) -> None:
+                    root: Item, table_pivots: tuple[str, ...]) -> None:
     """ Generate memory benchmark tables. """
     _generate_tables(content, sections_by_uid, root, table_pivots)
 
@@ -588,7 +588,7 @@ def generate_variants_table(content: TextContent,
 
 
 def generate(content: TextContent, sections_by_uid: SectionsByUID, root: Item,
-             table_pivots: list[str], mapper: ItemMapper) -> None:
+             table_pivots: tuple[str, ...], mapper: ItemMapper) -> None:
     """
     Generate memory benchmark documentation for items dependent on the root
     item and executables in the path.

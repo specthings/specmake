@@ -137,7 +137,7 @@ def test_membench(tmpdir, monkeypatch):
     sections_by_uid_2 = gather_sections(item_cache, "path-2", "objdump", "gdb")
     root = item_cache["/r0"]
     content = SphinxContent(context="CC-BY-SA-4.0")
-    generate(content, sections_by_uid, root, ["r0", "r4"], ItemMapper(root))
+    generate(content, sections_by_uid, root, ("r0", "r4"), ItemMapper(root))
     assert str(content) == """.. _BenchmarksBasedOnSpecT0:
 
 Benchmarks based on: spec:/t0

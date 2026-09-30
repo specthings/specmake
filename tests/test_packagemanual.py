@@ -87,7 +87,7 @@ def _repository_state_lazy_verify(self):
 
 def _package_manual_generate(content, sections_by_uid, root, table_pivots,
                              mapper):
-    content.add([root.uid] + table_pivots + list(sections_by_uid.keys()))
+    content.add([root.uid, *table_pivots, *sections_by_uid.keys()])
 
 
 def _subprocess_run(args, stdin, stdout, stderr, shell, cwd, check, encoding):

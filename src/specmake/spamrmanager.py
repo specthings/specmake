@@ -154,11 +154,9 @@ class SpamrManager(DocumentBuilder):
         requirements = self._get_related_requirements()
         number_requirements = len(requirements)
         for item in requirements:
-            if item.type in [
-                    "requirement/functional/action",
-                    "requirement/non-functional/performance-runtime",
-                    "runtime-measurement-test"
-            ]:
+            if item.type in ("requirement/functional/action",
+                             "requirement/non-functional/performance-runtime",
+                             "runtime-measurement-test"):
                 reqs_with_val_test += 1
                 continue
             try:
@@ -379,7 +377,7 @@ class SpamrManager(DocumentBuilder):
     def _code_size(self, _ctx: ItemGetValueContext) -> Any:
         # Action status
         sphinx_content = SphinxContent(context=self.mapper.context)
-        actions = ["Actions issued", "Actions closed", "Actions open"]
+        actions = ("Actions issued", "Actions closed", "Actions open")
         actions_count = [0, 0, 0]
         for issue in sorted(self.item.cache.values()):
             if not (issue.type == "issue" and "ESA" in issue["origin"]
@@ -439,7 +437,7 @@ class SpamrManager(DocumentBuilder):
 
     def _spr_ncr_status(self, _ctx: ItemGetValueContext) -> str:
         sphinx_content = SphinxContent(context=self.mapper.context)
-        actions = ["Actions issued", "Actions closed", "Actions open"]
+        actions = ("Actions issued", "Actions closed", "Actions open")
         actions_gitlab = [0, 0, 0]
         actions_rtems = [0, 0, 0]
         for issue in sorted(self.item.cache.values()):

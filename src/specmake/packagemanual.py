@@ -179,7 +179,7 @@ class PackageManualBuilder(DocumentBuilder):
             label = self._get_membench_build_label()
             sections_by_uid = self._membench[label]["membench"]
             root = self.item.cache["/rtems/req/mem-basic"]
-            table_pivots = ["/rtems/req/mem-smp-1"]
+            table_pivots = ("/rtems/req/mem-smp-1", )
             generate(content, sections_by_uid, root, table_pivots, self.mapper)
             return content.join()
 

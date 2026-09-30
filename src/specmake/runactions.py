@@ -51,7 +51,7 @@ def _get_host_processor_count(_ctx: ItemGetValueContext) -> str:
 
 @dataclasses.dataclass
 class _Env:
-    clear: list[str] = dataclasses.field(default_factory=list)
+    clear: tuple[str, ...] = ()
     path: dict[str, tuple[list[str],
                           list[str]]] = dataclasses.field(default_factory=dict)
     var_set: dict[str, str] = dataclasses.field(default_factory=dict)
@@ -59,7 +59,7 @@ class _Env:
 
 
 def _env_clear(env: _Env, _action: dict[str, str]) -> None:
-    env.clear = ["-i"]
+    env.clear = ("-i", )
 
 
 def _env_ignore(_env: _Env, _action: dict[str, str]) -> None:
@@ -458,8 +458,7 @@ class RunActionsProvider:
             env = _Env()
             for env_action in env_actions:
                 _ENV_ACTIONS[env_action["action"]](env, env_action)
-            args = []
-            args.extend(env.clear)
+            args = list(env.clear)
             args.extend(f"-u {name}" for name in env.var_unset)
             for name, values in sorted(env.path.items()):
                 value = ":".join(

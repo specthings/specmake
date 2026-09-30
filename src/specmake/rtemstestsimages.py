@@ -98,7 +98,7 @@ def _tmtimer01_build(title: str, base: str, data: dict) -> list[str]:
     axes.set_xscale("log")
     axes.set_ylabel("Timer Fire and Cancel Duration [μs]")
     x = [sample["active-timers"] for sample in data["samples"]]
-    for key in ["first", "middle", "last"]:
+    for key in ("first", "middle", "last"):
         y = [sample[key] / 1000.0 for sample in data["samples"]]
         axes.plot(x, y, label=f"operate on {key} timer", marker="o")
     return _savefig(fig, axes, base)
@@ -111,10 +111,9 @@ def _smpopenmp01_build(title: str, base: str, data: dict) -> list[str]:
     axes.set_ylabel("Relative Duration")
     x = list(range(1, len(data) + 1))
     axes.xaxis.set_major_locator(ticker.FixedLocator(x))
-    for key in [
-            "barrier-bench", "dynamic-bench", "guided-bench", "parallel-bench",
-            "runtime-bench", "single-bench", "static-bench"
-    ]:
+    for key in ("barrier-bench", "dynamic-bench", "guided-bench",
+                "parallel-bench", "runtime-bench", "single-bench",
+                "static-bench"):
         d = [results[key] for results in data]
         y = [x / d[0] for x in d]
         axes.plot(x, y, label=key.replace("-bench", ""), marker="o")
