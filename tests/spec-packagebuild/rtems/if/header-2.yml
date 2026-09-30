@@ -9,6 +9,8 @@ interface-type: header-file
 links:
 - role: interface-placement
   uid: domain
+- role: interface-host
+  uid: define-hosted
 - role: interface-ingroup
   uid: group-2
 - enabled-by: true

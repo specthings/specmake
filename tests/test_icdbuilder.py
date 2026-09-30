@@ -164,7 +164,9 @@ validations, so the corresponding table entries are N/A.
     +-+-+-+-+
     | _`/rtems/if/group-acfg` | not pre-qualified | `/rtems/if/acfg-integer`_ | not pre-qualified group member |
     +-+-+-+-+
-    | _`/rtems/if/group` | **not validated** | `/rtems/if/define-not-defined`_ | **not validated** group member |
+    | _`/rtems/if/group` | **not validated** | `/rtems/if/define-hosted`_ | **not validated** group member |
+    + + +-+-+
+    | | | `/rtems/if/define-not-defined`_ | **not validated** group member |
     + + +-+-+
     | | | `/rtems/if/define-real`_ | **not validated** group member |
     + + +-+-+
@@ -217,6 +219,8 @@ validations, so the corresponding table entries are N/A.
     | _`/rtems/if/group-b` | **not validated** | N/A | N/A |
     +-+-+-+-+
     | _`/rtems/if/acfg-integer` | not pre-qualified | N/A | N/A |
+    +-+-+-+-+
+    | _`/rtems/if/define-hosted` | **not validated** | N/A | N/A |
     +-+-+-+-+
     | _`/rtems/if/define-not-defined` | **not validated** | `/​rtems/​req/​define-not-defined </pkg/doc-ts-srs/html/requirements.html#specrtemsreqdefinenotdefined>`__ | **not validated** interface function |
     +-+-+-+-+
@@ -312,7 +316,9 @@ validations, so the corresponding table entries are N/A.
     +-+-+-+-+
     | _`/rtems/if/forward-decl` | **not validated** | N/A | N/A |
     +-+-+-+-+
-    | _`/rtems/if/header-2` | **not validated** | `/rtems/if/forward-decl`_ | **not validated** interface placement |
+    | _`/rtems/if/header-2` | **not validated** | `/rtems/if/define-hosted`_ | **not validated** interface placement |
+    + + +-+-+
+    | | | `/rtems/if/forward-decl`_ | **not validated** interface placement |
     + + +-+-+
     | | | `/rtems/if/group-2`_ | **not validated** interface placement |
     + + +-+-+
@@ -551,6 +557,34 @@ Group membership
 Interface placement
     This define is placed into the header file `<bar/more/unspec.h>
     </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecheader>`__.
+
+Validation
+    This define is **not validated**.
+
+.. _SpecRtemsIfDefineHosted:
+
+spec:/rtems/if/define-hosted
+----------------------------
+
+Hosted define brief.
+
+Requirement
+    The `<blub-2.h>
+    </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifheader2>`__
+    header file shall provide the define ``HOSTED``.
+
+Interface
+    .. code-block:: c
+
+        #define HOSTED 7
+
+Group membership
+    This define is a member of the interface group `Blub
+    </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifgroup>`__.
+
+Interface placement
+    This define is placed into the header file `<blub-2.h>
+    </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifheader2>`__.
 
 Validation
     This define is **not validated**.
@@ -964,6 +998,9 @@ Refined by
 Group memberships
     This interface group contains the following items:
 
+    - `HOSTED
+      </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdefinehosted>`__
+
     - `DEFINE_NOT_DEFINED
       </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdefinenotdefined>`__
 
@@ -1022,6 +1059,10 @@ Interface placement
 Validations
     The validation of this **not validated** interface group depends on the
     following items:
+
+    - `HOSTED
+      </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdefinehosted>`__
+      (**not validated** group member)
 
     - `DEFINE_NOT_DEFINED
       </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdefinenotdefined>`__
@@ -1442,6 +1483,9 @@ Interface placement
 Interface members
     This header file contains the following items:
 
+    - `HOSTED
+      </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdefinehosted>`__
+
     - `StructOnly
       </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifforwarddecl>`__
 
@@ -1461,6 +1505,10 @@ Interface include
 Validations
     The validation of this **not validated** header file depends on the
     following items:
+
+    - `HOSTED
+      </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifdefinehosted>`__
+      (**not validated** interface placement)
 
     - `StructOnly
       </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifforwarddecl>`__

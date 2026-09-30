@@ -128,7 +128,7 @@ def _add_links(ctx: _Context,
                down_prefix: str = "This",
                is_link_enabled: Callable[[Link], bool] = link_is_enabled,
                down_name: str | None = None,
-               down_parent_role: str | None = None) -> None:
+               down_parent_role: str | tuple[str, ...] | None = None) -> None:
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-positional-arguments
     # pylint: disable=too-many-locals
@@ -188,7 +188,7 @@ def _add_default_links(ctx: _Context) -> None:
                "is placed into",
                "contains",
                down_name="Interface members",
-               down_parent_role="register-block-host")
+               down_parent_role=("interface-host", "register-block-host"))
     _add_links(ctx,
                "register-block-base",
                "Register block base",
@@ -557,7 +557,7 @@ def _document_acfg_group(ctx: _Context) -> None:
 
 
 def _document_acfg_option(ctx: _Context) -> None:
-    container = ctx.item.parent('interface-placement')
+    container = get_interface_container(ctx.item)
     container_kind = get_kind(container)
     with ctx.content.topic("Requirement"):
         ctx.content.wrap(
@@ -775,7 +775,7 @@ def _document_group(ctx: _Context) -> None:
 def _document_header_file(ctx: _Context) -> None:
     path = ctx.item["path"]
     formatted_path = ctx.content.code(f"<{path}>")
-    container = ctx.item.parent('interface-placement')
+    container = get_interface_container(ctx.item)
     container_kind = get_kind(container)
     _add_brief(ctx)
     with ctx.content.topic("Requirement"):
@@ -788,7 +788,7 @@ def _document_header_file(ctx: _Context) -> None:
 
 
 def _document_forward_declaration(ctx: _Context) -> None:
-    container = ctx.item.parent('interface-placement')
+    container = get_interface_container(ctx.item)
     container_kind = get_kind(container)
     with ctx.content.topic("Requirement"):
         ctx.content.wrap(
