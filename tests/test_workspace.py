@@ -470,6 +470,21 @@ def test_workspace_discard_forgets_dependencies(tmpdir):
     assert buildspace.director["/a"]["directory"] == "foobar"
 
 
+def test_workspace_delete_with_old_component(tmpdir):
+    buildspace, workspace = _create_buildspace(tmpdir,
+                                               "spec-pkg-wk/file/single")
+    assert "/file" in buildspace.cache
+
+    # A buildspace of an older export lacks a component value which the
+    # content context of a build item needs.
+    component = buildspace.cache["/pkg/component"]
+    del component.data["license"]
+    component.save()
+    workspace.director.remove("/file")
+    buildspace_2 = _create_buildspace_from_workspace(tmpdir, workspace)
+    assert "/file" not in buildspace_2.cache
+
+
 def test_workspace_moved_deployment_directory(tmpdir):
     old_directory = os.path.join(tmpdir, "old")
     new_directory = os.path.join(tmpdir, "new")
@@ -615,6 +630,12 @@ def test_workspace_component(tmpdir):
     workspace.director.remove("/pkg/source/delete-me")
     buildspace_3 = export_to_buildspace(workspace, buildspace_config)
     assert "/pkg/source/delete-me" not in buildspace_3.cache
+
+    # The export discards a modified component after its modified parent.
+    package.item["discard-me"] = 0
+    work_bsp.item["discard-me"] = 0
+    buildspace_4 = export_to_buildspace(workspace, buildspace_config)
+    assert buildspace_4.cache["/pkg/arch/bsp/cfg/component"]["discard-me"] == 0
 
 
 def _create_component_workspace(tmpdir, mapping: str):

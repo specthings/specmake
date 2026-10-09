@@ -518,7 +518,9 @@ class BuildItem():
         self._description = SphinxContent(context=self.content_context)
 
     def _store_description(self) -> None:
-        description = "\n".join(self.description)
+        if self._description is None:
+            return
+        description = "\n".join(self._description)
         key = "build-description"
         if description:
             self.item[key] = description
