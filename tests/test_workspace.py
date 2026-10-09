@@ -35,7 +35,8 @@ import specmake
 from specmake import (BuildItem, BuildspaceConfig, DirectoryState,
                       PackageComponent, WorkspaceConfig,
                       create_build_item_factory, create_workspace,
-                      create_workspace_item_factory, export_to_buildspace)
+                      create_workspace_item_factory, export_to_buildspace,
+                      load_buildspace)
 from specmake.pkgworkspace import _WorkspaceItem
 
 
@@ -139,6 +140,21 @@ def test_workspace_dir_repository(tmp_path):
         assert file.read() == f"{tmp_path}\n"
     assert repo["commit"] == _git_commit(repo.directory, "main")
     assert repo.lazy_verify()
+
+
+def test_workspace_load_buildspace(tmp_path):
+    exported, _ = _create_buildspace(str(tmp_path),
+                                     "spec-pkg-wk/dir/repository")
+    config = BuildspaceConfig(spec_directory=str(tmp_path / "spec"),
+                              cache_directory=str(tmp_path /
+                                                  "cache-buildspace"),
+                              verify_specification_format=True)
+    loaded = load_buildspace(config)
+    assert loaded.cache.resolve_proxies
+    assert loaded.spec_directory == str(tmp_path / "spec")
+    assert loaded.director["/dir"]["commit"] == exported.director["/dir"][
+        "commit"]
+    assert loaded.director.package_uid == "/pkg/component"
 
 
 def test_workspace_file_single(tmpdir):
