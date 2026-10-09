@@ -53,3 +53,52 @@ def test_enabled_set(tmp_path, monkeypatch, names, enabled_set):
             str(tmp_path), "--enabled-set", names, "config.yml"
         ])
     assert configs[0].enabled_set == enabled_set
+
+
+class _Package(dict):
+
+    def __init__(self, deployment_directory):
+        super().__init__({"deployment-directory": deployment_directory})
+
+
+class _Director:
+
+    def __init__(self, deployment_directory):
+        self.package = _Package(deployment_directory)
+        self.builds = []
+
+    def build_package(self, only, force, skip):
+        self.builds.append((only, force, skip))
+
+
+class _Context:
+
+    def __init__(self, deployment_directory):
+        self.director = _Director(deployment_directory)
+
+
+@pytest.mark.parametrize("export_only", [False, True])
+def test_export_only(tmp_path, monkeypatch, export_only):
+    deployment = tmp_path / "deployment"
+    (deployment / ".git").mkdir(parents=True)
+    workspace = _Context(str(deployment))
+    buildspace = _Context(str(deployment))
+    monkeypatch.setattr(specmake.clibuild, "create_workspace",
+                        lambda config: workspace)
+    monkeypatch.setattr(specmake.clibuild, "export_to_buildspace",
+                        lambda workspace, config: buildspace)
+    monkeypatch.chdir(tmp_path)
+    file = tmp_path / "deployment-directory.txt"
+    argv = [
+        "specbuild", "--config-directory",
+        str(tmp_path), "--deployment-directory-file",
+        str(file), "--force", "f", "config.yml"
+    ]
+    if export_only:
+        argv.insert(1, "--export-only")
+    clibuild(argv)
+    assert file.read_text(encoding="utf-8") == f"{deployment}\n"
+    if export_only:
+        assert not buildspace.director.builds
+    else:
+        assert buildspace.director.builds == [(None, ["f"], None)]
