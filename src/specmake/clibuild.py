@@ -57,6 +57,13 @@ def _get_arguments(argv: list[str]) -> argparse.Namespace:
         parser.add_argument("--cache-directory",
                             help="the configuration cache directory",
                             default="config-cache")
+        parser.add_argument("--export-only",
+                            help="stop after the export of the workspace to "
+                            "the buildspace",
+                            action="store_true")
+        parser.add_argument("--deployment-directory-file",
+                            help="write the absolute path of the deployment "
+                            "directory to this file after the export")
         parser.add_argument('config_files', nargs='+')
 
     return get_build_arguments(argv, add_arguments=(_add_arguments, ))
@@ -103,4 +110,12 @@ def clibuild(argv: list[str] | None = None) -> None:
         cache_directory=os.path.join(deployment_directory, "build", "cache"),
         git_directory=None if args.do_not_use_git else deployment_directory)
     buildspace = export_to_buildspace(workspace, buildspace_config)
+    if args.deployment_directory_file is not None:
+        with open(args.deployment_directory_file, "w",
+                  encoding="utf-8") as file:
+            file.write(f"{os.path.abspath(deployment_directory)}\n")
+    if args.export_only:
+        logging.info("build: stop after the export to: %s",
+                     deployment_directory)
+        return
     buildspace.director.build_package(args.only, args.force, args.skip)
