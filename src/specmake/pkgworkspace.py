@@ -1014,6 +1014,21 @@ def _copy_to_buildspace(workspace_director: PackageBuildDirector,
             buildspace_item.commit("Copy to buildspace")
 
 
+def load_buildspace(
+        config: BuildspaceConfig,
+        package_uid: str = "/pkg/component",
+        enabled_set: Optional[list[str]] = None) -> BuildspaceContext:
+    """
+    Load the buildspace of a previous export to build its package without
+    the workspace.
+    """
+    buildspace = _create_buildspace(config, package_uid, enabled_set or [], {})
+    buildspace.cache.resolve_proxies = True
+    _verify_specification_format(buildspace.cache,
+                                 config.verify_specification_format)
+    return buildspace
+
+
 def export_to_buildspace(workspace: WorkspaceContext,
                          config: BuildspaceConfig) -> BuildspaceContext:
     """ Export the workspace to the buildspace. """
