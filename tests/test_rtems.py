@@ -182,6 +182,15 @@ def test_rtems_get_substitution_errors(caplog, tmpdir):
         "Copyright (C) ${/does/not:/exist}")
     assert get_substitution_errors(root) == errors
 
+    # A citation or a reference of a package item needs a document
+    text = root.cache["/glossary/api"].data
+    text["text"] = ("${/pkg/component:/cite} ${/pkg/component:/cite-group} "
+                    "${/pkg/component:/cite-long} ${/pkg/component:/ref}")
+    assert get_substitution_errors(root) == errors
+    text["text"] = "${/pkg/component:/does-not-exist}"
+    assert [uid for uid, _ in get_substitution_errors(root)
+            ] == ["/glossary/api", "/glossary/softwareproduct"]
+
     # The formatter saves nothing
     _MySTSubstitution(ItemMapper(root)).save(root)
 

@@ -234,7 +234,8 @@ def _check_errata(related_items: set[Item]) -> None:
 # The values of these type paths and of the spec key of every item need the
 # context of a document.  The check substitutes an empty string for them.
 _DOCUMENT_VALUES = (
-    "glossary/term:/plural", "reference:/cite", "reference:/cite-long",
+    "glossary/term:/plural", "pkg:/cite", "pkg:/cite-group", "pkg:/cite-long",
+    "pkg:/ref", "reference:/cite", "reference:/cite-long",
     "reference-location:/cite", "reference-location:/cite-long",
     "requirement/functional/action:/text-template",
     "requirement/non-functional/ecss:/clause",
