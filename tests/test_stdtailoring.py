@@ -31,6 +31,7 @@ import pytest
 from specitems import ContentContext
 
 from specmake import DocumentBuilder, ECSSClause
+from specmake.rtems import get_substitution_errors
 
 from .util import create_package
 
@@ -195,3 +196,19 @@ For an overview of all clauses, see the :ref:`tailoring table <CMStandardClause0
         "text": "Text removed due to license issues.",
         "type": "requirement",
     }
+
+
+def test_stdtailoring_substitution_errors(caplog, tmpdir):
+    package = create_package(caplog, Path(tmpdir), Path("stdtailoring/spec"))
+    clause = package.item.cache["/standard/clause-1"]
+
+    # The notes of a clause are plain strings and a clause reference needs
+    # the context of a document
+    clause.data["text"] = ("See ${/standard/clause-0:/clause} and "
+                           "${/standard/clause-0:/clause-section}.")
+    assert get_substitution_errors(clause) == []
+
+    # The text of a clause has the MyST format
+    clause.data["text"] = "See ${/standard/clause-0:/nix}."
+    assert [uid for uid, _ in get_substitution_errors(clause)
+            ] == ["/standard/clause-1"]

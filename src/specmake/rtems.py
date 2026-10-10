@@ -32,7 +32,8 @@ import os
 from typing import Any, Callable, Iterable
 
 from specitems import (EnabledSet, Item, ItemGetValueContext, ItemMapper,
-                       is_enabled, Link, SubstitutionError)
+                       is_enabled, Link, SpecVerifier, SubstitutionError)
+from specitems.specformatter import SpecFormatter
 from specware import (augment_with_test_case_links, augment_with_test_links,
                       get_inline_enumerators, get_items_by_type_map,
                       get_item_types_by_prefix, get_items_by_types,
@@ -230,15 +231,17 @@ def _check_errata(related_items: set[Item]) -> None:
             for uid, document in sorted(gaps)))
 
 
-_TEXT_ATTRIBUTES = frozenset(("brief", "description", "notes", "rationale",
-                              "test-brief", "test-description", "text"))
-
 # The values of these type paths and of the spec key of every item need the
 # context of a document.  The check substitutes an empty string for them.
 _DOCUMENT_VALUES = (
     "glossary/term:/plural", "reference:/cite", "reference:/cite-long",
     "reference-location:/cite", "reference-location:/cite-long",
     "requirement/functional/action:/text-template",
+    "requirement/non-functional/ecss:/clause",
+    "requirement/non-functional/ecss:/clause-long",
+    "requirement/non-functional/ecss:/clause-section",
+    "requirement/non-functional/ecss:/standard-and-clause",
+    "requirement/non-functional/ecss:/standard-and-clause-long",
     "requirement/non-functional/performance-runtime:/environment",
     "requirement/non-functional/performance-runtime:/limit-condition",
     "requirement/non-functional/performance-runtime:/limit-kind")
@@ -248,17 +251,21 @@ def _get_empty_value(_ctx: ItemGetValueContext) -> Any:
     return ""
 
 
-def _substitute_texts(mapper: ItemMapper, item: Item, prefix: str,
-                      data: Any) -> None:
-    if isinstance(data, dict):
-        for key, value in data.items():
-            if key in _TEXT_ATTRIBUTES:
-                mapper.substitute(value, item, prefix=prefix)
-            else:
-                _substitute_texts(mapper, item, f"{prefix}/{key}", value)
-    elif isinstance(data, list):
-        for index, element in enumerate(data):
-            _substitute_texts(mapper, item, f"{prefix}[{index}]", element)
+class _MySTSubstitution(SpecFormatter):
+    """ Substitutes each value which has the MyST format. """
+
+    def __init__(self, mapper: ItemMapper) -> None:
+        super().__init__("", {})
+        self._mapper = mapper
+
+    def format_value(self, item: Item, path: str, value: Any,
+                     fmt: dict) -> None:
+        if fmt["type"] == "myst":
+            prefix, _, _ = path.rpartition("/")
+            self._mapper.substitute(value, item, prefix=prefix)
+
+    def save(self, item: Item) -> None:
+        pass
 
 
 def get_substitution_errors(root: Item) -> list[tuple[str, str]]:
@@ -266,21 +273,31 @@ def get_substitution_errors(root: Item) -> list[tuple[str, str]]:
     Get the items with a text which fails the substitution.
 
     The check covers the enabled items of the item cache of the root except
-    the package and specification type items.  It returns the UID of each
-    item with the first error.
+    the package and specification type items.  It substitutes each value
+    which has the MyST format according to the specification type of the
+    item.  It returns the UID of each item with the first error.
     """
     mapper = ItemMapper(root)
     mapper.add_default_get_value("spec", _get_empty_value)
     for type_path_key in _DOCUMENT_VALUES:
         mapper.add_get_value(type_path_key, _get_empty_value)
+    cache = root.cache
     errors: list[tuple[str, str]] = []
-    for item in sorted(root.cache.values()):
-        if not item.enabled or item.type.startswith(("pkg", "spec")):
-            continue
-        try:
-            _substitute_texts(mapper, item, "", item.data)
-        except SubstitutionError as err:
-            errors.append((item.uid, str(err)))
+    # The verifier logs each type and each formatted value at the info level.
+    previous_level = logging.root.manager.disable
+    logging.disable(logging.INFO)
+    try:
+        verifier = SpecVerifier(cache, cache.type_provider.root_type_uid or "",
+                                logging.DEBUG, _MySTSubstitution(mapper))
+        for item in sorted(cache.values()):
+            if not item.enabled or item.type.startswith(("pkg", "spec")):
+                continue
+            try:
+                verifier.verify(item)
+            except SubstitutionError as err:
+                errors.append((item.uid, str(err)))
+    finally:
+        logging.disable(previous_level)
     return errors
 
 

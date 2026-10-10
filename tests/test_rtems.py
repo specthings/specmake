@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Tests for the rtems module. """
 
-# Copyright (C) 2023, 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2023, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -28,10 +28,11 @@ from pathlib import Path
 
 import pytest
 
-from specitems import EmptyItemCache
+from specitems import EmptyItemCache, ItemMapper
 
 from specmake import RTEMSItemCache
-from specmake.rtems import _name_register_block
+from specmake.rtems import (_MySTSubstitution, _name_register_block,
+                            get_substitution_errors)
 
 from tests import util
 
@@ -161,6 +162,28 @@ component.
     del director["/pkg/steps/rtems-item-cache"]
     rtems_item_cache = director["/pkg/steps/rtems-item-cache"]
     assert rtems_item_cache._hash != digest
+
+
+def test_rtems_get_substitution_errors(caplog, tmpdir):
+    package = util.create_package(caplog, Path(tmpdir),
+                                  Path("spec-packagebuild"),
+                                  ["aggregate-test-results"])
+    director = package.director
+    director.build_package()
+    root = director["/pkg/steps/rtems-item-cache"].get_spec_root()
+
+    # A text in MyST format fails the substitution
+    errors = get_substitution_errors(root)
+    assert [uid for uid, _ in errors] == ["/glossary/softwareproduct"]
+    assert "KeyError: '/glossary/rtems'" in errors[0][1]
+
+    # A value without the MyST format is not substituted
+    root.cache["/req/root"].data["copyrights"].append(
+        "Copyright (C) ${/does/not:/exist}")
+    assert get_substitution_errors(root) == errors
+
+    # The formatter saves nothing
+    _MySTSubstitution(ItemMapper(root)).save(root)
 
 
 def test_rtems_item_cache_errors(caplog, tmpdir):
