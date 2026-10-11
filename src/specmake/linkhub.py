@@ -995,8 +995,7 @@ class SpecMapper(BuildItemMapper):
             self.add_get_value(type_path_key, self._get_value_link)
         self.add_get_value("interface/enum:/enumerators/name",
                            self._get_value_enumerator_link)
-        for type_name in self.item.cache.items_by_type.keys():
-            self.add_get_value(f"{type_name}:/spec", self._get_value_link)
+        self.add_get_value(":/spec", self._get_value_link)
         for kind in ("define", "enum", "enumerator", "file", "function",
                      "group", "object", "type"):
             self.add_default_get_value(
