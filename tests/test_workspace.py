@@ -95,6 +95,32 @@ def test_workspace_archive_config_dir(tmpdir):
         assert src.read() == "This is an archive.\nAdded by inline patch.\n"
 
 
+def test_workspace_archive_patch_delete(tmpdir):
+    buildspace, _ = _create_buildspace(tmpdir,
+                                       "spec-pkg-wk/archive/patch-delete")
+    archive = buildspace.director["/archive"]
+    assert not os.path.exists(
+        os.path.join(archive.directory, "config", "keep.txt"))
+    assert list(archive.files(".")) == ["./README.md"]
+
+
+def test_workspace_archive_patch_delete_git(tmpdir):
+    deployment_directory = str(tmpdir)
+    status = run_command(["git", "init"], deployment_directory)
+    assert status == 0
+    workspace = _create_workspace(tmpdir, "spec-pkg-wk/archive/patch-delete")
+    buildspace_config = BuildspaceConfig(
+        spec_directory=os.path.join(tmpdir, "build", "spec"),
+        cache_directory=os.path.join(tmpdir, "build", "cache"),
+        git_directory=deployment_directory)
+    export_to_buildspace(workspace, buildspace_config)
+    stdout = []
+    status = run_command(["git", "ls-files", "source"], deployment_directory,
+                         stdout)
+    assert status == 0
+    assert stdout == ["source/root/README.md"]
+
+
 def test_workspace_archive_download(tmpdir):
     buildspace, _ = _create_buildspace(tmpdir, "spec-pkg-wk/archive/download")
     archive = buildspace.director["/archive"]

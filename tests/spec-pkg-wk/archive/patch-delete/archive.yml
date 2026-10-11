@@ -1,0 +1,34 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+archive-file: ${.:/component/workspace-directory}/config-dir.tar.xz
+archive-hash: Au-9LDp7b8pHmkUDoT_abDkocE-AMXifyILFKuBNimeYBfSjNtxkXXc9L736EV9EhOphkgw75o78SeOBt7Th7A==
+archive-patches:
+- enabled-by: true
+  patch: |
+    From: Sebastian Huber <sebastian.huber@embedded-brains.de>
+    Date: Sun, 11 Oct 2026 09:00:00 +0200
+    Subject: Remove config/keep.txt
+
+    diff --git a/config/keep.txt b/config/keep.txt
+    deleted file mode 100644
+    --- a/config/keep.txt
+    +++ /dev/null
+    @@ -1 +0,0 @@
+    -Kept.
+  type: inline
+archive-url: []
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+description: |
+  Description.
+destination-directory: ${.:/component/deployment-directory}/source
+enabled-by: true
+license-info: []
+links:
+- hash: null
+  name: component
+  role: input
+  uid: /pkg/component
+pkg-type: workspace
+symbolic-links: []
+type: pkg
+workspace-type: archive

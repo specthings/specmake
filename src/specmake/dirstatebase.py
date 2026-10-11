@@ -383,6 +383,18 @@ class DirectoryStateBase(BuildItem):
         self._files.update(dict.fromkeys(more, None))
         self._update_item_files()
 
+    def discard_files(self, files: Iterable[_Path]) -> None:
+        """
+        Remove the files from the file set of the directory state.
+
+        A commit does not pass the files to Git.
+        """
+        self.item["hash"] = None
+        less = set(os.path.normpath(name) for name in files)
+        for name in less:
+            self._files.pop(name, None)
+        self._update_item_files()
+
     def set_files(self, files: Iterable[_Path]) -> None:
         """ Set the file set of the directory state to the files. """
         self.clear()

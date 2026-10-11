@@ -203,7 +203,15 @@ def _apply_patch_file(workspace_directory: str,
         if line.startswith("Applied patch ")
     ]
     logging.info("%s: patched files: %s", unpacked_archive.uid, patched_files)
-    unpacked_archive.add_files(patched_files)
+    base = unpacked_archive.directory
+    deleted_files = [
+        name for name in patched_files
+        if not os.path.lexists(os.path.join(base, name))
+    ]
+    logging.info("%s: deleted files: %s", unpacked_archive.uid, deleted_files)
+    unpacked_archive.discard_files(deleted_files)
+    unpacked_archive.add_files(name for name in patched_files
+                               if name not in deleted_files)
 
 
 def _apply_patches(workspace_directory: str,
