@@ -952,11 +952,22 @@ def _set_other_workspace_hash(workspace_cache: ItemCache,
         workspace_item["workspace-hash"] = _workspace_hash(workspace_item.data)
 
 
+def _forget_dependencies(director: PackageBuildDirector,
+                         known: set[str]) -> None:
+    # The dependencies carry the buildspace state before the update.  The
+    # build after the update creates them again from the updated state.  The
+    # package component holds the registered submodules.
+    for uid in set(director) - known:
+        if uid != director.package_uid:
+            director.pop(uid)
+
+
 def _delete_buildspace_items(director: PackageBuildDirector,
                              deleted_uids: list[str],
                              item_files: list[str]) -> None:
     for uid in deleted_uids:
         logging.info("%s: discard buildspace state", uid)
+        known = set(director)
         try:
             buildspace_item = director.create_with_dependencies(
                 uid, permissive_errors=True)
@@ -966,6 +977,7 @@ def _delete_buildspace_items(director: PackageBuildDirector,
         else:
             buildspace_item.discard_and_clear()
             buildspace_item.commit("Delete")
+        _forget_dependencies(director, known)
         file = director.item_cache[uid].file
         director.remove(uid)
         logging.info("%s: remove: %s", uid, file)
@@ -988,6 +1000,7 @@ def _discard_buildspace_items(director: PackageBuildDirector,
                               discard_uids: list[str]) -> None:
     for uid in discard_uids:
         logging.info("%s: discard buildspace state", uid)
+        known = set(director)
         try:
             buildspace_item = director.create_with_dependencies(
                 uid, permissive_errors=True)
@@ -997,6 +1010,7 @@ def _discard_buildspace_items(director: PackageBuildDirector,
         else:
             buildspace_item.discard_and_clear()
             buildspace_item.commit("Discard")
+        _forget_dependencies(director, known)
         director.remove(uid)
 
 

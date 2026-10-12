@@ -432,6 +432,25 @@ def test_workspace_discard_and_delete_error(tmpdir):
     assert buildspace_2.director["/c"]["directory"] == "foobar"
 
 
+def test_workspace_delete_forgets_dependencies(tmpdir):
+    _, workspace = _create_buildspace(tmpdir,
+                                      "spec-pkg-wk/discard-and-delete-error")
+    workspace.director.remove("/a")
+    buildspace = _create_buildspace_from_workspace(tmpdir, workspace)
+    assert "/a" not in buildspace.cache
+    assert "/b" not in buildspace.director
+    assert buildspace.director.package_uid in buildspace.director
+
+
+def test_workspace_discard_forgets_dependencies(tmpdir):
+    _, workspace = _create_buildspace(tmpdir,
+                                      "spec-pkg-wk/discard-and-delete-error")
+    workspace.director["/a"]["directory"] = "foobar"
+    buildspace = _create_buildspace_from_workspace(tmpdir, workspace)
+    assert "/b" not in buildspace.director
+    assert buildspace.director["/a"]["directory"] == "foobar"
+
+
 def test_workspace_moved_deployment_directory(tmpdir):
     old_directory = os.path.join(tmpdir, "old")
     new_directory = os.path.join(tmpdir, "new")
