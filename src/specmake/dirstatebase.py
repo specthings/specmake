@@ -96,7 +96,9 @@ def _file_nop(_source: _Path, _target: _Path) -> None:
     pass
 
 
-def _export_data(item: Item, present: bool, built_later: bool) -> Any:
+def export_directory_state_data(item: Item, present: bool,
+                                built_later: bool) -> Any:
+    """ Export the data of a directory state item. """
     data = export_data(item, present, built_later)
     if not present or built_later:
         if "patterns" in item:
@@ -124,7 +126,7 @@ class DirectoryStateBase(BuildItem):
         factory.add_get_value(f"{type_name}:/glob", _get_glob)
         factory.add_get_value(f"{type_name}:/glob-executables",
                               _get_glob_executables)
-        factory.add_export_data(type_name, _export_data)
+        factory.add_export_data(type_name, export_directory_state_data)
 
     def __init__(self,
                  director: PackageBuildDirector,

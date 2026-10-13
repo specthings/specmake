@@ -1165,6 +1165,13 @@ Terms, definitions and abbreviated terms
         "${.:/component/license}")
     director.item_cache["/pkg/deployment/doc-2"]["document-base-path"] = (
         "${.:/component/deployment-directory}")
+    director.item_cache["/pkg/deployment/doc-2"]["document-relicensing"] = [{
+        "license":
+        "MIT",
+        "holders": ["Dave"],
+        "to":
+        "${.:/component/license}"
+    }]
     doc_2 = director["/pkg/deployment/doc-2"]
     assert doc_2.mapper.base_path == doc_2.substitute(
         "${.:/component/deployment-directory}")
@@ -1189,6 +1196,27 @@ Terms, definitions and abbreviated terms
     doc_2.register_part(early)
     assert doc_2.substitute("${.:/document-license-text:BSD-2-Clause}"
                             ).startswith("| © 2020 Carol\n")
+    doc_2.register_part(
+        Item(
+            EmptyItemCache(), "/relicensed", {
+                "SPDX-License-Identifier": "MIT",
+                "copyrights": ["Copyright (C) 2021 Dave"]
+            }))
+    assert doc_2.substitute(
+        "${.:/document-license-text:CC-BY-SA-4.0}").startswith(
+            "| © 2023 embedded brains GmbH & "
+            "Co. KG\n| © 2021 Dave\n")
+    with pytest.raises(ValueError, match="permits neither"):
+        doc_2.register_part(
+            Item(
+                EmptyItemCache(), "/foreign", {
+                    "SPDX-License-Identifier": "MIT",
+                    "copyrights": ["Copyright (C) 2021 Eve"]
+                }))
+    exported = director.factory.export_data(doc_2.item, True, 0)
+    assert "document-relicensing" not in exported
+    assert "document-relicensing" in doc_2.item
+    assert exported["document-license"] == "${.:/component/license}"
     part = Item(
         EmptyItemCache(), "/part", {
             "SPDX-License-Identifier": "GPL-2.0-only",

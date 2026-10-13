@@ -86,6 +86,11 @@ spec-info:
       document-releases:
         description: null
         spec-type: pkg-sphinx-release-list
+      document-relicensing:
+        description: |
+          If the value is present, then it shall be the relicensing rules of
+          the document.
+        spec-type: pkg-relicensing-rule-list
       document-title:
         description: |
           It shall be the document title.  Use ``$${break}`` to add break hints

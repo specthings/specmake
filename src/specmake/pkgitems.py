@@ -43,10 +43,10 @@ from typing import (Any, Callable, Iterable, Iterator, NamedTuple, Optional,
 from specitems import (ContentContext, EnabledSet, Item, ItemCache,
                        ItemDataByUID, ItemGetValue, ItemGetValueContext,
                        ItemMapper, ItemSelection, ItemView, LicenseAggregate,
-                       LicenseProvider, Link, MarkdownContent, SphinxContent,
-                       SphinxMapper, TextContent, augment_glossary_terms,
-                       data_digest, is_enabled, link_is_enabled,
-                       pickle_load_data_by_uid, to_iterable)
+                       LicenseProvider, Link, MarkdownContent, RelicensingRule,
+                       SphinxContent, SphinxMapper, TextContent,
+                       augment_glossary_terms, data_digest, is_enabled,
+                       link_is_enabled, pickle_load_data_by_uid, to_iterable)
 from specware import SpecWareTypeProvider, run_command
 
 
@@ -162,8 +162,12 @@ def _create_content_context(item: Item, component: "PackageComponent",
         the_license = component.substitute(the_license, item)
         accepted = component.substitute(
             item.get("document-accepted-licenses", None), item)
+    rules = tuple(
+        RelicensingRule.from_data(rule)
+        for rule in component.substitute(item.get("document-relicensing", (
+        )), item))
     return ContentContext(
-        LicenseAggregate(the_license, accepted or [], item.uid), None,
+        LicenseAggregate(the_license, accepted or [], item.uid, rules), None,
         provider)
 
 

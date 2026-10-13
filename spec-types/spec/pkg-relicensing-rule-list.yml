@@ -1,0 +1,21 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  list:
+    description: |
+      It shall be the relicensing rules of a work in the order of a chain.
+      The license which a rule produces is the input of the next rule.  A
+      rule which does not apply passes the license unchanged to the next
+      rule.  The work checks its own license first, then the chain, then
+      its accepted licenses.
+    spec-type: pkg-relicensing-rule
+spec-name: Relicensing Rule List
+spec-type: pkg-relicensing-rule-list
+type: spec

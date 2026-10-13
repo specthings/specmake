@@ -1,0 +1,35 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      holders:
+        description: |
+          It shall be the copyright holders which may replace the license.
+          The rule applies to a part only if this list names every copyright
+          holder of the part.
+        spec-type: list-str
+      license:
+        description: |
+          It shall be the license which the rule replaces.  The rule applies
+          to a part only if the license expression of the part permits this
+          license.
+        spec-type: spdx-license-identifier
+      to:
+        description: |
+          It shall be the license which replaces the license.
+        spec-type: spdx-license-identifier
+    description: |
+      This set of attributes specifies the replacement of a license by the
+      copyright holders of a part.
+    mandatory-attributes: all
+spec-name: Relicensing Rule
+spec-type: pkg-relicensing-rule
+type: spec

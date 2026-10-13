@@ -47,6 +47,7 @@ from specitems import (ContentContext, ROW_SPAN, BibTeXCitationProvider,
 from specware import run_command
 
 from .directorystate import DirectoryState
+from .dirstatebase import export_directory_state_data
 from .pkgitems import (BuildItem, BuildItemFactory, BuildItemMapper,
                        PackageBuildDirector, PackageComponent)
 from .testoutputparser import augment_report
@@ -355,6 +356,13 @@ class _CitationProvider(BibTeXCitationProvider):
         return content.join()
 
 
+def _export_document_data(item: Item, present: bool, built_later: bool) -> Any:
+    # The receiver of a package has no right to relicense a part.
+    data = export_directory_state_data(item, present, built_later)
+    data.pop("document-relicensing", None)
+    return data
+
+
 class SphinxBuilder(DirectoryState):
     """ Base class for Sphinx document builds. """
 
@@ -363,6 +371,7 @@ class SphinxBuilder(DirectoryState):
     def prepare_factory(cls, factory: BuildItemFactory,
                         type_name: str) -> None:
         DirectoryState.prepare_factory(factory, type_name)
+        factory.add_export_data(type_name, _export_document_data)
         factory.add_get_value(f"{type_name}:/document-release", _get_release)
         factory.add_get_value(f"{type_name}:/document-year",
                               _get_document_year)
