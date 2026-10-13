@@ -39,8 +39,12 @@ from .pkgitems import BuildItem, BuildItemMapper, PackageBuildDirector
 from .rtems import RTEMSItemCache
 
 # Sorted by expected frequency
-_ELEMENT_KINDS = ("function", "define", "group", "file", "type", "enum",
+_ELEMENT_KINDS = ("function", "define", "group", "file", "type", "tag", "enum",
                   "object", "enumerator")
+
+_TAG_TYPES = ("interface/register-block", "interface/struct",
+              "interface/union", "interface/unspecified-struct",
+              "interface/unspecified-union")
 
 
 def _member_link(elem: Any) -> str:
@@ -191,7 +195,7 @@ def _doxygen_type(name_info: dict[str, Any], elem: Any, parent: Any,
         name = elem.text
         elem_info = {}
     elem_info["name"] = name
-    _add_doxygen_item(name_info, elem, parent, f"type/{name}", elem_info)
+    _add_doxygen_item(name_info, elem, parent, f"tag/{name}", elem_info)
 
 
 def _doxygen_struct(name_info: dict[str, Any], elem: Any, parent: Any) -> None:
@@ -302,6 +306,16 @@ def _name_info_key_type(item: Item) -> str:
     return f"type/{item['name']}"
 
 
+def _name_info_key_tag(item: Item) -> str:
+    return f"tag/{item['name']}"
+
+
+def _name_info_key_tag_or_type(item: Item) -> str:
+    if item["definition-kind"].startswith("typedef"):
+        return f"type/{item['name']}"
+    return f"tag/{item['name']}"
+
+
 def spec_label(item: Item) -> str:
     """ Return the specification label of the item. """
     return f"Spec{item.ident}"
@@ -346,7 +360,10 @@ def _augment_default(_item: Item, _name_info: dict[str, Any]) -> None:
 def _add_sdd_info(item: Item, name_info: dict[str, Any],
                   name: Optional[str]) -> None:
     try:
-        elem_info = name_info[_ITEM_SPECIFICS[item.type][3](item)]
+        key = _ITEM_SPECIFICS[item.type][3](item)
+        if key not in name_info and item.type in _TAG_TYPES:
+            key = f"tag/{item['name']}"
+        elem_info = name_info[key]
     except KeyError:
         return
     item.view["sdd-info"] = elem_info
@@ -561,7 +578,7 @@ _ITEM_SPECIFICS = {
         "structure",
         _augment_interface,
         _name_name,
-        _name_info_key_type,
+        _name_info_key_tag_or_type,
     ),
     "interface/typedef": (
         "type definition",
@@ -573,7 +590,7 @@ _ITEM_SPECIFICS = {
         "union",
         _augment_interface,
         _name_name,
-        _name_info_key_type,
+        _name_info_key_tag_or_type,
     ),
     "interface/unspecified-define": (
         "define",
@@ -627,7 +644,7 @@ _ITEM_SPECIFICS = {
         "type",
         _augment_interface,
         _name_unspecified_type,
-        _name_info_key_type,
+        _name_info_key_tag,
     ),
     "interface/unspecified-typedef": (
         "type definition",
@@ -639,7 +656,7 @@ _ITEM_SPECIFICS = {
         "type",
         _augment_interface,
         _name_unspecified_type,
-        _name_info_key_type,
+        _name_info_key_tag,
     ),
     "interface/variable": (
         "object",
@@ -812,6 +829,11 @@ def _get_group_items(name_info: dict[str, Any], spec: RTEMSItemCache,
 def _get_associated_items(name_info: dict[str, Any], spec: RTEMSItemCache,
                           name: str, info: dict[str, Any]) -> list[Item]:
     item = spec.name_to_item.get(name, None)
+    if item is None and name.startswith("tag/"):
+        # Doxygen names an anonymous structure or union after its typedef
+        item = spec.name_to_item.get(f"type/{name[4:]}", None)
+        if item is not None and item.type not in _TAG_TYPES:
+            item = None
     if item is not None:
         return [item]
     groups = info.get("groups", None)
@@ -943,7 +965,12 @@ items.""")
     def get_sdd_link(self, kind: str, name: str,
                      mapper: BuildItemMapper) -> str:
         """ Return the SDD link for the name by kind. """
-        elem_info = self.name_info[f"{kind}/{name}"]
+        try:
+            elem_info = self.name_info[f"{kind}/{name}"]
+        except KeyError:
+            if kind != "type":
+                raise
+            elem_info = self.name_info[f"tag/{name}"]
         return mapper.format_link(elem_info["name"], elem_info["link"])
 
     def get_file_sdd_link(self, path: str, mapper: BuildItemMapper) -> str:
@@ -997,7 +1024,7 @@ class SpecMapper(BuildItemMapper):
                            self._get_value_enumerator_link)
         self.add_get_value(":/spec", self._get_value_link)
         for kind in ("define", "enum", "enumerator", "file", "function",
-                     "group", "object", "type"):
+                     "group", "object", "tag", "type"):
             self.add_default_get_value(
                 f"sdd-{kind}", functools.partial(self._get_value_sdd_link,
                                                  kind))

@@ -1937,7 +1937,7 @@ def test_sddlinker(caplog, tmp_path):
  */
 
 /**
- * @typedef struct StructBoth StructBoth
+ * @struct StructBoth
  *
  * @ingroup Blub
  *
@@ -1957,16 +1957,6 @@ def test_sddlinker(caplog, tmp_path):
  */
 
 /**
- * @typedef int Typedef
- *
- * @ingroup Blub
- *
- * @par Traceability
- * This design element is related to
- * [spec:/rtems/if/typedef](doc-ts-icd/html/requirements-and-design.html#specrtemsiftypedef).
- */
-
-/**
  * @union Union
  *
  * @ingroup Blub
@@ -1977,7 +1967,7 @@ def test_sddlinker(caplog, tmp_path):
  */
 
 /**
- * @typedef union UnionBoth UnionBoth
+ * @union UnionBoth
  *
  * @ingroup Blub
  *
@@ -2007,16 +1997,6 @@ def test_sddlinker(caplog, tmp_path):
  */
 
 /**
- * @typedef struct UnspecStruct UnspecTypedef
- *
- * @ingroup UnspecGroup
- *
- * @par Traceability
- * This design element is related to
- * [spec:/rtems/if/unspec-typedef](doc-ts-icd/html/requirements-and-design.html#specrtemsifunspectypedef).
- */
-
-/**
  * @union UnspecUnion
  *
  * @ingroup UnspecGroup
@@ -2024,6 +2004,66 @@ def test_sddlinker(caplog, tmp_path):
  * @par Traceability
  * This design element is related to
  * [spec:/rtems/if/unspec-union](doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecunion).
+ */
+
+/**
+ * @struct reg_block
+ *
+ * @ingroup RegBlock
+ *
+ * @par Traceability
+ * This design element is related to
+ * [spec:/rtems/if/reg-block](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock).
+ */
+
+/**
+ * @struct reg_block_2
+ *
+ * @ingroup RegBlock2
+ *
+ * @par Traceability
+ * This design element is related to
+ * [spec:/rtems/if/reg-block-2](doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2).
+ */
+
+/**
+ * @typedef struct StructBoth StructBoth
+ *
+ * @ingroup Blub
+ *
+ * @par Traceability
+ * This design element is related to
+ * [spec:/rtems/if/struct-both](doc-ts-icd/html/requirements-and-design.html#specrtemsifstructboth).
+ */
+
+/**
+ * @typedef int Typedef
+ *
+ * @ingroup Blub
+ *
+ * @par Traceability
+ * This design element is related to
+ * [spec:/rtems/if/typedef](doc-ts-icd/html/requirements-and-design.html#specrtemsiftypedef).
+ */
+
+/**
+ * @typedef union UnionBoth UnionBoth
+ *
+ * @ingroup Blub
+ *
+ * @par Traceability
+ * This design element is related to
+ * [spec:/rtems/if/union-both](doc-ts-icd/html/requirements-and-design.html#specrtemsifunionboth).
+ */
+
+/**
+ * @typedef struct UnspecStruct UnspecTypedef
+ *
+ * @ingroup UnspecGroup
+ *
+ * @par Traceability
+ * This design element is related to
+ * [spec:/rtems/if/unspec-typedef](doc-ts-icd/html/requirements-and-design.html#specrtemsifunspectypedef).
  */
 
 /**

@@ -268,6 +268,8 @@ driver, no Newlib reentrancy support, and no file system.
     + +-+
     | | `StructBoth </pkg/doc-ddf-sdd/html/group__Blub.html#gafc3408bd38e181fb80afd4d06fec20ff>`__ |
     + +-+
+    | | `StructBoth </pkg/doc-ddf-sdd/html/structStructBoth.html>`__ |
+    + +-+
     | | `StructOnly </pkg/doc-ddf-sdd/html/structStructOnly.html>`__ |
     + +-+
     | | `Typedef </pkg/doc-ddf-sdd/html/group__Blub.html#gaedec7b8d93c84ed3293e685c1e0b444e>`__ |
@@ -275,6 +277,8 @@ driver, no Newlib reentrancy support, and no file system.
     | | `Union </pkg/doc-ddf-sdd/html/unionUnion.html>`__ |
     + +-+
     | | `UnionBoth </pkg/doc-ddf-sdd/html/group__Blub.html#ga82983277a27d470f93cb6843cc648a4a>`__ |
+    + +-+
+    | | `UnionBoth </pkg/doc-ddf-sdd/html/unionUnionBoth.html>`__ |
     + +-+
     | | `UnionOnly </pkg/doc-ddf-sdd/html/unionUnionOnly.html>`__ |
     + +-+
@@ -284,7 +288,11 @@ driver, no Newlib reentrancy support, and no file system.
     + +-+
     | | `reg​_block </pkg/doc-ddf-sdd/html/group__RegBlock.html#ga4b1fce841b275741376210bf36459e32>`__ |
     + +-+
+    | | `reg​_block </pkg/doc-ddf-sdd/html/structreg__block.html>`__ |
+    + +-+
     | | `reg​_block​_2 </pkg/doc-ddf-sdd/html/group__RegBlock2.html#ga70a56c32b62caff7efa73f98f038320d>`__ |
+    + +-+
+    | | `reg​_block​_2 </pkg/doc-ddf-sdd/html/structreg__block__2.html>`__ |
     + +-+
     | | `the​_enum </pkg/doc-ddf-sdd/html/group__Blub.html#ga582a1afc79f3b607104a52d7aa268624>`__ |
     +-+-+
@@ -829,6 +837,8 @@ driver, no Newlib reentrancy support, and no file system.
     +-+-+
     | `Struct </pkg/doc-ddf-sdd/html/structStruct.html>`__ | `bar​/more​/blub.h </pkg/doc-ddf-sdd/html/blub_8h.html>`__ |
     +-+-+
+    | `StructBoth </pkg/doc-ddf-sdd/html/structStructBoth.html>`__ | `bar​/more​/blub.h </pkg/doc-ddf-sdd/html/blub_8h.html>`__ |
+    +-+-+
     | `StructBoth </pkg/doc-ddf-sdd/html/group__Blub.html#gafc3408bd38e181fb80afd4d06fec20ff>`__ | `bar​/more​/blub.h </pkg/doc-ddf-sdd/html/blub_8h.html>`__ |
     +-+-+
     | `StructOnly </pkg/doc-ddf-sdd/html/structStructOnly.html>`__ | `bar​/more​/blub.h </pkg/doc-ddf-sdd/html/blub_8h.html>`__ |
@@ -869,6 +879,8 @@ driver, no Newlib reentrancy support, and no file system.
     +-+-+
     | `Union </pkg/doc-ddf-sdd/html/unionUnion.html>`__ | `bar​/more​/blub.h </pkg/doc-ddf-sdd/html/blub_8h.html>`__ |
     +-+-+
+    | `UnionBoth </pkg/doc-ddf-sdd/html/unionUnionBoth.html>`__ | `bar​/more​/blub.h </pkg/doc-ddf-sdd/html/blub_8h.html>`__ |
+    +-+-+
     | `UnionBoth </pkg/doc-ddf-sdd/html/group__Blub.html#ga82983277a27d470f93cb6843cc648a4a>`__ | `bar​/more​/blub.h </pkg/doc-ddf-sdd/html/blub_8h.html>`__ |
     +-+-+
     | `UnionOnly </pkg/doc-ddf-sdd/html/unionUnionOnly.html>`__ | `bar​/more​/blub.h </pkg/doc-ddf-sdd/html/blub_8h.html>`__ |
@@ -901,7 +913,11 @@ driver, no Newlib reentrancy support, and no file system.
     +-+-+
     | `obj </pkg/doc-ddf-sdd/html/group__GroupB.html#gafc83d933ee990064a19b6b66ccad1800>`__ | `b.c </pkg/doc-ddf-sdd/html/b_8c.html>`__ |
     +-+-+
+    | `reg​_block </pkg/doc-ddf-sdd/html/structreg__block.html>`__ | `bar​/more​/blub.h </pkg/doc-ddf-sdd/html/blub_8h.html>`__ |
+    +-+-+
     | `reg​_block </pkg/doc-ddf-sdd/html/group__RegBlock.html#ga4b1fce841b275741376210bf36459e32>`__ | `bar​/more​/blub.h </pkg/doc-ddf-sdd/html/blub_8h.html>`__ |
+    +-+-+
+    | `reg​_block​_2 </pkg/doc-ddf-sdd/html/structreg__block__2.html>`__ | `bar​/more​/blub.h </pkg/doc-ddf-sdd/html/blub_8h.html>`__ |
     +-+-+
     | `reg​_block​_2 </pkg/doc-ddf-sdd/html/group__RegBlock2.html#ga70a56c32b62caff7efa73f98f038320d>`__ | `bar​/more​/blub.h </pkg/doc-ddf-sdd/html/blub_8h.html>`__ |
     +-+-+
@@ -1202,6 +1218,8 @@ driver, no Newlib reentrancy support, and no file system.
     +-+-+
     | `Struct </pkg/doc-ddf-sdd/html/structStruct.html>`__ | `spec:/​rtems/​if/​struct </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifstruct>`__ |
     +-+-+
+    | `StructBoth </pkg/doc-ddf-sdd/html/structStructBoth.html>`__ | `spec:/​rtems/​if/​struct-both </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifstructboth>`__ |
+    +-+-+
     | `StructBoth </pkg/doc-ddf-sdd/html/group__Blub.html#gafc3408bd38e181fb80afd4d06fec20ff>`__ | `spec:/​rtems/​if/​struct-both </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifstructboth>`__ |
     +-+-+
     | `StructOnly </pkg/doc-ddf-sdd/html/structStructOnly.html>`__ | `spec:/​rtems/​if/​struct-only </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifstructonly>`__ |
@@ -1241,6 +1259,8 @@ driver, no Newlib reentrancy support, and no file system.
     | `Typedef </pkg/doc-ddf-sdd/html/group__Blub.html#gaedec7b8d93c84ed3293e685c1e0b444e>`__ | `spec:/​rtems/​if/​typedef </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsiftypedef>`__ |
     +-+-+
     | `Union </pkg/doc-ddf-sdd/html/unionUnion.html>`__ | `spec:/​rtems/​if/​union </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunion>`__ |
+    +-+-+
+    | `UnionBoth </pkg/doc-ddf-sdd/html/unionUnionBoth.html>`__ | `spec:/​rtems/​if/​union-both </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunionboth>`__ |
     +-+-+
     | `UnionBoth </pkg/doc-ddf-sdd/html/group__Blub.html#ga82983277a27d470f93cb6843cc648a4a>`__ | `spec:/​rtems/​if/​union-both </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunionboth>`__ |
     +-+-+
@@ -1294,7 +1314,11 @@ driver, no Newlib reentrancy support, and no file system.
     +-+-+
     | `obj </pkg/doc-ddf-sdd/html/group__GroupB.html#gafc83d933ee990064a19b6b66ccad1800>`__ in `b.c </pkg/doc-ddf-sdd/html/b_8c.html>`__ | `spec:/​rtems/​if/​obj </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifobj>`__ |
     +-+-+
+    | `reg​_block </pkg/doc-ddf-sdd/html/structreg__block.html>`__ | `spec:/​rtems/​if/​reg-block </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock>`__ |
+    +-+-+
     | `reg​_block </pkg/doc-ddf-sdd/html/group__RegBlock.html#ga4b1fce841b275741376210bf36459e32>`__ | `spec:/​rtems/​if/​reg-block </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock>`__ |
+    +-+-+
+    | `reg​_block​_2 </pkg/doc-ddf-sdd/html/structreg__block__2.html>`__ | `spec:/​rtems/​if/​reg-block-2 </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2>`__ |
     +-+-+
     | `reg​_block​_2 </pkg/doc-ddf-sdd/html/group__RegBlock2.html#ga70a56c32b62caff7efa73f98f038320d>`__ | `spec:/​rtems/​if/​reg-block-2 </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifregblock2>`__ |
     +-+-+

@@ -95,9 +95,26 @@ _name_enumerator = functools.partial(_name_kind, "enumerator", "name")
 _name_function = functools.partial(_name_kind, "function", "name")
 _name_group = functools.partial(_name_kind, "group", "identifier")
 _name_object = functools.partial(_name_kind, "object", "name")
-_name_type = functools.partial(_name_kind, "type", "name")
 _name_perf_runtime_env = functools.partial(_name_kind, "perf-runtime-env",
                                            "name")
+
+
+def _name_type(name_to_item: dict[str, Item], item: Item) -> None:
+    if not item.enabled:
+        return
+    _name_default(name_to_item, item)
+    name = item["name"]
+    if item.type in ("interface/unspecified-struct",
+                     "interface/unspecified-union"):
+        definition_kind = "struct-only"
+    else:
+        definition_kind = item.get("definition-kind", "typedef-only")
+
+    # A tag and a type definition name are in distinct C namespaces
+    if definition_kind.startswith("typedef"):
+        _add_unique_name(name_to_item, item, f"type/{name}")
+    if definition_kind != "typedef-only":
+        _add_unique_name(name_to_item, item, f"tag/{name}")
 
 
 def _name_design_group(name_to_item: dict[str, Item], item: Item) -> None:

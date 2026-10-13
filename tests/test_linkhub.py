@@ -25,9 +25,14 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from pathlib import Path
+from types import SimpleNamespace
+
 import pytest
 
-from specmake.linkhub import _name_info_key_default, get_kind, SpecMapper
+from specitems import EmptyItemCache
+
+from specmake.linkhub import (_get_associated_items, _name_info_key_default,
+                              get_kind, SpecMapper)
 
 from .util import create_package, get_and_clear_log
 
@@ -46,6 +51,8 @@ def test_linkhub(caplog, tmp_path):
     assert link_hub.get_sdd_link(
         "function", "blub", link_hub.mapper
     ) == f"`blub() <{tmp_path}/pkg/doc-ddf-sdd/html/group__Blub.html#ga754ccc677acbd87ede8b3c082bb9ff6b>`__"
+    with pytest.raises(KeyError):
+        link_hub.get_sdd_link("function", "nil", link_hub.mapper)
     assert link_hub.get_file_sdd_link(
         "a.c", link_hub.mapper
     ) == f"`a.c <{tmp_path}/pkg/doc-ddf-sdd/html/a_8c.html>`__"
@@ -83,6 +90,12 @@ def test_linkhub(caplog, tmp_path):
     assert mapper.substitute(
         "${.:/sdd-type:Union}"
     ) == f"`Union <{tmp_path}/pkg/doc-ddf-sdd/html/unionUnion.html>`__"
+    assert mapper.substitute(
+        "${.:/sdd-tag:StructBoth}"
+    ) == f"`StructBoth <{tmp_path}/pkg/doc-ddf-sdd/html/structStructBoth.html>`__"
+    assert mapper.substitute(
+        "${.:/sdd-type:StructBoth}"
+    ) == f"`StructBoth <{tmp_path}/pkg/doc-ddf-sdd/html/group__Blub.html#gafc3408bd38e181fb80afd4d06fec20ff>`__"
 
     assert mapper.substitute(
         "${/rtems/if/func:/spec}") == ":ref:`blub() <SpecRtemsIfFunc>`"
@@ -193,3 +206,48 @@ def test_linkhub_get_link(caplog, tmp_path):
         "`spec:/​pkg/​sub/​t/​component "
         "<pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsifunspecmacro>`__)"
     )
+
+
+def test_linkhub_tag_and_type_of_same_name():
+    item_cache = EmptyItemCache()
+    item_cache.add_items({
+        "/tag": {
+            "interface-type": "struct",
+            "links": [],
+            "type": "interface"
+        },
+        "/type": {
+            "interface-type": "typedef",
+            "links": [],
+            "type": "interface"
+        },
+        "/anonymous": {
+            "interface-type": "union",
+            "links": [],
+            "type": "interface"
+        },
+        "/group": {
+            "interface-type": "group",
+            "links": [],
+            "type": "interface"
+        },
+    })
+    for item in item_cache.values():
+        item.type = f"interface/{item['interface-type']}"
+    spec = SimpleNamespace(
+        name_to_item={
+            "tag/status": item_cache["/tag"],
+            "type/status": item_cache["/type"],
+            "type/other": item_cache["/type"],
+            "type/anonymous": item_cache["/anonymous"],
+            "group/G": item_cache["/group"]
+        })
+    info = {"groups": ["G"]}
+    assert _get_associated_items({}, spec, "tag/status",
+                                 info) == [item_cache["/tag"]]
+    assert _get_associated_items({}, spec, "type/status",
+                                 info) == [item_cache["/type"]]
+    assert _get_associated_items({}, spec, "tag/anonymous",
+                                 info) == [item_cache["/anonymous"]]
+    assert _get_associated_items({}, spec, "tag/other",
+                                 info) == [item_cache["/group"]]

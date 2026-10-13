@@ -32,7 +32,7 @@ from specitems import EmptyItemCache, ItemMapper
 
 from specmake import RTEMSItemCache
 from specmake.rtems import (_MySTSubstitution, _name_register_block,
-                            get_substitution_errors)
+                            _name_type, get_substitution_errors)
 
 from tests import util
 
@@ -246,3 +246,57 @@ def test_rtems_name_register_block():
     assert sorted(name_to_item) == [
         "Hosted", "NoIdentifier", "Own", "group/HostId", "group/Own"
     ]
+
+
+def _type(name: str, **kwargs) -> dict:
+    return {
+        "enabled-by": True,
+        "interface-type": "struct",
+        "links": [],
+        "name": name,
+        "type": "interface",
+        **kwargs
+    }
+
+
+def test_rtems_name_type():
+    item_cache = EmptyItemCache()
+    item_cache.add_items({
+        "/struct-only":
+        _type("a", **{"definition-kind": "struct-only"}),
+        "/typedef":
+        _type("a", **{"interface-type": "typedef"}),
+        "/typedef-only":
+        _type("b", **{"definition-kind": "typedef-only"}),
+        "/both":
+        _type("c", **{"definition-kind": "typedef-and-struct"}),
+        "/disabled":
+        _type("a", **{"enabled-by": False}),
+        "/both-duplicate":
+        _type("a", **{"definition-kind": "typedef-and-union"}),
+        "/unspec-struct":
+        _type("d", **{"interface-type": "unspecified-struct"}),
+        "/unspec-typedef":
+        _type("d", **{"interface-type": "unspecified-typedef"}),
+    })
+    for item in item_cache.values():
+        item.type = f"interface/{item['interface-type']}"
+    name_to_item: dict = {}
+    for uid in [
+            "/struct-only", "/typedef", "/typedef-only", "/both", "/disabled",
+            "/unspec-struct", "/unspec-typedef"
+    ]:
+        _name_type(name_to_item, item_cache[uid])
+    assert sorted(name_to_item) == [
+        "Both", "StructOnly", "Typedef", "TypedefOnly", "UnspecStruct",
+        "UnspecTypedef", "tag/a", "tag/c", "tag/d", "type/a", "type/b",
+        "type/c", "type/d"
+    ]
+    assert name_to_item["tag/a"].uid == "/struct-only"
+    assert name_to_item["type/a"].uid == "/typedef"
+    assert name_to_item["tag/d"].uid == "/unspec-struct"
+    assert name_to_item["type/d"].uid == "/unspec-typedef"
+    match = (r"items /both-duplicate and /typedef "
+             r"specify the same interface group: a")
+    with pytest.raises(ValueError, match=match):
+        _name_type(name_to_item, item_cache["/both-duplicate"])
