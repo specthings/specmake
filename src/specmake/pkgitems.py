@@ -46,7 +46,8 @@ from specitems import (ContentContext, EnabledSet, Item, ItemCache,
                        LicenseProvider, Link, MarkdownContent, RelicensingRule,
                        SphinxContent, SphinxMapper, TextContent,
                        augment_glossary_terms, data_digest, is_enabled,
-                       link_is_enabled, pickle_load_data_by_uid, to_iterable)
+                       link_is_enabled, parse_attribute_path,
+                       pickle_load_data_by_uid, to_iterable)
 from specware import SpecWareTypeProvider, run_command
 
 
@@ -997,6 +998,115 @@ def export_data(item: Item, _present: bool, built_later: bool) -> Any:
         for link in data["links"]:
             if link["role"] in ("input", "input-to"):
                 link["hash"] = None
+    return data
+
+
+def _clear_value(uid: str, path: str, value: Any) -> Any:
+    if isinstance(value, list):
+        return []
+    if isinstance(value, dict):
+        return {}
+    if isinstance(value, str):
+        return ""
+    raise ValueError(f"{uid}: the export clearance path {path} names a value "
+                     f"of the type {type(value).__name__}, which is neither "
+                     "a list, a dictionary, nor a string")
+
+
+_Steps = tuple[str | int, ...]
+
+
+def _get_steps(uid: str, path: str) -> _Steps:
+    try:
+        segments = parse_attribute_path(path)
+    except ValueError as err:
+        raise ValueError(f"{uid}: {err}") from err
+    if not segments:
+        raise ValueError(f"{uid}: the attribute path {path} denotes the root")
+    steps: list[str | int] = []
+    for segment in segments:
+        steps.append(segment.key)
+        if segment.index is not None:
+            steps.append(segment.index)
+    return tuple(steps)
+
+
+def _get_step(value: Any, step: str | int) -> Any:
+    if isinstance(value, str):
+        raise TypeError(f"a string has no element '{step}'")
+    return value[step]
+
+
+def _clear_steps(uid: str, path: str, data: Any, steps: _Steps) -> None:
+    value = data
+    try:
+        for step in steps[:-1]:
+            value = _get_step(value, step)
+        old = _get_step(value, steps[-1])
+    except (KeyError, IndexError, TypeError):
+        return
+    value[steps[-1]] = _clear_value(uid, path, old)
+
+
+def _clear_path(uid: str, data: dict, path: str) -> None:
+    _clear_steps(uid, path, data, _get_steps(uid, path))
+
+
+def export_component_data(item: Item, present: bool, built_later: bool) -> Any:
+    """
+    Export the data of the component and clear the attributes which the
+    export clearance of the component names.
+    """
+    data = export_data(item, present, built_later)
+    for path in item.get("export-clearance", ()):
+        _clear_path(item.uid, data, path)
+    return data
+
+
+_USE_TEMPLATE_ROLES = ("use-package-template",
+                       "use-package-component-template")
+
+_ADD_TEMPLATE_ROLES = ("add-package-template",
+                       "add-package-component-template")
+
+
+def _gather_template_users(item: Item, users: set[Item]) -> None:
+    for user in itertools.chain(item.children(_USE_TEMPLATE_ROLES),
+                                item.parents(_ADD_TEMPLATE_ROLES)):
+        if user not in users:
+            users.add(user)
+            _gather_template_users(user, users)
+
+
+def export_template_data(item: Item, present: bool, built_later: bool) -> Any:
+    """
+    Export the data of the template and clear the attribute action values
+    which an export clearance of a component reaches.  The component uses the
+    template directly or through other templates.
+
+    A clearance path inside an action path clears the part of the action
+    value below the action path.  An action path inside a clearance path
+    clears the whole action value.
+    """
+    data = export_data(item, present, built_later)
+    users: set[Item] = set()
+    _gather_template_users(item, users)
+    clearances: dict[str, _Steps] = {}
+    for user in users:
+        for path in user.get("export-clearance", ()):
+            clearances[path] = _get_steps(user.uid, path)
+    for action in data.get("attribute-actions", None) or []:
+        for action_path in to_iterable(action["path"]):
+            action_steps = _get_steps(item.uid, action_path)
+            size = len(action_steps)
+            for path, steps in sorted(clearances.items()):
+                if steps[:size] == action_steps:
+                    value_steps = steps[size:]
+                elif action_steps[:len(steps)] == steps:
+                    value_steps = ()
+                else:
+                    continue
+                _clear_steps(item.uid, path, action, ("value", ) + value_steps)
     return data
 
 

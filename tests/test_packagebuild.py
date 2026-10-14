@@ -35,7 +35,8 @@ from specitems import EmptyItem, EmptyItemCache, Item, ItemGetValueContext
 import specmake
 from specmake import (BuildItem, BuildItemFactory, BuildItemMapper,
                       BuildItemTypeProvider, build_item_input,
-                      PackageBuildDirector, PackageComponent)
+                      create_build_item_factory, PackageBuildDirector,
+                      PackageComponent)
 
 from .util import create_package, create_test_director, get_and_clear_log
 
@@ -594,3 +595,236 @@ def test_builditem_transformer():
     assert build_item.substitute("${.:/params/list:join}") == "a,c"
     assert build_item.substitute("${.:/params/list:join separator=+}") == "a+c"
     assert build_item.substitute("${.:/component/list:join}") == "A,C"
+
+
+def test_export_clearance():
+    item_cache = EmptyItemCache()
+    item_cache.add_items({
+        "/c": {
+            "enabled-by": True,
+            "a": {
+                "b": "x",
+                "n": 1
+            },
+            "d": {
+                "e": "f"
+            },
+            "export-clearance": ["/l", "/d", "/a/b", "/a/z/y", "/m"],
+            "l": [1, 2],
+            "links": [{
+                "role": "use-package-component-template",
+                "uid": "/t1"
+            }],
+            "s": "t"
+        },
+        "/o": {
+            "enabled-by":
+            True,
+            "links": [{
+                "role": "use-package-component-template",
+                "uid": "/t0"
+            }, {
+                "role": "use-package-component-template",
+                "uid": "/t1"
+            }]
+        },
+        "/t0": {
+            "enabled-by":
+            True,
+            "attribute-actions": [{
+                "action": "set-default",
+                "path": "/l",
+                "value": [1]
+            }, {
+                "action": "substitute",
+                "path": "/d"
+            }],
+            "links": []
+        },
+        "/t1": {
+            "enabled-by":
+            True,
+            "attribute-actions": [{
+                "action": "set-default",
+                "path": "/d",
+                "value": {
+                    "e": "f"
+                }
+            }, {
+                "action": "set-default",
+                "path": "/s",
+                "value": "t"
+            }],
+            "links": [{
+                "role": "use-package-component-template",
+                "uid": "/t0"
+            }, {
+                "role": "use-package-template",
+                "uid": "/t4"
+            }]
+        },
+        "/t2": {
+            "enabled-by":
+            True,
+            "attribute-actions": [{
+                "action": "set-default",
+                "path": "/a/b",
+                "value": "x"
+            }],
+            "links": [{
+                "role": "add-package-component-template",
+                "uid": "/c"
+            }]
+        },
+        "/t3": {
+            "enabled-by": True,
+            "links": []
+        },
+        "/t4": {
+            "enabled-by":
+            True,
+            "attribute-actions": [{
+                "action": "set-default",
+                "path": "/l",
+                "value": [3]
+            }],
+            "links": []
+        },
+        "/t5": {
+            "enabled-by":
+            True,
+            "attribute-actions": [{
+                "action": "set-default",
+                "path": "/m",
+                "value": "n"
+            }],
+            "links": [{
+                "role": "add-package-template",
+                "uid": "/c"
+            }]
+        }
+    })
+    for uid in ("/c", "/o"):
+        item_cache[uid].type = "pkg/component/generic"
+    for uid in ("/t0", "/t1", "/t2", "/t3", "/t4", "/t5"):
+        item_cache[uid].type = "pkg/template/component"
+    factory = create_build_item_factory()
+    order = len(item_cache)
+    data = factory.export_data(item_cache["/c"], True, order)
+    assert data["l"] == []
+    assert data["d"] == {}
+    assert data["a"] == {"b": "", "n": 1}
+    assert data["s"] == "t"
+    assert item_cache["/c"]["l"] == [1, 2]
+    assert [
+        action.get("value") for action in factory.export_data(
+            item_cache["/t0"], True, order)["attribute-actions"]
+    ] == [[], None]
+    assert [
+        action["value"] for action in factory.export_data(
+            item_cache["/t1"], True, order)["attribute-actions"]
+    ] == [{}, "t"]
+    assert factory.export_data(item_cache["/t2"], True,
+                               order)["attribute-actions"][0]["value"] == ""
+    assert "attribute-actions" not in factory.export_data(
+        item_cache["/t3"], True, order)
+    assert factory.export_data(item_cache["/t4"], True,
+                               order)["attribute-actions"][0]["value"] == []
+    assert factory.export_data(item_cache["/t5"], True,
+                               order)["attribute-actions"][0]["value"] == ""
+    assert "export-clearance" not in factory.export_data(
+        item_cache["/o"], True, order)
+    item_cache["/c"]["export-clearance"] = ["/a/n"]
+    with pytest.raises(ValueError,
+                       match=r"/c: the export clearance path "
+                       r"/a/n names a value of the type int"):
+        factory.export_data(item_cache["/c"], True, order)
+
+
+def test_export_clearance_attribute_path():
+    item_cache = EmptyItemCache()
+    item_cache.add_items({
+        "/c": {
+            "enabled-by":
+            True,
+            "export-clearance":
+            ["/q[1]/r", "/q[-1]", "/s/u", "/s/v", "/w", "/x[0]/y", "/z[9]"],
+            "links": [{
+                "role": "use-package-component-template",
+                "uid": "/t"
+            }],
+            "q": [{
+                "r": "a"
+            }, {
+                "r": "b"
+            }, ["c"]],
+            "s":
+            "t",
+            "w":
+            "x",
+            "z": []
+        },
+        "/t": {
+            "enabled-by":
+            True,
+            "attribute-actions": [{
+                "action": "set-default",
+                "path": "/s",
+                "value": {
+                    "u": "v",
+                    "k": "l"
+                }
+            }, {
+                "action": "set-default",
+                "path": "/w/a",
+                "value": "b"
+            }, {
+                "action": "set-default",
+                "path": ["/n", "/x"],
+                "value": [{
+                    "y": "z"
+                }]
+            }, {
+                "action": "set-default",
+                "path": "/q[0]",
+                "value": {
+                    "r": "s"
+                }
+            }, {
+                "action": "set-default",
+                "path": "/n",
+                "value": "m"
+            }, {
+                "action": "remove",
+                "path": "/s/u"
+            }],
+            "links": []
+        }
+    })
+    item_cache["/c"].type = "pkg/component/generic"
+    item_cache["/t"].type = "pkg/template/component"
+    factory = create_build_item_factory()
+    order = len(item_cache)
+    data = factory.export_data(item_cache["/c"], True, order)
+    assert data["q"] == [{"r": "a"}, {"r": ""}, []]
+    assert data["s"] == "t"
+    assert data["w"] == ""
+    assert data["z"] == []
+    actions = factory.export_data(item_cache["/t"], True,
+                                  order)["attribute-actions"]
+    assert [action.get("value") for action in actions] == [{
+        "u": "",
+        "k": "l"
+    }, "", [{
+        "y": ""
+    }], {
+        "r": "s"
+    }, "m", None]
+    for path, message in (("/a//b", r"/c: invalid segment '' in attribute "
+                           r"path '/a//b'"),
+                          ("/", r"/c: the attribute path / denotes the root")):
+        item_cache["/c"]["export-clearance"] = [path]
+        with pytest.raises(ValueError, match=message):
+            factory.export_data(item_cache["/c"], True, order)
+        with pytest.raises(ValueError, match=message):
+            factory.export_data(item_cache["/t"], True, order)

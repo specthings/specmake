@@ -35,7 +35,8 @@ from .itemcachestate import ItemCacheDirectoryState
 from .linkhub import LinkHub
 from .membenchcollector import MembenchCollector
 from .notruncoverage import NotRunCoverage
-from .pkgitems import (BuildItemFactory, GenericPackageComponent, Redirection)
+from .pkgitems import (BuildItemFactory, GenericPackageComponent, Redirection,
+                       export_component_data, export_template_data)
 from .packagechanges import PackageChanges
 from .packagemanual import PackageManualBuilder, PackageSummary
 from .perfimages import BuildPerformanceImages
@@ -65,6 +66,11 @@ def create_build_item_factory() -> BuildItemFactory:
     factory = BuildItemFactory()
     factory.add_constructor("pkg/component/generic", GenericPackageComponent)
     factory.add_constructor("pkg/component/rtems", RTEMSPackageComponent)
+    for type_name in ("pkg/component/generic", "pkg/component/rtems"):
+        factory.add_export_data(type_name, export_component_data)
+    for type_name in ("pkg/template/component", "pkg/template/file-item",
+                      "pkg/template/inline-item", "pkg/template/redirect"):
+        factory.add_export_data(type_name, export_template_data)
     factory.add_constructor("pkg/directory-state/archive", Archiver)
     factory.add_constructor("pkg/directory-state/ctrf", CTRFCollector)
     factory.add_constructor("pkg/directory-state/doxyfile", Doxyfile)

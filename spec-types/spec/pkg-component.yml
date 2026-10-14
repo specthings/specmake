@@ -22,6 +22,16 @@ spec-info:
         description: |
           It shall be the enabled set of the component.
         spec-type: list-str
+      export-clearance:
+        description: |
+          It shall be the attribute paths which the export of the package
+          clears.  The export clears the value of each path in the component
+          and in each attribute action of a template which the component uses
+          directly or through other templates.  A path segment may select a
+          list element by an index in brackets.  The export skips a path which
+          names no value.  A list becomes empty, a dictionary becomes empty,
+          and a string becomes the empty string.
+        spec-type: list-str
       accepted-licenses:
         description: |
           It shall be the licenses which a work of the component accepts for a
