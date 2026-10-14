@@ -516,7 +516,7 @@ At the time when the package of this version was produced, the following newly o
     +--------------+------------------------------------------------+---------------------------------------------------------+
     | Database     | Identifier                                     | Subject                                                 |
     +==============+================================================+=========================================================+
-    | RTEMS Ticket | `2548 <https://devel.rtems.org/ticket/2548>`__ | Problematic integer conversion in rtems_clock_get_tod() |
+    | RTEMS Ticket | `2548 <https://devel.rtems.org/ticket/2548>`__ | The fake conversion overflows for any large input value |
     +--------------+------------------------------------------------+---------------------------------------------------------+
 
 .. raw:: latex
@@ -541,7 +541,7 @@ At the time when the package of this version was produced, the following open is
     +--------------+------------------------------------------------+------------------------------------------------------------+
     | Database     | Identifier                                     | Subject                                                    |
     +==============+================================================+============================================================+
-    | RTEMS Ticket | `2365 <https://devel.rtems.org/ticket/2365>`__ | Task pre-emption disable is broken due to pseudo ISR tasks |
+    | RTEMS Ticket | `2365 <https://devel.rtems.org/ticket/2365>`__ | The fake scheduler fails to preempt the low priority tasks |
     +--------------+------------------------------------------------+------------------------------------------------------------+
 
 .. raw:: latex
@@ -566,7 +566,7 @@ For this package version, the following issues which were newly or already open 
     +--------------+------------------------------------------------+------------------------------------------------------+
     | Database     | Identifier                                     | Subject                                              |
     +==============+================================================+======================================================+
-    | RTEMS Ticket | `2189 <https://devel.rtems.org/ticket/2189>`__ | Insufficient documentation for rtems_clock_get_tod() |
+    | RTEMS Ticket | `2189 <https://devel.rtems.org/ticket/2189>`__ | The fake directive lacks documentation of its result |
     +--------------+------------------------------------------------+------------------------------------------------------+
 
 .. raw:: latex
@@ -598,9 +598,9 @@ At the time when the package of this version was produced, the following newly o
     +--------------+------------------------------------------------+------------------------------------------------------------+
     | Database     | Identifier                                     | Subject                                                    |
     +==============+================================================+============================================================+
-    | RTEMS Ticket | `2189 <https://devel.rtems.org/ticket/2189>`__ | Insufficient documentation for rtems_clock_get_tod()       |
+    | RTEMS Ticket | `2189 <https://devel.rtems.org/ticket/2189>`__ | The fake directive lacks documentation of its result       |
     +--------------+------------------------------------------------+------------------------------------------------------------+
-    | RTEMS Ticket | `2365 <https://devel.rtems.org/ticket/2365>`__ | Task pre-emption disable is broken due to pseudo ISR tasks |
+    | RTEMS Ticket | `2365 <https://devel.rtems.org/ticket/2365>`__ | The fake scheduler fails to preempt the low priority tasks |
     +--------------+------------------------------------------------+------------------------------------------------------------+
 
 .. raw:: latex
@@ -656,9 +656,9 @@ At the time when the package of this version was produced, the following open is
     +--------------+------------------------------------------------+------------------------------------------------------------+
     | Database     | Identifier                                     | Subject                                                    |
     +==============+================================================+============================================================+
-    | RTEMS Ticket | `2365 <https://devel.rtems.org/ticket/2365>`__ | Task pre-emption disable is broken due to pseudo ISR tasks |
+    | RTEMS Ticket | `2365 <https://devel.rtems.org/ticket/2365>`__ | The fake scheduler fails to preempt the low priority tasks |
     +--------------+------------------------------------------------+------------------------------------------------------------+
-    | RTEMS Ticket | `2548 <https://devel.rtems.org/ticket/2548>`__ | Problematic integer conversion in rtems_clock_get_tod()    |
+    | RTEMS Ticket | `2548 <https://devel.rtems.org/ticket/2548>`__ | The fake conversion overflows for any large input value    |
     +--------------+------------------------------------------------+------------------------------------------------------------+
 
 .. raw:: latex

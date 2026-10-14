@@ -1,6 +1,7 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
-created: '2019-04-02T15:06:29.497Z'
-copyrights: []
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+created: '2026-01-01T00:00:00.000Z'
 enabled-by: true
 identifier: '2365'
 labels: []
@@ -10,6 +11,6 @@ links:
 milestone: null
 pkg-type: issue
 status: assigned
-subject: Task pre-emption disable is broken due to pseudo ISR tasks
+subject: The fake scheduler fails to preempt the low priority tasks
 type: pkg
-updated: '2019-04-02T15:06:29.497Z'
+updated: '2026-01-01T00:00:00.000Z'

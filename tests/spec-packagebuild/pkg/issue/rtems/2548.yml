@@ -1,6 +1,7 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
-created: '2019-04-02T15:06:29.497Z'
-copyrights: []
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+created: '2026-01-01T00:00:00.000Z'
 enabled-by: true
 identifier: '2548'
 labels: []
@@ -10,6 +11,6 @@ links:
 milestone: null
 pkg-type: issue
 status: assigned
-subject: Problematic integer conversion in rtems_clock_get_tod()
+subject: The fake conversion overflows for any large input value
 type: pkg
-updated: '2019-04-02T15:06:29.497Z'
+updated: '2026-01-01T00:00:00.000Z'
