@@ -29,10 +29,10 @@ import itertools
 import logging
 import posixpath
 import re
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, Optional
 
 from specitems import (EnabledSet, IS_ENABLED_OPS, Item, is_enabled_with_ops,
-                       load_data, to_iterable)
+                       load_data, resolve_attribute_path, to_iterable)
 
 from .pkgitems import BuildItem, PackageComponent
 
@@ -43,14 +43,14 @@ class _AttributeActionContext(NamedTuple):
     action_value: Any
     value: Any
     name: str
-    idx: int
+    idx: Optional[int]
     path: str
 
 
 def _attribute_action_append(ctx: _AttributeActionContext) -> None:
     logging.info("%s: at %s append: %s", ctx.item.uid, ctx.path,
                  ctx.action_value)
-    if ctx.idx >= 0:
+    if ctx.idx is not None:
         ctx.value[ctx.name][ctx.idx].append(ctx.action_value)
     else:
         ctx.value[ctx.name].append(ctx.action_value)
@@ -59,7 +59,7 @@ def _attribute_action_append(ctx: _AttributeActionContext) -> None:
 def _attribute_action_extend(ctx: _AttributeActionContext) -> None:
     logging.info("%s: at %s extend by: %s", ctx.item.uid, ctx.path,
                  ctx.action_value)
-    if ctx.idx >= 0:
+    if ctx.idx is not None:
         ctx.value[ctx.name][ctx.idx] += ctx.action_value
     else:
         ctx.value[ctx.name] += ctx.action_value
@@ -67,7 +67,7 @@ def _attribute_action_extend(ctx: _AttributeActionContext) -> None:
 
 def _attribute_action_insert(ctx: _AttributeActionContext,
                              adjustment: int) -> None:
-    if ctx.idx >= 0:
+    if ctx.idx is not None:
         the_list = ctx.value[ctx.name][ctx.idx]
     else:
         the_list = ctx.value[ctx.name]
@@ -95,7 +95,7 @@ def _attribute_action_insert_before(ctx: _AttributeActionContext) -> None:
 
 def _attribute_action_remove(ctx: _AttributeActionContext) -> None:
     msg = f"{ctx.item.uid}: at {ctx.action['path']} remove: "
-    if ctx.idx >= 0:
+    if ctx.idx is not None:
         logging.info("%s%s", msg, ctx.value[ctx.name][ctx.idx])
         del ctx.value[ctx.name][ctx.idx]
     else:
@@ -116,7 +116,7 @@ def _remove_list_items(ctx: _AttributeActionContext,
 
 
 def _attribute_action_remove_list_items(ctx: _AttributeActionContext) -> None:
-    if ctx.idx >= 0:
+    if ctx.idx is not None:
         ctx.value[ctx.name][ctx.idx] = _remove_list_items(
             ctx, ctx.value[ctx.name][ctx.idx])
     else:
@@ -126,7 +126,7 @@ def _attribute_action_remove_list_items(ctx: _AttributeActionContext) -> None:
 def _attribute_action_set(ctx: _AttributeActionContext) -> None:
     logging.info("%s: at %s set to: %s", ctx.item.uid, ctx.path,
                  ctx.action_value)
-    if ctx.idx >= 0:
+    if ctx.idx is not None:
         ctx.value[ctx.name][ctx.idx] = ctx.action_value
     else:
         ctx.value[ctx.name] = ctx.action_value
@@ -141,7 +141,7 @@ def _attribute_action_set_default(ctx: _AttributeActionContext) -> None:
 
 
 def _attribute_action_substitute(ctx: _AttributeActionContext) -> None:
-    if ctx.idx >= 0:
+    if ctx.idx is not None:
         new_value = ctx.item.substitute(ctx.value[ctx.name][ctx.idx])
         ctx.value[ctx.name][ctx.idx] = new_value
     else:
@@ -164,25 +164,9 @@ _ATTRIBUTE_ACTIONS = {
 }
 
 
-def _get_name_and_index(key: str) -> tuple[str, int]:
-    parts = key.split("[")
-    try:
-        return parts[0], int(parts[1].split("]")[0])
-    except IndexError:
-        return parts[0], -1
-
-
 def _attribute_action(item: BuildItem, action: dict, data: dict) -> None:
     for path in to_iterable(action["path"]):
-        path_list = path.strip("/").split("/")
-        value = data
-        for key in path_list[:-1]:
-            name, index = _get_name_and_index(key)
-            if index >= 0:
-                value = value[name][index]
-            else:
-                value = value[name]
-        name, index = _get_name_and_index(path_list[-1])
+        value, name, index = resolve_attribute_path(data, path)
         _ATTRIBUTE_ACTIONS[action["action"]](_AttributeActionContext(
             item, action, item.substitute(action.get("value", None)), value,
             name, index, path))

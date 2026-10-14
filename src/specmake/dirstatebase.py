@@ -47,7 +47,7 @@ _Path = Path | str
 
 
 def _get_file_path(ctx: ItemGetValueContext) -> str:
-    index = max(ctx.index, 0)
+    index = 0 if ctx.index is None else ctx.index
     return ctx.substitute_and_transform(
         f"{ctx.item['directory']}/{ctx.item['files'][index]['file']}")
 
@@ -57,7 +57,7 @@ def _get_file_path_without_extension(ctx: ItemGetValueContext) -> str:
 
 
 def _get_sha512(ctx: ItemGetValueContext) -> str:
-    index = max(ctx.index, 0)
+    index = 0 if ctx.index is None else ctx.index
     digest = ctx.item["files"][index]["hash"]
     assert digest is not None
     return base64_to_hex_text(digest)

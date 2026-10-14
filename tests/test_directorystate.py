@@ -146,6 +146,8 @@ type: pkg
         "${.:/file[1]}") == "spec-glossary/glossary/t.yml"
     assert dir_state.substitute(
         "${.:/file-without-extension[1]}") == "spec-glossary/glossary/t"
+    assert dir_state.substitute(
+        "${.:/file[-1]}") == "spec-glossary/glossary/t.yml"
     assert list(dir_state.files(".")) == ["./doc.rst", "./glossary/t.yml"]
     assert list(dir_state.files()) == [
         str(os.path.join(base, "doc.rst")),
