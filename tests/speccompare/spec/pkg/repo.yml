@@ -1,6 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 archive-file: ${.:/component/workspace-directory}/repo.tar.xz
-archive-hash: jPlPwDEquCap64obxou_xN4HS0TxZmxT-pPa5WFUVU2LboiOJnL7ZZy9x8CSMC5ee0CHfdqtWXHAhy2HEvkzDA==
+archive-hash: hCpzlQ9_dtx-R2sX6aaXyk_cfu-Zc1v8cyrbJE7LjQgYkJxRAWLMf5WheXD0qs_CCtUwnlGf640EJevDYTwJGw==
 archive-patches: []
 archive-url: https://foobar.org/repo.tar.xz
 copyrights:

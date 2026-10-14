@@ -137,7 +137,7 @@ def _get_git_log(config: _CompareSpecsConfig,
                  spec_paths: list[str]) -> list[str]:
     stdout: list[str] = []
     status = run_command([
-        "git", "log", "--no-renames", "-p",
+        "git", "log", "--no-merges", "--no-renames", "-p",
         f"{config.previous.revision}..{config.current.revision}", "--"
     ] + spec_paths, config.repository.directory, stdout)
     assert status == 0
