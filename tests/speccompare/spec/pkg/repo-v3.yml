@@ -1,7 +1,7 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 branch: v3
 clone-depth: null
-commit: 9379cc24cd03040fcf09988dcf679e88e67ab46b
+commit: e0920baf43eb7f966aa05d565c29872e5a05e609
 copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
 description: |

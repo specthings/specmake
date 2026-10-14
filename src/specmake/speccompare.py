@@ -181,7 +181,7 @@ class _LogParser:
                 b_uid = self._get_diff_uid(diff, "b")
             except ValueError:
                 return
-            if b_uid is not None and b_uid not in self._uids:
+            if (a_uid if b_uid is None else b_uid) not in self._uids:
                 return
             diff["a-uid"] = a_uid
             diff["b-uid"] = b_uid
