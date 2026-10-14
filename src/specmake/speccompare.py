@@ -194,9 +194,8 @@ class _LogParser:
         self._finalize_diff()
         commit = self._current_commit
         self._current_commit = {}
-        if commit and commit["diffs"]:
-            if commit["commit"] in self._ignored_commits:
-                commit["diffs"] = []
+        if commit and commit["diffs"] and commit[
+                "commit"] not in self._ignored_commits:
             self._commits.append(commit)
 
     def finalize(self) -> list[_Commit]:
@@ -345,11 +344,6 @@ def _add_change_log(content: TextContent, config: _CompareSpecsConfig) -> None:
                 body = _commit_message_body(commit)
                 if body:
                     _add_literal_block(content, body)
-                if not commit["diffs"]:
-                    with content.directive("note"):
-                        content.add("The modifications of this change are "
-                                    "not listed in the document.")
-                    continue
                 for diff in commit["diffs"]:
                     a_uid = diff["a-uid"]
                     b_uid = diff["b-uid"]

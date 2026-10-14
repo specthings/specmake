@@ -134,15 +134,6 @@ spec:/root
 
     \\end{footnotesize}
 
-.. _L3DoTheD:
-
-Do the D
-########
-
-.. note::
-
-    The modifications of this change are not listed in the document.
-
 .. _L3DoTheE:
 
 Do the E
