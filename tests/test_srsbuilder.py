@@ -76,6 +76,16 @@ is met:
   this target and there are no unexpected test failures in the test results for
   this target.
 
+* *V7*: It is an erratum and each errata group which reaches it has at least
+  one validation which resolves the erratum, and all these validations are
+  *validated*.
+
+* *V8*: It is an errata document and all its enabled errata are *validated*.
+
+An errata group reaches each enabled erratum of the errata documents which it
+references.  An errata group refines its errata documents in the sense of
+*V1*.
+
 An item which is neither *validated* nor *not pre-qualified* is *not
 validated*.  To check that all items are validated it is sufficient to check
 the status of the root item: :ref:`spec:/req/root </req/root>`.
@@ -1411,28 +1421,60 @@ Source
     - Errata Notice
 
 Resolutions
-    This erratum is resolved by the design requirement `spec:/\u200breq/\u200berrata-1
-    </pkg/doc-ts-srs/html/requirements.html#specreqerrata1>`__.
+    This erratum is resolved by the validation by analysis
+    `spec:/\u200brtems/\u200bval/\u200berrata-1
+    </pkg/doc-djf-svs/html/validation-other.html#specrtemsvalerrata1>`__.
+
+Validation
+    This validated erratum is validated by the validated errata resolution `spec:/\u200brtems/\u200bval/\u200berrata-1 </pkg/doc-djf-svs/html/validation-other.html#specrtemsvalerrata1>`__.
 """ in text
+    assert """Validations
+    The validation of this validated errata group depends on the following
+    items:
+""" in text
+    assert ("    | _`/ref/errata` :cite:`RefErrata` | validated | "
+            "`/errata/vendor/part/1`_ | validated erratum |\n") in text
+    assert (
+        "    | _`/errata/vendor/part/2` | validated | "
+        "`/\u200brtems/\u200bval/\u200berrata-2 "
+        "</pkg/doc-djf-svs/html/validation-other.html#specrtemsvalerrata2>`__"
+        " | validated errata resolution |\n") in text
     srs = package.director["/pkg/deployment/doc-ts-srs"]
     parts = [item.uid for item in srs.get_parts_of_document()]
-    assert "/req/errata-1" in parts
+    assert "/req/errata" in parts
     assert parts[-3:] == [
         "/errata/vendor/part/1", "/errata/vendor/part/2",
         "/errata/vendor/part/3"
     ]
-    assert """Erratum
-    This design requirement resolves the erratum
-    `spec:/\u200berrata/\u200bvendor/\u200bpart/\u200b2
-    </pkg/doc-ts-srs/html/requirements.html#specerratavendorpart2>`__.
-""" in text
 
 
 def test_srsbuilder_errata_gap(caplog, tmpdir):
-    with pytest.raises(ValueError,
-                       match="erratum /errata/vendor/part/2 of /ref/misc "
-                       "has no enabled resolution"):
-        build_document(caplog, tmpdir, "doc-ts-srs", [
-            "aggregate-test-results", "errata", "errata-gap", "link-hub",
-            "dummy-images", "ts-srs"
-        ])
+    package, text = build_document(caplog, tmpdir, "doc-ts-srs", [
+        "aggregate-test-results", "errata", "errata-gap", "link-hub",
+        "dummy-images", "ts-srs"
+    ])
+    assert """Source
+    The vendor states this erratum in:
+
+    - `The Title - More <https://foobar.org/doc_ument.pdf>`__, section 1.2
+
+Validation
+    This erratum is **not validated**.
+""" in text
+    assert ("    | _`/ref/misc` :cite:`RefMisc` | **not validated** | "
+            "`/errata/vendor/part/1`_ | validated erratum |\n"
+            "    +") in text
+    assert ("    | | | `/errata/vendor/part/2`_ | **not validated** erratum "
+            "|\n") in text
+    aggregator = package.director["/pkg/steps/aggregate-test-results"]
+    assert [(item.uid, item.type)
+            for item in aggregator.get_not_validated_items()
+            if "errata" in item.uid] == [
+                ("/req/errata", "requirement/non-functional/errata-group"),
+                ("/errata/vendor/part/2", "errata"),
+            ]
+    assert [(item.uid, item.type)
+            for item in aggregator.get_not_validated_items()
+            if item.uid.startswith("/ref/")] == [
+                ("/ref/misc", "reference/misc"),
+            ]

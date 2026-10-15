@@ -74,6 +74,16 @@ is met:
   this target and there are no unexpected test failures in the test results for
   this target.
 
+* *V7*: It is an erratum and each errata group which reaches it has at least
+  one validation which resolves the erratum, and all these validations are
+  *validated*.
+
+* *V8*: It is an errata document and all its enabled errata are *validated*.
+
+An errata group reaches each enabled erratum of the errata documents which it
+references.  An errata group refines its errata documents in the sense of
+*V1*.
+
 An item which is neither *validated* nor *not pre-qualified* is *not
 validated*.  To check that all items are validated it is sufficient to check
 the status of the root item: `spec:/​req/​root </pkg/doc-ts-srs/html/requirements.html#specreqroot>`__.

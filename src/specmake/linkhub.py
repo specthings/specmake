@@ -718,6 +718,12 @@ _ITEM_SPECIFICS = {
         _name_spec,
         _name_info_key_default,
     ),
+    "requirement/non-functional/errata-group": (
+        "errata group",
+        _augment_requirement,
+        _name_spec,
+        _name_info_key_default,
+    ),
     "requirement/non-functional/interface": (
         "interface requirement",
         _augment_requirement,

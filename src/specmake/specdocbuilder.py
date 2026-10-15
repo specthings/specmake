@@ -356,6 +356,7 @@ def _document_errata(ctx: _Context) -> None:
                          f"{ctx.item['title']}")
     _add_errata_documents(ctx)
     _add_default_links(ctx)
+    _add_validations(ctx)
 
 
 def _document_requirement(ctx: _Context) -> None:
@@ -934,6 +935,7 @@ _ITEM_DOCUMENTER = {
     "requirement/functional/function": _document_requirement,
     "requirement/non-functional/design": _document_requirement,
     "requirement/non-functional/design-group": _document_requirement,
+    "requirement/non-functional/errata-group": _document_requirement,
     "requirement/non-functional/design-target": _document_requirement,
     "requirement/non-functional/interface": _document_requirement,
     "requirement/non-functional/interface-requirement": _document_requirement,
@@ -1045,6 +1047,16 @@ is met:
 * *V6*: It is a design target and at least one test result is available for
   this target and there are no unexpected test failures in the test results for
   this target.
+
+* *V7*: It is an erratum and each errata group which reaches it has at least
+  one validation which resolves the erratum, and all these validations are
+  *validated*.
+
+* *V8*: It is an errata document and all its enabled errata are *validated*.
+
+An errata group reaches each enabled erratum of the errata documents which it
+references.  An errata group refines its errata documents in the sense of
+*V1*.
 
 An item which is neither *validated* nor *not pre-qualified* is *not
 validated*.  To check that all items are validated it is sufficient to check
@@ -1166,6 +1178,14 @@ class SpecDocumentBuilder(DocumentBuilder):
                                                     validation_status[1])
         return f"N/A ({validation_status})"
 
+    def _get_validation_table_target(self, item: Item) -> str:
+        target = f"_`{item.uid}`"
+        if item.type.startswith("reference/"):
+            # An errata document has no section, so its row cites the work.
+            cite = self.mapper.substitute(f"${{{item.uid}:/cite}}")
+            return f"{target} {cite}"
+        return target
+
     def _add_validation_table(self, content: TextContent) -> None:
         """ Add the document item validation table to the content. """
         get_link = self.mapper.get_link
@@ -1185,7 +1205,7 @@ class SpecDocumentBuilder(DocumentBuilder):
         for item in sorted(items,
                            key=lambda x:
                            (len(x.view["order"]), x.view["order"])):
-            req: str | int = f"_`{item.uid}`"
+            req: str | int = self._get_validation_table_target(item)
             status: str | int = _status(item)
             for validation in item.view["validation-dependencies"]:
                 item_2 = item_cache[validation[0]]

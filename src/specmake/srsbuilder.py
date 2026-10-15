@@ -65,13 +65,17 @@ class SRSBuilder(SpecDocumentBuilder):
             "runtime-measurement-test:/params/sample-count", self._get_count)
 
     def get_items_of_document(self) -> list[Item]:
-        return self.spec.get_related_requirements()
+        return (self.spec.get_related_requirements() +
+                self.spec.get_related_items_by_type(
+                    ["errata"] +
+                    self.spec.get_related_types_by_prefix("reference/")))
 
     def get_parts_of_document(self) -> list[Item]:
-        # The errata are parts of the document and stay out of its validation
-        # table.
-        return (super().get_parts_of_document() +
-                self.spec.get_related_items_by_type("errata"))
+        # An errata document has a row in the validation table and no section.
+        return [
+            item for item in super().get_parts_of_document()
+            if not item.type.startswith("reference/")
+        ]
 
     def _get_constraints(self, ctx: ItemGetValueContext) -> str:
         with self.section_content(ctx) as (content, _):
@@ -134,7 +138,8 @@ class SRSBuilder(SpecDocumentBuilder):
                     ("errata", "glossary/group",
                      "requirement/non-functional/design",
                      "requirement/non-functional/design-group",
-                     "requirement/non-functional/design-target"))
+                     "requirement/non-functional/design-target",
+                     "requirement/non-functional/errata-group"))
                 with content.section("Security and privacy requirements"):
                     _add_no_requirements(content, "security and privacy")
                 with content.section("Portability requirements"):

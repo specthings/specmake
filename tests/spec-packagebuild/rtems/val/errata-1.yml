@@ -4,9 +4,13 @@ copyrights:
 enabled-by: errata
 links:
 - role: validation
-  uid: /req/errata-1
+  uid: /req/errata
+- role: errata-resolution
+  uid: /errata/vendor/part/1
+- role: errata-resolution
+  uid: /errata/vendor/part/3
 method: by-analysis
 references: []
 text: |
-  The erratum does not apply.
+  The errata do not apply.
 type: validation

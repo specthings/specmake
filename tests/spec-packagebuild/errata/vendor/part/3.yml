@@ -3,6 +3,8 @@ copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
 enabled-by: true
 identifier: '3'
-links: []
+links:
+- role: reference
+  uid: /ref/errata
 title: Third defect
 type: errata
