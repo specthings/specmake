@@ -59,7 +59,15 @@ def test_sourcecompare(caplog, tmpdir):
 Unchanged files
 ###############
 
+- binary-changed.bin
+
+- binary-unchanged.bin
+
 - changed-no-review.txt
+
+- form-feed.c
+
+- line-ends.txt
 
 - new.txt
 
@@ -182,6 +190,29 @@ renamed-from.txt
 Files with unspecific changes
 #############################
 
+.. _LabelBinaryChangedBin:
+
+binary-changed.bin
+******************
+
+.. topic:: WARNING
+
+    This change has no associated review.
+
+.. raw:: latex
+
+    \\begin{footnotesize}
+
+.. code-block:: diff
+    :linenos:
+    :lineno-start: 1
+
+    Binary files binary-changed.bin and binary-changed.bin differ
+
+.. raw:: latex
+
+    \\end{footnotesize}
+
 .. _LabelChangedNoReviewTxt:
 
 changed-no-review.txt
@@ -275,6 +306,38 @@ changed-no-review.txt
 .. raw:: latex
 
     \\end{footnotesize}
+
+.. _LabelFilesWithChangesInsideOfCommentsFormFeedC:
+
+form-feed.c
+***********
+
+.. raw:: latex
+
+    \\begin{footnotesize}
+
+.. code-block:: diff
+    :linenos:
+    :lineno-start: 1
+
+    @@ -1,3 +1,3 @@
+     int x;
+    -/* page\fPrevious */
+    +/* page\fCurrent */
+     int y;
+
+.. raw:: latex
+
+    \\end{footnotesize}
+
+.. _LabelUnchangedFiles:
+
+Unchanged files
+###############
+
+- binary-unchanged.bin
+
+- line-ends.txt
 """
     builder = director["/pkg/doc"]
     assert isinstance(builder, DocumentBuilder)
@@ -375,6 +438,29 @@ renamed-from.txt
 Files with unspecific changes
 =============================
 
+.. _LabelBinaryChangedBin:
+
+binary-changed.bin
+------------------
+
+.. topic:: WARNING
+
+    This change has no associated review.
+
+.. raw:: latex
+
+    \\begin{footnotesize}
+
+.. code-block:: diff
+    :linenos:
+    :lineno-start: 1
+
+    Binary files binary-changed.bin and binary-changed.bin differ
+
+.. raw:: latex
+
+    \\end{footnotesize}
+
 .. _LabelChangedNoReviewTxt:
 
 changed-no-review.txt
@@ -467,6 +553,38 @@ changed-no-review.txt
 
 .. raw:: latex
 
-    \\end{footnotesize}"""
+    \\end{footnotesize}
+
+.. _LabelFilesWithChangesInsideOfCommentsFormFeedC:
+
+form-feed.c
+-----------
+
+.. raw:: latex
+
+    \\begin{footnotesize}
+
+.. code-block:: diff
+    :linenos:
+    :lineno-start: 1
+
+    @@ -1,3 +1,3 @@
+     int x;
+    -/* page\fPrevious */
+    +/* page\fCurrent */
+     int y;
+
+.. raw:: latex
+
+    \\end{footnotesize}
+
+.. _LabelUnchangedFiles:
+
+Unchanged files
+===============
+
+- binary-unchanged.bin
+
+- line-ends.txt"""
     with pytest.raises(ValueError):
         builder.substitute("${.:/compare-sources:0:invalid}")
