@@ -1,0 +1,11 @@
+file,region,type,modified,line start,line end,std.code.complexity:cyclomatic,std.code.complexity:maxindent,std.code.lines:code,std.code.lines:comments,std.code.lines:preprocessor
+/opt/rtems-qual-only/cpukit/a.c,__global__,global,,1,700,,,580,40,30
+/opt/rtems-qual-only/cpukit/a.c,,file,,1,700,,,,,
+/opt/rtems-qual-only/cpukit/a.c,complex,function,,10,40,12,2,27,1,0
+/opt/rtems-qual-only/cpukit/a.c,deep,function,,50,60,3,6,5,5,0
+/opt/rtems-qual-only/cpukit/a.c,fine,function,,70,80,1,1,9,1,0
+/opt/rtems-qual-only/cpukit/b.c,__global__,global,,1,20,,,10,6,2
+/opt/rtems-qual-only/cpukit/b.c,,file,,1,20,,,,,
+/opt/rtems-qual-only/cpukit/b.c,s,struct,,3,6,,,4,0,0
+/opt/rtems-qual-only/cpukit/b.c,empty,function,,8,8,1,0,0,0,0
+/opt/rtems-qual-only/cpukit/b.c,chatty,function,,10,20,1,1,4,4,0

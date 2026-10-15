@@ -1,0 +1,82 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "results": [
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "/opt/rtems-qual-only/cpukit/a.c"
+                },
+                "region": {
+                  "endColumn": 3,
+                  "endLine": 3,
+                  "startColumn": 3,
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "The scope of the variable 'x' can be reduced."
+          },
+          "ruleId": "variableScope"
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "/elsewhere/c.c"
+                },
+                "region": {
+                  "endColumn": 1,
+                  "endLine": 7,
+                  "startColumn": 1,
+                  "startLine": 7
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "syntax error"
+          },
+          "ruleId": "syntaxError"
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "/opt/rtems-qual-only/cpukit/b.c"
+                },
+                "region": {
+                  "endColumn": 3,
+                  "endLine": 9,
+                  "startColumn": 3,
+                  "startLine": 9
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "The scope of the variable 'y' can be reduced."
+          },
+          "ruleId": "variableScope"
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "Cppcheck",
+          "rules": []
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

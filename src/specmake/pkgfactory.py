@@ -40,13 +40,14 @@ from .pkgitems import (BuildItemFactory, GenericPackageComponent, Redirection,
 from .packagechanges import PackageChanges
 from .packagemanual import PackageManualBuilder, PackageSummary
 from .perfimages import BuildPerformanceImages
+from .qualityscanner import QualityScanner
 from .reposubset import RepositorySubset
 from .rtems import RTEMSItemCache, RTEMSPackageComponent
 from .rtemstestsimages import BuildRTEMSTestsImages
 from .runactions import RunActions
 from .runexecutablecmd import RunExecutableCommand
 from .sddlinker import SDDLinker
-from .spamrmanager import SpamrManager
+from .spamrbuilder import SpamrBuilder
 from .speccompare import CompareSpecsRegistry
 from .sreldbuilder import SRelDBuilder
 from .srsbuilder import SRSBuilder
@@ -88,6 +89,8 @@ def create_build_item_factory() -> BuildItemFactory:
     factory.add_constructor("pkg/directory-state/patterns", DirectoryState)
     factory.add_constructor("pkg/directory-state/performance-images",
                             BuildPerformanceImages)
+    factory.add_constructor("pkg/directory-state/quality-scanner",
+                            QualityScanner)
     factory.add_constructor("pkg/directory-state/repository", RepositoryState)
     factory.add_constructor("pkg/directory-state/repository-subset",
                             RepositorySubset)
@@ -104,7 +107,7 @@ def create_build_item_factory() -> BuildItemFactory:
     factory.add_constructor("pkg/directory-state/sphinx/package-manual",
                             PackageManualBuilder)
     factory.add_constructor("pkg/directory-state/sphinx/paf-spamr",
-                            SpamrManager)
+                            SpamrBuilder)
     factory.add_constructor("pkg/directory-state/sphinx/test-plan",
                             TestPlanBuilder)
     factory.add_constructor("pkg/directory-state/sphinx/test-report",
