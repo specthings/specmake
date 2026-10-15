@@ -26,9 +26,10 @@
 
 import dataclasses
 import difflib
+import io
 import os
 import re
-from typing import NamedTuple, Union
+from typing import NamedTuple, Optional, Union
 
 import specitems
 
@@ -156,24 +157,44 @@ class _Context:
             self.other.setdefault(name, []).append(chunk)
 
 
+def _read_lines(data: bytes) -> list[str]:
+    """
+    Return the lines of the UTF-8 text with universal newlines.
+
+    A line ends only at a newline, so a form feed stays inside its line.
+    """
+    return io.StringIO(data.decode("utf-8"), newline=None).readlines()
+
+
 def _get_chunks(prefix_current: str, prefix_previous: str, name_current: str,
-                name_previous: str) -> list[list[str]]:
-    chunks: list[list[str]] = []
+                name_previous: str) -> Optional[list[list[str]]]:
+    """
+    Return the chunks of the unified diff of the two files.
+
+    Return None for two different files which are not UTF-8 text.
+    """
     path = os.path.join(prefix_current, name_current)
     path_previous = os.path.join(prefix_previous, name_previous)
-    with open(path,
-              encoding="utf-8") as src, open(path_previous,
-                                             encoding="utf-8") as src_previous:
-        chunk: list[str] = []
-        for line in difflib.unified_diff(src_previous.readlines(),
-                                         src.readlines(), path_previous, path):
-            line = line.rstrip("\r\n")
-            if line.startswith("@@"):
-                chunks.append(chunk)
-                chunk = []
-            chunk.append(line)
-        if chunk:
+    with open(path, "rb") as src, open(path_previous, "rb") as src_previous:
+        data = src.read()
+        data_previous = src_previous.read()
+    if data == data_previous:
+        return []
+    try:
+        lines = _read_lines(data)
+        lines_previous = _read_lines(data_previous)
+    except UnicodeDecodeError:
+        return None
+    chunks: list[list[str]] = []
+    chunk: list[str] = []
+    for line in difflib.unified_diff(lines_previous, lines, path_previous,
+                                     path):
+        line = line.rstrip("\r\n")
+        if line.startswith("@@"):
             chunks.append(chunk)
+            chunk = []
+        chunk.append(line)
+    chunks.append(chunk)
     return chunks[1:]
 
 
@@ -211,6 +232,10 @@ def _add_comparison(content: specitems.TextContent,
         previous.files.remove(name_previous)
         chunks = _get_chunks(current.prefix, previous.prefix, name_current,
                              name_previous)
+        if chunks is None:
+            ctx.other.setdefault(name_current, []).append(
+                [f"Binary files {name_previous} and {name_current} differ"])
+            continue
         if not chunks:
             ctx.no_changes.add(name_current)
             continue
