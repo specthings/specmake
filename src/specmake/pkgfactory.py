@@ -40,6 +40,7 @@ from .pkgitems import (BuildItemFactory, GenericPackageComponent, Redirection,
 from .packagechanges import PackageChanges
 from .packagemanual import PackageManualBuilder, PackageSummary
 from .perfimages import BuildPerformanceImages
+from .repositoryfilter import export_no_data
 from .reposubset import RepositorySubset
 from .rtems import RTEMSItemCache, RTEMSPackageComponent
 from .rtemstestsimages import BuildRTEMSTestsImages
@@ -71,6 +72,7 @@ def create_build_item_factory() -> BuildItemFactory:
     for type_name in ("pkg/template/component", "pkg/template/file-item",
                       "pkg/template/inline-item", "pkg/template/redirect"):
         factory.add_export_data(type_name, export_template_data)
+    factory.add_export_data("pkg/repository-filter", export_no_data)
     factory.add_constructor("pkg/directory-state/archive", Archiver)
     factory.add_constructor("pkg/directory-state/ctrf", CTRFCollector)
     factory.add_constructor("pkg/directory-state/doxyfile", Doxyfile)

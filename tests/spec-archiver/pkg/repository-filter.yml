@@ -1,0 +1,12 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+baseline: '0000000000000000000000000000000000000000'
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: repository-filter
+  uid: a
+path-rules: []
+pkg-type: repository-filter
+replace-files: []
+type: pkg

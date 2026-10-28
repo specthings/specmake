@@ -1,0 +1,35 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      content:
+        description: |
+          It shall be the content of the file in each filtered commit which
+          contains the file.
+        spec-type: str
+      enabled-by:
+        description: |
+          It shall define the condition under which the replacement is
+          enabled.
+        spec-type: enabled-by
+      path:
+        description: |
+          It shall be the path of the file relative to the repository root.
+          An enabled replacement decides before the path rules.
+        spec-type: str
+    description: |
+      This set of attributes specifies a file of a repository filter which
+      gets a replaced content.  The enabled replacements of a path shall have
+      the same content.
+    mandatory-attributes: all
+spec-name: Repository Filter Replaced File
+spec-type: pkg-repository-filter-replace-file
+type: spec

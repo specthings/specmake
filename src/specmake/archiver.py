@@ -263,6 +263,8 @@ class Archiver(DirectoryState):
             if item.type.startswith("spec"):
                 continue
             data = factory.export_data(item, uid in member_uids, build_order)
+            if data is None:
+                continue
             uid_path = f"{uid[1:]}.yml"
             path = os.path.join(directory, uid_path)
             os.makedirs(os.path.dirname(path), exist_ok=True)

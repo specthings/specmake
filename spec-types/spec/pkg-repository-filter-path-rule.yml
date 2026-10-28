@@ -1,0 +1,36 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      drop:
+        description: |
+          It shall be the list of path elements which the filter drops.
+        spec-type: list-str
+      enabled-by:
+        description: |
+          It shall define the condition under which the rule is enabled.
+        spec-type: enabled-by
+      keep:
+        description: |
+          It shall be the list of path elements which the filter keeps.
+        spec-type: list-str
+    description: |
+      This set of attributes specifies a path rule of a repository filter.  A
+      path element which ends with a slash is a directory prefix.  Any other
+      path element is an exact path relative to the repository root.  For each
+      path of a commit, the longest matching element of the enabled rules
+      decides whether the filter keeps the path.  The filter keeps a path
+      which no element matches.  An element shall not be in the drop list and
+      the keep list of enabled rules.
+    mandatory-attributes: all
+spec-name: Repository Filter Path Rule
+spec-type: pkg-repository-filter-path-rule
+type: spec

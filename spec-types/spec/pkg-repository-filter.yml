@@ -1,0 +1,54 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: pkg-type
+  spec-value: repository-filter
+  uid: pkg-root
+spec-description: |
+  A workspace repository with an enabled repository filter clones the commit
+  with its complete history.  The filter rewrites the commits which follow the
+  baseline up to the commit.  A rule reaches a file of the baseline only in
+  the filtered commits which change the file.  The export logs a warning for
+  each baseline which contains a file of a rule.  The filter drops a commit
+  which becomes empty.  The clone depth applies to the filtered history.  The
+  buildspace item records the filtered commit.
+
+  The filter replaces a file only under the paths of ``replace-files``.  A
+  commit which renames or copies a replaced file to a path which no rule names
+  delivers the original content under that path.  The commits fetched through
+  ``origin-fetch`` of the repository do not pass the filter.
+
+  The specification export of an archive does not export the item.
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      baseline:
+        description: |
+          It shall be the commit of the source repository which the filter
+          leaves unchanged together with its ancestors.  The origin commit of
+          the repository shall be the baseline or one of its ancestors.
+        spec-type: str
+      path-rules:
+        description: |
+          It shall be the list of path rules.
+        spec-type: pkg-repository-filter-path-rule-list
+      replace-files:
+        description: |
+          It shall be the list of replaced files.
+        spec-type: pkg-repository-filter-replace-file-list
+    description: |
+      This set of attributes specifies the filter of the history of a
+      workspace repository.  The item links to the workspace repository with
+      the ``repository-filter`` role.  The filter of a workspace repository
+      uses the rules of all its enabled repository filters.  These shall have
+      the same baseline.
+    mandatory-attributes: all
+spec-name: Repository Filter Item Type
+spec-type: pkg-repository-filter
+type: spec

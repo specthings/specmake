@@ -1151,7 +1151,10 @@ class BuildItemFactory:
         return self.constructors.get(item.type, BuildItem)(director, item)
 
     def export_data(self, item: Item, present: bool, build_order: int) -> Any:
-        """ Export the item data using the presence indicator. """
+        """
+        Export the item data using the presence indicator.  Return None for
+        an item which is not exported.
+        """
         built_later = item.view.get("package-build-order",
                                     len(item.cache)) > build_order
         return self._export_data.get(item.type, export_data)(item, present,

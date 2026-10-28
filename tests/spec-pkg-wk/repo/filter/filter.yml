@@ -1,0 +1,31 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+baseline: 40abab3c7aca7f38d06f339d784fa08178588f47
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: repository-filter
+  uid: repo
+path-rules:
+- drop:
+  - .eb/
+  - README.md
+  - private/
+  enabled-by: true
+  keep:
+  - private/public.txt
+- drop:
+  - code.c
+  enabled-by: false
+  keep: []
+pkg-type: repository-filter
+replace-files:
+- content: |
+    empty
+  enabled-by: true
+  path: private/shared.txt
+- content: |
+    invalid
+  enabled-by: false
+  path: private/public.txt
+type: pkg

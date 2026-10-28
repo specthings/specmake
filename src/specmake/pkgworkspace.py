@@ -54,6 +54,7 @@ from .pkgitems import (BuildItem, BuildItemFactory, BuildItemMapper,
                        BuildItemTypeProvider, PackageBuildDirector,
                        PackageComponent, build_item_input)
 from .pkgtemplate import BuildItemTemplate, run_attribute_actions
+from .repositoryfilter import RepositoryFilter, load_repository_filter
 
 
 def _git_commit(repository: str, commit: Optional[str] = None) -> str:
@@ -478,7 +479,14 @@ class WorkspaceRepository(_WorkspaceItem):
                                               []).append(self.uid)
         self.item["commit"] = self["commit"]
         self.item["origin-commit"] = self["origin-commit"]
-        return super().load_workspace_state()
+        digest = super().load_workspace_state()
+        repository_filter = self._repository_filter()
+        if repository_filter is None:
+            return digest
+        return data_digest({
+            "repository": digest,
+            "repository-filter": repository_filter.digest()
+        })
 
     def prepare_buildspace_data(self) -> dict:
         data = _make_directory_state_data(self.item, "repository")
@@ -493,6 +501,11 @@ class WorkspaceRepository(_WorkspaceItem):
     def copy_to_buildspace(self, buildspace_item: BuildItem) -> None:
         assert isinstance(buildspace_item, RepositoryState)
         self._git_clone(buildspace_item)
+
+    def _repository_filter(self) -> RepositoryFilter | None:
+        return load_repository_filter(self.uid,
+                                      self.item.children("repository-filter"),
+                                      self.enabled_set)
 
     def _git_commit(self, ctx: ItemGetValueContext) -> str:
         args, kwargs = ctx.unpack_args_dict()
@@ -556,6 +569,66 @@ class WorkspaceRepository(_WorkspaceItem):
         return run_command(["git", "fetch"] + self._git_depth() +
                            ["origin", commit], destination_directory)
 
+    def _git_clone_commit(self, repository: str, commit: str,
+                          workspace_directory: str,
+                          destination_directory: str) -> None:
+        status = self._git_clone_revision(repository, commit,
+                                          workspace_directory,
+                                          destination_directory)
+        if status != 0:
+            status = self._git_init_fetch(repository, commit,
+                                          workspace_directory,
+                                          destination_directory)
+        if status != 0:
+            raise IOError(f"{self.uid}: cannot clone or "
+                          f"initialize repository: {repository}")
+
+    def _git_filter(self, repository_filter: RepositoryFilter, repository: str,
+                    commit: str, workspace_directory: str,
+                    filter_directory: str) -> str:
+        status = run_command(["git", "init", "--bare", filter_directory],
+                             workspace_directory)
+        assert status == 0
+        status = run_command([
+            "git", "--git-dir", filter_directory, "fetch", "--no-tags",
+            repository, commit
+        ], workspace_directory)
+        if status != 0:
+            raise IOError(f"{self.uid}: cannot fetch commit {commit} of "
+                          f"repository: {repository}")
+        origin_commit = self["origin-commit"]
+        if origin_commit and not repository_filter.is_ancestor_of_baseline(
+                filter_directory, origin_commit):
+            raise ValueError(
+                f"{self.uid}: the origin commit {origin_commit} is no "
+                f"ancestor of the baseline {repository_filter.baseline}")
+        return repository_filter.run(filter_directory, commit)
+
+    def _git_clone_or_filter(self, repository: str, commit: str,
+                             buildspace_item: RepositoryState) -> str:
+        workspace_directory = self.substitute(
+            "${.:/component/workspace-directory}")
+        destination_directory = buildspace_item.directory
+        repository_filter = self._repository_filter()
+        if repository_filter is None:
+            self._git_clone_commit(repository, commit, workspace_directory,
+                                   destination_directory)
+            return commit
+        parent_directory = os.path.dirname(destination_directory)
+        os.makedirs(parent_directory, exist_ok=True)
+        with tempfile.TemporaryDirectory(
+                dir=parent_directory) as filter_directory:
+            commit = self._git_filter(repository_filter, repository, commit,
+                                      workspace_directory, filter_directory)
+            self._git_clone_commit(filter_directory, commit,
+                                   workspace_directory, destination_directory)
+        status = run_command(
+            ["git", "remote", "set-url", "origin", repository],
+            destination_directory)
+        assert status == 0
+        buildspace_item.item.data["commit"] = commit
+        return commit
+
     def _git_clone(self, buildspace_item: RepositoryState) -> None:
         repository = self["directory"]
         branch = self["branch"]
@@ -571,19 +644,8 @@ class WorkspaceRepository(_WorkspaceItem):
                 status = run_command(["git", "branch", "-f", branch, commit],
                                      source_directory)
                 assert status == 0
-        workspace_directory = self.substitute(
-            "${.:/component/workspace-directory}")
         destination_directory = buildspace_item.directory
-        status = self._git_clone_revision(repository, commit,
-                                          workspace_directory,
-                                          destination_directory)
-        if status != 0:
-            status = self._git_init_fetch(repository, commit,
-                                          workspace_directory,
-                                          destination_directory)
-        if status != 0:
-            raise IOError(f"{self.uid}: cannot clone or "
-                          f"initialize repository: {repository}")
+        commit = self._git_clone_or_filter(repository, commit, buildspace_item)
         status = run_command(["git", "checkout", "-B", branch, commit],
                              destination_directory)
         assert status == 0
