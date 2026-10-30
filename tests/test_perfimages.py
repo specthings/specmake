@@ -29,6 +29,8 @@ from pathlib import Path
 
 import pytest
 
+from specmake import perfimages
+
 from .util import create_package, get_and_clear_log
 
 
@@ -79,3 +81,58 @@ def test_perfimages_worker_died(caplog, tmpdir, monkeypatch):
     monkeypatch.setattr(multiprocessing, "Process", _DeadProcess)
     with pytest.raises(RuntimeError, match="image workers failed"):
         package.director.build_package(only=[uid])
+
+
+def test_perfimages_work_items():
+    config = {"config-key": "c", "target": {"name": "t"}}
+    test_suite = {"config": config}
+    env_data = {
+        "samples": [1.0],
+        "min": 1.0,
+        "max": 1.0,
+        "q1": 1.0,
+        "q2": 1.0,
+        "q3": 1.0,
+        "histogram": "h",
+        "test-case": {}
+    }
+    measurement_data = {
+        "config": config,
+        "requirement-uid": "/r",
+        "test-case": {
+            "test-suite": test_suite
+        },
+        "test-suite": test_suite,
+        "boxplot": "b",
+        "variants": {
+            "v1": env_data,
+            "v2": dict(env_data)
+        }
+    }
+    work_items = perfimages._work_items([measurement_data, measurement_data])
+    assert work_items == [{
+        "requirement-uid": "/r",
+        "config-key": "c",
+        "target-name": "t",
+        "boxplot": "b",
+        "variants": {
+            "v1": {
+                "samples": [1.0],
+                "min": 1.0,
+                "max": 1.0,
+                "q1": 1.0,
+                "q2": 1.0,
+                "q3": 1.0,
+                "histogram": "h"
+            },
+            "v2": {
+                "samples": [1.0],
+                "min": 1.0,
+                "max": 1.0,
+                "q1": 1.0,
+                "q2": 1.0,
+                "q3": 1.0,
+                "histogram": "h"
+            }
+        }
+    }]
