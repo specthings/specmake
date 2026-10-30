@@ -55,9 +55,8 @@ def _worker(work_queue: multiprocessing.Queue, build_item_uid: str):
             logging.info("%s: worker done", build_item_uid)
             return
         req_uid = measurement_data["requirement-uid"]
-        config = measurement_data["test-case"]["test-suite"]["config"]
-        config_key = config["config-key"]
-        target_name = config["target"]["name"]
+        config_key = measurement_data["config-key"]
+        target_name = measurement_data["target-name"]
         logging.info("%s: create images for: %s - %s - %s", build_item_uid,
                      target_name, config_key, req_uid)
         spec = f"spec:{req_uid}"
@@ -159,6 +158,44 @@ def _boxplot(title: str, base: str, max_median: float,
     plt.close()
 
 
+_ENV_KEYS = ("samples", "min", "max", "q1", "q2", "q3", "histogram")
+
+
+def _work_items(runtime_measurements: list[dict]) -> list[dict]:
+    """
+    Get the work items of the image workers.
+
+    A measurement links to the aggregated results of all test suites, so a
+    work item holds only the data of the images.  The list of the
+    measurements holds a measurement once for each of its variants.
+    """
+    work_items: list[dict] = []
+    seen: set[int] = set()
+    for measurement_data in runtime_measurements:
+        if id(measurement_data) in seen:
+            continue
+        seen.add(id(measurement_data))
+        config = measurement_data["test-case"]["test-suite"]["config"]
+        work_items.append({
+            "requirement-uid":
+            measurement_data["requirement-uid"],
+            "config-key":
+            config["config-key"],
+            "target-name":
+            config["target"]["name"],
+            "boxplot":
+            measurement_data["boxplot"],
+            "variants": {
+                env_name: {
+                    key: env_data[key]
+                    for key in _ENV_KEYS
+                }
+                for env_name, env_data in measurement_data["variants"].items()
+            }
+        })
+    return work_items
+
+
 class BuildPerformanceImages(DirectoryState):
     """ Generates runtime performance measurement images. """
 
@@ -191,12 +228,11 @@ class BuildPerformanceImages(DirectoryState):
         tests = self.input("test-aggregation")
         assert isinstance(tests, TestAggregator)
         work_queue: multiprocessing.Queue = multiprocessing.Queue()
-        for measurement_data in tests.runtime_measurements:
-            work_queue.put(measurement_data)
+        work_items = _work_items(tests.runtime_measurements)
+        for work_item in work_items:
+            work_queue.put(work_item)
         processes = []
-        for _ in range(
-                min(multiprocessing.cpu_count(),
-                    len(tests.runtime_measurements))):
+        for _ in range(min(multiprocessing.cpu_count(), len(work_items))):
             process = multiprocessing.Process(target=_worker,
                                               args=(work_queue, self.uid),
                                               daemon=True)
