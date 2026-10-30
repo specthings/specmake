@@ -42,7 +42,7 @@ from .testrunner import RunnerExecutable, RunnerReport, TestRunner
 from .util import now_utc
 
 
-def _get_symbols(exe_path: str, nm_path: str) -> dict[str, list[int]]:
+def get_symbols(exe_path: str, nm_path: str) -> dict[str, list[int]]:
     """ Return the symbols of the executable using the nm tool. """
     result = subprocess.run([nm_path, exe_path],
                             check=True,
@@ -126,7 +126,7 @@ class GRPCTestRunner(TestRunner):
                 monotonic_begin = time.monotonic()
                 logging.debug("%s: send request for: %s", self.uid,
                               executable.path)
-                breakpoints = _get_symbols(executable.path, nm)[reset]
+                breakpoints = get_symbols(executable.path, nm)[reset]
                 report: RunnerReport = {
                     "command-line": [],
                     "executable": executable.path,
