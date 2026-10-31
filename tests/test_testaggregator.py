@@ -97,3 +97,104 @@ def test_get_not_validated_items():
     root.view["validated"] = True
     assert testaggregator.TestAggregator.get_not_validated_items(
         _make_aggregator(root, items)) == []
+
+
+def _limits(percent):
+    return {
+        "branch-min-percent": percent,
+        "function-min-percent": percent,
+        "line-min-percent": percent
+    }
+
+
+class _Aggregator:
+    uid = "/pkg/steps/aggregate-test-results"
+
+
+def _file_coverage(file_path, count):
+    return {
+        "file":
+        file_path,
+        "lines": [{
+            "line_number": 10,
+            "count": count,
+            "gcovr/md5": "d0",
+            "branches": [{
+                "count": count,
+                "destination_block_id": 3
+            }]
+        }],
+        "functions": [{
+            "name": "f",
+            "execution_count": count
+        }]
+    }
+
+
+def _coverage_summary(files, limits_by_area):
+    return testaggregator._CoverageSummary(
+        _Aggregator(), {
+            "files": files,
+            "html-directory": "html",
+            "limits-by-area": limits_by_area,
+            "scope": "Scope",
+            "target-uid": "/target/simulator",
+            "verifications": {}
+        })
+
+
+def test_file_limits_by_pattern():
+    limits_by_area = {
+        "overall": _limits(100.0),
+        "per-file": _limits(100.0),
+        "file-lib/*": _limits(10.0),
+        "file-lib/sub/*": _limits(20.0),
+        "file-lib/sub/a.c": _limits(30.0),
+        "file-lib/sub/[ab].c": _limits(40.0)
+    }
+    summary = _coverage_summary([], limits_by_area)
+    assert summary._file_limits("src/a.c") is None
+    assert summary._file_limits("lib/a.c") == _limits(10.0)
+    assert summary._file_limits("lib/x/y/a.c") == _limits(10.0)
+    assert summary._file_limits("lib/sub/c.c") == _limits(20.0)
+    assert summary._file_limits("lib/sub/a.c") == _limits(30.0)
+    assert summary._file_limits("lib/sub/b.c") == _limits(40.0)
+
+
+def test_unjustified_gaps_of_files_with_limits():
+    files = [
+        _file_coverage("src/a.c", 0),
+        _file_coverage("src/b.c", 1),
+        _file_coverage("lib/c.c", 0),
+        _file_coverage("lib/d.c", 0)
+    ]
+    limits_by_area = {
+        "overall": _limits(100.0),
+        "per-file": _limits(0.0),
+        "file-lib/*": _limits(0.0),
+        "file-lib/d.c": _limits(100.0)
+    }
+    summary = _coverage_summary(files, limits_by_area)
+    assert "error" in summary.overall
+    assert summary.overall["line-total"] == 2
+    assert summary.overall["per-file-line-total"] == 2
+    assert [stats["file-path"] for stats in summary.bad_files] == ["lib/d.c"]
+    assert sorted(gap.file for gap in summary.get_unjustified_gaps()) == [
+        "lib/d.c", "lib/d.c", "lib/d.c", "src/a.c", "src/a.c", "src/a.c"
+    ]
+    limits_by_area["overall"] = _limits(0.0)
+    summary = _coverage_summary(files, limits_by_area)
+    assert "error" not in summary.overall
+    assert sorted(gap.file for gap in summary.get_unjustified_gaps()) == [
+        "lib/d.c", "lib/d.c", "lib/d.c"
+    ]
+
+
+def test_limits_order():
+    areas = ["file-lib/sub/a.c", "per-file", "file-lib/*", "overall"]
+    assert sorted(
+        ((area, None) for area in areas),
+        key=testaggregator._limits_order) == [("overall", None),
+                                              ("per-file", None),
+                                              ("file-lib/*", None),
+                                              ("file-lib/sub/a.c", None)]
