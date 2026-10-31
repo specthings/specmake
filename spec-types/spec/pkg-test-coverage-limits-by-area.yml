@@ -22,7 +22,13 @@ spec-info:
       This set of attributes specifies test coverage limits for coverage areas.
     generic-attributes:
       description: |
-        It shall list the test coverage limits for specific files.
+        It shall list the test coverage limits for specific files.  The key
+        shall be ``file-`` followed by a file path or a pattern.  The pattern
+        shall have the form of the Python ``fnmatch`` module.  A ``*`` of the
+        pattern matches a ``/`` of the path.  A key which equals ``file-``
+        followed by the file path wins over each pattern.  Of several
+        matching patterns, the longest key wins.  A file which a key matches
+        is not part of the overall coverage.
       key-spec-type: str
       value-spec-type: pkg-test-coverage-limits
     mandatory-attributes: all

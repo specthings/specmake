@@ -27,6 +27,7 @@
 # pylint: disable=too-many-lines
 
 import copy
+import fnmatch
 import hashlib
 import itertools
 import logging
@@ -259,6 +260,11 @@ class _CoverageSummary:
         self.verifications = copy.deepcopy(coverage["verifications"])
         self.html_directory = coverage["html-directory"]
         self.limits_by_area = coverage["limits-by-area"]
+        self._file_patterns = sorted(
+            (area for area in self.limits_by_area if area.startswith("file-")),
+            key=len,
+            reverse=True)
+        self._files_with_limits: set[str] = set()
         self.not_run_groups = coverage.get("not-run-groups", [])
         self.not_run_spots = not_run_spots(self.not_run_groups)
         self.not_run_counts = [{
@@ -307,6 +313,22 @@ class _CoverageSummary:
                                        IssueSubject(f"spec:{spacify(uid)}")
                                        for uid in unused)
 
+    def _file_limits(self, file_path: str) -> dict | None:
+        """
+        Get the limits of the file area which matches the file path.
+
+        An exact file area wins.  Otherwise, the longest file area pattern
+        which matches the file path wins.
+        """
+        area = f"file-{file_path}"
+        limits = self.limits_by_area.get(area)
+        if limits is not None:
+            return limits
+        for pattern in self._file_patterns:
+            if fnmatch.fnmatchcase(area, pattern):
+                return self.limits_by_area[pattern]
+        return None
+
     def _add_gap(self, file_path: str, spot: str) -> None:
         self.gaps.setdefault(file_path,
                              []).append(CoverageGap(file_path, spot))
@@ -315,14 +337,17 @@ class _CoverageSummary:
         """
         Get the unjustified gaps which count against a missed limit.
 
-        If the overall coverage misses a limit, these are the gaps of all
-        files.  Otherwise, these are the gaps of the files which miss their
-        limits.
+        These are the gaps of the files which miss their limits.  If the
+        overall coverage misses a limit, these are also the gaps of the files
+        which the overall coverage accounts.
         """
+        files = [stats["file-path"] for stats in self.bad_files]
         if "error" in self.overall:
-            files = list(self.gaps)
-        else:
-            files = [stats["file-path"] for stats in self.bad_files]
+            bad = set(files)
+            files = [
+                file for file in self.gaps
+                if file in bad or file not in self._files_with_limits
+            ]
         return [gap for file in files for gap in self.gaps.get(file, [])]
 
     def _add_not_run_issues(self) -> None:
@@ -450,12 +475,13 @@ class _CoverageSummary:
                         spot_to_justification: _SpotToJustification) -> None:
         # Files with explicit coverage limits are excluded from the general
         # overall coverage accounting and shown separately in [...] brackets.
-        limits = self.limits_by_area.get(f"file-{file_path}")
+        limits = self._file_limits(file_path)
         if limits is None:
             limits = self.limits_by_area["per-file"]
             overall_scope = ""
         else:
             overall_scope = "per-file-"
+            self._files_with_limits.add(file_path)
         for kind in _COVERAGE_KINDS:
             for what in ("covered", "justified", "not-run", "total"):
                 key = f"{kind}-{what}"
