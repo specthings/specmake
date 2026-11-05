@@ -29,22 +29,20 @@ import functools
 import hashlib
 import logging
 import os
-from typing import Any, Callable, Iterable
+from typing import Any, Callable
 
 from specitems import (EnabledSet, Item, ItemGetValueContext, ItemMapper,
                        is_enabled, Link, SpecVerifier, SubstitutionError)
 from specitems.specformatter import SpecFormatter
 from specware import (augment_with_test_case_links, augment_with_test_links,
-                      get_inline_enumerators, get_items_by_type_map,
-                      get_item_types_by_prefix, get_items_by_types,
-                      get_interface_items, get_interface_and_requirement_items,
-                      get_register_block_hosts, get_register_block_identifier,
-                      get_requirement_items, is_validation_by_test,
-                      recursive_is_enabled, validate)
+                      get_inline_enumerators, get_register_block_hosts,
+                      get_register_block_identifier, is_validation_by_test,
+                      recursive_is_enabled)
 
 from .pkgitems import (BuildItem, BuildItemFactory, BuildItemMapper,
                        build_item_input, GenericPackageComponent,
                        PackageBuildDirector, PackageComponent)
+from .specitemcache import SpecItemCacheBase
 
 
 def _add_unique_name(name_to_item: dict[str, Item], item: Item,
@@ -298,7 +296,7 @@ def get_substitution_errors(root: Item) -> list[tuple[str, str]]:
     return errors
 
 
-class RTEMSItemCache(BuildItem):
+class RTEMSItemCache(SpecItemCacheBase):
     """ Augments the items with RTEMS-specific attributes and links. """
 
     @classmethod
@@ -309,7 +307,6 @@ class RTEMSItemCache(BuildItem):
 
     def __init__(self, director: PackageBuildDirector, item: Item):
         super().__init__(director, item)
-        self.item_cache = self.item.cache
         logging.info("%s: augment with test links", self.uid)
         augment_with_test_links(self.item_cache)
         logging.info("%s: augment with test case links", self.uid)
@@ -318,8 +315,6 @@ class RTEMSItemCache(BuildItem):
         self.name_to_item: dict[str, Item] = {}
         for item_2 in self.item_cache.values():
             _NAME.get(item_2.type, _name_default)(self.name_to_item, item_2)
-        self.related_items: set[Item] = set()
-        self.related_items_by_type: dict[str, list[Item]] = {}
         self.related_validations_by_test: set[Item] = set()
 
         # Calculate the overall item cache hash.  Ignore package configuration
@@ -358,49 +353,15 @@ view of the specification items.""")
                 return False
         return validated
 
-    def get_spec_root(self) -> Item:
-        """ Get the root of the specification. """
-        return self.item_cache[self["spec-root-uid"]]
-
     def validate_using_test_results(self) -> None:
         """ Validate the specification using test results. """
-        self.related_items = validate(self.get_spec_root(),
-                                      self._validate_using_test_results)
-        self.related_items_by_type = get_items_by_type_map(self.related_items)
+        self.validate_tree(self._validate_using_test_results)
 
     def has_changed(self, link: Link) -> bool:
         return link["hash"] is None or self._hash != link["hash"]
 
     def refresh_link(self, link: Link) -> None:
         link["hash"] = self._hash
-
-    def get_related_items_by_type(self,
-                                  types: str | Iterable[str]) -> list[Item]:
-        """ Get related items by a list of types. """
-        return get_items_by_types(self.related_items_by_type, types)
-
-    def get_related_types_by_prefix(
-        self,
-        prefix: str | tuple[str, ...],
-        exclude: tuple[str, ...] = tuple()
-    ) -> list[str]:
-        """
-        Get the types of the related items having one of the type prefixes.
-        """
-        return get_item_types_by_prefix(self.related_items_by_type, prefix,
-                                        exclude)
-
-    def get_related_interfaces(self) -> list[Item]:
-        """ Get the related interfaces. """
-        return get_interface_items(self.related_items_by_type)
-
-    def get_related_requirements(self) -> list[Item]:
-        """ Get the related requirements. """
-        return get_requirement_items(self.related_items_by_type)
-
-    def get_related_interfaces_and_requirements(self) -> list[Item]:
-        """ Get the related interfaces and requirements. """
-        return get_interface_and_requirement_items(self.related_items_by_type)
 
 
 class RTEMSPackageComponent(GenericPackageComponent):
