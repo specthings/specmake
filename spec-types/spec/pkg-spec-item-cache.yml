@@ -1,0 +1,27 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: pkg-type
+  spec-value: spec-item-cache
+  uid: pkg-root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      spec-root-uid:
+        description: |
+          It shall be the UID of the root specification item.
+        spec-type: str
+    description: |
+      This set of attributes specifies a build step which validates the items
+      related to the root specification item without test results.
+    mandatory-attributes: all
+spec-name: Specification Item Cache Item Type
+spec-type: pkg-spec-item-cache
+type: spec

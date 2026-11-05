@@ -50,6 +50,8 @@ from .runexecutablecmd import RunExecutableCommand
 from .sddlinker import SDDLinker
 from .spamrbuilder import SpamrBuilder
 from .speccompare import CompareSpecsRegistry
+from .specdocbuilder import SpecDocumentBuilder
+from .specitemcache import SpecItemCache
 from .sreldbuilder import SRelDBuilder
 from .srsbuilder import SRSBuilder
 from .stdtailoring import ECSSClause
@@ -113,6 +115,8 @@ def create_build_item_factory() -> BuildItemFactory:
                             PackageManualBuilder)
     factory.add_constructor("pkg/directory-state/sphinx/paf-spamr",
                             SpamrBuilder)
+    factory.add_constructor("pkg/directory-state/sphinx/spec",
+                            SpecDocumentBuilder)
     factory.add_constructor("pkg/directory-state/sphinx/test-plan",
                             TestPlanBuilder)
     factory.add_constructor("pkg/directory-state/sphinx/test-report",
@@ -127,6 +131,7 @@ def create_build_item_factory() -> BuildItemFactory:
     factory.add_constructor("pkg/rtems-item-cache", RTEMSItemCache)
     factory.add_constructor("pkg/run-actions", RunActions)
     factory.add_constructor("pkg/spec-compare-registry", CompareSpecsRegistry)
+    factory.add_constructor("pkg/spec-item-cache", SpecItemCache)
     factory.add_constructor("pkg/test-aggregator", TestAggregator)
     factory.add_constructor("pkg/test-runner/esa", ESATestRunner)
     factory.add_constructor("pkg/test-runner/dummy", TestRunner)

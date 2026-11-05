@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-2-Clause
-""" Provides the items related to a specification root. """
+""" Provides the validated items related to a specification root. """
 
 # Copyright (C) 2026 embedded brains GmbH & Co. KG
 #
@@ -84,3 +84,19 @@ class SpecItemCacheBase(BuildItem):
     def get_related_interfaces_and_requirements(self) -> list[Item]:
         """ Get the related interfaces and requirements. """
         return get_interface_and_requirement_items(self.related_items_by_type)
+
+
+def _validate_without_test_results(_item: Item, validated: bool) -> bool:
+    return validated
+
+
+class SpecItemCache(SpecItemCacheBase):
+    """ Validates the specification without test results. """
+
+    def __init__(self, director: PackageBuildDirector, item: Item):
+        super().__init__(director, item)
+        self.validate_tree(_validate_without_test_results)
+
+    def run(self) -> None:
+        self.description.add("""Validate the specification items without test
+results.""")
