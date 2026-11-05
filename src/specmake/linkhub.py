@@ -1004,6 +1004,10 @@ class SpecMapper(BuildItemMapper):
     def __init__(self, item: Item, build_item: BuildItem, whoami: str):
         super().__init__(item, build_item)
         self._whoami = whoami
+
+        # The document of this mapper presents a section for each of these
+        # items.
+        self.presented_items: set[Item] = set()
         for type_path_key in (
                 "interface/appl-config-option/feature-enable:/name",
                 "interface/appl-config-option/feature:/name",
@@ -1083,6 +1087,8 @@ class SpecMapper(BuildItemMapper):
                 if name is None:
                     name = _ITEM_SPECIFICS.get(item.type,
                                                _ITEM_DEFAULT)[2](item)
+                if item in self.presented_items:
+                    return self.make_reference(item, name)
                 return self.format_code(name)
             if len(component_links) == 1:
                 return self.format_link(link_name, path)

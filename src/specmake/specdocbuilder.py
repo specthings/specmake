@@ -46,6 +46,7 @@ from .linkhub import get_kind, spec_label, SpecMapper
 from .perfimages import environment_order
 from .rtems import RTEMSItemCache
 from .speccompare import CompareSpecsRegistry
+from .specitemcache import SpecItemCacheBase
 from .testaggregator import get_test_result_status
 from .util import duration
 
@@ -55,7 +56,7 @@ class _Context(NamedTuple):
     item: Item
     mapper: SpecMapper
     code_mapper: ItemMapper
-    spec: RTEMSItemCache
+    spec: SpecItemCacheBase
     file_path: str
 
 
@@ -81,7 +82,7 @@ def _add_brief(ctx: _Context) -> None:
 
 
 def _add_sdd_link(ctx: _Context) -> None:
-    path = ctx.item.view["document-paths"].get("sdd", None)
+    path = ctx.item.view.get("document-paths", {}).get("sdd", None)
     if path:
         kind = get_kind(ctx.item)
         name = ctx.item.view["sdd-name"]
@@ -405,6 +406,7 @@ def _document_perf_runtime(ctx: _Context) -> None:
             for env, limits in sorted(link["limits"].items(),
                                       key=environment_order):
                 env_name, _, _ = env.partition("/")
+                assert isinstance(ctx.spec, RTEMSItemCache)
                 env_item = ctx.spec.name_to_item[
                     f"perf-runtime-env/{env_name}"]
                 lower_bound = limits["min-lower-bound"]
@@ -1128,7 +1130,7 @@ class SpecDocumentBuilder(DocumentBuilder):
         super().__init__(director, item)
         self.mapper.topic_as_definition = True
         spec = self.input("spec")
-        assert isinstance(spec, RTEMSItemCache)
+        assert isinstance(spec, SpecItemCacheBase)
         self.spec = spec
         try:
             spec_compare_registry = self.input("spec-compare-registry")
@@ -1139,6 +1141,7 @@ class SpecDocumentBuilder(DocumentBuilder):
         my_type = self.item.type
         self.mapper.add_get_value(f"{my_type}:/validation-verification",
                                   self._validation_verification)
+        self.mapper.add_get_value(f"{my_type}:/spec-tree", self._spec_tree)
 
     def get_items_of_document(self) -> list[Item]:
         """ Get the items of this document. """
@@ -1158,15 +1161,16 @@ class SpecDocumentBuilder(DocumentBuilder):
 
     def add_item(self, content: TextContent, item: Item) -> None:
         """ Add the item documentation to the content. """
+        with content.section(item.spec, label=spec_label(item)):
+            self._add_item_body(content, item)
+
+    def _add_item_body(self, content: TextContent, item: Item) -> None:
         content.register_license_and_copyrights_of_item(item)
         with self.mapper.scope(item):
-            with content.section(item.spec, label=spec_label(item)):
-                _ITEM_DOCUMENTER[item.type](_Context(content, item,
-                                                     self.mapper,
-                                                     CodeMapper(item),
-                                                     self.spec,
-                                                     self.file_path))
-                self.add_item_changes(content, item)
+            _ITEM_DOCUMENTER[item.type](_Context(content, item, self.mapper,
+                                                 CodeMapper(item), self.spec,
+                                                 self.file_path))
+            self.add_item_changes(content, item)
 
     def _validation_status(self, item: Item) -> str:
         validation_status = item.view.get("validation-status", "N/A")
@@ -1231,4 +1235,39 @@ class SpecDocumentBuilder(DocumentBuilder):
     def _validation_verification(self, ctx: ItemGetValueContext) -> str:
         with self.section_content(ctx) as (content, _):
             self._add_validation_table(content)
+            return content.join()
+
+    def _spec_tree(self, ctx: ItemGetValueContext) -> str:
+        """
+        Present the root item and each item which the validation reaches from
+        it.
+
+        The substitution is ``${.:/spec-tree:<level-change>:<root>}``.  Each
+        item gets the section of its documenter.  The sections nest in the
+        order of the validation.  A link to a presented item references its
+        section.
+        """
+        with self.section_content(ctx) as (content, root_uid):
+            assert root_uid
+            root = self.item.cache[root_uid]
+            order = root.view["order"]
+            prefix = order[:-1]
+            items = [root] + [
+                item for item in sorted(self.spec.related_items,
+                                        key=lambda item: item.view["order"])
+                if len(item.view["order"]) > len(order)
+                and item.view["order"][:len(prefix)] == prefix
+            ]
+            self.mapper.presented_items.update(items)
+            levels: list[int] = []
+            for item in items:
+                level = len(item.view["order"]) - len(order)
+                while levels and levels[-1] >= level:
+                    content.close_section()
+                    levels.pop()
+                content.open_section(item.spec, label=spec_label(item))
+                levels.append(level)
+                self._add_item_body(content, item)
+            for _ in levels:
+                content.close_section()
             return content.join()
