@@ -26,8 +26,9 @@ spec-info:
       the filtered commits after the rules before it.  It removes each link to a
       dropped item in each filtered commit.  The UID of an item is its path
       relative to its specification directory without the ``.yml`` extension.  A
-      link of a kept item of the tip to an item which no specification directory
-      contains fails the filter.
+      link of a kept item of the tip to an item which the path rules remove from
+      the tip fails the filter.  A link to an item which the repository does not
+      contain refers to another repository.
     mandatory-attributes: all
 spec-name: Repository Filter Item Closure Rule
 spec-type: pkg-repository-filter-content-rule-item-closure

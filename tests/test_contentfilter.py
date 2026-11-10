@@ -308,12 +308,14 @@ def test_content_filter_item_closure():
     assert not content_filter.dropped_paths
 
 
-def test_content_filter_item_closure_missing_link():
+def test_content_filter_item_closure_removed_link():
     content_filter = _closure_filter()
-    files = {"spec/a.yml": _item("true", "b")}
+    files = {"spec/a.yml": _item("true", "b", "/other/c")}
+    content_filter.prepare(_readers(files), ["other.txt"])
+    assert not content_filter.dropped_paths
     with pytest.raises(ValueError,
-                       match="the item /a links to the missing item /b"):
-        content_filter.prepare(_readers(files))
+                       match="the item /a links to the removed item /b"):
+        content_filter.prepare(_readers(files), ["spec/b.yml"])
 
 
 _CODE = b"""#ifdef A

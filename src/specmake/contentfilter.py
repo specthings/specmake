@@ -29,7 +29,7 @@ import logging
 import posixpath
 import re
 import subprocess
-from typing import Any, Callable
+from typing import Any, Callable, Iterable
 
 import yaml
 from specitems import (ItemDumper, make_subprocess_environment,
@@ -292,11 +292,17 @@ class _ItemClosureRule(ContentRule):
     def matches(self, path: str) -> bool:
         return self._item_uid(path) is not None
 
-    def prepare(self, items: dict[str, dict]) -> None:
+    def prepare(self, items: dict[str, dict], removed: Iterable[str]) -> None:
         """
         Prepare the rule with the data of the items of the tip by path.  Raise
-        a ValueError for a link of a kept item to a missing item.
+        a ValueError for a link of a kept item to an item whose path is in the
+        removed paths of the tip.  A link to an item outside the specification
+        directories of the rule refers to another repository.
         """
+        removed_uids = {
+            uid
+            for uid in map(self._item_uid, removed) if uid is not None
+        }
         kept: dict[str, dict] = {}
         for path, data in items.items():
             uid = self._item_uid(path)
@@ -309,8 +315,8 @@ class _ItemClosureRule(ContentRule):
         for uid, data in sorted(kept.items()):
             for link in data.get("links", []):
                 link_uid = _abs_uid(uid, link["uid"])
-                if link_uid not in kept and link_uid not in self._dropped:
-                    raise ValueError(f"the item {uid} links to the missing "
+                if link_uid in removed_uids:
+                    raise ValueError(f"the item {uid} links to the removed "
                                      f"item {link_uid}")
 
     def reset(self) -> None:
@@ -481,12 +487,14 @@ class ContentFilter:
         for closure in self._closures:
             closure.reset()
 
-    def prepare(self, files: Files) -> None:
+    def prepare(self, files: Files, removed: Iterable[str] = ()) -> None:
         """
         Prepare the item closures with the files of the tip.  The files map
         each path to the reader of its content.  Each closure sees the items
-        after the rules before it.
+        after the rules before it.  The removed paths are the paths of the tip
+        which the path rules drop.
         """
+        removed = list(removed)
         for closure in self._closures:
             items: dict[str, dict] = {}
             for path, read in sorted(files.items()):
@@ -496,4 +504,4 @@ class ContentFilter:
                     if isinstance(data, dict):
                         items[path] = data
             logging.info("prepare the item closure with %d items", len(items))
-            closure.prepare(items)
+            closure.prepare(items, removed)

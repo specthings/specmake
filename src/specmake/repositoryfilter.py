@@ -118,10 +118,11 @@ class RepositoryFilter:
         each path to the reader of its content.
         """
         self.content_filter.reset()
-        self.content_filter.prepare({
-            path: read
-            for path, read in files.items() if self.keep(path)
-        })
+        self.content_filter.prepare(
+            {
+                path: read
+                for path, read in files.items() if self.keep(path)
+            }, [path for path in files if not self.keep(path)])
 
     def _prepare_content_filter(self, directory: str, commit: str) -> None:
         if not self.content_filter:
