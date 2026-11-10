@@ -516,9 +516,11 @@ class WorkspaceRepository(_WorkspaceItem):
         return _ItemFilter(prefix, repository_filter)
 
     def _repository_filter(self) -> RepositoryFilter | None:
-        return load_repository_filter(self.uid,
-                                      self.item.children("repository-filter"),
-                                      self.enabled_set)
+        return load_repository_filter(
+            self.uid, self.item.children("repository-filter"),
+            self.enabled_set, self.substitute,
+            lambda actions, data: run_attribute_actions(
+                actions, self.component, data))
 
     def _git_commit(self, ctx: ItemGetValueContext) -> str:
         args, kwargs = ctx.unpack_args_dict()
@@ -1155,11 +1157,38 @@ class _ItemFilter:
     repository_filter: RepositoryFilter | None
 
 
+def _prepare_content_filter(item_filter: _ItemFilter) -> None:
+    repository_filter = item_filter.repository_filter
+    if repository_filter is None or not repository_filter.content_filter:
+        return
+    base = Path(item_filter.prefix)
+    files = {}
+    for path in base.rglob("*"):
+        relative = path.relative_to(base)
+        if ".git" not in relative.parts and path.is_file():
+            files[relative.as_posix()] = path.read_bytes
+    repository_filter.prepare_content_filter(files)
+
+
+def _classify_item(item: Item, path: str, repository_filter: RepositoryFilter,
+                   dropped: list[tuple[Item, RepositoryFilter]],
+                   replaced: list[tuple[Item, RepositoryFilter, str]]) -> None:
+    if not repository_filter.keep(path):
+        dropped.append((item, repository_filter))
+    elif repository_filter.content_filter.matches(path):
+        with open(item.file, "rb") as src:
+            old_content = src.read()
+        new_content = repository_filter.content_filter.apply(path, old_content)
+        if new_content != old_content:
+            replaced.append(
+                (item, repository_filter, new_content.decode("utf-8")))
+
+
 def _filter_items(workspace: WorkspaceContext) -> list[str]:
     """
     Apply the repository filters to the items of the repository directories.
-    Remove each item which a filter drops.  Give each item which a filter
-    replaces the data of the replacement.  Return the UIDs of the removed
+    Remove each item which a filter drops.  Give each item which a content
+    rule changes the data of the changed file.  Return the UIDs of the removed
     items.
 
     The innermost repository directory which contains the file of an item
@@ -1174,6 +1203,8 @@ def _filter_items(workspace: WorkspaceContext) -> list[str]:
             item_filters.append(repository.item_filter())
     item_filters.sort(key=lambda item_filter: len(item_filter.prefix),
                       reverse=True)
+    for item_filter in item_filters:
+        _prepare_content_filter(item_filter)
     cache = workspace.cache
     stays = set(cache.items_by_type.get("pkg/repository-filter", []))
     dropped: list[tuple[Item, RepositoryFilter]] = []
@@ -1188,12 +1219,8 @@ def _filter_items(workspace: WorkspaceContext) -> list[str]:
         repository_filter = item_filter.repository_filter
         if repository_filter is None or item in stays:
             continue
-        path = file[len(item_filter.prefix):]
-        content = repository_filter.replace_files.get(path)
-        if content is not None:
-            replaced.append((item, repository_filter, content))
-        elif not repository_filter.keep(path):
-            dropped.append((item, repository_filter))
+        _classify_item(item, file[len(item_filter.prefix):], repository_filter,
+                       dropped, replaced)
     for item, repository_filter, content in replaced:
         logging.info("%s: replace the filtered item %s", repository_filter.uid,
                      item.uid)

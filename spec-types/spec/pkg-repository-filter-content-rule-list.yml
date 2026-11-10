@@ -10,7 +10,7 @@ spec-example: null
 spec-info:
   list:
     description: null
-    spec-type: pkg-repository-filter-replace-file
-spec-name: Repository Filter Replaced File List
-spec-type: pkg-repository-filter-replace-file-list
+    spec-type: pkg-repository-filter-content-rule
+spec-name: Repository Filter Content Rule List
+spec-type: pkg-repository-filter-content-rule-list
 type: spec

@@ -1,0 +1,34 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: rule
+  spec-value: python
+  uid: pkg-repository-filter-content-rule
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      code:
+        description: |
+          It shall be Python code which defines the function
+          ``filter_content(path: str, content: bytes) -> bytes``.  The function shall
+          return the new content of the file at the path.
+        spec-type: str
+      files:
+        description: |
+          It shall be the list of path globs which select the files of the rule.
+          A ``*`` and a ``?`` match within one directory.  A ``**`` matches across
+          directories, and a ``**/`` matches no directory too.
+        spec-type: list-str
+    description: |
+      This set of attributes specifies a content rule which runs Python code.
+    mandatory-attributes: all
+spec-name: Repository Filter Python Rule
+spec-type: pkg-repository-filter-content-rule-python
+type: spec

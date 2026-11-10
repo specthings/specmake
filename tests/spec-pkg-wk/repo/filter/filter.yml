@@ -1,5 +1,18 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 baseline: 40abab3c7aca7f38d06f339d784fa08178588f47
+content-rules:
+- content: |
+    empty
+  enabled-by: true
+  files:
+  - private/shared.txt
+  rule: replace
+- content: |
+    invalid
+  enabled-by: false
+  files:
+  - private/public.txt
+  rule: replace
 copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
 enabled-by: true
@@ -14,18 +27,10 @@ path-rules:
   enabled-by: true
   keep:
   - private/public.txt
+  - private/shared.txt
 - drop:
   - code.c
   enabled-by: false
   keep: []
 pkg-type: repository-filter
-replace-files:
-- content: |
-    empty
-  enabled-by: true
-  path: private/shared.txt
-- content: |
-    invalid
-  enabled-by: false
-  path: private/public.txt
 type: pkg

@@ -8,5 +8,4 @@ links:
   uid: a
 path-rules: []
 pkg-type: repository-filter
-replace-files: []
 type: pkg

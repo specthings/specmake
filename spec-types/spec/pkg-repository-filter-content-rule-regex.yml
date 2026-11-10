@@ -1,0 +1,47 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: rule
+  spec-value: regex
+  uid: pkg-repository-filter-content-rule
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      count:
+        description: |
+          It shall be the maximum count of substitutions.  The value 0 substitutes
+          each match.
+        spec-type: int
+      files:
+        description: |
+          It shall be the list of path globs which select the files of the rule.
+          A ``*`` and a ``?`` match within one directory.  A ``**`` matches across
+          directories, and a ``**/`` matches no directory too.
+        spec-type: list-str
+      flags:
+        description: |
+          It shall be the list of the names of the ``re`` flags, such as
+          ``MULTILINE``.
+        spec-type: list-str
+      pattern:
+        description: |
+          It shall be the regular expression.
+        spec-type: str
+      replacement:
+        description: |
+          It shall be the replacement in the form of ``re.sub()``.
+        spec-type: str
+    description: |
+      This set of attributes specifies a content rule which substitutes the
+      matches of a regular expression in the text of a file with ``re.sub()``.
+    mandatory-attributes: all
+spec-name: Repository Filter Regular Expression Rule
+spec-type: pkg-repository-filter-content-rule-regex
+type: spec

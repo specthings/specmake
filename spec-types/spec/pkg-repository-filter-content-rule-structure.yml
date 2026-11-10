@@ -1,0 +1,42 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: rule
+  spec-value: structure
+  uid: pkg-repository-filter-content-rule
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      accept-format-changes:
+        description: |
+          If the value is true, then a file which a dump of its unchanged data does
+          not reproduce gets the format of the closest dump, otherwise the filter
+          fails for such a file.
+        spec-type: bool
+      attribute-actions:
+        description: |
+          It shall be the list of attribute actions which run on the data of the file.
+        spec-type: pkg-attribute-action-list
+      files:
+        description: |
+          It shall be the list of path globs which select the files of the rule.
+          A ``*`` and a ``?`` match within one directory.  A ``**`` matches across
+          directories, and a ``**/`` matches no directory too.
+        spec-type: list-str
+    description: |
+      This set of attributes specifies a content rule which runs attribute
+      actions on the data of a YAML or JSON file.  A YAML file whose text equals
+      the dump of a specification item gets that dump.  Any other YAML file goes
+      through a round trip which keeps the comments, the key order, the quotes and
+      the indentation.  A JSON file keeps its indentation.
+    mandatory-attributes: all
+spec-name: Repository Filter Structure Rule
+spec-type: pkg-repository-filter-content-rule-structure
+type: spec

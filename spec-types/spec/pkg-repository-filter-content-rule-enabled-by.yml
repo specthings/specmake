@@ -1,0 +1,36 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: rule
+  spec-value: enabled-by
+  uid: pkg-repository-filter-content-rule
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      files:
+        description: |
+          It shall be the list of path globs which select the files of the rule.
+          A ``*`` and a ``?`` match within one directory.  A ``**`` matches across
+          directories, and a ``**/`` matches no directory too.
+        spec-type: list-str
+      symbols:
+        description: |
+          It shall map each symbol to its value.
+        spec-type: pkg-repository-filter-symbols
+    description: |
+      This set of attributes specifies a content rule which assigns symbols in
+      each ``enabled-by`` attribute at any depth of the data of a YAML or JSON
+      file.  The rule then simplifies the expression.  A constant ``and``, ``or``
+      or ``not`` operation becomes ``true`` or ``false``.  A file which a dump of
+      its unchanged data does not reproduce fails the filter.
+    mandatory-attributes: all
+spec-name: Repository Filter Enabled-By Rule
+spec-type: pkg-repository-filter-content-rule-enabled-by
+type: spec

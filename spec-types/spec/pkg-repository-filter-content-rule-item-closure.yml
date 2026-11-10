@@ -1,0 +1,34 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: rule
+  spec-value: item-closure
+  uid: pkg-repository-filter-content-rule
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      spec-directories:
+        description: |
+          It shall be the list of specification directories relative to the
+          repository root.  A directory shall end with a slash.  The empty
+          string is the repository root.
+        spec-type: list-str
+    description: |
+      This set of attributes specifies a content rule which drops each
+      specification item whose ``enabled-by`` attribute is ``false`` in the tip of
+      the filtered commits after the rules before it.  It removes each link to a
+      dropped item in each filtered commit.  The UID of an item is its path
+      relative to its specification directory without the ``.yml`` extension.  A
+      link of a kept item of the tip to an item which no specification directory
+      contains fails the filter.
+    mandatory-attributes: all
+spec-name: Repository Filter Item Closure Rule
+spec-type: pkg-repository-filter-content-rule-item-closure
+type: spec
