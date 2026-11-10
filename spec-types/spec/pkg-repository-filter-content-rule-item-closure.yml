@@ -28,7 +28,8 @@ spec-info:
       relative to its specification directory without the ``.yml`` extension.  A
       link of a kept item of the tip to an item which the path rules remove from
       the tip fails the filter.  A link to an item which the repository does not
-      contain refers to another repository.
+      contain refers to another repository.  A file of a filtered commit which
+      is no valid YAML stays unchanged.
     mandatory-attributes: all
 spec-name: Repository Filter Item Closure Rule
 spec-type: pkg-repository-filter-content-rule-item-closure

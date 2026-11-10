@@ -35,7 +35,8 @@ spec-info:
       actions on the data of a YAML or JSON file.  A YAML file whose text equals
       the dump of a specification item gets that dump.  Any other YAML file goes
       through a round trip which keeps the comments, the key order, the quotes and
-      the indentation.  A JSON file keeps its indentation.
+      the indentation.  A JSON file keeps its indentation.  A file which is no
+      valid YAML or JSON stays unchanged.
     mandatory-attributes: all
 spec-name: Repository Filter Structure Rule
 spec-type: pkg-repository-filter-content-rule-structure
