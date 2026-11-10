@@ -42,7 +42,7 @@ jobs:
     - name: Install Git
       if: runner.os == 'Linux'
       run: |
-        sudo apt install git
+        sudo apt install git unifdef
     - name: Configure Git
       run: |
         git config --global user.email "you@example.com"

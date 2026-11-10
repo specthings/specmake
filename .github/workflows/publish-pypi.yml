@@ -30,7 +30,7 @@ jobs:
         version: 0.10.12
     - name: Install Git
       run: |
-        sudo apt install git
+        sudo apt install git unifdef
         git config --global user.email "you@example.com"
         git config --global user.name "Your Name"
     - name: Make
