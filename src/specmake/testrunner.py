@@ -40,7 +40,8 @@ from .executablerecord import (ExecutableRecord, add_executable_record,
                                find_report, get_test_state_note, index_reports,
                                read_executable_record, reuse_report)
 from .pkgitems import BuildItem, PackageBuildDirector
-from .runtests import (RunnerExecutable, RunnerReport, run_subprocess_tests,
+from .runtests import (RunnerExecutable, RunnerReport, command_runner_hash,
+                       is_reusable_report, run_subprocess_tests,
                        run_tests_with_retries, select_command)
 from .testoutputparser import augment_report
 from .util import now_utc
@@ -140,12 +141,11 @@ class TestRunner(BuildItem):
 
         The runner hash is stored in the test log.  If the current runner hash
         differs from the hash in the test log, the test reports are not reused
-        and all tests are run again.
+        and all tests are run again.  The hash covers only the value which
+        selects the machine of the test runner.  This runner selects no
+        machine.
         """
-        return data_digest({
-            "digest": self.digest(),
-            "do-not-run": gather_do_not_run(self.item)
-        })
+        return data_digest({})
 
     def run_tests(self,
                   executables: list[RunnerExecutable]) -> list[RunnerReport]:
@@ -213,30 +213,30 @@ class TestRunner(BuildItem):
             # tests is a manual activity.
             report = find_report(previous_reports, digest,
                                  record.loadable_sha512)
-            if report is None or cannot_reuse_reports:
-                if name in do_not_run:
-                    logging.info("%s: do not run: %s", self.uid, path)
-                    report = TestRunner.run_tests(
-                        self, [RunnerExecutable(path, digest, 0.0)])[0]
-                    report["do-not-run"] = True
-                    add_executable_record(report, record)
-                    augment_report(report, report["output"])
-                    reports.append(report)
-                else:
-                    try:
-                        timeout = max(timeouts[timeout_key][name])
-                    except KeyError:
-                        timeout = default_timeout
-                    timeout = timeout_scaler * max(timeout, min_timeout)
-                    logging.debug("%s: run with %.1fs timeout: %s", self.uid,
-                                  timeout, path)
-                    executables.append(
-                        RunnerExecutable(path, digest, timeout,
-                                         get_test_state_note(record)))
-            else:
+            if not cannot_reuse_reports and is_reusable_report(
+                    report, name, do_not_run):
                 logging.info("%s: use previous report for: %s", self.uid, path)
                 reuse_report(report, record)
                 reports.append(report)
+            elif name in do_not_run:
+                logging.info("%s: do not run: %s", self.uid, path)
+                report = TestRunner.run_tests(
+                    self, [RunnerExecutable(path, digest, 0.0)])[0]
+                report["do-not-run"] = True
+                add_executable_record(report, record)
+                augment_report(report, report["output"])
+                reports.append(report)
+            else:
+                try:
+                    timeout = max(timeouts[timeout_key][name])
+                except KeyError:
+                    timeout = default_timeout
+                timeout = timeout_scaler * max(timeout, min_timeout)
+                logging.debug("%s: run with %.1fs timeout: %s", self.uid,
+                              timeout, path)
+                executables.append(
+                    RunnerExecutable(path, digest, timeout,
+                                     get_test_state_note(record)))
         return reports, executables
 
     def run(self) -> None:
@@ -348,13 +348,9 @@ class SubprocessTestRunner(TestRunner):
         # The arguments keep their variables.  A substituted argument carries
         # the workspace path, so a relocated build directory discards every
         # test report.
-        return data_digest({
-            "runner":
-            super().get_runner_hash(),
-            "command":
+        return command_runner_hash(
             select_command(self.item["command"],
-                           self._is_enabled_item_condition)
-        })
+                           self._is_enabled_item_condition))
 
     def describe(self) -> str:
         executable = "${test_program}"

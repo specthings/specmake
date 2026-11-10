@@ -35,7 +35,7 @@ import time
 from typing import Iterator
 import yaml
 
-from specitems import Item
+from specitems import data_digest, Item
 from specware import run_command
 
 from .directorystate import RepositoryState
@@ -60,6 +60,9 @@ class ESATestRunner(TestRunner):
     def _target_board(self) -> str:
         return self["bsp-to-target-board"][self.substitute(
             "${.:/component/arch}/${.:/component/bsp}")]
+
+    def get_runner_hash(self) -> str:
+        return data_digest({"target": self._target_board()})
 
     def describe(self) -> str:
         return f"""This test procedure requests the `ESA run tests service

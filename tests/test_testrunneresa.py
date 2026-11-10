@@ -278,6 +278,13 @@ def test_testrunneresa(monkeypatch, tmp_path):
 <https://gitlab.esa.int/flight-software/fsw-boards-server/FSWBoardsServerRemoteExecution_Binaries.git>`__
 to run the test programs on the ``Board`` target board."""
 
+    # The target board contributes to the runner hash
+    runner_hash = runner.get_runner_hash()
+    runner.item["bsp-to-target-board"]["Arch/BSP"] = "Other"
+    assert runner.get_runner_hash() != runner_hash
+    runner.item["bsp-to-target-board"]["Arch/BSP"] = "Board"
+    assert runner.get_runner_hash() == runner_hash
+
     logging.critical("empty request with remote branch delete")
     assert not commands
     commands.extend([

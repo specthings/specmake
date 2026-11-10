@@ -123,6 +123,14 @@ def test_testrunneragent(caplog, tmp_path, monkeypatch):
     # The transport does not contribute to the runner hash
     assert runner_hashes[0] == runner_hashes[1]
 
+    # Only the target contributes to the runner hash
+    runner_hash = runner.get_runner_hash()
+    runner.item["default-timeout-in-seconds"] += 1.0
+    runner.item["enabled-by"] = ["other"]
+    assert runner.get_runner_hash() == runner_hash
+    runner.item["target"] = [{"enabled-by": True, "value": "other/target"}]
+    assert runner.get_runner_hash() != runner_hash
+
     runner.item["transport"] = [{"enabled-by": True, "type": "foo"}]
     with pytest.raises(ValueError,
                        match="the transport type 'foo' is not one of "

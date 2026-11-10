@@ -343,19 +343,62 @@ def test_reuse(tmp_path):
     assert reports == expected
 
 
+def test_reuse_with_other_substitutions(tmp_path):
+    previous = _run_and_keep(tmp_path)
+    previous_log = _load(previous)
+
+    # The substitutions do not contribute to the test runner hash, so every
+    # report is reused
+    assert _run(tmp_path, "--reuse", str(previous), "--define",
+                "unused=x") == 1
+    test_log = _load(tmp_path / "test-log.json")
+    assert test_log["test-runner-hash"] == previous_log["test-runner-hash"]
+    assert test_log["reports"] == previous_log["reports"]
+
+
 def test_reuse_of_another_test_runner(tmp_path, caplog):
     previous = _run_and_keep(tmp_path)
     previous_hash = _load(previous)["test-runner-hash"]
 
-    # Changed substitution data changes the test runner hash, so the reports
-    # of the previous test log are not reusable.  The command is unchanged, so
-    # the tests run again and produce the same results.
-    assert _run(tmp_path, "--reuse", str(previous), "--define",
-                "unused=x") == 1
+    # A changed command changes the test runner hash, so the reports of the
+    # previous test log are not reusable
+    assert _run(tmp_path, "--reuse", str(previous), "-E", "verbose") == 1
     test_log = _load(tmp_path / "test-log.json")
     assert test_log["test-runner-hash"] != previous_hash
     assert "cannot reuse the reports" in caplog.text
     assert len(test_log["reports"]) == 7
+
+
+def _by_name(test_log):
+    return {
+        os.path.basename(report["executable"]): report
+        for report in test_log["reports"]
+    }
+
+
+def test_reuse_with_changed_do_not_run(tmp_path):
+    previous = _run_and_keep(tmp_path)
+    previous_log = _load(previous)
+    with open(_RUNNER, "r", encoding="utf-8") as src:
+        runner = yaml.safe_load(src)
+    runner["do-not-run"] = [runner["do-not-run"][0], "hello.exe"]
+    changed_runner = tmp_path / "runner.yml"
+    changed_runner.write_text(yaml.safe_dump(runner), encoding="utf-8")
+
+    # The do not run set does not contribute to the test runner hash.  Only
+    # the executables which enter or leave the set get a new report.
+    assert _run(tmp_path, "--reuse", str(previous),
+                runner=str(changed_runner)) == 1
+    test_log = _load(tmp_path / "test-log.json")
+    assert test_log["test-runner-hash"] == previous_log["test-runner-hash"]
+    reports = _by_name(test_log)
+    previous_reports = _by_name(previous_log)
+    assert reports["hello.exe"]["do-not-run"]
+    assert "do-not-run" not in reports["no-reason.exe"]
+    assert reports["no-reason.exe"]["command-line"] != ""
+    for name in ("ts-pass.exe", "ts-fail.exe", "crash.exe", "discarded.exe",
+                 "do-not-run.exe"):
+        assert reports[name] == previous_reports[name]
 
 
 def test_reuse_of_invalid_json(tmp_path, capsys):
