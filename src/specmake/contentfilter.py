@@ -23,6 +23,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 
+import copy
 import json
 import logging
 import posixpath
@@ -134,14 +135,23 @@ def edit_attributes(path: str, content: bytes, edit: EditAttributes,
     A YAML text which equals the dump of a specification item gets that dump
     after the edit.  Any other YAML text goes through a round trip.  A JSON
     text keeps its indentation.  If exact is true, a text which a dump of the
-    unchanged data does not reproduce raises a ValueError.
+    unchanged data does not reproduce raises a ValueError.  A content whose
+    data the edit leaves unchanged stays as it is.
     """
     text = content.decode("utf-8")
     if path.endswith(".json"):
-        return _edit_json(text, edit, exact).encode("utf-8")
-    if path.endswith((".yml", ".yaml")):
-        return _edit_yaml(text, edit, exact).encode("utf-8")
-    raise ValueError("the file is no YAML or JSON file")
+        data = json.loads(text)
+        edit_text = _edit_json
+    elif path.endswith((".yml", ".yaml")):
+        data = yaml.load(text, Loader=SafeLoader)
+        edit_text = _edit_yaml
+    else:
+        raise ValueError("the file is no YAML or JSON file")
+    edited = copy.deepcopy(data)
+    edit(edited)
+    if edited == data:
+        return content
+    return edit_text(text, edit, exact).encode("utf-8")
 
 
 def _simplify_list(items: list, symbols: dict[str, bool],
