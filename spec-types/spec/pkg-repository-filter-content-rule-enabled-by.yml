@@ -29,7 +29,8 @@ spec-info:
       each ``enabled-by`` attribute at any depth of the data of a YAML or JSON
       file.  The rule then simplifies the expression.  A constant ``and``, ``or``
       or ``not`` operation becomes ``true`` or ``false``.  A file which a dump of
-      its unchanged data does not reproduce fails the filter.
+      its unchanged data does not reproduce fails the filter.  A file which is
+      no valid YAML or JSON stays unchanged.
     mandatory-attributes: all
 spec-name: Repository Filter Enabled-By Rule
 spec-type: pkg-repository-filter-content-rule-enabled-by

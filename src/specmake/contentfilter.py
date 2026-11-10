@@ -127,6 +127,11 @@ def _edit_yaml(text: str, edit: EditAttributes, exact: bool) -> str:
     return yaml_round_trip(text, edit, exact)[0]
 
 
+def _keep_invalid(path: str, err: Exception) -> None:
+    logging.warning("%s: keep the content which is no valid data: %s", path,
+                    str(err).splitlines()[0])
+
+
 def edit_attributes(path: str, content: bytes, edit: EditAttributes,
                     exact: bool) -> bytes:
     """
@@ -136,17 +141,22 @@ def edit_attributes(path: str, content: bytes, edit: EditAttributes,
     after the edit.  Any other YAML text goes through a round trip.  A JSON
     text keeps its indentation.  If exact is true, a text which a dump of the
     unchanged data does not reproduce raises a ValueError.  A content whose
-    data the edit leaves unchanged stays as it is.
+    data the edit leaves unchanged stays as it is.  A content which is no valid
+    YAML or JSON stays as it is and produces a warning.
     """
     text = content.decode("utf-8")
-    if path.endswith(".json"):
-        data = json.loads(text)
-        edit_text = _edit_json
-    elif path.endswith((".yml", ".yaml")):
-        data = yaml.load(text, Loader=SafeLoader)
-        edit_text = _edit_yaml
-    else:
-        raise ValueError("the file is no YAML or JSON file")
+    try:
+        if path.endswith(".json"):
+            data = json.loads(text)
+            edit_text = _edit_json
+        elif path.endswith((".yml", ".yaml")):
+            data = yaml.load(text, Loader=SafeLoader)
+            edit_text = _edit_yaml
+        else:
+            raise ValueError("the file is no YAML or JSON file")
+    except (json.JSONDecodeError, yaml.YAMLError) as err:
+        _keep_invalid(path, err)
+        return content
     edited = copy.deepcopy(data)
     edit(edited)
     if edited == data:
@@ -333,7 +343,11 @@ class _ItemClosureRule(ContentRule):
     def apply(self, path: str, content: bytes) -> bytes:
         uid = self._item_uid(path)
         assert uid is not None
-        data = yaml.load(content, Loader=SafeLoader)
+        try:
+            data = yaml.load(content, Loader=SafeLoader)
+        except yaml.YAMLError as err:
+            _keep_invalid(path, err)
+            return content
         if not isinstance(data, dict) or not any(
                 _abs_uid(uid, link["uid"]) in self._dropped
                 for link in data.get("links", [])):

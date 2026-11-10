@@ -23,6 +23,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 
+import logging
 import sys
 
 import pytest
@@ -95,6 +96,14 @@ def test_edit_attributes():
                            True) == _YAML_WRAPPED
     assert edit_attributes("a.json", b'{"a":1}', _no_change,
                            True) == b'{"a":1}'
+
+
+def test_edit_attributes_invalid(caplog):
+    caplog.set_level(logging.WARNING)
+    assert edit_attributes("a.yml", b"a: b\nc\n", _set_b, True) == b"a: b\nc\n"
+    assert "a.yml: keep the content which is no valid data: " in caplog.text
+    assert edit_attributes("a.json", b"{", _set_b, True) == b"{"
+    assert "a.json: keep the content which is no valid data: " in caplog.text
 
 
 @pytest.mark.parametrize("enabled_by, simplified", [
@@ -304,6 +313,7 @@ def test_content_filter_item_closure():
                                 files["spec/c/d.yml"]) == _item(
                                     "true", "../a")
     assert content_filter.apply("spec/f.yml", b"- x\n") == b"- x\n"
+    assert content_filter.apply("spec/i.yml", b"a: b\nc\n") == b"a: b\nc\n"
     content_filter.reset()
     assert not content_filter.dropped_paths
 
