@@ -32,7 +32,8 @@ import re
 from typing import Any, NamedTuple, Optional
 
 from specitems import (EnabledSet, IS_ENABLED_OPS, Item, is_enabled_with_ops,
-                       load_data, resolve_attribute_path, to_iterable)
+                       load_data, parse_attribute_path, resolve_attribute_path,
+                       select_attribute_path, to_iterable)
 
 from .pkgitems import BuildItem, PackageComponent
 
@@ -164,12 +165,24 @@ _ATTRIBUTE_ACTIONS = {
 }
 
 
+def _resolve_attribute_path(data: dict,
+                            path: str) -> list[tuple[Any, str, Optional[int]]]:
+    try:
+        parse_attribute_path(path)
+    except ValueError:
+        # A path with a selection form acts on each match.  The last match
+        # comes first, so a removal keeps the indices of the other matches.
+        return [(match.container, match.key, match.index)
+                for match in reversed(select_attribute_path(data, path))]
+    return [resolve_attribute_path(data, path)]
+
+
 def _attribute_action(item: BuildItem, action: dict, data: dict) -> None:
     for path in to_iterable(action["path"]):
-        value, name, index = resolve_attribute_path(data, path)
-        _ATTRIBUTE_ACTIONS[action["action"]](_AttributeActionContext(
-            item, action, item.substitute(action.get("value", None)), value,
-            name, index, path))
+        for value, name, index in _resolve_attribute_path(data, path):
+            _ATTRIBUTE_ACTIONS[action["action"]](_AttributeActionContext(
+                item, action, item.substitute(action.get("value", None)),
+                value, name, index, path))
 
 
 def _enabled_by_has_type(item: Item, enabled_by: dict, who: str) -> bool:
