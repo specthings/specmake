@@ -484,10 +484,18 @@ def test_repository_filter_content_rules_error(tmpdir):
     _create_buildspace_from_workspace(tmpdir, workspace)
     source = os.path.join(tmpdir, "source", "repo")
     workspace.director["/repo"].item["commit"] = _commit(
-        source, "Add item", {"spec/a.yml": _ITEM_A})
+        source, "Add items", {
+            "spec/a.yml": _ITEM_A,
+            "spec/b.yml": "enabled-by: true\nlinks: []\n"
+        })
     workspace.cache["/filter"]["content-rules"] = _CONTENT_RULES
+    workspace.cache["/filter"]["path-rules"].append({
+        "drop": ["spec/b.yml"],
+        "enabled-by": True,
+        "keep": []
+    })
     with pytest.raises(ValueError,
-                       match="the item /a links to the missing item /b"):
+                       match="the item /a links to the removed item /b"):
         _create_buildspace_from_workspace(tmpdir, workspace)
 
 
