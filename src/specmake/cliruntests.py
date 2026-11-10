@@ -26,7 +26,6 @@
 
 import argparse
 import functools
-import hashlib
 import json
 import logging
 import os
@@ -43,7 +42,8 @@ from .ctrf import (CTRF_FAILED, convert_test_log, ctrf_markdown_summary,
 from .executablerecord import (ExecutableRecord, add_executable_record,
                                find_report, get_test_state_note, index_reports,
                                read_executable_record, reuse_report)
-from .runtests import (RunnerExecutable, RunnerReport, run_subprocess_tests,
+from .runtests import (RunnerExecutable, RunnerReport, command_runner_hash,
+                       is_reusable_report, run_subprocess_tests,
                        run_tests_with_retries, select_command)
 from .testoutputparser import augment_report
 from .util import command_arguments, command_name, now_utc, write_json
@@ -349,7 +349,7 @@ def _gather(
         records[path] = record
         report = find_report(previous_reports, record.sha512,
                              record.loadable_sha512)
-        if report is not None:
+        if is_reusable_report(report, name, do_not_run):
             logging.info("%s: use previous report for: %s", _UID, path)
             reuse_report(report, record)
             reports.append(report)
@@ -376,17 +376,6 @@ def _with_records(reports: list[RunnerReport],
     for report in reports:
         add_executable_record(report, records[report["executable"]])
     return reports
-
-
-def _runner_hash(command: list[str], substitutions: dict[str, str]) -> str:
-    state = hashlib.sha512()
-    state.update(
-        json.dumps({
-            "command": command,
-            "substitutions": substitutions
-        },
-                   sort_keys=True).encode("utf-8"))
-    return state.hexdigest()
 
 
 def _describe(command: list[str]) -> str:
@@ -418,7 +407,7 @@ def _run(args: argparse.Namespace) -> _Data:
                                     runner.get("discard-patterns", []),
                                     runner["max-process-count"], _UID)
 
-    runner_hash = _runner_hash(command, substitutions)
+    runner_hash = command_runner_hash(command)
     start_time = now_utc()
     begin = time.monotonic()
     records: dict[str, ExecutableRecord] = {}

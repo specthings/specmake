@@ -33,9 +33,9 @@ import re
 import subprocess
 import threading
 import time
-from typing import Any, Callable, NamedTuple, Optional
+from typing import Any, Callable, NamedTuple, Optional, TypeGuard
 
-from specitems import is_enabled
+from specitems import data_digest, is_enabled
 
 from .testoutputparser import augment_report
 from .util import now_utc
@@ -70,6 +70,31 @@ def select_command(command: list,
         else:
             arguments.append(element)
     return arguments
+
+
+def command_runner_hash(command: list) -> str:
+    """
+    Return the test runner hash of a runner which runs the command.
+
+    The command is the result of select_command(), so its arguments keep their
+    variables.
+    """
+    return data_digest({"command": command})
+
+
+def is_reusable_report(report: dict | None, name: str,
+                       do_not_run: set[str]) -> TypeGuard[dict]:
+    """
+    Return true, if the previous report is reusable for the executable of the
+    name.
+
+    A report of an executable which did not run is reusable only while the
+    executable is in the do not run set.  A report of an executable which ran
+    is reusable only while the executable is not in that set.
+    """
+    if report is None:
+        return False
+    return bool(report.get("do-not-run", False)) == (name in do_not_run)
 
 
 class RunnerExecutable(NamedTuple):

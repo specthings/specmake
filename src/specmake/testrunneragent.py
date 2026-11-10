@@ -33,7 +33,7 @@ from typing import Any
 
 import grpc  # type: ignore
 
-from specitems import is_enabled, Item, ItemGetValueContext
+from specitems import data_digest, is_enabled, Item, ItemGetValueContext
 
 # pylint: disable=no-name-in-module
 from spectestrunner import (GRPCDescribeTargetRequest, GRPCRunImageRequest,
@@ -102,6 +102,9 @@ class AgentTestRunner(TestRunner):
 
     def _get_target_name(self, _ctx: ItemGetValueContext) -> str:
         return self._get_optional_value("target")
+
+    def get_runner_hash(self) -> str:
+        return data_digest({"target": self._get_optional_value("target")})
 
     def _get_transport(self) -> dict[str, Any]:
         for transport in self["transport"]:

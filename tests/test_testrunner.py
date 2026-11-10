@@ -312,3 +312,57 @@ def test_testrunner_dummy(caplog, tmpdir):
     assert dummy_runner.get_run_command("foobar") == None
     with pytest.raises(ValueError, match="there is no timeout key"):
         director.build_package(only=["/pkg/test-logs/test-runner-dummy"])
+
+
+class _PlainTestRunner(TestRunner):
+
+    ran: list[str] = []
+
+    def run_tests(self,
+                  executables: list[RunnerExecutable]) -> list[RunnerReport]:
+        _PlainTestRunner.ran.extend(
+            Path(executable.path).name for executable in executables)
+        return [{
+            "executable": executable.path,
+            "executable-sha512": executable.digest,
+            "output": []
+        } for executable in executables]
+
+
+def _build_and_get_ran(director, do_not_run):
+    runner = director["/pkg/test-runner/test"]
+    runner.item["do-not-run"] = do_not_run
+    _PlainTestRunner.ran = []
+    director.build_package(force=["/pkg/test-logs/bsp"])
+    reports = director["/pkg/test-logs/bsp"].json_load()["reports"]
+    not_run = sorted(
+        Path(report["executable"]).name for report in reports
+        if report.get("do-not-run", False))
+    return sorted(_PlainTestRunner.ran), not_run, runner.get_runner_hash()
+
+
+def test_testrunner_do_not_run_per_executable(caplog, tmpdir):
+    package = create_package(caplog, Path(tmpdir), Path("spec-packagebuild"),
+                             ["run-tests"])
+    director = package.director
+    director.factory.add_constructor("pkg/test-runner/test", _PlainTestRunner)
+    director["/pkg/build/bsp"].load()
+    ran, not_run, runner_hash = _build_and_get_ran(director,
+                                                   ["do-not-run.exe"])
+    assert ran == ["a.exe", "b.exe"]
+    assert not_run == ["do-not-run-via-link.exe", "do-not-run.exe"]
+
+    # A changed do not run set keeps the runner hash.  Only the executable
+    # which enters the set gets a new report.
+    get_and_clear_log(caplog)
+    ran, not_run, other_hash = _build_and_get_ran(director,
+                                                  ["do-not-run.exe", "b.exe"])
+    assert other_hash == runner_hash
+    assert ran == []
+    assert not_run == ["b.exe", "do-not-run-via-link.exe", "do-not-run.exe"]
+    assert "cannot reuse reports" not in get_and_clear_log(caplog)
+
+    # The executable which leaves the set runs again
+    ran, not_run, _ = _build_and_get_ran(director, ["do-not-run.exe"])
+    assert ran == ["b.exe"]
+    assert not_run == ["do-not-run-via-link.exe", "do-not-run.exe"]
