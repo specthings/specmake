@@ -55,6 +55,10 @@ def _set_b(data):
     data["b"] = 2
 
 
+def _no_change(data):
+    data["a"] = data["a"]
+
+
 _ITEM = b"""a: 1
 links: []
 """
@@ -87,6 +91,10 @@ def test_edit_attributes():
                            False) == b"a: x y\nb: 2\n"
     with pytest.raises(ValueError, match="no YAML or JSON file"):
         edit_attributes("a.txt", b"", _set_b, True)
+    assert edit_attributes("a.yaml", _YAML_WRAPPED, _no_change,
+                           True) == _YAML_WRAPPED
+    assert edit_attributes("a.json", b'{"a":1}', _no_change,
+                           True) == b'{"a":1}'
 
 
 @pytest.mark.parametrize("enabled_by, simplified", [
