@@ -20,7 +20,10 @@ spec-info:
         spec-type: pkg-attribute-action-enabled-by
       path:
         description: |
-          It shall be the path to the attribute.
+          It shall be the attribute path to the attribute.  A path with a
+          selection form, such as ``links[attr(uid)="/a/.*"]``, applies the
+          action to each attribute which the path selects.  It applies the
+          action to the last selected attribute first.
         spec-type: str-or-list-str
     description: |
       This set of attributes specifies an action to alter the associated item
