@@ -1,0 +1,25 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      This set of attributes maps the defined symbols of a C preprocessor rule
+      to their values.
+    generic-attributes:
+      description: |
+        The key shall be the symbol.  If the value is present, then it shall
+        be the value of the symbol.
+      key-spec-type: str
+      value-spec-type: optional-str
+    mandatory-attributes: none
+spec-name: Repository Filter Defined Symbols
+spec-type: pkg-repository-filter-cpp-defined
+type: spec

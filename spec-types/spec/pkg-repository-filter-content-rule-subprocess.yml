@@ -1,0 +1,37 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: rule
+  spec-value: subprocess
+  uid: pkg-repository-filter-content-rule
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      files:
+        description: |
+          It shall be the list of path globs which select the files of the rule.
+          A ``*`` and a ``?`` match within one directory.  A ``**`` matches across
+          directories, and a ``**/`` matches no directory too.
+        spec-type: list-str
+      subprocess:
+        description: |
+          It shall be the subprocess.  A variable substitution is performed on the
+          value.  The ``stdout`` attribute shall be absent.
+        spec-type: action-subprocess
+    description: |
+      This set of attributes specifies a content rule which pipes a file through
+      a subprocess.  The subprocess gets the path of the file as its last argument
+      and the content on its standard input.  Its standard output is the new
+      content.  If the expected return code is present, then another return
+      code fails the filter, otherwise the filter ignores the return code.
+    mandatory-attributes: all
+spec-name: Repository Filter Subprocess Rule
+spec-type: pkg-repository-filter-content-rule-subprocess
+type: spec

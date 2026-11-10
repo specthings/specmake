@@ -1,0 +1,33 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: rule
+  spec-value: replace
+  uid: pkg-repository-filter-content-rule
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      content:
+        description: |
+          It shall be the new content of each selected file.
+        spec-type: str
+      files:
+        description: |
+          It shall be the list of path globs which select the files of the rule.
+          A ``*`` and a ``?`` match within one directory.  A ``**`` matches across
+          directories, and a ``**/`` matches no directory too.
+        spec-type: list-str
+    description: |
+      This set of attributes specifies a content rule which replaces the content
+      of a file.
+    mandatory-attributes: all
+spec-name: Repository Filter Replace Rule
+spec-type: pkg-repository-filter-content-rule-replace
+type: spec

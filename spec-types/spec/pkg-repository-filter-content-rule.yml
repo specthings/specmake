@@ -1,0 +1,30 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      enabled-by:
+        description: |
+          It shall define the condition under which the rule is enabled.
+        spec-type: enabled-by
+      rule:
+        description: |
+          It shall be the kind of the content rule.
+        spec-type: name
+    description: |
+      This set of attributes specifies a content rule of a repository filter.
+      The enabled content rules of the enabled repository filter items apply in
+      the order of the items and of the rules.  A content rule applies to each kept
+      file which no replacement names.  The filter transforms each distinct pair of
+      a path and a file content once.
+    mandatory-attributes: all
+spec-name: Repository Filter Content Rule
+spec-type: pkg-repository-filter-content-rule
+type: spec
