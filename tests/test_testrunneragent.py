@@ -86,7 +86,10 @@ class _Client:
     def describe_target(self, target):
         return f"git {self.remote} {self.wait_timeout}"
 
-    def run_steps(self, target, timeout, request_steps, data):
+    def submit_run_steps(self, target, timeout, request_steps, data):
+        return request_steps[0]["path"]
+
+    def collect_run_steps(self, request_id):
         return [{"status": "success", "output": _OUTPUT}]
 
 
@@ -148,9 +151,10 @@ def test_testrunneragent_reuse(caplog, tmp_path, monkeypatch):
 
     class _CountingClient(_Client):
 
-        def run_steps(self, target, timeout, request_steps, data):
+        def submit_run_steps(self, target, timeout, request_steps, data):
             requests.append("git")
-            return super().run_steps(target, timeout, request_steps, data)
+            return super().submit_run_steps(target, timeout, request_steps,
+                                            data)
 
     class _CountingStub(_GRPCServiceStub):
 
