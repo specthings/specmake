@@ -1627,14 +1627,14 @@ wheels = [
 
 [[package]]
 name = "mdit-py-plugins"
-version = "0.6.1"
+version = "0.7.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "markdown-it-py" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/59/fc/f8d0863f8862f25602c0404d75568e89fb6b4109804645e5cdfb1be5cf56/mdit_py_plugins-0.6.1.tar.gz", hash = "sha256:a2bca0f039f39dbd35fb74ae1b5f998608c437463371f0ff7f49a19a17a114d0", size = 56114, upload-time = "2026-05-13T09:03:38.91Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ad/a4/77a4e1be19fd9b08993c76d5e54979ac836b327754f1f5fecfed1b56cc67/mdit_py_plugins-0.7.0.tar.gz", hash = "sha256:26d2179227aaf4d1dc7acffe7a738cbd15cade6b5a61cff0a2cbf9fed93efede", size = 51268, upload-time = "2026-11-10T16:29:31.081Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a5/69/6da5581c6a7fede7dc261bf4e67d6adca4196f176b43288b55b3db395b6e/mdit_py_plugins-0.6.1-py3-none-any.whl", hash = "sha256:214c82fb2ac524472ab6a5bcab1de80f73b50443e187f401bfd77efbc7c6481d", size = 66663, upload-time = "2026-05-13T09:03:37.76Z" },
+    { url = "https://files.pythonhosted.org/packages/4d/d3/d07e61326f150944ead0da9d0b39fb20d7fa367bbc951b10fca6bb1c7382/mdit_py_plugins-0.7.0-py3-none-any.whl", hash = "sha256:7f8e30403f3dd8bfe3afcdcbc6e61066d3f2e714167507b9c26eb385ec399353", size = 72937, upload-time = "2026-11-10T16:29:29.847Z" },
 ]
 
 [[package]]
@@ -2486,7 +2486,7 @@ requires-dist = [
     { name = "gcovr", specifier = ">=8.6" },
     { name = "git-filter-repo", specifier = ">=2.47.0" },
     { name = "matplotlib", specifier = ">=3.10.1" },
-    { name = "spectestrunner", specifier = ">=0.9.6" },
+    { name = "spectestrunner", specifier = ">=0.9.7" },
     { name = "specware", specifier = ">=1.3.35" },
     { name = "sphinx", specifier = ">=8.2.3" },
     { name = "sphinx-better-subsection", specifier = ">=0.2" },
@@ -2521,7 +2521,7 @@ dev = [
 
 [[package]]
 name = "spectestrunner"
-version = "0.9.6"
+version = "0.9.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "grpcio" },
@@ -2529,9 +2529,9 @@ dependencies = [
     { name = "pyyaml" },
     { name = "specitems" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e8/8a/8d6c4721113faa746cae3f3173064c3728aa701ab5ab9ead4890afd4f845/spectestrunner-0.9.6.tar.gz", hash = "sha256:c241f9add6c067e35e7eeac3c1ce247839c67879def9d7d47c31ccc9c7c75c62", size = 33996, upload-time = "2026-10-30T10:13:46.222Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/97/d8/e93c8122774c1cbff00032229dd31c69158c23396269e95e2d867a589c9e/spectestrunner-0.9.7.tar.gz", hash = "sha256:e4736d2706d391e23a5dcffc8e3524ae777f2d0b583f1d989a54d2305da35dc2", size = 34722, upload-time = "2026-11-11T05:50:42.533Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/42/2d/683e373100b010d9a07fb57e7e07bfd92d26dc1d4282c412a8dc6f42955d/spectestrunner-0.9.6-py3-none-any.whl", hash = "sha256:7e61f147b025fba6d9d967d0bd17fffdaee226d0b324365587ee606872c31b8f", size = 53620, upload-time = "2026-10-30T10:13:47.18Z" },
+    { url = "https://files.pythonhosted.org/packages/03/e2/34943d88d5c1f8329435c6971c8cbfceec82844a8f07387bfa3ba6453170/spectestrunner-0.9.7-py3-none-any.whl", hash = "sha256:fa22c6656283941b2ceae72c74831ff064095e2137c8760ec86d707ddec33b80", size = 54059, upload-time = "2026-11-11T05:50:43.316Z" },
 ]
 
 [[package]]
