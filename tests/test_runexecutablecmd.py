@@ -75,15 +75,17 @@ _TEST_LOGS_BY_TARGET: dict[str, str] = {
     'sparc/gr712rc/smp': ['${package-directory}/test-log-bsp.json']
 }
 
-_COMMANDS: dict[str, list[str]] = {'sparc/gr712rc/smp/one': ['$${executable}']}
+_COMMANDS: dict[str, list[str]] = {'sparc/gr712rc/smp/one': ['${executable}']}
 """ in script
     _check_script(Path(build_item.file))
 
 
-def _run(script: Path, executable: Path) -> subprocess.CompletedProcess:
+def _run(
+    script: Path, executable: Path, options: tuple[str, ...] = ()
+) -> subprocess.CompletedProcess:
     return subprocess.run([
         sys.executable, "-I",
-        str(script), "sparc-gr712rc-smp-extra",
+        str(script), *options, "sparc-gr712rc-smp-extra",
         str(executable)
     ],
                           capture_output=True,
@@ -121,6 +123,13 @@ def _check_script(script: Path) -> None:
     result = _run(script, other)
     assert result.returncode == 1
     assert "there is no service available" in result.stderr
+    runnable = package_directory / "runnable.exe"
+    runnable.write_text("#!/bin/sh\necho ran\n", encoding="utf-8")
+    runnable.chmod(0o755)
+    result = _run(script, runnable,
+                  ("--runner-type=one", "--do-not-use-test-logs"))
+    assert result.returncode == 0
+    assert result.stdout == "ran\n"
     broken = package_directory / "broken.exe"
     broken.write_bytes(build_elf(1, ">", segments)[:40])
     result = _run(script, broken)
