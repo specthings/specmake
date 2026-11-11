@@ -207,7 +207,7 @@ class RunExecutableCommand(DirectoryState):
                 test_runner = redirection.target()
                 assert isinstance(test_runner, TestRunner)
                 with test_runner.component_scope(redirection.component):
-                    command = test_runner.get_run_command("$${executable}")
+                    command = test_runner.get_run_command("${executable}")
                     if command is None:
                         continue
                     command = [
