@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import collections
+import dataclasses
 import logging
 from pathlib import Path
 import subprocess
@@ -46,10 +48,29 @@ from .util import now_utc
 
 _POLL_INTERVAL_IN_SECONDS = 10.0
 
+# The agent keeps this number of requests on the remote.  The bridge finds
+# the next request as soon as it answers the current one.
+_GIT_REQUESTS_ON_REMOTE = 2
+
 _GIT_ERRORS = (gitclient.RequestGone, gitclient.Rejected,
                gitclient.WaitTimeout, gitproto.ProtocolError, gitwire.GitError)
 
 _TRANSPORTS = ("git", "grpc")
+
+
+def _withdraw_git(client: gitclient.Client, request_id: str) -> None:
+    try:
+        client.cleanup(request_id)
+    except gitwire.GitError as err:
+        logging.warning("could not withdraw %s: %s", request_id, err)
+
+
+@dataclasses.dataclass
+class _GitRequest:
+    """ Holds a request which the agent submitted to the Git bridge. """
+    executable: RunnerExecutable
+    request_id: str = ""
+    error: str = ""
 
 
 def get_symbols(exe_path: str, nm_path: str) -> dict[str, list[int]]:
@@ -233,10 +254,8 @@ class AgentTestRunner(TestRunner):
                       target_id)
         return description
 
-    def _run_executable_git(self, client: gitclient.Client, target_id: str,
-                            executable: RunnerExecutable) -> RunnerReport:
-        start_time = now_utc()
-        monotonic_begin = time.monotonic()
+    def _submit_git(self, client: gitclient.Client, target_id: str,
+                    executable: RunnerExecutable) -> _GitRequest:
         logging.debug("%s: send request for: %s", self.uid, executable.path)
         data = self._get_executable_data(executable)
         step = {
@@ -245,20 +264,36 @@ class AgentTestRunner(TestRunner):
             "digest": image.get_digest(data),
             "breakpoints": self._get_breakpoints(executable)
         }
+        request = _GitRequest(executable)
+        try:
+            request.request_id = client.submit_run_steps(
+                target_id, executable.timeout, [step], {0: data})
+        except _GIT_ERRORS as err:
+            request.error = str(err)
+        return request
+
+    def _collect_git(self, client: gitclient.Client,
+                     request: _GitRequest) -> RunnerReport:
+        executable = request.executable
         report: RunnerReport = {
             "command-line": [],
             "executable": executable.path,
             "executable-sha512": executable.digest,
-            "start-time": start_time
+            "start-time": now_utc()
         }
-        try:
-            result = client.run_steps(target_id, executable.timeout, [step],
-                                      {0: data})[0]
-            logging.debug("%s: received response for: %s", self.uid,
-                          executable.path)
-        except _GIT_ERRORS as err:
+        monotonic_begin = time.monotonic()
+        error = request.error
+        result: dict[str, Any] = {}
+        if not error:
+            try:
+                result = client.collect_run_steps(request.request_id)[0]
+                logging.debug("%s: received response for: %s", self.uid,
+                              executable.path)
+            except _GIT_ERRORS as err:
+                error = str(err)
+        if error:
             report["output"] = []
-            report["error"] = str(err)
+            report["error"] = error
         else:
             report["output"] = _get_git_report_output(result)
             if result["status"] != "success":
@@ -274,9 +309,22 @@ class AgentTestRunner(TestRunner):
             self, transport: dict[str, Any],
             executables: list[RunnerExecutable]) -> list[RunnerReport]:
         target_id = self._get_optional_value("target")
+        reports: list[RunnerReport] = []
         with gitclient.repository() as repo:
             client = self._git_client(repo, transport)
-            return [
-                self._run_executable_git(client, target_id, executable)
-                for executable in executables
-            ]
+            requests: collections.deque[_GitRequest] = collections.deque()
+            try:
+                for executable in executables:
+                    requests.append(
+                        self._submit_git(client, target_id, executable))
+                    if len(requests) == _GIT_REQUESTS_ON_REMOTE:
+                        reports.append(self._collect_git(client, requests[0]))
+                        requests.popleft()
+                while requests:
+                    reports.append(self._collect_git(client, requests[0]))
+                    requests.popleft()
+            finally:
+                for request in requests:
+                    if request.request_id:
+                        _withdraw_git(client, request.request_id)
+        return reports

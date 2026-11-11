@@ -26,12 +26,15 @@
 
 import dataclasses
 import json
+import logging
 from pathlib import Path
 
-from spectestrunner import gitclient, image, steps
+import pytest
+from spectestrunner import gitclient, gitwire, image, steps
 
 import specmake
 from specmake import AgentTestRunner
+from specmake.runtests import RunnerExecutable
 
 from .util import create_package
 
@@ -54,6 +57,10 @@ class _Client:
 
     requests: list[tuple] = []
 
+    events: list[str] = []
+
+    pending: dict[str, tuple[str, int]] = {}
+
     def __init__(self, repo, remote, submitter, wait_timeout, poll_interval):
         # pylint: disable=too-many-arguments
         # pylint: disable=too-many-positional-arguments
@@ -69,12 +76,19 @@ class _Client:
             return f"{target} at {self.remote}"
         raise gitclient.WaitTimeout("no response")
 
-    def run_steps(self, target, timeout, request_steps, data):
+    def submit_run_steps(self, target, timeout, request_steps, data):
         _Client.requests.append(
             (target, timeout, request_steps, data, self.wait_timeout))
         _Client.counter += 1
-        path = request_steps[0]["path"]
-        outcome = _Client.counter % 4
+        request_id = f"r{_Client.counter}"
+        _Client.events.append(f"submit {request_id}")
+        _Client.pending[request_id] = (request_steps[0]["path"],
+                                       _Client.counter % 4)
+        return request_id
+
+    def collect_run_steps(self, request_id):
+        _Client.events.append(f"collect {request_id}")
+        path, outcome = _Client.pending.pop(request_id)
         if outcome == 1:
             raise gitclient.Rejected("the reason")
         if outcome == 2:
@@ -97,6 +111,8 @@ class _Client:
 def test_testrunnergit(caplog, tmp_path, monkeypatch):
     _Client.counter = 0
     _Client.requests = []
+    _Client.events = []
+    _Client.pending = {}
     monkeypatch.setattr(specmake.testrunneragent.subprocess, "run",
                         _subprocess_run)
     monkeypatch.setattr(specmake.testrunneragent.gitclient, "Client", _Client)
@@ -109,6 +125,15 @@ def test_testrunnergit(caplog, tmp_path, monkeypatch):
     runner = director["/pkg/test-runner/git"]
     assert isinstance(runner, AgentTestRunner)
     assert runner.substitute("${.:/target-name}") == "the/target"
+
+    outstanding = 0
+    for event in _Client.events:
+        outstanding += 1 if event.startswith("submit") else -1
+        assert 0 <= outstanding <= 2
+    first, second, third = _Client.events[:3]
+    assert first.startswith("submit")
+    assert second.startswith("submit")
+    assert third == first.replace("submit", "collect")
 
     target, timeout, request_steps, data, wait_timeout = _Client.requests[0]
     assert target == "the/target"
@@ -153,3 +178,59 @@ def test_testrunnergit(caplog, tmp_path, monkeypatch):
         "Requesting the target description of ``the/target`` through the "
         "Git bridge at /iris.git failed: no response.")
     assert runner.describe() == "the/target at /iris.git"
+
+
+class _FailingClient(_Client):
+
+    cleaned: list[str] = []
+
+    def submit_run_steps(self, target, timeout, request_steps, data):
+        if request_steps[0]["path"] in ("b.exe", "e.exe"):
+            raise gitwire.GitError("push refused")
+        return super().submit_run_steps(target, timeout, request_steps, data)
+
+    def collect_run_steps(self, request_id):
+        if _Client.pending[request_id][0] == "d.exe":
+            raise RuntimeError("interrupted")
+        return super().collect_run_steps(request_id)
+
+    def cleanup(self, request_id):
+        _FailingClient.cleaned.append(request_id)
+        raise gitwire.GitError("delete refused")
+
+
+def test_testrunnergit_failures(caplog, tmp_path, monkeypatch):
+    _Client.counter = 0
+    _Client.requests = []
+    _Client.events = []
+    _Client.pending = {}
+    monkeypatch.setattr(specmake.testrunneragent.subprocess, "run",
+                        _subprocess_run)
+    monkeypatch.setattr(specmake.testrunneragent.gitclient, "Client",
+                        _FailingClient)
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
+                             ["test-runner-git"])
+    runner = package.director["/pkg/test-runner/git"]
+    assert isinstance(runner, AgentTestRunner)
+
+    # A failed submission yields the report of its executable
+    reports = runner.run_tests([
+        RunnerExecutable("a.exe", "0", 1.0),
+        RunnerExecutable("b.exe", "0", 1.0),
+        RunnerExecutable("c.exe", "0", 1.0)
+    ])
+    assert [report["executable"]
+            for report in reports] == ["a.exe", "b.exe", "c.exe"]
+    assert reports[1]["error"] == "push refused"
+    assert reports[1]["output"] == []
+    assert not _FailingClient.cleaned
+
+    # An abort withdraws the requests which wait on the remote
+    caplog.set_level(logging.WARNING)
+    with pytest.raises(RuntimeError, match="interrupted"):
+        runner.run_tests([
+            RunnerExecutable("d.exe", "0", 1.0),
+            RunnerExecutable("e.exe", "0", 1.0)
+        ])
+    assert _FailingClient.cleaned == ["r3"]
+    assert "could not withdraw r3: delete refused" in caplog.text
