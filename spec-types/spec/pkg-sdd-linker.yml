@@ -13,10 +13,16 @@ spec-description: null
 spec-example: null
 spec-info:
   dict:
-    attributes: {}
+    attributes:
+      sdd:
+        description: |
+          It shall be the name of the software design document (SDD) of the
+          produced header file.  Without this attribute, the header file is
+          produced for the SDD without UID prefixes.
+        spec-type: str
     description: |
       This set of attributes specifies an SDD linker.
-    mandatory-attributes: all
+    mandatory-attributes: none
 spec-name: SDD Linker Item Type
 spec-type: pkg-sdd-linker
 type: spec

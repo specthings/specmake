@@ -25,7 +25,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import itertools
-from typing import Iterator
+from typing import Any, Iterator
 
 from specitems import Item, ItemGetValueContext, ROW_SPAN
 from specware import gather_benchmarks_and_test_suites
@@ -132,32 +132,30 @@ class SVRBuilder(SpecDocumentBuilder):
         assert isinstance(link_hub, LinkHub)
         format_link = self.mapper.format_link
         rows = [("Design Component", "Requirement")]
-        for _, info in sorted(link_hub.name_info.items(),
-                              key=lambda x: _get_name(x[0])):
-            if not isinstance(info, dict):
-                continue
-            variants = info.get("variants", [])
-            for variant in itertools.chain([info], variants):
-                name = format_link(spacify(variant["name"]), variant["link"])
-                if variants:
-                    file_path = variant["file"]
-                    file_link = link_hub.name_info[f"file/{file_path}"]["link"]
-                    file_link = format_link(spacify(file_path), file_link)
-                    name = f"{name} in {file_link}"
-                for item in sorted(variant["items"]):
-                    path = item.view["default-document-path"]
-                    rows.append((name, format_link(item.spec_2, path)))
+        for name_info in link_hub.get_sdd_name_infos():
+            for _, info in sorted(name_info.items(),
+                                  key=lambda x: _get_name(x[0])):
+                if not isinstance(info, dict):
+                    continue
+                variants = info.get("variants", [])
+                for variant in itertools.chain([info], variants):
+                    name = format_link(spacify(variant["name"]),
+                                       variant["link"])
+                    if variants:
+                        file_path = variant["file"]
+                        file_link = name_info[f"file/{file_path}"]["link"]
+                        file_link = format_link(spacify(file_path), file_link)
+                        name = f"{name} in {file_link}"
+                    for item in sorted(variant["items"]):
+                        path = item.view["default-document-path"]
+                        rows.append((name, format_link(item.spec_2, path)))
         content.add_grid_table(rows, [60, 40], font_size=-4)
         return str(content)
 
-    def _get_design_to_code(self) -> list[tuple[str, str]]:
-        if self._design_to_code:
-            return self._design_to_code
-        link_hub = self.input("link-hub")
-        assert isinstance(link_hub, LinkHub)
+    def _add_design_to_code(self, design_to_code: list[tuple[str, str]],
+                            name_info: dict[str, Any]) -> None:
         format_link = self.mapper.format_link
-        design_to_code: list[tuple[str, str]] = []
-        for kind_name, info in sorted(link_hub.name_info.items(),
+        for kind_name, info in sorted(name_info.items(),
                                       key=lambda x: _get_name(x[0])):
             if not isinstance(info, dict):
                 continue
@@ -167,7 +165,7 @@ class SVRBuilder(SpecDocumentBuilder):
             if kind == "group":
                 name = format_link(spacify(info["name"]), info["link"])
                 for file_path in info["files"]:
-                    file_link = link_hub.name_info[f"file/{file_path}"]["link"]
+                    file_link = name_info[f"file/{file_path}"]["link"]
                     design_to_code.append(
                         (name, format_link(spacify(file_path), file_link)))
                 continue
@@ -175,9 +173,18 @@ class SVRBuilder(SpecDocumentBuilder):
             for variant in itertools.chain([info], variants):
                 name = format_link(spacify(variant["name"]), variant["link"])
                 file_path = variant["file"]
-                file_link = link_hub.name_info[f"file/{file_path}"]["link"]
+                file_link = name_info[f"file/{file_path}"]["link"]
                 design_to_code.append(
                     (name, format_link(spacify(file_path), file_link)))
+
+    def _get_design_to_code(self) -> list[tuple[str, str]]:
+        if self._design_to_code:
+            return self._design_to_code
+        link_hub = self.input("link-hub")
+        assert isinstance(link_hub, LinkHub)
+        design_to_code: list[tuple[str, str]] = []
+        for name_info in link_hub.get_sdd_name_infos():
+            self._add_design_to_code(design_to_code, name_info)
         self._design_to_code = design_to_code
         return design_to_code
 

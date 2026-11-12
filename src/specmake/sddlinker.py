@@ -66,7 +66,8 @@ class SDDLinker(DirectoryState):
         link_hub = self.input("link-hub")
         assert isinstance(link_hub, LinkHub)
         mapper = self.mapper
-        for _, info in sorted(link_hub.name_info.items()):
+        name_info = link_hub.get_sdd_name_info(self.item.get("sdd", None))
+        for _, info in sorted(name_info.items()):
             if not isinstance(info, dict):
                 continue
             for variant in itertools.chain([info], info.get("variants", [])):

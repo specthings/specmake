@@ -1,0 +1,21 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+directory: ${.:/component/deployment-directory}/doc-ddf-sdd-other
+directory-state-type: explicit
+enabled-by: link-hub-sdds
+files: []
+hash: null
+license-info: []
+links:
+- hash: null
+  name: component
+  role: input
+  uid: ../component
+- path: html
+  resource-key: sdd
+  role: resource
+  sdd: other
+  uid: ../steps/link-hub
+pkg-type: directory-state
+type: pkg

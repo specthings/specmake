@@ -26,10 +26,11 @@
 
 # pylint: disable=too-many-lines
 
+import dataclasses
 import functools
 import itertools
 import os
-from typing import Any, Optional
+from typing import Any, Optional, Protocol
 from xml.etree import ElementTree
 
 from specitems import Item, ItemGetValueContext, list_terms
@@ -37,6 +38,38 @@ from specitems import Item, ItemGetValueContext, list_terms
 from .directorystate import DirectoryState
 from .pkgitems import BuildItem, BuildItemMapper, PackageBuildDirector
 from .rtems import RTEMSItemCache
+
+
+class _NameSpec(Protocol):
+    # pylint: disable=too-few-public-methods
+
+    @property
+    def name_to_item(self) -> dict[str, Item]:
+        """ Maps names to items. """
+
+    @property
+    def item(self) -> Item:
+        """ Is the item whose view collects the mapping problems. """
+
+
+@dataclasses.dataclass
+class _SDDSpec:
+    """ Is the part of the item cache which an SDD documents. """
+    name_to_item: dict[str, Item]
+    item: Item
+
+
+@dataclasses.dataclass
+class _SDD:
+    """ Describes one software design document (SDD). """
+    name: str
+    uid_prefixes: tuple[str, ...]
+    name_info: dict[str, Any]
+
+
+def _sdd_label(name: str) -> str:
+    return f"SDD '{name}'" if name else "unnamed SDD"
+
 
 # Sorted by expected frequency
 _ELEMENT_KINDS = ("function", "define", "group", "file", "type", "tag", "enum",
@@ -810,7 +843,7 @@ def get_kind(item: Item) -> str:
     return _ITEM_SPECIFICS[item.type][0]
 
 
-def _get_group_items(name_info: dict[str, Any], spec: RTEMSItemCache,
+def _get_group_items(name_info: dict[str, Any], spec: _NameSpec,
                      info: dict[str, Any]) -> list[Item]:
     items = []
     try:
@@ -832,7 +865,7 @@ def _get_group_items(name_info: dict[str, Any], spec: RTEMSItemCache,
     return items
 
 
-def _get_associated_items(name_info: dict[str, Any], spec: RTEMSItemCache,
+def _get_associated_items(name_info: dict[str, Any], spec: _NameSpec,
                           name: str, info: dict[str, Any]) -> list[Item]:
     item = spec.name_to_item.get(name, None)
     if item is None and name.startswith("tag/"):
@@ -856,14 +889,14 @@ def _get_associated_items(name_info: dict[str, Any], spec: RTEMSItemCache,
     return _get_group_items(name_info, spec, file_info)
 
 
-def _augment_name_info_default(name_info: dict[str, Any], spec: RTEMSItemCache,
+def _augment_name_info_default(name_info: dict[str, Any], spec: _NameSpec,
                                name: str, info: dict[str, Any]) -> None:
     for variant in itertools.chain([info], info.get("variants", [])):
         items = _get_associated_items(name_info, spec, name, variant)
         variant["items"] = set(items)
 
 
-def _augment_name_info_group(name_info: dict[str, Any], spec: RTEMSItemCache,
+def _augment_name_info_group(name_info: dict[str, Any], spec: _NameSpec,
                              name: str, info: dict[str, Any]) -> None:
     try:
         items = [spec.name_to_item[name]]
@@ -872,7 +905,7 @@ def _augment_name_info_group(name_info: dict[str, Any], spec: RTEMSItemCache,
     info["items"] = set(items)
 
 
-def _augment_name_info_nop(_name_info: dict[str, Any], _spec: RTEMSItemCache,
+def _augment_name_info_nop(_name_info: dict[str, Any], _spec: _NameSpec,
                            _name: str, _info: dict[str, Any]) -> None:
     pass
 
@@ -885,7 +918,7 @@ _AUGMENT_NAME_INFO = {
 }
 
 
-def _check_mapping_completeness(spec: RTEMSItemCache) -> None:
+def _check_mapping_completeness(spec: _NameSpec) -> None:
     without = spec.item.view.get("files-without-group")
     if without:
         raise ValueError(f"files without group: {' '.join(sorted(without))}")
@@ -894,8 +927,7 @@ def _check_mapping_completeness(spec: RTEMSItemCache) -> None:
         raise ValueError(f"groups without items: {' '.join(sorted(without))}")
 
 
-def _augment_name_info(name_info: dict[str, Any],
-                       spec: RTEMSItemCache) -> None:
+def _augment_name_info(name_info: dict[str, Any], spec: _NameSpec) -> None:
     # Associate files and groups with groups
     for group in name_info["groups/all"]:
         info = name_info[f"group/{group}"]
@@ -940,57 +972,181 @@ class LinkHub(BuildItem):
     def __init__(self, director: PackageBuildDirector, item: Item):
         super().__init__(director, item)
         self.name_info: dict[str, Any] = {}
-        for link in self.item.links_to_parents("resource"):
+        self._sdds: dict[str, _SDD] = {}
+        self._default_sdd: Optional[_SDD] = None
+        sdd_directories = self._gather_directories()
+        self._gather_sdds(sdd_directories)
+        if not self._sdds:
+            if "RTEMS_QUAL" in self.enabled_set:
+                raise ValueError(f"{self.uid}: there is no associated tagfile")
+            return
+        spec = self.input("spec")
+        assert isinstance(spec, RTEMSItemCache)
+        name_to_item_by_sdd: dict[str, dict[str, Item]] = {
+            name: {}
+            for name in self._sdds
+        }
+        for name, item_2 in spec.name_to_item.items():
+            sdd = self._get_sdd(item_2)
+            if sdd is not None:
+                name_to_item_by_sdd[sdd.name][name] = item_2
+        for sdd in self._sdds.values():
+            _augment_name_info(
+                sdd.name_info,
+                _SDDSpec(name_to_item_by_sdd[sdd.name], spec.item))
+        for item_2 in spec.item_cache.values():
+            if not item_2.enabled:
+                continue
+            sdd_2 = self._get_sdd(item_2)
+            name_info = self.name_info if sdd_2 is None else sdd_2.name_info
+            _ITEM_SPECIFICS.get(item_2.type, _ITEM_DEFAULT)[1](item_2,
+                                                               name_info)
+
+    def _gather_directories(self) -> dict[str, dict[str, str]]:
+        sdd_directories: dict[str, dict[str, str]] = {}
+        for link in itertools.chain(self.item.links_to_parents("resource"),
+                                    self.item.links_to_children("resource")):
             target = self.director[link.item.uid]
             assert isinstance(target, DirectoryState)
             name = f"dir/{link['resource-key']}"
-            self.name_info[name] = os.path.normpath(
+            path = os.path.normpath(
                 os.path.join(target.directory, link["path"]))
-        try:
-            tagfile = self.input("tagfile")
-        except KeyError as err:
-            if "RTEMS_QUAL" in self.enabled_set:
-                raise ValueError(
-                    f"{self.uid}: there is no associated tagfile") from err
-        else:
+            sdd = link.data.get("sdd", None)
+            if sdd is None:
+                self.name_info[name] = path
+            else:
+                sdd_directories.setdefault(sdd, {})[name] = path
+        return sdd_directories
+
+    def _gather_sdds(self, sdd_directories: dict[str, dict[str, str]]) -> None:
+        tagfiles = [(link.data.get("sdd", ""), link, tagfile)
+                    for link, tagfile in self.input_links("tagfile")]
+        without_tagfile = set(sdd_directories).difference(
+            name for name, _, _ in tagfiles)
+        if without_tagfile:
+            raise ValueError(f"{self.uid}: there is no tagfile for the "
+                             f"SDDs: {', '.join(sorted(without_tagfile))}")
+        for name, link, tagfile in tagfiles:
             assert isinstance(tagfile, DirectoryState)
-            _gather_name_info(self.name_info, tagfile.file)
-            spec = self.input("spec")
-            assert isinstance(spec, RTEMSItemCache)
-            _augment_name_info(self.name_info, spec)
-            for item_2 in spec.item_cache.values():
-                if not item_2.enabled:
-                    continue
-                _ITEM_SPECIFICS.get(item_2.type,
-                                    _ITEM_DEFAULT)[1](item_2, self.name_info)
+            if name in self._sdds:
+                raise ValueError(
+                    f"{self.uid}: there is more than one tagfile for the "
+                    f"{_sdd_label(name)}")
+            directories = sdd_directories.get(name, {})
+            name_info = dict(self.name_info)
+            name_info.update(directories)
+            if "dir/sdd" not in (directories if name else name_info):
+                raise ValueError(
+                    f"{self.uid}: the {_sdd_label(name)} has no directory")
+            uid_prefixes = tuple(link.data.get("sdd-uid-prefixes", ()))
+            sdd = _SDD(name, uid_prefixes, name_info)
+            if not uid_prefixes:
+                if self._default_sdd is not None:
+                    raise ValueError(
+                        f"{self.uid}: the "
+                        f"{_sdd_label(self._default_sdd.name)} and the "
+                        f"{_sdd_label(name)} have no UID prefixes")
+                self._default_sdd = sdd
+            _gather_name_info(name_info, tagfile.file)
+            self._sdds[name] = sdd
+
+    def _get_sdd(self, item: Optional[Item]) -> Optional[_SDD]:
+        if item is None:
+            return self._default_sdd
+        uid = item.uid
+        found = self._default_sdd
+        length = 0
+        for sdd in self._sdds.values():
+            for prefix in sdd.uid_prefixes:
+                if len(prefix) > length and uid.startswith(prefix):
+                    found = sdd
+                    length = len(prefix)
+        return found
+
+    def _get_name_info(self, name: str,
+                       item: Optional[Item]) -> tuple[dict[str, Any], str]:
+        sdd_name, separator, name_2 = name.partition(":")
+        if separator:
+            sdd = self._sdds.get(sdd_name, None)
+            if sdd is not None:
+                return sdd.name_info, name_2
+        sdd = self._get_sdd(item)
+        if sdd is None:
+            return self.name_info, name
+        return sdd.name_info, name
+
+    def get_sdd_name_info(self, sdd_name: Optional[str]) -> dict[str, Any]:
+        """
+        Return the name information of the SDD with the name.
+
+        Without a name, return the name information of the SDD without UID
+        prefixes.
+        """
+        if sdd_name is None:
+            if self._default_sdd is None:
+                if self._sdds:
+                    raise ValueError(
+                        f"{self.uid}: there is no SDD without UID prefixes")
+                return self.name_info
+            return self._default_sdd.name_info
+        try:
+            return self._sdds[sdd_name].name_info
+        except KeyError as err:
+            raise ValueError(
+                f"{self.uid}: there is no SDD '{sdd_name}'") from err
+
+    def get_sdd_name_infos(self) -> list[dict[str, Any]]:
+        """ Return the name information of each SDD sorted by SDD name. """
+        if not self._sdds:
+            return [self.name_info]
+        return [sdd.name_info for _, sdd in sorted(self._sdds.items())]
 
     def run(self) -> None:
         self.description.add("""Provide documentation links for specification
 items.""")
 
-    def get_sdd_link(self, kind: str, name: str,
-                     mapper: BuildItemMapper) -> str:
-        """ Return the SDD link for the name by kind. """
+    def get_sdd_link(self,
+                     kind: str,
+                     name: str,
+                     mapper: BuildItemMapper,
+                     item: Optional[Item] = None) -> str:
+        """
+        Return the SDD link for the name by kind.
+
+        The name may start with the name of an SDD followed by a colon.
+        Otherwise, the SDD of the item contains the element.
+        """
+        name_info, name = self._get_name_info(name, item)
         try:
-            elem_info = self.name_info[f"{kind}/{name}"]
+            elem_info = name_info[f"{kind}/{name}"]
         except KeyError:
             if kind != "type":
                 raise
-            elem_info = self.name_info[f"tag/{name}"]
+            elem_info = name_info[f"tag/{name}"]
         return mapper.format_link(elem_info["name"], elem_info["link"])
 
-    def get_file_sdd_link(self, path: str, mapper: BuildItemMapper) -> str:
+    def get_file_sdd_link(self,
+                          path: str,
+                          mapper: BuildItemMapper,
+                          item: Optional[Item] = None) -> str:
         """ Return the SDD link for the file path. """
-        return self.get_sdd_link("file", path, mapper)
+        return self.get_sdd_link("file", path, mapper, item)
 
-    def get_function_sdd_link(self, name: str, mapper: BuildItemMapper) -> str:
+    def get_function_sdd_link(self,
+                              name: str,
+                              mapper: BuildItemMapper,
+                              item: Optional[Item] = None) -> str:
         """ Return the SDD link for the function with the name. """
-        return self.get_sdd_link("function", name, mapper)
+        return self.get_sdd_link("function", name, mapper, item)
 
-    def get_any_sdd_link(self, name: str, mapper: BuildItemMapper) -> str:
+    def get_any_sdd_link(self,
+                         name: str,
+                         mapper: BuildItemMapper,
+                         item: Optional[Item] = None) -> str:
         """ Return an SDD link for the name. """
+        name_info, name_2 = self._get_name_info(name, item)
         for kind in _ELEMENT_KINDS:
-            elem_info = self.name_info.get(f"{kind}/{name}")
+            elem_info = name_info.get(f"{kind}/{name_2}")
             if elem_info is not None:
                 break
         if elem_info is None:
@@ -1115,11 +1271,11 @@ class SpecMapper(BuildItemMapper):
         link_hub = self.build_item.director[link_hub_uid]
         assert isinstance(link_hub, LinkHub)
         assert ctx.args
-        return link_hub.get_sdd_link(kind, ctx.args, self)
+        return link_hub.get_sdd_link(kind, ctx.args, self, ctx.item)
 
     def _get_value_sdd_link_unique(self, ctx: ItemGetValueContext) -> str:
         link_hub_uid = self.build_item.component.item.child("link-hub").uid
         link_hub = self.build_item.director[link_hub_uid]
         assert isinstance(link_hub, LinkHub)
         assert ctx.args
-        return link_hub.get_any_sdd_link(ctx.args, self)
+        return link_hub.get_any_sdd_link(ctx.args, self, ctx.item)

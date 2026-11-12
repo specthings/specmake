@@ -1,0 +1,30 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  Brief.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+definition:
+  default:
+    attributes: null
+    body: null
+    params: []
+    return: int
+  variants: []
+description: |
+  Description.
+enabled-by: link-hub-sdds
+index-entries: []
+interface-type: function
+links:
+- role: interface-placement
+  uid: /rtems/if/header
+- role: interface-ingroup
+  uid: group
+name: other_func
+notes: null
+params: []
+return:
+  return: |
+    Returns.
+  return-values: []
+type: interface

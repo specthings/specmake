@@ -1,0 +1,35 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: name
+  spec-value: tagfile
+  uid: pkg-input-role
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      sdd:
+        description: |
+          It shall be the name of the software design document (SDD) described
+          by the Doxygen tagfile.
+        spec-type: str
+      sdd-uid-prefixes:
+        description: |
+          It shall be the list of UID prefixes of the items documented by the
+          SDD.  An item belongs to the SDD with the longest matching prefix.
+        spec-type: list-str
+    description: |
+      It defines the tagfile input role of links.  It associates a Doxygen
+      tagfile with a link hub.  A tagfile without the ``sdd`` attribute
+      describes the unnamed SDD.  An item which matches no UID prefix belongs
+      to the SDD without the ``sdd-uid-prefixes`` attribute.
+    mandatory-attributes: none
+spec-name: Tagfile Input Link Role
+spec-type: pkg-input-tagfile-role
+type: spec
