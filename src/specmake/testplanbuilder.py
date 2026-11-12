@@ -159,9 +159,12 @@ ${/pkg/deployment/doc-package-manual:/cite-long}."""))
                     content.add(
                         "The test suite contains no specified test cases.")
             with content.section("Approach refinements"):
+                link_hub = self._get_link_hub()
+                target = link_hub.get_file_sdd_link(item["test-target"],
+                                                    self.mapper, item)
                 content.add(f"""There are no approach refinements
 necessary.  The test suite is implemented in the file
-{self._get_link_hub().get_file_sdd_link(item['test-target'], self.mapper)}.""")
+{target}.""")
 
     def _get_test_suites(self, _ctx: ItemGetValueContext) -> str:
         content = self.mapper.create_content(section_level=2)
@@ -200,9 +203,9 @@ necessary.  The test suite is implemented in the file
         content.add(f"""This test case validates all state transitions
 specified by the action requirement {self.mapper.get_link(item)}.  The
 transition map is validated by the function
-{link_hub.get_function_sdd_link(test_case_function, self.mapper)}
+{link_hub.get_function_sdd_link(test_case_function, self.mapper, item)}
 contained in the file
-{link_hub.get_file_sdd_link(item['test-target'], self.mapper)}.""")
+{link_hub.get_file_sdd_link(item['test-target'], self.mapper, item)}.""")
 
     def _document_performance_runtime(self, content: TextContent,
                                       link_hub: LinkHub, item: Item,
@@ -214,9 +217,9 @@ measurement request which is carried out by
 {self.mapper.make_reference(context)}.  It produces the runtime measurements
 required by the runtime performance requirement {self.mapper.get_link(item)}.
 It is implemented by the function
-{link_hub.get_function_sdd_link(test_case_function, self.mapper)}
+{link_hub.get_function_sdd_link(test_case_function, self.mapper, item)}
 contained in the file
-{link_hub.get_file_sdd_link(context['test-target'], self.mapper)}.""")
+{link_hub.get_file_sdd_link(context['test-target'], self.mapper, context)}.""")
 
     def _document_runtime_measurement_request(self, content: TextContent,
                                               link_hub: LinkHub, item: Item,
@@ -230,11 +233,12 @@ contained in the file
             ]), "The following runtime measurement requests are carried out:")
         content.gap = self._add_test_case_validations(
             content, item, item["links"], "This test case validates")
-        test_case_function = f"T_case_body_{ident}"
+        function = link_hub.get_function_sdd_link(f"T_case_body_{ident}",
+                                                  self.mapper, item)
         content.add(f"""This test case is implemented by the
-function {link_hub.get_function_sdd_link(test_case_function, self.mapper)}
+function {function}
 contained in the file
-{link_hub.get_file_sdd_link(item['test-target'], self.mapper)}.""")
+{link_hub.get_file_sdd_link(item['test-target'], self.mapper, item)}.""")
 
     def _document_test_case(self, content: TextContent, link_hub: LinkHub,
                             item: Item, ident: str) -> None:
@@ -253,15 +257,16 @@ contained in the file
                 content.gap = bool(action["checks"])
                 content.gap = self._add_test_case_validations(
                     content, item, action["links"], "This action validates")
-                action_function = f"{ident}_Action_{index}"
+                function = link_hub.get_function_sdd_link(
+                    f"{ident}_Action_{index}", self.mapper, item)
                 content.add(f"""This action is implemented by
-the function {link_hub.get_function_sdd_link(action_function, self.mapper)}."""
-                            )
-        test_case_function = _get_test_case_function(item, ident)
+the function {function}.""")
+        function = link_hub.get_function_sdd_link(
+            _get_test_case_function(item, ident), self.mapper, item)
         content.add(f"""This test case is implemented by the
-function {link_hub.get_function_sdd_link(test_case_function, self.mapper)}
+function {function}
 contained in the file
-{link_hub.get_file_sdd_link(item['test-target'], self.mapper)}.""")
+{link_hub.get_file_sdd_link(item['test-target'], self.mapper, item)}.""")
 
     def _add_test_suite_memberships(self, content: TextContent,
                                     item: Item) -> None:

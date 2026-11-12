@@ -169,6 +169,10 @@ def test_linkhub_no_tagfile(caplog, tmp_path):
     mapper = SpecMapper(link_hub.item, link_hub, "icd")
     assert mapper.get_link(package.item.cache["/rtems/if/func"],
                            "icd") == "``blub()``"
+    assert "dir/icd" in link_hub.get_sdd_name_info(None)
+    assert link_hub.get_sdd_name_infos() == [link_hub.name_info]
+    with pytest.raises(KeyError):
+        link_hub.get_function_sdd_link("blub", mapper)
 
 
 def test_linkhub_no_tagfile_qual(caplog, tmp_path):
@@ -253,3 +257,167 @@ def test_linkhub_tag_and_type_of_same_name():
                                  info) == [item_cache["/anonymous"]]
     assert _get_associated_items({}, spec, "tag/other",
                                  info) == [item_cache["/group"]]
+
+
+def test_linkhub_sdds(caplog, tmp_path):
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
+                             ["djf-svs", "link-hub", "link-hub-sdds"])
+    item_cache = package.item.cache
+    director = package.director
+    director.build_package()
+    link_hub = director["/pkg/steps/link-hub"]
+    sdd = f"{tmp_path}/pkg/doc-ddf-sdd/html"
+    sdd_other = f"{tmp_path}/pkg/doc-ddf-sdd-other/html"
+    blub = f"`blub() <{sdd}/group__Blub.html#ga754ccc677acbd87ede8b3c082bb9ff6b>`__"
+    blub_other = (f"`blub() <{sdd_other}/group__OtherGroup.html"
+                  "#ga0000000000000000000000000000000a>`__")
+    other_func = (f"`other_func() <{sdd_other}/group__OtherGroup.html"
+                  "#ga0000000000000000000000000000000b>`__")
+
+    func = item_cache["/rtems/if/func"]
+    assert func.view["document-paths"]["sdd"] == (
+        f"{sdd}/group__Blub.html#ga754ccc677acbd87ede8b3c082bb9ff6b")
+    func_other = item_cache["/other/if/func"]
+    assert func_other.view["document-paths"]["sdd"] == (
+        f"{sdd_other}/group__OtherGroup.html"
+        "#ga0000000000000000000000000000000b")
+    assert item_cache["/other/if/group"].view["document-paths"]["sdd"] == (
+        f"{sdd_other}/group__OtherGroup.html")
+
+    assert link_hub.get_function_sdd_link("blub", link_hub.mapper) == blub
+    assert link_hub.get_function_sdd_link("blub", link_hub.mapper,
+                                          func) == blub
+    assert link_hub.get_function_sdd_link("blub", link_hub.mapper,
+                                          func_other) == blub_other
+    assert link_hub.get_function_sdd_link("other:blub",
+                                          link_hub.mapper) == blub_other
+    assert link_hub.get_function_sdd_link("other_func", link_hub.mapper,
+                                          func_other) == other_func
+    with pytest.raises(KeyError):
+        link_hub.get_function_sdd_link("other_func", link_hub.mapper)
+    with pytest.raises(KeyError):
+        link_hub.get_function_sdd_link("nil:blub", link_hub.mapper)
+    name_infos = link_hub.get_sdd_name_infos()
+    assert len(name_infos) == 2
+    assert "function/other_func" not in name_infos[0]
+    assert "function/other_func" in name_infos[1]
+    assert link_hub.get_file_sdd_link(
+        "other.c", link_hub.mapper,
+        func_other) == f"`other.c <{sdd_other}/other_8c.html>`__"
+
+    mapper = SpecMapper(link_hub.item, link_hub, "icd")
+    assert mapper.substitute("${.:/sdd-function:blub}") == blub
+    assert mapper.substitute("${.:/sdd-function:other:blub}") == blub_other
+    assert mapper.substitute("${.:/sdd:other:other_func}") == other_func
+    assert mapper.substitute("${.:/sdd:other:OtherGroup}") == (
+        f"`Other <{sdd_other}/group__OtherGroup.html>`__")
+    assert mapper.substitute("${/other/if/func:/sdd-function:blub}") == (
+        blub_other)
+
+    assert "function/other_func" in link_hub.get_sdd_name_info("other")
+    assert "function/other_func" not in link_hub.get_sdd_name_info(None)
+    with pytest.raises(ValueError, match="there is no SDD 'nil'"):
+        link_hub.get_sdd_name_info("nil")
+
+
+def test_linkhub_sdds_linker(caplog, tmp_path):
+    package = create_package(
+        caplog, tmp_path, Path("spec-packagebuild"),
+        ["djf-svs", "link-hub", "link-hub-sdds", "sdd-linker"])
+    director = package.director
+    director.build_package()
+    with open(director["/pkg/deployment/sdd-linker-other"].file,
+              "r",
+              encoding="utf-8") as src:
+        content = src.read()
+    assert "@fn int other_func(void)" in content
+    assert "@fn int blub(int param)" in content
+    assert "@def BLUB" not in content
+    with open(director["/pkg/deployment/sdd-linker"].file,
+              "r",
+              encoding="utf-8") as src:
+        content = src.read()
+    assert "other_func" not in content
+    assert "@def BLUB" in content
+
+
+def _set_link_data(item, role: str, uid: str, data: dict) -> None:
+    for link in item["links"]:
+        if link["role"] == role and link["uid"] == uid:
+            for key, value in data.items():
+                if value is None:
+                    del link[key]
+                else:
+                    link[key] = value
+            return
+    raise AssertionError
+
+
+def test_linkhub_sdds_two_defaults(caplog, tmp_path):
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
+                             ["djf-svs", "link-hub", "link-hub-sdds"])
+    _set_link_data(package.item.cache["/pkg/source/tagfile-other"], "input-to",
+                   "../steps/link-hub", {"sdd-uid-prefixes": None})
+    with pytest.raises(ValueError,
+                       match="the unnamed SDD and the SDD 'other' have no "
+                       "UID prefixes"):
+        package.director.build_package()
+
+
+def test_linkhub_sdds_same_name(caplog, tmp_path):
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
+                             ["djf-svs", "link-hub", "link-hub-sdds"])
+    _set_link_data(package.item.cache["/pkg/source/tagfile-other"], "input-to",
+                   "../steps/link-hub", {"sdd": None})
+    _set_link_data(package.item.cache["/pkg/deployment/doc-ddf-sdd-other"],
+                   "resource", "../steps/link-hub", {"sdd": None})
+    with pytest.raises(ValueError,
+                       match="there is more than one tagfile for the "
+                       "unnamed SDD"):
+        package.director.build_package()
+
+
+def test_linkhub_sdds_no_directory(caplog, tmp_path):
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
+                             ["djf-svs", "link-hub", "link-hub-sdds"])
+    _set_link_data(package.item.cache["/pkg/deployment/doc-ddf-sdd-other"],
+                   "resource", "../steps/link-hub", {"resource-key": "nil"})
+    with pytest.raises(ValueError, match="the SDD 'other' has no directory"):
+        package.director.build_package()
+
+
+def test_linkhub_sdds_no_tagfile(caplog, tmp_path):
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
+                             ["djf-svs", "link-hub", "link-hub-sdds"])
+    _set_link_data(package.item.cache["/pkg/deployment/doc-ddf-sdd-other"],
+                   "resource", "../steps/link-hub", {"sdd": "nil"})
+    with pytest.raises(ValueError,
+                       match="there is no tagfile for the SDDs: nil"):
+        package.director.build_package()
+
+
+def test_linkhub_sdds_no_default(caplog, tmp_path):
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
+                             ["djf-svs", "link-hub", "link-hub-sdds"])
+    _set_link_data(package.item.cache["/pkg/steps/link-hub"], "input",
+                   "../source/tagfile", {
+                       "sdd": "rtems",
+                       "sdd-uid-prefixes": ["/"]
+                   })
+    _set_link_data(package.item.cache["/pkg/steps/link-hub"], "resource",
+                   "../deployment/doc-ddf-sdd", {"sdd": "rtems"})
+    package.director.build_package()
+    link_hub = package.director["/pkg/steps/link-hub"]
+    with pytest.raises(ValueError, match="there is no SDD without UID"):
+        link_hub.get_sdd_name_info(None)
+
+
+def test_linkhub_sdds_item_without_sdd(caplog, tmp_path):
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
+                             ["djf-svs", "link-hub", "link-hub-sdds"])
+    item_cache = package.item.cache
+    _set_link_data(item_cache["/pkg/steps/link-hub"], "input",
+                   "../source/tagfile", {"name": "no-tagfile"})
+    package.director.build_package()
+    assert "sdd" not in item_cache["/rtems/if/func"].view["document-paths"]
+    assert "sdd" in item_cache["/other/if/func"].view["document-paths"]

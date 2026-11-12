@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<tagfile doxygen_version="1.15.0">
+  <compound kind="file">
+    <name>other.c</name>
+    <path></path>
+    <filename>other_8c.html</filename>
+    <member kind="function">
+      <type>int</type>
+      <name>blub</name>
+      <anchorfile>group__OtherGroup.html</anchorfile>
+      <anchor>ga0000000000000000000000000000000a</anchor>
+      <arglist>(int param)</arglist>
+    </member>
+    <member kind="function">
+      <type>int</type>
+      <name>other_func</name>
+      <anchorfile>group__OtherGroup.html</anchorfile>
+      <anchor>ga0000000000000000000000000000000b</anchor>
+      <arglist>(void)</arglist>
+    </member>
+  </compound>
+  <compound kind="group">
+    <name>OtherGroup</name>
+    <title>Other</title>
+    <filename>group__OtherGroup.html</filename>
+    <file path="">other.c</file>
+    <member kind="function">
+      <type>int</type>
+      <name>blub</name>
+      <anchorfile>group__OtherGroup.html</anchorfile>
+      <anchor>ga0000000000000000000000000000000a</anchor>
+      <arglist>(int param)</arglist>
+    </member>
+    <member kind="function">
+      <type>int</type>
+      <name>other_func</name>
+      <anchorfile>group__OtherGroup.html</anchorfile>
+      <anchor>ga0000000000000000000000000000000b</anchor>
+      <arglist>(void)</arglist>
+    </member>
+  </compound>
+</tagfile>

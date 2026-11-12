@@ -37,6 +37,12 @@ spec-info:
         description: |
           It shall be the resource key to identify the resource.
         spec-type: str
+      sdd:
+        description: |
+          It shall be the name of the software design document (SDD) to which
+          the resource belongs.  A resource without this attribute belongs to
+          all SDDs.
+        spec-type: str
     description: |
       It defines the resource role of links and is used to associate a resource
       or resource area with a key.  The resource is identified by the mandatory

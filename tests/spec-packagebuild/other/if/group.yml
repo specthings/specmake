@@ -1,0 +1,20 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  Brief.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+description: |
+  Description.
+enabled-by: link-hub-sdds
+identifier: OtherGroup
+index-entries: []
+interface-type: group
+links:
+- role: interface-placement
+  uid: /rtems/if/header
+- role: requirement-refinement
+  uid: /req/api
+name: Other
+text: |
+  Text.
+type: interface

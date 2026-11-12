@@ -1478,3 +1478,23 @@ driver, no Newlib reentrancy support, and no file system.
     \\end{small}
 
 .. unit-verification end"""
+
+
+def test_svrbuilder_sdds(caplog, tmpdir):
+    _, text = build_document(
+        caplog, tmpdir, "doc-djf-svr",
+        ["aggregate-test-results", "link-hub", "link-hub-sdds", "djf-svr"])
+    other = "/pkg/doc-ddf-sdd-other/html"
+    icd = "/pkg/doc-ts-icd/html/requirements-and-design.html"
+    other_c = f"`other.c <{other}/other_8c.html>`__"
+    other_group = f"`Other <{other}/group__OtherGroup.html>`__"
+    blub = (f"`blub() <{other}/group__OtherGroup.html"
+            "#ga0000000000000000000000000000000a>`__")
+    other_func = (f"`other\u200b_func() <{other}/group__OtherGroup.html"
+                  "#ga0000000000000000000000000000000b>`__")
+    group_spec = f"`spec:/\u200bother/\u200bif/\u200bgroup <{icd}#specotherifgroup>`__"
+    func_spec = f"`spec:/\u200bother/\u200bif/\u200bfunc <{icd}#specotheriffunc>`__"
+    assert f"| {other_group} | {other_c} |" in text
+    assert f"| {other_func} | {other_c} |" in text
+    assert f"| {blub} | {group_spec} |" in text
+    assert f"| {other_func} | {func_spec} |" in text
