@@ -138,6 +138,7 @@ class SRSBuilder(SpecDocumentBuilder):
                     ("errata", "glossary/group",
                      "requirement/non-functional/design",
                      "requirement/non-functional/design-group",
+                     "requirement/non-functional/design-property",
                      "requirement/non-functional/design-target",
                      "requirement/non-functional/errata-group"))
                 with content.section("Security and privacy requirements"):
