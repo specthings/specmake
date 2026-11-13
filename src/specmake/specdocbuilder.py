@@ -935,6 +935,7 @@ _ITEM_DOCUMENTER = {
     "requirement/functional/function": _document_requirement,
     "requirement/non-functional/design": _document_requirement,
     "requirement/non-functional/design-group": _document_requirement,
+    "requirement/non-functional/design-property": _document_requirement,
     "requirement/non-functional/errata-group": _document_requirement,
     "requirement/non-functional/design-target": _document_requirement,
     "requirement/non-functional/interface": _document_requirement,

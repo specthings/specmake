@@ -745,6 +745,12 @@ _ITEM_SPECIFICS = {
         _name_spec,
         _name_info_key_group,
     ),
+    "requirement/non-functional/design-property": (
+        "design property",
+        _augment_requirement,
+        _name_spec,
+        _name_info_key_default,
+    ),
     "requirement/non-functional/design-target": (
         "design target",
         _augment_requirement,

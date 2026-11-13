@@ -1478,3 +1478,25 @@ Validation
             if item.uid.startswith("/ref/")] == [
                 ("/ref/misc", "reference/misc"),
             ]
+
+
+def test_srsbuilder_design_property(caplog, tmpdir):
+    _, text = build_document(caplog, tmpdir, "doc-ts-srs", [
+        "aggregate-test-results", "design-property", "link-hub",
+        "dummy-images", "ts-srs"
+    ])
+    assert """.. _SpecReqDesignProperty:
+
+spec:/req/design-property
+=========================
+
+Requirement
+    The system shall have the property.
+
+Refines
+    This design property refines the design requirement `spec:/\u200breq/\u200broot
+    </pkg/doc-ts-srs/html/requirements.html#specreqroot>`__.
+
+Validation
+    This design property is **not validated**.
+""" in text
