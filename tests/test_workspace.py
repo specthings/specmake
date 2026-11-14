@@ -598,6 +598,13 @@ def test_workspace_component(tmpdir):
 
     buildspace = export_to_buildspace(workspace, buildspace_config)
 
+    # The enabled set of the package component enables the feature patch.
+    archive = buildspace.director["/pkg/source/archive"]
+    with open(os.path.join(archive.directory, "README.md"), "r") as src:
+        assert src.read() == ("This is a Git repository.\nAdded by patch.\n"
+                              "Added by inline patch.\n"
+                              "Added by feature patch.\n")
+
     build_item_a = buildspace.director["/pkg/template-item-a"]
     assert isinstance(build_item_a, DirectoryState)
     assert build_item_a.directory == "."
