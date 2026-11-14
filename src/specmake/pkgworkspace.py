@@ -217,7 +217,7 @@ def _apply_patch_file(workspace_directory: str,
                                if name not in deleted_files)
 
 
-def _apply_patches(workspace_directory: str,
+def _apply_patches(workspace_directory: str, enabled_set: EnabledSet,
                    unpacked_archive: DirectoryState) -> None:
     # An empty git directory of its own keeps git out of a repository which
     # contains the archive.  Git reads its configuration from that directory,
@@ -225,8 +225,7 @@ def _apply_patches(workspace_directory: str,
     with tempfile.TemporaryDirectory() as git_directory:
         # Do not substitute patches
         for patch in unpacked_archive.item["archive-patches"]:
-            if not is_enabled(unpacked_archive.enabled_set,
-                              patch["enabled-by"]):
+            if not is_enabled(enabled_set, patch["enabled-by"]):
                 continue
             if patch["type"] == "inline":
                 with tempfile.TemporaryDirectory() as name:
@@ -302,8 +301,10 @@ class WorkspaceArchive(_WorkspaceItem):
         buildspace_item.compact()
         buildspace_item.create_symbolic_links(
             buildspace_item["symbolic-links"])
+        # The enabled set of the buildspace cache is not the enabled set of
+        # the component of this item.
         _apply_patches(self.substitute("${.:/component/workspace-directory}"),
-                       buildspace_item)
+                       self.enabled_set, buildspace_item)
         buildspace_item.load()
 
 

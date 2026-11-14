@@ -33,6 +33,26 @@ archive-patches:
     --
     2.51.0
   type: inline
+- enabled-by: pkg.feature.red
+  patch: |
+    From: Sebastian Huber <sebastian.huber@embedded-brains.de>
+    Subject: [PATCH] Update README.md for a feature
+
+    ---
+     README.md | 1 +
+     1 file changed, 1 insertion(+)
+
+    diff --git a/README.md b/README.md
+    --- a/README.md
+    +++ b/README.md
+    @@ -1,3 +1,4 @@
+     This is a Git repository.
+     Added by patch.
+     Added by inline patch.
+    +Added by feature patch.
+    --
+    2.51.0
+  type: inline
 archive-url: https://foobar.org/repo.tar.xz
 copyrights:
 - Copyright (C) 2025 embedded brains GmbH & Co. KG
