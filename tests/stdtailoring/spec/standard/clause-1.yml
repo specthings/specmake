@@ -6,6 +6,9 @@ copyrights:
 enabled-by: true
 expected-output: Expected output.
 links:
+- citation-group-key: doc-output
+  role: citation-group-user
+  uid: /pkg/component
 - role: requirement-refinement
   uid: standard
 name: Clause 1 name

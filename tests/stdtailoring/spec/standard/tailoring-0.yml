@@ -7,6 +7,12 @@ links:
   role: statement-of-compliance
   supplier-status: Y
   uid: clause-0
+- citation-group-key: doc-process
+  role: citation-group-user
+  uid: /pkg/component
+- citation-group-key: doc-output
+  role: citation-group-user
+  uid: /pkg/component
 text: |
   Yes.
 type: statement-of-compliance

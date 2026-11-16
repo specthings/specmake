@@ -167,7 +167,33 @@ Clause 0 name (4.3.1.1x)
 Tailoring Status: Y
     Yes.
 
+Process
+    `Title, Process section <process.html#processlabel>`__ :cite:`PkgDoc`
+
+Output
+    `Title, Output section <output.html#outputlabel>`__ :cite:`PkgDoc`
+
 For an overview of all clauses, see the :ref:`tailoring table <CMStandardClause0>`."""
+
+    # Check the clause traceability of a document
+    caplog.clear()
+    assert builder.substitute(
+        "${.:/ecss-clause-traceability}") == """.. table::
+    :class: longtable
+    :widths: 30,10,60
+
+    +---------------------------------------+---------+---------------------------------------------------------------+
+    | Section                               | Role    | Clauses                                                       |
+    +=======================================+=========+===============================================================+
+    | :ref:`Process section <ProcessLabel>` | Process | :ref:`ABCD-X-ST-01Y Rev. 42 - 4.3.1.1x <StandardClause0>` (Y) |
+    +---------------------------------------+---------+---------------------------------------------------------------+
+    | :ref:`Output section <OutputLabel>`   | Output  | :ref:`ABCD-X-ST-01Y Rev. 42 - 4.3.1.1x <StandardClause0>` (Y) |
+    +---------------------------------------+---------+---------------------------------------------------------------+"""
+    assert ("the citation group member 'doc-unused' serves no tailoring"
+            in caplog.text)
+    assert "doc-method" not in caplog.text
+    assert builder_2.substitute("${.:/ecss-clause-traceability}") == (
+        "No section of this document serves a tailoring decision.")
 
     clause = director["/standard/clause-0"]
     assert isinstance(clause, ECSSClause)
@@ -212,3 +238,49 @@ def test_stdtailoring_substitution_errors(caplog, tmpdir):
     clause.data["text"] = "See ${/standard/clause-0:/nix}."
     assert [uid for uid, _ in get_substitution_errors(clause)
             ] == ["/standard/clause-1"]
+
+
+def _trace_links(item):
+    return list(item.links_to_parents("citation-group-user"))
+
+
+def test_stdtailoring_trace_errors(caplog, tmpdir):
+    package = create_package(caplog, Path(tmpdir), Path("stdtailoring/spec"))
+    builder = package.director["/pkg/doc"]
+    statement = package.item.cache["/standard/tailoring-0"]
+    soc = statement.parent_link("statement-of-compliance")
+    process, output = _trace_links(statement)
+
+    def check(match):
+        with pytest.raises(ValueError, match=match):
+            builder.substitute("${.:/standard-tailoring}")
+
+    # A traced tailoring needs an output
+    output.data["citation-group-key"] = "doc-process"
+    check("a tailoring status of Y needs an output")
+
+    # A method needs a process, an assurance, or a control
+    process.data["citation-group-key"] = "doc-method"
+    output.data["citation-group-key"] = "doc-output"
+    check("a method needs a process, an assurance, or a control")
+    process.data["citation-group-key"] = "doc-process"
+
+    # A member of a traced citation group needs a kind
+    output.data["citation-group-key"] = "doc-no-kind"
+    check("'doc-no-kind' needs a kind of process, assurance, control, "
+          "method, or output")
+
+    # A traced citation group shall not be empty
+    output.data["citation-group-key"] = "doc-none"
+    check("the citation group 'doc-none' is empty")
+    output.data["citation-group-key"] = "doc-output"
+
+    # A status other than Y needs a justification
+    soc.data["supplier-status"] = "Ye"
+    statement.data["text"] = " "
+    check("a tailoring status of Ye needs a justification")
+    soc.data["supplier-status"] = "Y"
+
+    # The text of a traced tailoring does not cite a group
+    statement.data["text"] = "${/pkg/component:/cite-group:doc-output}"
+    check("shall not use a citation group")
