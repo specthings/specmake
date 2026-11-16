@@ -1,0 +1,31 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: |
+  elf-note-key: build-label
+  elf-note-expected:
+    eq: product/1/arch/bsp/config
+spec-info:
+  dict:
+    attributes:
+      elf-note-expected:
+        description: |
+          The expression states the values of the note which the test analysis
+          accepts.
+        spec-type: spec-assert-str
+      elf-note-key:
+        description: |
+          It shall be the key of the RTEMS ELF note.
+        spec-type: str
+    description: |
+      This set of attributes specifies the expected value of an RTEMS ELF
+      note.
+    mandatory-attributes: all
+spec-name: Expected ELF Note
+spec-type: pkg-expected-elf-note
+type: spec

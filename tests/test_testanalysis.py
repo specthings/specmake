@@ -204,6 +204,11 @@ def test_testanalysis(caplog, tmpdir):
     target_data = aggregator.targets[target]
     suites = target_data["configs"][0]["test-suites"]
     suite_data = suites["/testsuites/test-suite-pass"]
+    assert suite_data["report"]["expected-elf-notes"] == {
+        "build-label": {
+            "eq": "test-log"
+        }
+    }
     checks = {check.key: check for check in analysis.get_checks(suite_data)}
     assert checks["bsp"] == TestCheck("bsp", "BSP", 18, "gr740", "gr712rc",
                                       False)
@@ -432,3 +437,98 @@ def test_analysis_of_a_build_with_elf_notes():
     analyser.check_test_info(report)
     analyser.check_test_suite({"report": report})
     assert "The BSP has not the expected name." in _failures(analyser)
+
+
+def test_expected_elf_notes():
+    analyser = _analyser({"RTEMS_DEBUG", "RTEMS_SMP"})
+    analyser.target_hashes = ["h"]
+    test_suite = {
+        "step-count": 3,
+        "line-step-count": 5,
+        "failed-steps-count": 0,
+        "line-failed-steps-count": 6,
+        "duration": 0.1,
+        "line-duration": 6,
+        "target-hash": "h",
+        "line-target-hash": 4,
+        "report-hash": "r",
+        "line-report-hash": 7,
+        "report-hash-calculated": "r"
+    }
+
+    # An expectation replaces the built-in expectation of its note
+    suite_data = {
+        "report": {
+            "info": dict(_COMPLETE),
+            "elf-notes": dict(_NOTES, **{"build-label": "M"}),
+            "expected-elf-notes": {
+                "build-label": {
+                    "eq": "M"
+                }
+            },
+            "test-suite": dict(test_suite)
+        }
+    }
+    analyser.check_test_suite(suite_data)
+    checks = {
+        check.key: check
+        for check in analyser.analysis.get_checks(suite_data)
+    }
+    assert checks["build-label"] == TestCheck("build-label", "Build Label",
+                                              ELF_NOTE, "M", "M", True)
+    assert _failures(analyser) == []
+
+    # Other expressions show in the YAML form
+    analyser = _analyser({"RTEMS_DEBUG", "RTEMS_SMP"})
+    analyser.target_hashes = ["h"]
+    suite_data = {
+        "report": {
+            "info": dict(_COMPLETE),
+            "elf-notes": dict(_NOTES),
+            "expected-elf-notes": {
+                "build-label": {
+                    "in": ["M", "N"]
+                }
+            },
+            "test-suite": dict(test_suite)
+        }
+    }
+    analyser.check_test_suite(suite_data)
+    checks = {
+        check.key: check
+        for check in analyser.analysis.get_checks(suite_data)
+    }
+    assert checks["build-label"] == TestCheck("build-label", "Build Label",
+                                              ELF_NOTE, "L", "{in: [M, N]}",
+                                              False)
+    assert _failures(analyser) == [
+        "The build label has not the expected value."
+    ]
+
+    # The printed line keeps the built-in expectation
+    analyser = _analyser({"RTEMS_DEBUG", "RTEMS_SMP"})
+    analyser.target_hashes = ["h"]
+    suite_data = {
+        "report": {
+            "info":
+            dict(_COMPLETE),
+            "elf-notes":
+            dict(_NOTES, **{"build-label": "M"}),
+            "expected-elf-notes": {
+                "build-label": {
+                    "eq": "M"
+                }
+            },
+            "test-suite":
+            dict(test_suite, **{
+                "build-label": "L",
+                "line-build-label": 3
+            })
+        }
+    }
+    analyser.check_test_suite(suite_data)
+    labels = [(check.line, check.reported, check.expected, check.ok)
+              for check in analyser.analysis.get_checks(suite_data)
+              if check.key == "build-label"]
+    assert labels == [(ELF_NOTE, "M", "M", True), (3, "L", "L", True)]
+    assert _failures(analyser) == []

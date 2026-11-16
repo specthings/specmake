@@ -4,6 +4,10 @@ copyrights:
 directory: ${.:/component/deployment-directory}
 directory-state-type: test-log
 enabled-by: true
+expected-elf-notes:
+- elf-note-expected:
+    eq: ${.:/directory-state-type}
+  elf-note-key: build-label
 files:
 - file: test-log-sample.json
   hash: null

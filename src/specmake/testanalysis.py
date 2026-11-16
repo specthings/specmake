@@ -32,7 +32,9 @@ import re
 from typing import (Any, Callable, Iterable, Iterator, NamedTuple,
                     TYPE_CHECKING)
 
-from specitems import Item
+import yaml
+
+from specitems import Item, evaluate_str_assert
 
 if TYPE_CHECKING:
     from .testaggregator import TestAggregator  # pragma: no cover
@@ -290,6 +292,12 @@ def _zero_one(value: bool) -> str:
     return "0"
 
 
+def _expression_text(expression: Any) -> str:
+    if isinstance(expression, dict) and list(expression) == ["eq"]:
+        return expression["eq"]
+    return yaml.safe_dump(expression, default_flow_style=True).strip()
+
+
 def _is_equal(expected: str, reported: Any) -> bool:
     return reported is not None and reported == expected
 
@@ -427,6 +435,7 @@ class _Analyser:
         self.bsp: str = aggregator.component["bsp"]
         self.arch_bsp = f"{aggregator.component['arch']}/{self.bsp}"
         self.notes: dict[str, Any] = {}
+        self.expected_elf_notes: dict[str, Any] = {}
         self.properties: dict[str, _TestProperty] = {}
         for link, _ in aggregator.input_links("test-property"):
             data = aggregator.substitute(link.data)
@@ -479,10 +488,15 @@ class _Analyser:
         it is present or if there is no note.
         """
         if note is not None and note.key in self.notes:
-            note_expected = expected if note.expected is None else \
-                note.expected
             reported = note.transform(self.notes[note.key])
-            ok = is_ok(note_expected, reported)
+            expression = self.expected_elf_notes.get(note.key, None)
+            if expression is None:
+                note_expected = expected if note.expected is None else \
+                    note.expected
+                ok = is_ok(note_expected, reported)
+            else:
+                note_expected = _expression_text(expression)
+                ok = evaluate_str_assert(str(self.notes[note.key]), expression)
             if not ok:
                 self.add_error(f"unexpected-{key}")
             checks.append(
@@ -523,6 +537,7 @@ class _Analyser:
         """ Check the test information of the report. """
         info = report["info"]
         self.notes = report.get("elf-notes", {})
+        self.expected_elf_notes = report.get("expected-elf-notes", {})
         for error in get_outcome_errors(report):
             self.add_error(error)
         if self.notes.get("conflicts", []):
@@ -561,6 +576,7 @@ class _Analyser:
         report = suite_data["report"]
         info = report["test-suite"]
         self.notes = report.get("elf-notes", {})
+        self.expected_elf_notes = report.get("expected-elf-notes", {})
         checks: list[TestCheck] = []
         self.check_property(checks, info, "compiler", "compiler-version",
                             "tools")
