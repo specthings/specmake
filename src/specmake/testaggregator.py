@@ -1153,6 +1153,14 @@ class TestAggregator(BuildItem):
             summary.get_issues(issues)
         return issues
 
+    def get_test_runner_description(self, target_uid: str) -> str:
+        """
+        Get the test runner description of the test logs of the target.
+        """
+        description = self.targets.get(target_uid,
+                                       {}).get("test-runner-description")
+        return description or "There is no description available."
+
     def get_analysis(self) -> TestAnalysis:
         """
         Get the analysis of the test results.

@@ -39,6 +39,10 @@ def _run_command(args, cwd=None, stdout=None):
     return 0
 
 
+def _describe(_self):
+    assert False
+
+
 def test_testplanbuilder(caplog, tmp_path, monkeypatch):
     monkeypatch.setattr(specmake.sphinxbuilder, "run_command", _run_command)
     package = create_package(caplog, tmp_path, Path("spec-packagebuild"), [
@@ -64,18 +68,19 @@ def test_testplanbuilder(caplog, tmp_path, monkeypatch):
 .. test-cases end
 
 .. test-procedures begin
+.. _SpecPkgTestRunnerPlan:
+
+Plan
+====
+
+The test runner of target A.
+
 .. _SpecPkgTestRunnerSubprocess:
 
 Subprocess
 ==========
 
-For each test program (indicated by ``${test_program}``),
-this test procedure runs the following command as a subprocess on the machine
-building the package and captures the output:
-
-.. code-block:: none
-
-    foo --on 1 bar ${test_program}
+There is no description available.
 .. test-procedures end
 
 .. other-validations begin
@@ -152,6 +157,8 @@ The following items are not specifically validated by a test:
     by_analysis = director.item_cache["/rtems/val/by-analysis"]
     spec.related_items.remove(by_analysis)
     spec.related_items_by_type[by_analysis.type].remove(by_analysis)
+    monkeypatch.setattr(TestRunner, "describe", _describe)
+    monkeypatch.setattr(specmake.SubprocessTestRunner, "describe", _describe)
     director.build_package(force=["/pkg/deployment/doc-test-plan"])
     tp_build = Path(director["/pkg/build/doc-test-plan"].directory)
     tp_index = tp_build / "source" / "index.rst"
@@ -1153,18 +1160,19 @@ There are no specific interface dependencies present.
 .. test-cases end
 
 .. test-procedures begin
+.. _SpecPkgTestRunnerPlan:
+
+Plan
+====
+
+The test runner of target A.
+
 .. _SpecPkgTestRunnerSubprocess:
 
 Subprocess
 ==========
 
-For each test program (indicated by ``${test_program}``),
-this test procedure runs the following command as a subprocess on the machine
-building the package and captures the output:
-
-.. code-block:: none
-
-    foo --on 1 bar ${test_program}
+There is no description available.
 
 .. _SpecRtemsValProcedure:
 

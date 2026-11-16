@@ -65,6 +65,13 @@ def test_testreporter(caplog, tmpdir):
 Target - Name Target A
 ######################
 
+.. _ATestProcedureDescription:
+
+Test procedure description
+**************************
+
+The test runner of target A.
+
 .. _ABuildConfigKey:
 
 Configuration - build-config-key

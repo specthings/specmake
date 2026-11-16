@@ -44,6 +44,10 @@ links:
   role: input
   uid: ../steps/link-hub
 - hash: null
+  name: test-aggregation
+  role: input
+  uid: ../steps/aggregate-test-results
+- hash: null
   name: source
   role: input
   uid: ../source/doc-djf-svs

@@ -25,6 +25,8 @@ links:
   uid: /rtems/target-a
 - role: test-runner
   uid: test-runner/subprocess
+- role: test-runner
+  uid: test-runner/plan
 name: ${.:/arch}-${.:/bsp}${.:/config:dash}-${.:/package-version}
 membench-build-label: build-label
 package-directory: pkg

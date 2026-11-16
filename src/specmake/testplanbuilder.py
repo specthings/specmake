@@ -30,6 +30,7 @@ from specware import gather_benchmarks_and_test_suites, gather_test_cases
 from .pkgitems import PackageBuildDirector
 from .linkhub import LinkHub, spec_label
 from .specdocbuilder import SpecDocumentBuilder
+from .testaggregator import TestAggregator
 from .testrunner import TestRunner
 
 # The section type of a test condition names no output and no pass - fail
@@ -326,12 +327,17 @@ contained in the file
         for item in self.component.item.parents("test-runner"):
             test_runner = self.director[item.uid]
             test_runners.append(test_runner)
+        test_aggregator = self.input("test-aggregation")
+        assert isinstance(test_aggregator, TestAggregator)
         content = self.mapper.create_content(section_level=2)
         for test_runner in sorted(test_runners):
             label = spec_label(test_runner.item)
+            target_uid = test_runner.item.parent("target").uid
             with test_runner.component_scope(self.component):
                 with content.section(test_runner["name"], label=label):
-                    content.add(test_runner.describe())
+                    content.add(
+                        test_aggregator.get_test_runner_description(
+                            target_uid))
         procedures = {
             procedure
             for test_case in self._gather_test_cases()
