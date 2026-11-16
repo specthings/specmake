@@ -40,6 +40,12 @@ from .testaggregator import get_test_result_status
 
 _DEFINE_NOT_DEFINED = "requirement/functional/interface-define-not-defined"
 
+_ACTION = "requirement/functional/action"
+
+_FUNCTION = "function/"
+
+_FUNCTION_TYPE = "interface/function"
+
 _GROUP = ("interface/group", "requirement/non-functional/design-group")
 
 
@@ -84,6 +90,8 @@ class SVRBuilder(SpecDocumentBuilder):
                                   self._traceability_code_to_design)
         self.mapper.add_get_value(f"{my_type}:/unit-verification",
                                   self._unit_verification)
+        self.mapper.add_get_value(f"{my_type}:/unit-test-traceability",
+                                  self._unit_test_traceability)
         self.mapper.add_get_value(f"{my_type}:/performance-summary",
                                   self._performance_summary)
         self.mapper.add_get_value(f"{my_type}:/memory-benchmarks",
@@ -235,6 +243,57 @@ class SVRBuilder(SpecDocumentBuilder):
             rows_2.append([name, ", ".join(status)])
         content.add_grid_table(rows, [80, 20], font_size=-1)
         content.add_grid_table(rows_2, [80, 20], font_size=-1)
+        return str(content)
+
+    def _gather_unit_tests(
+            self) -> tuple[list[tuple[str, str, str, str]], set[str]]:
+        mapper = self.mapper
+        get_link = mapper.get_link
+        entries: list[tuple[str, str, str, str]] = []
+        specified: set[str] = set()
+        for item in self.spec.get_related_requirements():
+            units = [
+                unit for unit in item.parents("interface-function")
+                if unit.type == _FUNCTION_TYPE
+            ]
+            if not units:
+                continue
+            if item.type == _ACTION:
+                tests = [item]
+            else:
+                tests = sorted(item.children("validation"))
+            validation = ", ".join(
+                f"{get_link(test)} {get_test_result_status(test, mapper)}"
+                for test in tests) or "**no validation**"
+            requirement = get_link(item)
+            for unit in units:
+                specified.add(unit["name"])
+                entries.append(
+                    (unit["name"], get_link(unit), requirement, validation))
+        return entries, specified
+
+    def _unit_test_traceability(self, _ctx: ItemGetValueContext) -> str:
+        entries, specified = self._gather_unit_tests()
+        link_hub = self.input("link-hub")
+        assert isinstance(link_hub, LinkHub)
+        functions = {
+            key[len(_FUNCTION):]
+            for name_info in link_hub.get_sdd_name_infos()
+            for key in name_info if key.startswith(_FUNCTION)
+        }
+        content = self.mapper.create_content(section_level=2)
+        content.add_simple_table([("Software Units", "Count"),
+                                  ("All", str(len(functions))),
+                                  ("With a requirement of their own",
+                                   str(len(functions & specified)))])
+        rows: list[tuple[str | int, ...]] = [("Software Unit", "Requirement",
+                                              "Validation")]
+        last = ""
+        for name, unit_link, requirement, validation in sorted(entries):
+            rows.append((ROW_SPAN if last == name else unit_link, requirement,
+                         validation))
+            last = name
+        content.add_grid_table(rows, [25, 35, 40], font_size=-4)
         return str(content)
 
     def _performance_summary(self, _ctx: ItemGetValueContext) -> str:

@@ -1477,7 +1477,40 @@ driver, no Newlib reentrancy support, and no file system.
 
     \\end{small}
 
-.. unit-verification end"""
+.. unit-verification end
+
+.. unit-test-traceability begin
+.. table::
+    :class: longtable
+
+    =============================== =====
+    Software Units                  Count
+    =============================== =====
+    All                             36
+    With a requirement of their own 1
+    =============================== =====
+
+.. raw:: latex
+
+    \\begin{tiny}
+
+.. table::
+    :class: longtable
+    :widths: 25,35,40
+
+    +-+-+-+
+    | Software Unit | Requirement | Validation |
+    +=+=+=+
+    | `blub() </pkg/doc-ts-icd/html/requirements-and-design.html#specrtemsiffunc>`__ | `spec:/​rtems/​req/​action-2 </pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2>`__ | `spec:/​rtems/​req/​action-2 </pkg/doc-ts-srs/html/requirements.html#specrtemsreqaction2>`__ **no test results** |
+    + +-+-+
+    | | `spec:/​rtems/​req/​func </pkg/doc-ts-srs/html/requirements.html#specrtemsreqfunc>`__ | `spec:/​rtems/​val/​test-case </pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcase>`__ **no test results**, `spec:/​rtems/​val/​test-case-run </pkg/doc-djf-svs/html/test-case-specification.html#specrtemsvaltestcaserun>`__ **no test results** |
+    +-+-+-+
+
+.. raw:: latex
+
+    \\end{tiny}
+
+.. unit-test-traceability end"""
 
 
 def test_svrbuilder_sdds(caplog, tmpdir):
