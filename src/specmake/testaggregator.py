@@ -838,6 +838,11 @@ class TestAggregator(BuildItem):
                           config_data: _Data) -> None:
         logging.debug("%s: process %s", self.uid, test_log.file)
         test_log_data = test_log.json_load()
+        expected_elf_notes = {
+            entry["elf-note-key"]: entry["elf-note-expected"]
+            for entry in test_log.substitute(
+                test_log.item.get("expected-elf-notes", []))
+        }
         description = test_log_data.get("test-runner-description", "")
         target_data = config_data["target"]
         if "test-runner-description" in target_data:
@@ -846,6 +851,8 @@ class TestAggregator(BuildItem):
         else:
             target_data["test-runner-description"] = description
         for report in test_log_data["reports"]:
+            if expected_elf_notes:
+                report["expected-elf-notes"] = expected_elf_notes
             _add_retried_program(config_data, report)
             try:
                 test_suite = report["test-suite"]
