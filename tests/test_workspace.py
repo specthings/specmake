@@ -414,6 +414,13 @@ def test_workspace_repo_fetch(tmpdir):
 def test_workspace_test_log(tmpdir):
     buildspace, _ = _create_buildspace(tmpdir, "spec-pkg-wk/test-log")
     assert buildspace.director["/file"]["directory-state-type"] == "test-log"
+    assert buildspace.director["/file"]["expected-elf-notes"] == [{
+        "elf-note-expected": {
+            "eq": "label"
+        },
+        "elf-note-key":
+        "build-label"
+    }]
     with open(os.path.join(tmpdir, "file", "c.txt"), "rb") as file:
         assert file.read() == b"b\n"
 
