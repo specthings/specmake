@@ -113,10 +113,11 @@ def test_testrunnergrpc(caplog, tmp_path, monkeypatch):
         with pytest.raises(ValueError):
             runner.substitute("${.:/target-name}")
 
-    assert runner.describe() == (
+    assert runner.describe(True) == (
         "Requesting the target description of "
         "``the/target`` from the test server at iris:50051 failed: the error.")
-    assert runner.describe() == "10"
+    assert runner.describe(True) == "10"
+    assert runner.describe(False) is None
 
     # The strip program does not contribute to the runner hash, so the
     # executables run again only without a previous test log

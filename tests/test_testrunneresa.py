@@ -274,7 +274,7 @@ def test_testrunneresa(monkeypatch, tmp_path):
     assert isinstance(runner, ESATestRunner)
 
     assert runner.describe(
-    ) == """This test procedure requests the `ESA run tests service
+        True) == """This test procedure requests the `ESA run tests service
 <https://gitlab.esa.int/flight-software/fsw-boards-server/FSWBoardsServerRemoteExecution_Binaries.git>`__
 to run the test programs on the ``Board`` target board."""
 
