@@ -428,6 +428,7 @@ class WorkspaceTestLog(WorkspaceFile):
     def prepare_buildspace_data(self) -> dict:
         data = super().prepare_buildspace_data()
         data["directory-state-type"] = "test-log"
+        self.copy_attributes(data, ("expected-elf-notes", ))
         return data
 
 

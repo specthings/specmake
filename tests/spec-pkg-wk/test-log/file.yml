@@ -5,6 +5,10 @@ destination-directory: ${.:/component/deployment-directory}/file
 destination-file: c.txt
 directory: ${.:/component/workspace-directory}
 enabled-by: true
+expected-elf-notes:
+- elf-note-expected:
+    eq: label
+  elf-note-key: build-label
 license-info: []
 source-file: b.txt
 links:
