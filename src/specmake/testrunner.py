@@ -131,8 +131,14 @@ class TestRunner(BuildItem):
     def _get_test_executable(self, _ctx: ItemGetValueContext) -> str:
         return self._executable
 
-    def describe(self) -> str:
-        """ Return a description of the test runner. """
+    def describe(self, run_required: bool) -> str | None:
+        """
+        Return a description of the test runner.
+
+        If no test run is required and the description needs the machine of
+        the test runner, then return None.
+        """
+        _ = run_required
         return "This test procedure cannot run tests."
 
     def get_runner_hash(self) -> str:
@@ -255,8 +261,8 @@ class TestRunner(BuildItem):
             target, previous_reports, report_runner_hash, timeout_key)
 
         # Run the tests with changed executable hashes
+        description = self._update_description(description, bool(executables))
         if executables:
-            description = self.describe()
             for report in self._run_tests(executables):
                 add_executable_record(report,
                                       self._records[report["executable"]])
@@ -281,6 +287,10 @@ class TestRunner(BuildItem):
 
         self.description.add(f"""Run tests and produce test result file
 {self.description.path(log.file)}""")
+
+    def _update_description(self, description: str, run_required: bool) -> str:
+        new_description = self.describe(run_required)
+        return description if new_description is None else new_description
 
     def _run_tests_of_attempt(
             self, executables: list[RunnerExecutable]) -> list[RunnerReport]:
@@ -307,7 +317,8 @@ class GRMONManualTestRunner(TestRunner):
             os.path.basename(executable.path)
             for executable in self._executables)
 
-    def describe(self) -> str:
+    def describe(self, run_required: bool) -> str | None:
+        _ = run_required
         return """This test procedure creates an archive with test programs, a
 GRMON test script, and a shell script to run the tests manually."""
 
@@ -352,7 +363,8 @@ class SubprocessTestRunner(TestRunner):
             select_command(self.item["command"],
                            self._is_enabled_item_condition))
 
-    def describe(self) -> str:
+    def describe(self, run_required: bool) -> str | None:
+        _ = run_required
         executable = "${test_program}"
         self._executable = executable
         command = " ".join(f"'{part}'" if " " in part else part

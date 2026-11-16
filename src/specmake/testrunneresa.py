@@ -64,7 +64,8 @@ class ESATestRunner(TestRunner):
     def get_runner_hash(self) -> str:
         return data_digest({"target": self._target_board()})
 
-    def describe(self) -> str:
+    def describe(self, run_required: bool) -> str | None:
+        _ = run_required
         return f"""This test procedure requests the `ESA run tests service
 <https://gitlab.esa.int/flight-software/fsw-boards-server/\
 FSWBoardsServerRemoteExecution_Binaries.git>`__

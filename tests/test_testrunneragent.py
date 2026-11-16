@@ -138,12 +138,12 @@ def test_testrunneragent(caplog, tmp_path, monkeypatch):
     with pytest.raises(ValueError,
                        match="the transport type 'foo' is not one of "
                        "git, grpc"):
-        runner.describe()
+        runner.describe(True)
     runner.item["transport"] = []
     with pytest.raises(ValueError,
                        match="there is no transport for enabled "
                        "set"):
-        runner.describe()
+        runner.describe(True)
 
 
 def test_testrunneragent_reuse(caplog, tmp_path, monkeypatch):

@@ -174,10 +174,11 @@ def test_testrunnergit(caplog, tmp_path, monkeypatch):
     assert [attempt["error"] for attempt in report_b["failed-attempts"]
             ] == ["error", "error", "unreached: UNAVAILABLE"]
 
-    assert runner.describe() == (
+    assert runner.describe(True) == (
         "Requesting the target description of ``the/target`` through the "
         "Git bridge at /iris.git failed: no response.")
-    assert runner.describe() == "the/target at /iris.git"
+    assert runner.describe(True) == "the/target at /iris.git"
+    assert runner.describe(False) is None
 
 
 class _FailingClient(_Client):

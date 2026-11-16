@@ -138,7 +138,10 @@ class AgentTestRunner(TestRunner):
         raise ValueError(f"{self.uid}: there is no transport for enabled "
                          f"set {sorted(self.enabled_set)}")
 
-    def describe(self) -> str:
+    def describe(self, run_required: bool) -> str | None:
+        # The description asks the machine of the test runner
+        if not run_required:
+            return None
         transport = self._get_transport()
         target_id = self._get_optional_value("target")
         if transport["type"] == "git":

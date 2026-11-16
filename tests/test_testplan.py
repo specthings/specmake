@@ -39,7 +39,7 @@ def _run_command(args, cwd=None, stdout=None):
     return 0
 
 
-def _describe(_self):
+def _describe(_self, _run_required):
     assert False
 
 

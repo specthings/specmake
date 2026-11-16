@@ -123,7 +123,7 @@ def test_testrunner(caplog, tmpdir, monkeypatch):
 
     # Test GRMONManualTestRunner
     grmon_manual_runner = director["/pkg/test-runner/grmon-manual"]
-    assert "GRMON" in grmon_manual_runner.describe()
+    assert "GRMON" in grmon_manual_runner.describe(True)
     exe = tmp_dir / "a.exe"
     exe.touch()
     with pytest.raises(IOError):
@@ -147,7 +147,7 @@ def test_testrunner(caplog, tmpdir, monkeypatch):
     # Test SubprocessTestRunner
     subprocess_runner = director["/pkg/test-runner/subprocess"]
     assert subprocess_runner.describe(
-    ) == """For each test program (indicated by ``${test_program}``),
+        True) == """For each test program (indicated by ``${test_program}``),
 this test procedure runs the following command as a subprocess on the machine
 building the package and captures the output:
 
@@ -288,6 +288,25 @@ building the package and captures the output:
     director.build_package(force=["/pkg/test-logs/bsp"])
     log = get_and_clear_log(caplog)
     assert f"use previous report for: {build_bsp.directory}/a.exe" in log
+
+    # Without a test run, the test log gets the current description
+    test_log = director["/pkg/test-logs/bsp"]
+    data = test_log.json_load()
+    data["test-runner-description"] = "stale"
+    test_log.json_dump(data)
+    director.build_package(force=["/pkg/test-logs/bsp"])
+    assert test_log.json_load()["test-runner-description"] == (
+        "This test procedure cannot run tests.")
+
+    # A runner which needs its machine for the description keeps the old one
+    data = test_log.json_load()
+    data["test-runner-description"] = "stale"
+    test_log.json_dump(data)
+    _TestRunner.describe = lambda self, run_required: ("new" if run_required
+                                                       else None)
+    director.build_package(force=["/pkg/test-logs/bsp"])
+    assert test_log.json_load()["test-runner-description"] == "stale"
+    del _TestRunner.describe
 
     test_log_file.unlink()
     _TestRunner.run_round = 3
