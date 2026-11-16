@@ -38,5 +38,6 @@
       "start-time": "2025-09-22T06:31:59.410772+00:00"
     }
   ],
-  "start-time": "2023-07-11T09:47:29.050266"
+  "start-time": "2023-07-11T09:47:29.050266",
+  "test-runner-description": "The test runner of target A."
 }

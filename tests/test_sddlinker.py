@@ -30,8 +30,9 @@ from .util import create_package
 
 
 def test_sddlinker(caplog, tmp_path):
-    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
-                             ["djf-svs", "link-hub", "sdd-linker"])
+    package = create_package(
+        caplog, tmp_path, Path("spec-packagebuild"),
+        ["aggregate-test-results", "djf-svs", "link-hub", "sdd-linker"])
     director = package.director
     director.build_package()
     spec_links = director["/pkg/deployment/sdd-linker"].file

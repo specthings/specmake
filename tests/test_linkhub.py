@@ -39,7 +39,7 @@ from .util import create_package, get_and_clear_log
 
 def test_linkhub(caplog, tmp_path):
     package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
-                             ["djf-svs", "link-hub"])
+                             ["aggregate-test-results", "djf-svs", "link-hub"])
     item_cache = package.item.cache
     director = package.director
     director.build_package()
@@ -129,7 +129,7 @@ def test_linkhub(caplog, tmp_path):
 
 def test_linkhub_no_test_to_req(caplog, tmp_path):
     package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
-                             ["djf-svs", "link-hub"])
+                             ["aggregate-test-results", "djf-svs", "link-hub"])
     item_cache = package.item.cache
     item_cache.remove_item("/build/test-suite")
     with pytest.raises(
@@ -139,31 +139,35 @@ def test_linkhub_no_test_to_req(caplog, tmp_path):
 
 
 def test_linkhub_files_without_group(caplog, tmp_path):
-    package = create_package(
-        caplog, tmp_path, Path("spec-packagebuild"),
-        ["djf-svs", "link-hub", "link-hub-files-without-group"])
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"), [
+        "aggregate-test-results", "djf-svs", "link-hub",
+        "link-hub-files-without-group"
+    ])
     with pytest.raises(ValueError, match="files without group"):
         package.director.build_package()
 
 
 def test_linkhub_groups_without_items(caplog, tmp_path):
-    package = create_package(
-        caplog, tmp_path, Path("spec-packagebuild"),
-        ["djf-svs", "link-hub", "link-hub-groups-without-items"])
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"), [
+        "aggregate-test-results", "djf-svs", "link-hub",
+        "link-hub-groups-without-items"
+    ])
     with pytest.raises(ValueError, match="groups without items"):
         package.director.build_package()
 
 
 def test_linkhub_no_file(caplog, tmp_path):
-    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
-                             ["djf-svs", "link-hub", "link-hub-no-file"])
+    package = create_package(
+        caplog, tmp_path, Path("spec-packagebuild"),
+        ["aggregate-test-results", "djf-svs", "link-hub", "link-hub-no-file"])
     with pytest.raises(ValueError, match="not associated with a file"):
         package.director.build_package()
 
 
 def test_linkhub_no_tagfile(caplog, tmp_path):
-    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
-                             ["djf-svs", "link-hub", "link-hub-no-tagfile"])
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"), [
+        "aggregate-test-results", "djf-svs", "link-hub", "link-hub-no-tagfile"
+    ])
     package.director.build_package()
     link_hub = package.director["/pkg/steps/link-hub"]
     mapper = SpecMapper(link_hub.item, link_hub, "icd")
@@ -176,9 +180,10 @@ def test_linkhub_no_tagfile(caplog, tmp_path):
 
 
 def test_linkhub_no_tagfile_qual(caplog, tmp_path):
-    package = create_package(
-        caplog, tmp_path, Path("spec-packagebuild"),
-        ["djf-svs", "link-hub", "link-hub-no-tagfile", "RTEMS_QUAL"])
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"), [
+        "aggregate-test-results", "djf-svs", "link-hub", "link-hub-no-tagfile",
+        "RTEMS_QUAL"
+    ])
     with pytest.raises(ValueError, match="there is no associated tagfile"):
         package.director.build_package()
 
@@ -260,8 +265,9 @@ def test_linkhub_tag_and_type_of_same_name():
 
 
 def test_linkhub_sdds(caplog, tmp_path):
-    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
-                             ["djf-svs", "link-hub", "link-hub-sdds"])
+    package = create_package(
+        caplog, tmp_path, Path("spec-packagebuild"),
+        ["aggregate-test-results", "djf-svs", "link-hub", "link-hub-sdds"])
     item_cache = package.item.cache
     director = package.director
     director.build_package()
@@ -321,9 +327,10 @@ def test_linkhub_sdds(caplog, tmp_path):
 
 
 def test_linkhub_sdds_linker(caplog, tmp_path):
-    package = create_package(
-        caplog, tmp_path, Path("spec-packagebuild"),
-        ["djf-svs", "link-hub", "link-hub-sdds", "sdd-linker"])
+    package = create_package(caplog, tmp_path, Path("spec-packagebuild"), [
+        "aggregate-test-results", "djf-svs", "link-hub", "link-hub-sdds",
+        "sdd-linker"
+    ])
     director = package.director
     director.build_package()
     with open(director["/pkg/deployment/sdd-linker-other"].file,
@@ -354,8 +361,9 @@ def _set_link_data(item, role: str, uid: str, data: dict) -> None:
 
 
 def test_linkhub_sdds_two_defaults(caplog, tmp_path):
-    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
-                             ["djf-svs", "link-hub", "link-hub-sdds"])
+    package = create_package(
+        caplog, tmp_path, Path("spec-packagebuild"),
+        ["aggregate-test-results", "djf-svs", "link-hub", "link-hub-sdds"])
     _set_link_data(package.item.cache["/pkg/source/tagfile-other"], "input-to",
                    "../steps/link-hub", {"sdd-uid-prefixes": None})
     with pytest.raises(ValueError,
@@ -365,8 +373,9 @@ def test_linkhub_sdds_two_defaults(caplog, tmp_path):
 
 
 def test_linkhub_sdds_same_name(caplog, tmp_path):
-    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
-                             ["djf-svs", "link-hub", "link-hub-sdds"])
+    package = create_package(
+        caplog, tmp_path, Path("spec-packagebuild"),
+        ["aggregate-test-results", "djf-svs", "link-hub", "link-hub-sdds"])
     _set_link_data(package.item.cache["/pkg/source/tagfile-other"], "input-to",
                    "../steps/link-hub", {"sdd": None})
     _set_link_data(package.item.cache["/pkg/deployment/doc-ddf-sdd-other"],
@@ -378,8 +387,9 @@ def test_linkhub_sdds_same_name(caplog, tmp_path):
 
 
 def test_linkhub_sdds_no_directory(caplog, tmp_path):
-    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
-                             ["djf-svs", "link-hub", "link-hub-sdds"])
+    package = create_package(
+        caplog, tmp_path, Path("spec-packagebuild"),
+        ["aggregate-test-results", "djf-svs", "link-hub", "link-hub-sdds"])
     _set_link_data(package.item.cache["/pkg/deployment/doc-ddf-sdd-other"],
                    "resource", "../steps/link-hub", {"resource-key": "nil"})
     with pytest.raises(ValueError, match="the SDD 'other' has no directory"):
@@ -387,8 +397,9 @@ def test_linkhub_sdds_no_directory(caplog, tmp_path):
 
 
 def test_linkhub_sdds_no_tagfile(caplog, tmp_path):
-    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
-                             ["djf-svs", "link-hub", "link-hub-sdds"])
+    package = create_package(
+        caplog, tmp_path, Path("spec-packagebuild"),
+        ["aggregate-test-results", "djf-svs", "link-hub", "link-hub-sdds"])
     _set_link_data(package.item.cache["/pkg/deployment/doc-ddf-sdd-other"],
                    "resource", "../steps/link-hub", {"sdd": "nil"})
     with pytest.raises(ValueError,
@@ -397,8 +408,9 @@ def test_linkhub_sdds_no_tagfile(caplog, tmp_path):
 
 
 def test_linkhub_sdds_no_default(caplog, tmp_path):
-    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
-                             ["djf-svs", "link-hub", "link-hub-sdds"])
+    package = create_package(
+        caplog, tmp_path, Path("spec-packagebuild"),
+        ["aggregate-test-results", "djf-svs", "link-hub", "link-hub-sdds"])
     _set_link_data(package.item.cache["/pkg/steps/link-hub"], "input",
                    "../source/tagfile", {
                        "sdd": "rtems",
@@ -413,8 +425,9 @@ def test_linkhub_sdds_no_default(caplog, tmp_path):
 
 
 def test_linkhub_sdds_item_without_sdd(caplog, tmp_path):
-    package = create_package(caplog, tmp_path, Path("spec-packagebuild"),
-                             ["djf-svs", "link-hub", "link-hub-sdds"])
+    package = create_package(
+        caplog, tmp_path, Path("spec-packagebuild"),
+        ["aggregate-test-results", "djf-svs", "link-hub", "link-hub-sdds"])
     item_cache = package.item.cache
     _set_link_data(item_cache["/pkg/steps/link-hub"], "input",
                    "../source/tagfile", {"name": "no-tagfile"})
