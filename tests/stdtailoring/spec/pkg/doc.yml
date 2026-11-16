@@ -27,6 +27,40 @@ files: []
 hash: null
 license-info: []
 links:
+- citation-group-key: doc-process
+  kind: process
+  label: ProcessLabel
+  name: Process section
+  path: /process.html
+  role: citation-group-member
+  uid: component
+- citation-group-key: doc-output
+  kind: output
+  label: OutputLabel
+  name: Output section
+  path: /output.html
+  role: citation-group-member
+  uid: component
+- citation-group-key: doc-method
+  kind: method
+  label: MethodLabel
+  name: Method section
+  path: /method.html
+  role: citation-group-member
+  uid: component
+- citation-group-key: doc-no-kind
+  label: NoKindLabel
+  name: No kind section
+  path: /no-kind.html
+  role: citation-group-member
+  uid: component
+- citation-group-key: doc-unused
+  kind: output
+  label: UnusedLabel
+  name: Unused section
+  path: /unused.html
+  role: citation-group-member
+  uid: component
 - role: standard-tailoring
   uid: /standard/standard
 - path: path/to/ecss/tailoring

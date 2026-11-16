@@ -1,0 +1,31 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: citation-group-user
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      citation-group-key:
+        description: |
+          It shall be the key of the citation group which the link source
+          relies on.
+        spec-type: str
+    description: |
+      This set of attributes specifies a citation group user role of links.
+      The link source relies on the areas of the citation group with the
+      associated key.  The link target shall be the item which hosts the
+      citation group members.  The user of the citation group defines the
+      meaning of the ``kind`` attribute of the members.
+    mandatory-attributes: all
+spec-name: Citation Group User Link Role
+spec-type: citation-group-user-role
+type: spec
