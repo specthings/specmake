@@ -94,7 +94,7 @@ class NotRunCoverage(DirectoryState):
             self["gcovr"], "--include-internal-functions",
             "--gcov-ignore-parse-errors", "--json", json_file,
             f"--gcov-executable={self['gcov']}", "--object-directory",
-            object_directory, object_directory
+            self["gcov-working-directory"], object_directory
         ]
         logging.info("%s: run in %s: %s", self.uid,
                      self["gcovr-working-directory"], " ".join(command))
