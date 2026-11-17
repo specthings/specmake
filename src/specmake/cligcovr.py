@@ -35,6 +35,7 @@ import re
 import shutil
 import subprocess
 
+from .gcdaproducer import demangle_gcda, remove_mangled_gcda
 from .util import command_arguments
 
 _GCOV_INFO = re.compile(r"\*\*\* BEGIN OF GCOV INFO BASE64 \*\*\*(.*)"
@@ -83,6 +84,7 @@ def cligcovr(argv: list[str] | None = None) -> None:
                           recursive=True):
         print("remove:", gcda)
         os.unlink(gcda)
+    remove_mangled_gcda(args.working_directory)
     for output in args.outputs:
         with open(output, "r", encoding="latin-1") as src:
             lines = src.readlines()
@@ -95,6 +97,7 @@ def cligcovr(argv: list[str] | None = None) -> None:
                                check=True,
                                input=gcov_info,
                                cwd=args.working_directory)
+    demangle_gcda(args.working_directory)
     shutil.rmtree(args.destination_directory, ignore_errors=True)
     os.makedirs(args.destination_directory)
     cmd = [
