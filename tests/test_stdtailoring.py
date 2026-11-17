@@ -168,7 +168,8 @@ Tailoring Status: Y
     Yes.
 
 Process
-    `Title, Process section <process.html#processlabel>`__ :cite:`PkgDoc`
+    `Title, Process section <process.html#processlabel>`__ :cite:`PkgDoc` and
+    `Title, Group section <../doc-2/group.html#grouplabel>`__ :cite:`PkgDoc2`
 
 Output
     `Title, Output section <output.html#outputlabel>`__ :cite:`PkgDoc`
@@ -192,6 +193,21 @@ For an overview of all clauses, see the :ref:`tailoring table <CMStandardClause0
     assert ("the citation group member 'doc-unused' serves no tailoring"
             in caplog.text)
     assert "doc-method" not in caplog.text
+    assert builder_2.substitute(
+        "${.:/ecss-clause-traceability}") == """.. table::
+    :class: longtable
+    :widths: 30,10,60
+
+    +-----------------------------------+---------+------------------------------------------------------------------------------------------+
+    | Section                           | Role    | Clauses                                                                                  |
+    +===================================+=========+==========================================================================================+
+    | :ref:`Group section <GroupLabel>` | Process | `ABCD-X-ST-01Y Rev. 42 - 4.3.1.1x <../doc/path/to/ecss/tailoring#standardclause0>`__ (Y) |
+    +-----------------------------------+---------+------------------------------------------------------------------------------------------+"""
+    assert builder.substitute("${/pkg/group:/cite-group}") == (
+        "`Title, Group section <../doc-2/group.html#grouplabel>`__ "
+        ":cite:`PkgDoc2`")
+    group_member = _member_links(builder_2.item)[0]
+    del group_member.data["kind"]
     assert builder_2.substitute("${.:/ecss-clause-traceability}") == (
         "No section of this document serves a tailoring decision.")
 
@@ -244,12 +260,16 @@ def _trace_links(item):
     return list(item.links_to_parents("citation-group-user"))
 
 
+def _member_links(item):
+    return list(item.links_to_parents("citation-group-member"))
+
+
 def test_stdtailoring_trace_errors(caplog, tmpdir):
     package = create_package(caplog, Path(tmpdir), Path("stdtailoring/spec"))
     builder = package.director["/pkg/doc"]
     statement = package.item.cache["/standard/tailoring-0"]
     soc = statement.parent_link("statement-of-compliance")
-    process, output = _trace_links(statement)
+    process, output, _ = _trace_links(statement)
 
     def check(match):
         with pytest.raises(ValueError, match=match):
@@ -260,10 +280,13 @@ def test_stdtailoring_trace_errors(caplog, tmpdir):
     check("a tailoring status of Y needs an output")
 
     # A method needs a process, an assurance, or a control
+    member = _member_links(package.item.cache["/pkg/doc-2"])[0]
+    member.data["kind"] = "output"
     process.data["citation-group-key"] = "doc-method"
     output.data["citation-group-key"] = "doc-output"
     check("a method needs a process, an assurance, or a control")
     process.data["citation-group-key"] = "doc-process"
+    member.data["kind"] = "process"
 
     # A member of a traced citation group needs a kind
     output.data["citation-group-key"] = "doc-no-kind"
@@ -284,3 +307,9 @@ def test_stdtailoring_trace_errors(caplog, tmpdir):
     # The text of a traced tailoring does not cite a group
     statement.data["text"] = "${/pkg/component:/cite-group:doc-output}"
     check("shall not use a citation group")
+    statement.data["text"] = "Yes.\n"
+
+    # A citation group item restricts the kinds of its members
+    member.data["kind"] = "method"
+    check("the member of citation group /pkg/group has the kind 'method', "
+          "expected process or output")
