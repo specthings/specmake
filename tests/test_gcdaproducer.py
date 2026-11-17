@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Tests for the gcdaproducer module. """
 
-# Copyright (C) 2023, 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2023, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -36,6 +36,7 @@ def _gcov_tool(command, check, cwd, input):
     assert check
     assert input == b"gcfnB04R\x00\x00\x00\x95/opt"
     (Path(cwd) / "file.gcda").touch()
+    (Path(cwd) / "sub#dir#mangled.gcda").touch()
 
 
 def test_gcdaproducer(caplog, tmpdir, monkeypatch):
@@ -52,4 +53,31 @@ def test_gcdaproducer(caplog, tmpdir, monkeypatch):
     assert f"/pkg/build/gcda: remove unexpected *.gcda file in build directory: '{tmp_dir}/pkg/build/bsp/f.gcda'" in log
     assert f"/pkg/build/gcda: process: ts-unit-no-clock-0.exe" in log
     assert f"/pkg/build/gcda: move *.gcda files from '{tmp_dir}/pkg/build/bsp' to '{tmp_dir}/pkg/build/gcda'" in log
+    assert (tmp_dir / "pkg" / "build" / "gcda" / "sub" / "dir" /
+            "mangled.gcda").is_file()
+    assert not (tmp_dir / "pkg" / "build" / "gcda" /
+                "sub#dir#mangled.gcda").exists()
     assert f"/pkg/build/gcda: create symbolic link from '{tmp_dir}/pkg/build/gcda-symbolic-link-name' to 'gcda-symbolic-link-target'" in log
+
+
+def test_demangle_gcda(tmpdir):
+    tmp_dir = Path(tmpdir)
+    (tmp_dir / "build#a#b.c.gcda").write_bytes(b"x")
+    (tmp_dir / "^#src#d.c.gcda").write_bytes(b"y")
+    (tmp_dir / "plain.gcda").write_bytes(b"z")
+    (tmp_dir / "no#gcda.txt").write_bytes(b"w")
+    specmake.gcdaproducer.demangle_gcda(str(tmp_dir))
+    assert (tmp_dir / "build" / "a" / "b.c.gcda").read_bytes() == b"x"
+    assert (tmp_dir / ".." / "src" / "d.c.gcda").read_bytes() == b"y"
+    assert (tmp_dir / "plain.gcda").read_bytes() == b"z"
+    assert (tmp_dir / "no#gcda.txt").read_bytes() == b"w"
+    assert not (tmp_dir / "build#a#b.c.gcda").exists()
+
+
+def test_remove_mangled_gcda(tmpdir):
+    tmp_dir = Path(tmpdir)
+    (tmp_dir / "build#a#b.c.gcda").touch()
+    (tmp_dir / "plain.gcda").touch()
+    specmake.gcdaproducer.remove_mangled_gcda(str(tmp_dir))
+    assert not (tmp_dir / "build#a#b.c.gcda").exists()
+    assert (tmp_dir / "plain.gcda").exists()

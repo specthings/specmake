@@ -34,7 +34,8 @@ from typing import Any
 from specitems import SphinxContent
 
 from .directorystate import DirectoryState
-from .gcdaproducer import gcov_stream, merge_gcov_stream, remove_gcda
+from .gcdaproducer import (demangle_gcda, gcov_stream, merge_gcov_stream,
+                           remove_gcda, remove_mangled_gcda)
 from .sphinxbuilder import spacify
 
 _Data = dict[str, Any]
@@ -136,12 +137,14 @@ class NotRunCoverage(DirectoryState):
         working_directory = self["gcov-tool-working-directory"]
         measured: dict[str, str] = {}
         remove_gcda(build.directory, self.uid, expected=True)
+        remove_mangled_gcda(working_directory)
         for name in group["executables"]:
             entry = streams.get(name, None)
             if entry is None:
                 continue
             measured[name] = entry[0]
             merge_gcov_stream(entry[1], gcov_tool, working_directory)
+        demangle_gcda(working_directory)
         group["measured-on"] = measured
         group["not-measured"] = sorted(
             set(group["executables"]) - set(measured))

@@ -60,6 +60,8 @@ def fake_run(tmp_path):
     def fake_run_func(cmd, *args, **kwargs):
         # Simulate gcov-tool merge-stream
         if isinstance(cmd, list) and "merge-stream" in cmd:
+            cwd = Path(kwargs.get("cwd", "."))
+            (cwd / "build#sub#merged.gcda").write_bytes(b"merged")
             return
         # Simulate gcovr creating outputs
         if isinstance(cmd, list) and "gcovr" in cmd:
@@ -102,8 +104,12 @@ def test_remove_gcda_and_coverage_run(tmp_path, monkeypatch, fake_run):
         str(tmp_path), "-r", "gcovr", "-g", "gcov", "-t", "gcov-tool",
         str(output_file)
     ]
+    (tmp_path / "build#sub#stale.gcda").write_bytes(b"stale")
     cligcovr(argv)
     assert not (build_dir / "dummy.gcda").exists()
+    assert not (tmp_path / "build#sub#stale.gcda").exists()
+    assert not (build_dir / "sub" / "stale.gcda").exists()
+    assert (build_dir / "sub" / "merged.gcda").read_bytes() == b"merged"
     assert (dest_dir / "index.html").exists()
     assert (dest_dir / "summary.json").exists()
 

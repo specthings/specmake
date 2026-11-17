@@ -93,6 +93,34 @@ def remove_gcda(directory: str, uid: str, expected: bool = False) -> None:
         os.remove(file)
 
 
+def _is_mangled_gcda(name: str) -> bool:
+    return name.endswith(".gcda") and "#" in name
+
+
+def remove_mangled_gcda(directory: str) -> None:
+    """ Remove the GCDA files with a mangled name of the directory. """
+    for name in os.listdir(directory):
+        if _is_mangled_gcda(name):
+            os.remove(os.path.join(directory, name))
+
+
+def demangle_gcda(directory: str) -> None:
+    """
+    Move each GCDA file with a mangled name of the directory to the path
+    which the name encodes relative to the directory.
+
+    With -fprofile-dir, GCC replaces each "/" of the object path by "#" and
+    each ".." by "^".
+    """
+    for name in os.listdir(directory):
+        if not _is_mangled_gcda(name):
+            continue
+        parts = [".." if part == "^" else part for part in name.split("#")]
+        file_dest = os.path.join(directory, *parts)
+        os.makedirs(os.path.dirname(file_dest), exist_ok=True)
+        os.replace(os.path.join(directory, name), file_dest)
+
+
 def merge_gcov_stream(stream: bytes, gcov_tool: str,
                       working_directory: str) -> None:
     """ Merge the gcov information stream into the GCDA files. """
@@ -130,6 +158,7 @@ class GCDAProducer(DirectoryState):
 
         gcov_tool = self["gcov-tool"]
         cwd = self["working-directory"]
+        remove_mangled_gcda(cwd)
 
         logging.debug("%s: load file: %s", self.uid, log.file)
         with open(log.file, "r", encoding="utf-8") as src:
@@ -142,6 +171,7 @@ class GCDAProducer(DirectoryState):
                 continue
             logging.debug("%s: process: %s", self.uid, report["executable"])
             merge_gcov_stream(stream, gcov_tool, cwd)
+        demangle_gcda(cwd)
 
         logging.info("%s: move *.gcda files from '%s' to '%s'", self.uid,
                      build.directory, self.directory)
