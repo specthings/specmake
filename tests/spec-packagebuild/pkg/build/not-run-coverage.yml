@@ -11,6 +11,7 @@ gcda-sub-directory: sub
 gcov: my-gcov
 gcov-tool: my-gcov-tool
 gcov-tool-working-directory: ${../build/bsp:/directory}
+gcov-working-directory: /gcov/working/directory
 gcovr: my-gcovr
 gcovr-working-directory: ${../build/bsp:/directory}
 hash: null

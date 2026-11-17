@@ -243,6 +243,8 @@ def _gcovr(command, check, cwd):
     assert check
     assert command[0] == "my-gcovr"
     assert "--gcov-executable=my-gcov" in command
+    object_directory = command.index("--object-directory") + 1
+    assert command[object_directory] == "/gcov/working/directory"
     json_file = command[command.index("--json") + 1]
     with open(json_file, "w", encoding="utf-8") as dst:
         json.dump({"files": [_file_coverage(1, 1, 1)]}, dst)

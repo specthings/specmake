@@ -26,6 +26,11 @@ spec-info:
         description: |
           It shall be the path to the gcov-tool executable.
         spec-type: str
+      gcov-working-directory:
+        description: |
+          It shall be the working directory to run gcov. The paths of a notes file
+          are relative to this directory.
+        spec-type: str
       gcov-tool-working-directory:
         description: |
           It shall be the working directory to run the gcov-tool. The paths of a gcov
