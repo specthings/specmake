@@ -16,8 +16,7 @@ spec-info:
     attributes:
       input-name:
         description: |
-          If the attribute is present, it shall be name of the input directory
-          state.
+          If the attribute is present, it shall be name of the input directory state.
         spec-type: str
       output-name:
         description: |
@@ -25,19 +24,19 @@ spec-info:
         spec-type: str
       source:
         description: |
-          If an input directory state is specified, then it shall be the source
-          file relative to the base directory of the input directory state,
-          otherwise it shall be the absolute path to source file.
+          If an input directory state is specified, then it shall be the source file
+          relative to the base directory of the input directory state, otherwise it shall
+          be the absolute path to source file.
         spec-type: str
       target:
         description: |
-          It shall be the target file relative to the base directory of the
-          output directory state.
+          It shall be the target file relative to the base directory of the output
+          directory state.
         spec-type: str
     description: |
-      This set of attributes specifies a directory state add and copy file
-      action.  The source file is copied to the target file and added to the
-      output directory state.
+      This set of attributes specifies a directory state add and copy file action.
+      The source file is copied to the target file and added to the output directory
+      state.
     mandatory-attributes:
     - output-name
     - source

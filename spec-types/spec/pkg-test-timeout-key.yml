@@ -10,14 +10,14 @@ spec-example: null
 spec-info:
   dict:
     attributes:
+      enabled-by:
+        description: null
+        spec-type: enabled-by
       key:
         description: |
           Its value shall be the test timeout key for the associated enabled-by
           expression.
         spec-type: str
-      enabled-by:
-        description: null
-        spec-type: enabled-by
     description: |
       This set of attributes specifies a test timeout key.
     mandatory-attributes: all

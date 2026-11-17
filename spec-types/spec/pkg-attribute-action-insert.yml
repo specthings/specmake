@@ -24,8 +24,8 @@ spec-info:
         spec-type: any
       where-key:
         description: |
-          It shall be the list member attribute key to select the value
-          defining the insert position.
+          It shall be the list member attribute key to select the value defining the
+          insert position.
         spec-type: any
       where-value:
         description: |

@@ -20,18 +20,18 @@ spec-info:
         spec-type: pkg-optional-path-list
       include-path:
         description: |
-          It shall be the list of optional Doxygen include paths within the
-          directory state.
+          It shall be the list of optional Doxygen include paths within the directory
+          state.
         spec-type: pkg-optional-path-list
       input:
         description: |
-          It shall be the list of optional Doxygen input paths within the
-          directory state.
+          It shall be the list of optional Doxygen input paths within the directory
+          state.
         spec-type: pkg-optional-path-list
       strip-from-path:
         description: |
-          It shall be the list of optional strip from path elements within the
-          directory state.
+          It shall be the list of optional strip from path elements within the directory
+          state.
         spec-type: pkg-optional-path-list
     description: null
     mandatory-attributes: all

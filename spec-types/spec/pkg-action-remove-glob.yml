@@ -16,18 +16,16 @@ spec-info:
     attributes:
       path:
         description: |
-          It shall be the path to start the search for files and directories to
-          remove.
+          It shall be the path to start the search for files and directories to remove.
         spec-type: str
       patterns:
         description: |
-          It shall be the list of patterns to match the files and directories
-          to remove.
+          It shall be the list of patterns to match the files and directories to remove.
         spec-type: list-str
       remove-tree:
         description: |
-          It shall be true, if matching directories shall be removed as a
-          directory tree, otherwise false.
+          It shall be true, if matching directories shall be removed as a directory tree,
+          otherwise false.
         spec-type: bool
     description: |
       This set of attributes specifies a pattern based removal of files and

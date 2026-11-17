@@ -15,8 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      This set of attributes specifies a build of runtime performance
-      measurement images.
+      This set of attributes specifies a build of runtime performance measurement
+      images.
     mandatory-attributes: all
 spec-name: Build Runtime Performance Measurement Images Item Type
 spec-type: pkg-build-performance-images

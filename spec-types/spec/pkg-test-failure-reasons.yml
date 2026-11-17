@@ -11,8 +11,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      This set of attributes contains the reasons of the unexpected test
-      failures by target.
+      This set of attributes contains the reasons of the unexpected test failures by
+      target.
     generic-attributes:
       description: |
         The key shall be the UID of the target.

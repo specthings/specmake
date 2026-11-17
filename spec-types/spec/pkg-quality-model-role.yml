@@ -15,8 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the quality model role of links and is used to associate a
-      quality model with a software product assurance milestone report.
+      It defines the quality model role of links and is used to associate a quality
+      model with a software product assurance milestone report.
     mandatory-attributes: all
 spec-name: Quality Model Link Role
 spec-type: pkg-quality-model-role

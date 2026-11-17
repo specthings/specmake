@@ -20,17 +20,17 @@ spec-info:
     attributes:
       hash:
         description: |
-          If the value is present, then it shall be the expected hash of the
-          input, otherwise the input dependency is not yet initialized.
+          If the value is present, then it shall be the expected hash of the input,
+          otherwise the input dependency is not yet initialized.
         spec-type: pkg-optional-hash
       name:
         description: |
-          It shall be the name of the input dependency.  The name may be used
-          to distinguish it from other dependencies of the same item.
+          It shall be the name of the input dependency. The name may be used to
+          distinguish it from other dependencies of the same item.
         spec-type: str
     description: |
-      It defines the input role of links and is used to define an input
-      dependency of a build item.
+      It defines the input role of links and is used to define an input dependency of
+      a build item.
     mandatory-attributes: all
 spec-name: Input Link Role
 spec-type: pkg-input-role

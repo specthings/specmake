@@ -18,13 +18,13 @@ spec-info:
         description: |
           It shall be name of the output directory state.
         spec-type: str
-      pattern:
-        description: |
-          It shall be the pattern to match the files.
-        spec-type: str
       path:
         description: |
           It shall be the path to start the search for files.
+        spec-type: str
+      pattern:
+        description: |
+          It shall be the pattern to match the files.
         spec-type: str
     description: |
       This set of attributes specifies a directory state add files action.

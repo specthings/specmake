@@ -14,13 +14,13 @@ spec-example: null
 spec-info:
   dict:
     attributes:
-      name:
-        description: |
-          It shall be the name of the issue database.
-        spec-type: str
       format-identifier:
         description: |
           It shall be the format of an issue identifier in a document.
+        spec-type: str
+      name:
+        description: |
+          It shall be the name of the issue database.
         spec-type: str
       url:
         description: |

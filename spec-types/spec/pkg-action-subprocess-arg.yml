@@ -8,9 +8,6 @@ links:
 spec-description: null
 spec-example: null
 spec-info:
-  str:
-    description: |
-      It shall be a command argument.
   dict:
     attributes:
       enabled-by:
@@ -23,6 +20,9 @@ spec-info:
     description: |
       This set of attributes specifies an optional command argument.
     mandatory-attributes: all
+  str:
+    description: |
+      It shall be a command argument.
 spec-name: Subprocess Command Argument
 spec-type: pkg-action-subprocess-arg
 type: spec

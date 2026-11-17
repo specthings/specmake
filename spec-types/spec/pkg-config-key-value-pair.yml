@@ -12,8 +12,7 @@ spec-info:
     attributes:
       enabled-by:
         description: |
-          It shall define the conditions under which the key-value pair is
-          enabled.
+          It shall define the conditions under which the key-value pair is enabled.
         spec-type: pkg-action-enabled-by
       key:
         description: |

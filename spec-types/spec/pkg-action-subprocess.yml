@@ -16,26 +16,25 @@ spec-info:
     attributes:
       command:
         description: |
-          It shall be the command and argument list to run as a subprocess.  A
-          variable substitution is performed on the list elements.  For
-          example, you can use
-          ``$${/variant:/build-directory}/some/path/to/build/file`` or
-          ``$${/variant:/deployment-directory}/some/path/to/deployment/file``.
+          It shall be the command and argument list to run as a subprocess. A variable
+          substitution is performed on the list elements. For example, you can use
+          `$${/variant:/build-directory}/some/path/to/build/file` or
+          `$${/variant:/deployment-directory}/some/path/to/deployment/file`.
         spec-type: pkg-action-subprocess-arg-list
       env:
         description: null
         spec-type: pkg-action-subprocess-env-list
       expected-return-code:
         description: |
-          If the value is present, then it shall be the expected return code of
-          the command.
+          If the value is present, then it shall be the expected return code of the
+          command.
         spec-type: optional-int
       stdout:
         description: |
-          If the attribute is present, then it shall be the path of the file
-          which takes the standard output of the command.  A relative path is
-          relative to the working directory.  The parent directory of the file
-          shall exist.  A variable substitution is performed on the value.
+          If the attribute is present, then it shall be the path of the file which takes
+          the standard output of the command. A relative path is relative to the working
+          directory. The parent directory of the file shall exist. A variable
+          substitution is performed on the value.
         spec-type: str
       working-directory:
         description: |

@@ -16,14 +16,14 @@ spec-info:
     attributes:
       do-not-run:
         description: |
-          It shall be the list of test executables which the target does not
-          run.  An entry with a reason justifies each coverage gap which only
-          its test executables reach.
+          It shall be the list of test executables which the target does not run. An
+          entry with a reason justifies each coverage gap which only its test executables
+          reach.
         spec-type: pkg-test-runner-do-not-run-list
     description: |
-      It defines the test runner do not run role of links.  Links of this role
-      may be used by ${pkg-directory-state:/spec-name} items to exclude tests
-      from being run by the referenced test runner.
+      It defines the test runner do not run role of links. Links of this role may be
+      used by ${pkg-directory-state:/spec-name} items to exclude tests from being run
+      by the referenced test runner.
     mandatory-attributes: all
 spec-name: Test Runner Do Not Run Link Role
 spec-type: pkg-test-runner-do-not-run-role

@@ -12,8 +12,8 @@ links:
 spec-description: |
   Items of this type shall have the following links:
 
-  * There shall be links to ${pkg-issue:/spec-name} items
-    with the ${pkg-issue-role:/spec-name}.
+  - There shall be links to ${pkg-issue:/spec-name} items with the
+    ${pkg-issue-role:/spec-name}.
 spec-example: null
 spec-info:
   dict:

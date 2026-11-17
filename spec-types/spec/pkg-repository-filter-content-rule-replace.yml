@@ -20,13 +20,13 @@ spec-info:
         spec-type: str
       files:
         description: |
-          It shall be the list of path globs which select the files of the rule.
-          A ``*`` and a ``?`` match within one directory.  A ``**`` matches across
-          directories, and a ``**/`` matches no directory too.
+          It shall be the list of path globs which select the files of the rule. A `*`
+          and a `?` match within one directory. A `**` matches across directories, and a
+          `**/` matches no directory too.
         spec-type: list-str
     description: |
-      This set of attributes specifies a content rule which replaces the content
-      of a file.
+      This set of attributes specifies a content rule which replaces the content of a
+      file.
     mandatory-attributes: all
 spec-name: Repository Filter Replace Rule
 spec-type: pkg-repository-filter-content-rule-replace

@@ -16,20 +16,19 @@ spec-info:
     attributes:
       spec-directories:
         description: |
-          It shall be the list of specification directories relative to the
-          repository root.  A directory shall end with a slash.  The empty
-          string is the repository root.
+          It shall be the list of specification directories relative to the repository
+          root. A directory shall end with a slash. The empty string is the repository
+          root.
         spec-type: list-str
     description: |
-      This set of attributes specifies a content rule which drops each
-      specification item whose ``enabled-by`` attribute is ``false`` in the tip of
-      the filtered commits after the rules before it.  It removes each link to a
-      dropped item in each filtered commit.  The UID of an item is its path
-      relative to its specification directory without the ``.yml`` extension.  A
-      link of a kept item of the tip to an item which the path rules remove from
-      the tip fails the filter.  A link to an item which the repository does not
-      contain refers to another repository.  A file of a filtered commit which
-      is no valid YAML stays unchanged.
+      This set of attributes specifies a content rule which drops each specification
+      item whose `enabled-by` attribute is `false` in the tip of the filtered commits
+      after the rules before it. It removes each link to a dropped item in each
+      filtered commit. The UID of an item is its path relative to its specification
+      directory without the `.yml` extension. A link of a kept item of the tip to an
+      item which the path rules remove from the tip fails the filter. A link to an
+      item which the repository does not contain refers to another repository. A file
+      of a filtered commit which is no valid YAML stays unchanged.
     mandatory-attributes: all
 spec-name: Repository Filter Item Closure Rule
 spec-type: pkg-repository-filter-content-rule-item-closure

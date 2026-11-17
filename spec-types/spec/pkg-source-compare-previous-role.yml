@@ -16,12 +16,12 @@ spec-info:
     attributes:
       source-compare-key:
         description: |
-          It shall be the key to associate the current and previous sources for
-          a comparison.
+          It shall be the key to associate the current and previous sources for a
+          comparison.
         spec-type: str
     description: |
-      The input link shall reference the previous sources for the source
-      comparison associated with the source compare key.
+      The input link shall reference the previous sources for the source comparison
+      associated with the source compare key.
     mandatory-attributes: all
 spec-name: Previous Sources Input Link Role
 spec-type: pkg-input-source-compare-previous-role

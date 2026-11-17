@@ -28,20 +28,20 @@ spec-info:
         spec-type: str
       source:
         description: |
-          If the value is present, then it shall be the source file relative to
-          the base directory of the input directory state, otherwise the
-          source file is the first file of the input directory state.
+          If the value is present, then it shall be the source file relative to the base
+          directory of the input directory state, otherwise the source file is the first
+          file of the input directory state.
         spec-type: optional-str
       target:
         description: |
-          If the value is present, then it shall be the target file relative to
-          the base directory of the output directory state, otherwise the
-          target file is the first file of the output directory state.
+          If the value is present, then it shall be the target file relative to the base
+          directory of the output directory state, otherwise the target file is the first
+          file of the output directory state.
         spec-type: optional-str
     description: |
-      This set of attributes specifies a copy action or a copy and substitute
-      action.  The copy and substitute action reads the source file,
-      substitutes the content and writes the result to the target file.
+      This set of attributes specifies a copy action or a copy and substitute action.
+      The copy and substitute action reads the source file, substitutes the content
+      and writes the result to the target file.
     mandatory-attributes: all
 spec-name: Copy and Substitute Action
 spec-type: pkg-action-copy-and-substitute

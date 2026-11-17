@@ -10,8 +10,7 @@ spec-example: null
 spec-info:
   list:
     description: |
-      The first enabled transport of the list is the transport of the test
-      runner.
+      The first enabled transport of the list is the transport of the test runner.
     spec-type: pkg-test-runner-transport
 spec-name: Test Runner Transport List
 spec-type: pkg-test-runner-transport-list

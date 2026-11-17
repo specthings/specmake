@@ -11,12 +11,12 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      This set of attributes maps the UID of a generated item to the attributes
-      which the source does not state, for example the enabled-by of a group.
+      This set of attributes maps the UID of a generated item to the attributes which
+      the source does not state, for example the enabled-by of a group.
     generic-attributes:
       description: |
-        The key shall be the UID of a generated item.  The value shall be the
-        attributes which override the attributes from the source.
+        The key shall be the UID of a generated item. The value shall be the attributes
+        which override the attributes from the source.
       key-spec-type: str
       value-spec-type: tool-task-spec-from-source-item-attributes
     mandatory-attributes: none

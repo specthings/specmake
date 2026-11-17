@@ -16,9 +16,8 @@ spec-info:
     attributes:
       attributes:
         description: |
-          It shall be the attribute set of the item.  The
-          ``SPDX-License-Identifier`` and ``copyrights`` attributes are taken
-          from the template item.
+          It shall be the attribute set of the item. The `SPDX-License-Identifier` and
+          `copyrights` attributes are taken from the template item.
         spec-type: any
     description: |
       This set of attributes specifies an inline item template.

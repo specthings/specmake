@@ -19,8 +19,8 @@ spec-info:
           It shall be the list of license files.
         spec-type: list-str
     description: |
-      This set of attributes states the license files of a directory.  The
-      package document reproduces each file.
+      This set of attributes states the license files of a directory. The package
+      document reproduces each file.
     mandatory-attributes:
     - files
 spec-name: License Files

@@ -16,12 +16,12 @@ spec-info:
     attributes:
       name:
         description: |
-          It shall be the name of the output production.  The name may be used
-          to distinguish it from other productions of the same item.
+          It shall be the name of the output production. The name may be used to
+          distinguish it from other productions of the same item.
         spec-type: str
     description: |
-      It defines the output production role of links and is used to define that
-      an item is the producer of an output.
+      It defines the output production role of links and is used to define that an
+      item is the producer of an output.
     mandatory-attributes: all
 spec-name: Output Link Role
 spec-type: pkg-output-role

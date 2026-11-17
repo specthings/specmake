@@ -20,18 +20,17 @@ spec-info:
         spec-type: str
       header-is-optional:
         description: |
-          If set to true, then no section header is added when there is only
-          one section present with this section key, otherwise a section header
-          will be added always.
+          If set to true, then no section header is added when there is only one section
+          present with this section key, otherwise a section header will be added always.
         spec-type: bool
       section-key:
         description: |
           It shall be the section key.
         spec-type: name
     description: |
-      It defines the document section role of links and is used to add a
-      section to the link target document.  The sections added to a document
-      are grouped by the section key.
+      It defines the document section role of links and is used to add a section to
+      the link target document. The sections added to a document are grouped by the
+      section key.
     mandatory-attributes: all
 spec-name: Document Section Input Link Role
 spec-type: pkg-sphinx-section-role

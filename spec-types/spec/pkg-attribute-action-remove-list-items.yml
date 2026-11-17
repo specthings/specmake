@@ -16,8 +16,7 @@ spec-info:
     attributes:
       pattern:
         description: |
-          It shall be the Python regular expression pattern to select items to
-          remove.
+          It shall be the Python regular expression pattern to select items to remove.
         spec-type: str
     description: |
       This set of attributes specifies an attribute removal action.

@@ -18,8 +18,8 @@ spec-info:
         description: null
         spec-type: pkg-sphinx-contributor-list
     description: |
-      This set of attributes specifies document contributors which performed a
-      common action.
+      This set of attributes specifies document contributors which performed a common
+      action.
     mandatory-attributes: all
 spec-name: Sphinx Document Contributors by Action
 spec-type: pkg-sphinx-contributor-action

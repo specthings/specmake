@@ -15,8 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      This set of attributes specifies a build of images for some tests of the
-      RTEMS tests.
+      This set of attributes specifies a build of images for some tests of the RTEMS
+      tests.
     mandatory-attributes: all
 spec-name: Build RTEMS Tests Images Item Type
 spec-type: pkg-build-rtems-tests-images

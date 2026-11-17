@@ -14,13 +14,13 @@ spec-example: null
 spec-info:
   dict:
     attributes:
-      script-base-path:
-        description: |
-          It shall be the base path for scripts.
-        spec-type: str
       grmon-script:
         description: |
           It shall be the GRMON script to run the tests.
+        spec-type: str
+      script-base-path:
+        description: |
+          It shall be the base path for scripts.
         spec-type: str
       shell-script:
         description: |

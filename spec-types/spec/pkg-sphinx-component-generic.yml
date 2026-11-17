@@ -24,12 +24,12 @@ spec-info:
     attributes:
       file:
         description: |
-          It shall be the file path or paths relative to the source and build
-          directories related to the document component.
+          It shall be the file path or paths relative to the source and build directories
+          related to the document component.
         spec-type: str-or-list-str
     description: |
-      This set of attributes specifies that a generic action which produces a
-      Sphinx source file for a document using Sphinx documentation framework.
+      This set of attributes specifies that a generic action which produces a Sphinx
+      source file for a document using Sphinx documentation framework.
     mandatory-attributes: all
 spec-name: Generic Sphinx Document Component
 spec-type: pkg-sphinx-component-generic

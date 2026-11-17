@@ -27,8 +27,8 @@ spec-info:
           It shall be the UID of the link target.
         spec-type: str
     description: |
-      This set of attributes specifies a link which the task adds to a
-      generated item.
+      This set of attributes specifies a link which the task adds to a generated
+      item.
     mandatory-attributes:
     - role
     - uid

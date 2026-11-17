@@ -15,8 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      This set of attributes specifies a directory state defined by an explicit
-      list of files.
+      This set of attributes specifies a directory state defined by an explicit list
+      of files.
     mandatory-attributes: all
 spec-name: Explicit Directory State Item Type
 spec-type: pkg-directory-explicit

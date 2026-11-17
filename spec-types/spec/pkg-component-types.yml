@@ -19,8 +19,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      This empty set of attributes is used for refined package component types
-      which do not need extra attributes.
+      This empty set of attributes is used for refined package component types which
+      do not need extra attributes.
     mandatory-attributes: all
 spec-name: Package Component Item Types
 spec-type: pkg-component-types

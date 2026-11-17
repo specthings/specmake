@@ -15,8 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the test procedure role of links and is used to associate a
-      test procedure with a variant.
+      It defines the test procedure role of links and is used to associate a test
+      procedure with a variant.
     mandatory-attributes: all
 spec-name: Test Procedure Link Role
 spec-type: pkg-test-procedure-role

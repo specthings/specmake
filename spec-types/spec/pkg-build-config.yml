@@ -18,14 +18,14 @@ spec-info:
         description: |
           It shall be the build label of the build configuration.
         spec-type: str
+      config-key:
+        description: |
+          It shall be the configuration key. The configuration key is visible in the
+          documentation, for example test reports.
+        spec-type: str
       description:
         description: |
           It shall be the description of the build configuration.
-        spec-type: str
-      config-key:
-        description: |
-          It shall be the configuration key.  The configuration key is visible
-          in the documentation, for example test reports.
         spec-type: str
       name:
         description: |

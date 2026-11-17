@@ -20,8 +20,7 @@ spec-info:
         spec-type: pkg-test-program-counts
       unexpected-test-failure-reasons:
         description: |
-          It shall be the reasons of the unexpected test failures for each
-          target.
+          It shall be the reasons of the unexpected test failures for each target.
         spec-type: pkg-test-failure-reasons
       unexpected-test-failures:
         description: |

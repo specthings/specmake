@@ -11,24 +11,23 @@ links:
   spec-value: paf-spamr
   uid: pkg-sphinx-document
 spec-description: |
-  The item shall have a link with the ${pkg-quality-model-role:/spec-name} to
-  the quality model.  It shall have the inputs ``clang-analyzer``,
-  ``cppcheck``, ``metrixplusplus`` and ``quality-scanner`` with the outputs of
-  the analysis tools.  The ``rtems`` inputs shall be the source directories
-  of the analysed code.  The ``package-changes`` input shall provide the
-  status of the issues for the package.
+  The item shall have a link with the ${pkg-quality-model-role:/spec-name} to the
+  quality model. It shall have the inputs `clang-analyzer`, `cppcheck`,
+  `metrixplusplus` and `quality-scanner` with the outputs of the analysis tools.
+  The `rtems` inputs shall be the source directories of the analysed code. The
+  `package-changes` input shall provide the status of the issues for the package.
 spec-example: null
 spec-info:
   dict:
     attributes:
       metric-verdicts:
         description: |
-          It shall be the verdicts of the reviewer for the metrics which a
-          review evaluates.
+          It shall be the verdicts of the reviewer for the metrics which a review
+          evaluates.
         spec-type: pkg-spamr-metric-verdicts
     description: |
-      This set of attributes specifies the additional specific PAF SPAMR
-      document attributes.
+      This set of attributes specifies the additional specific PAF SPAMR document
+      attributes.
     mandatory-attributes: all
 spec-name: PAF SPAMR Document Item Type
 spec-type: pkg-build-paf-spamr

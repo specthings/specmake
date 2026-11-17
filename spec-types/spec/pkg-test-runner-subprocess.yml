@@ -16,11 +16,10 @@ spec-info:
     attributes:
       command:
         description: |
-          It shall be the test runner subprocess command.  A variable
-          substitution is performed on the list elements.  Use
-          ``$${.:/test-executable}`` for the test executable.  An element
-          which defines a condition contributes its argument only if the
-          enabled set fulfils this condition.
+          It shall be the test runner subprocess command. A variable substitution is
+          performed on the list elements. Use `$${.:/test-executable}` for the test
+          executable. An element which defines a condition contributes its argument only
+          if the enabled set fulfils this condition.
         spec-type: pkg-test-runner-subprocess-arg-list
       discard-patterns:
         description: null

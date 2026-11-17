@@ -16,9 +16,9 @@ spec-info:
     attributes:
       accept-format-changes:
         description: |
-          If the value is true, then a file which a dump of its unchanged data does
-          not reproduce gets the format of the closest dump, otherwise the filter
-          fails for such a file.
+          If the value is true, then a file which a dump of its unchanged data does not
+          reproduce gets the format of the closest dump, otherwise the filter fails for
+          such a file.
         spec-type: bool
       attribute-actions:
         description: |
@@ -26,17 +26,17 @@ spec-info:
         spec-type: pkg-attribute-action-list
       files:
         description: |
-          It shall be the list of path globs which select the files of the rule.
-          A ``*`` and a ``?`` match within one directory.  A ``**`` matches across
-          directories, and a ``**/`` matches no directory too.
+          It shall be the list of path globs which select the files of the rule. A `*`
+          and a `?` match within one directory. A `**` matches across directories, and a
+          `**/` matches no directory too.
         spec-type: list-str
     description: |
-      This set of attributes specifies a content rule which runs attribute
-      actions on the data of a YAML or JSON file.  A YAML file whose text equals
-      the dump of a specification item gets that dump.  Any other YAML file goes
-      through a round trip which keeps the comments, the key order, the quotes and
-      the indentation.  A JSON file keeps its indentation.  A file which is no
-      valid YAML or JSON stays unchanged.
+      This set of attributes specifies a content rule which runs attribute actions on
+      the data of a YAML or JSON file. A YAML file whose text equals the dump of a
+      specification item gets that dump. Any other YAML file goes through a round
+      trip which keeps the comments, the key order, the quotes and the indentation. A
+      JSON file keeps its indentation. A file which is no valid YAML or JSON stays
+      unchanged.
     mandatory-attributes: all
 spec-name: Repository Filter Structure Rule
 spec-type: pkg-repository-filter-content-rule-structure

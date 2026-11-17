@@ -15,8 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the Doxygen tagfile role of links and is used to define the
-      filename of a Doxygen tagfile.
+      It defines the Doxygen tagfile role of links and is used to define the filename
+      of a Doxygen tagfile.
     mandatory-attributes: all
 spec-name: Doxygen Tagfile Link Role
 spec-type: pkg-doxygen-tagfile-role

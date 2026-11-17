@@ -24,8 +24,7 @@ spec-info:
         spec-type: str
       destination-file:
         description: |
-          It shall be the destination file relative to the destination
-          directory.
+          It shall be the destination file relative to the destination directory.
         spec-type: str
       directory:
         description: |
@@ -33,9 +32,9 @@ spec-info:
         spec-type: str
       expected-elf-notes:
         description: |
-          The list states the expected values of RTEMS ELF notes of the
-          executables of a test log.  The export copies it to the test log
-          item of the buildspace.  Only a test log uses it.
+          The list states the expected values of RTEMS ELF notes of the executables of a
+          test log. The export copies it to the test log item of the buildspace. Only a
+          test log uses it.
         spec-type: pkg-expected-elf-note-list
       license-files:
         description: null
@@ -45,9 +44,9 @@ spec-info:
         spec-type: pkg-license-info-list
       source-file:
         description: |
-          It shall be the source file relative to the source directory in the
-          workspace.  If a list is specified, then the first existing source
-          file on the list will be used.
+          It shall be the source file relative to the source directory in the workspace.
+          If a list is specified, then the first existing source file on the list will be
+          used.
         spec-type: str-or-list-str
     description: |
       This set of attributes specifies a workspace file.

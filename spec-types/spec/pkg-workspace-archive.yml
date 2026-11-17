@@ -14,6 +14,10 @@ spec-example: null
 spec-info:
   dict:
     attributes:
+      archive-download-timeout-in-seconds:
+        description: |
+          It shall be the archive download timeout in seconds. The default is 20 minutes.
+        spec-type: int
       archive-file:
         description: |
           It shall be the path to the archive file.
@@ -28,15 +32,10 @@ spec-info:
         spec-type: pkg-patch-list
       archive-url:
         description: |
-          It shall be the archive download URL.  A list of URLs may be provided
-          to query multiple download sources.  This may increase the download
-          availability in case of service failures.
+          It shall be the archive download URL. A list of URLs may be provided to query
+          multiple download sources. This may increase the download availability in case
+          of service failures.
         spec-type: str-or-list-str
-      archive-download-timeout-in-seconds:
-        description: |
-          It shall be the archive download timeout in seconds.  The default is
-          20 minutes.
-        spec-type: int
       description:
         description: |
           It shall be the description of the archive.

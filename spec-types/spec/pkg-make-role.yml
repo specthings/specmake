@@ -16,8 +16,8 @@ spec-info:
     attributes:
       hash:
         description: |
-          If the value is present, then it shall be the expected hash of the
-          input, otherwise the input dependency is not yet initialized.
+          If the value is present, then it shall be the expected hash of the input,
+          otherwise the input dependency is not yet initialized.
         spec-type: pkg-optional-hash
       output-name:
         description: |
@@ -25,11 +25,12 @@ spec-info:
         spec-type: str
       params:
         description: |
-          It shall be an optional set of parameters which may be used to make the outputs.
+          It shall be an optional set of parameters which may be used to make the
+          outputs.
         spec-type: any
     description: |
-      It defines the make role of links and is used to make the outputs of the
-      item from the inputs and the parameters.
+      It defines the make role of links and is used to make the outputs of the item
+      from the inputs and the parameters.
     mandatory-attributes: all
 spec-name: Make Link Role
 spec-type: pkg-make-role

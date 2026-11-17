@@ -19,8 +19,8 @@ spec-info:
           It shall be the UID of the root specification item.
         spec-type: str
     description: |
-      This set of attributes specifies a build step which validates the items
-      related to the root specification item without test results.
+      This set of attributes specifies a build step which validates the items related
+      to the root specification item without test results.
     mandatory-attributes: all
 spec-name: Specification Item Cache Item Type
 spec-type: pkg-spec-item-cache

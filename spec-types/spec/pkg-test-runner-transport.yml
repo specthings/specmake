@@ -12,16 +12,14 @@ spec-info:
     attributes:
       enabled-by:
         description: |
-          It shall define the conditions under which the transport is
-          enabled.
+          It shall define the conditions under which the transport is enabled.
         spec-type: enabled-by
       type:
         description: |
           It shall be the transport type.
         spec-type: name
     description: |
-      This set of attributes specifies a transport of a test runner to a test
-      server.
+      This set of attributes specifies a transport of a test runner to a test server.
     mandatory-attributes: all
 spec-name: Test Runner Transport
 spec-type: pkg-test-runner-transport
