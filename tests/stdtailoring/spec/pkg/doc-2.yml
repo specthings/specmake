@@ -27,6 +27,12 @@ files: []
 hash: null
 license-info: []
 links:
+- kind: process
+  label: GroupLabel
+  name: Group section
+  path: /group.html
+  role: citation-group-member
+  uid: group
 - hash: null
   name: component
   role: input

@@ -43,7 +43,8 @@ from specitems import (ContentContext, ROW_SPAN, BibTeXCitationProvider,
                        ItemGetValueContext, ItemMapper, ItemValueProvider,
                        Link, SphinxContent, TextContent, generate_glossary,
                        LicenseAggregate, LicenseProvider, get_value_subprocess,
-                       is_enabled, list_terms, to_iterable)
+                       get_citation_group_members, is_enabled, list_terms,
+                       to_iterable)
 from specware import run_command
 
 from .directorystate import DirectoryState
@@ -314,9 +315,7 @@ class _CitationProvider(BibTeXCitationProvider):
         mapper = ctx.mapper
         assert isinstance(mapper, BuildItemMapper)
         content = mapper.create_content()
-        for link in ctx.item.links_to_children("citation-group-member"):
-            if link["citation-group-key"] != group:
-                continue
+        for link in get_citation_group_members(ctx.item, group or None):
             _, fields = self.get_fields(link.item)
             title = ctx.substitute(fields["title"])
             cite = ctx.substitute(f"${{{link.uid}:/cite}}")
@@ -341,9 +340,8 @@ class _CitationProvider(BibTeXCitationProvider):
             titles.append(title)
             citations.append(cite)
         if not titles:
-            logging.warning(
-                "%s: the citation group associated with key '%s' is empty",
-                ctx.item.uid, group)
+            logging.warning("%s: the citation group '%s' is empty",
+                            ctx.item.uid, group or ctx.item.uid)
         if flat:
             if use_common_title:
                 title = os.path.commonprefix(titles)

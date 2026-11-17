@@ -29,7 +29,7 @@ import os
 from typing import Any
 
 from specitems import (Item, ItemGetValueContext, Link, TextContent,
-                       TextMapper, list_terms)
+                       TextMapper, get_citation_group_members, list_terms)
 
 from .sphinxbuilder import (SphinxBuilder, DocumentBuilderValueProvider,
                             _normal_title)
@@ -71,18 +71,19 @@ _KINDS = ("process", "assurance", "control", "method", "output")
 _PLAN_KINDS = ("process", "assurance", "control")
 
 
-def _members(component: Item, key: str) -> list[Link]:
-    return [
-        link for link in component.links_to_children(_MEMBER_ROLE)
-        if link["citation-group-key"] == key
-    ]
+def _key(link: Link) -> str | None:
+    return link.data.get("citation-group-key")
+
+
+def _group_name(link: Link) -> str:
+    return _key(link) or link.uid
 
 
 def _member_kind(member: Link) -> str:
     kind = member.data.get("kind")
     if kind not in _KINDS:
         raise ValueError(f"{member.item.uid}: the citation group member "
-                         f"'{member['citation-group-key']}' needs a kind "
+                         f"'{_group_name(member)}' needs a kind "
                          f"of {list_terms(_KINDS, 'or')}")
     return kind
 
@@ -90,10 +91,10 @@ def _member_kind(member: Link) -> str:
 def _trace_members(statement: Item) -> dict[str, list[Link]]:
     by_kind: dict[str, list[Link]] = {kind: [] for kind in _KINDS}
     for trace in statement.links_to_parents(_TRACE_ROLE):
-        members = _members(trace.item, trace["citation-group-key"])
+        members = get_citation_group_members(trace.item, _key(trace))
         if not members:
             raise ValueError(f"{statement.uid}: the citation group "
-                             f"'{trace['citation-group-key']}' is empty")
+                             f"'{_group_name(trace)}' is empty")
         for member in members:
             by_kind[_member_kind(member)].append(member)
     return by_kind
@@ -233,8 +234,7 @@ class StandardTailoringProvider(DocumentBuilderValueProvider):
             clauses: list[tuple[list, str]] = []
             for trace in member.item.links_to_children(_TRACE_ROLE):
                 if (trace.item.type != "statement-of-compliance"
-                        or trace["citation-group-key"]
-                        != member["citation-group-key"]):
+                        or _key(trace) != _key(member)):
                     continue
                 link = trace.item.parent_link("statement-of-compliance")
                 clause = link.item
@@ -246,8 +246,7 @@ class StandardTailoringProvider(DocumentBuilderValueProvider):
                 if kind != "method":
                     logging.warning(
                         "%s: the citation group member '%s' serves no "
-                        "tailoring", ctx.item.uid,
-                        member["citation-group-key"])
+                        "tailoring", ctx.item.uid, _group_name(member))
                 continue
             section = mapper.format_reference(member["name"], member["label"])
             rows.append([
