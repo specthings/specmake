@@ -3,6 +3,7 @@ copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
 directory: /doc-2
 directory-state-type: sphinx
+document-accepted-licenses: []
 document-base-path: /doc-2
 document-components: []
 document-contributors: []
@@ -16,7 +17,6 @@ document-latex-geometry: geometry
 document-latex-header-left: header left
 document-latex-sphinxsetup: sphinxsetup
 document-latex-theme: manual
-document-accepted-licenses: []
 document-license: CC-BY-SA-4.0
 document-releases: []
 document-title: Title
