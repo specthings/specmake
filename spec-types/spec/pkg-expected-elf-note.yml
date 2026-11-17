@@ -16,7 +16,7 @@ spec-info:
       elf-note-expected:
         description: |
           The expression states the values of the note which the test analysis accepts.
-        spec-type: spec-assert-str
+        spec-type: assert-str
       elf-note-key:
         description: |
           It shall be the key of the RTEMS ELF note.
