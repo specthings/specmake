@@ -16,12 +16,12 @@ spec-info:
     attributes:
       params:
         description: |
-          It shall be an optional set of parameters which may be used to run
-          the actions for the member.
+          It shall be an optional set of parameters which may be used to run the actions
+          for the member.
         spec-type: any
     description: |
-      It defines the run actions member role of links and is used to run
-      actions for the member.
+      It defines the run actions member role of links and is used to run actions for
+      the member.
     mandatory-attributes: all
 spec-name: Run Actions Member Link Role
 spec-type: pkg-run-actions-member-role

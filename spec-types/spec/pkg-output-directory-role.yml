@@ -15,8 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the output directory role of links and is used to define the
-      output directory for content producers.
+      It defines the output directory role of links and is used to define the output
+      directory for content producers.
     mandatory-attributes: all
 spec-name: Output Directory Link Role
 spec-type: pkg-output-directory-role

@@ -14,18 +14,18 @@ spec-example: null
 spec-info:
   dict:
     attributes:
+      key-value-pairs:
+        description: null
+        spec-type: pkg-config-key-value-pair-list
       output-name:
         description: |
           It shall be name of the output directory state.
         spec-type: str
-      key-value-pairs:
-        description: null
-        spec-type: pkg-config-key-value-pair-list
       target:
         description: |
-          If the value is present, then it shall be the target file relative to
-          the base directory of the output directory state, otherwise the
-          target file is the first file of the output directory state.
+          If the value is present, then it shall be the target file relative to the base
+          directory of the output directory state, otherwise the target file is the first
+          file of the output directory state.
         spec-type: optional-str
     description: |
       This set of attributes specifies a create kconfig file action.

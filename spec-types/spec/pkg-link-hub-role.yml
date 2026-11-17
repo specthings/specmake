@@ -15,8 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the link hub role of links and is used to attach a link hub to
-      a package component.
+      It defines the link hub role of links and is used to attach a link hub to a
+      package component.
     mandatory-attributes: all
 spec-name: Link Hub Link Role
 spec-type: pkg-link-hub-role

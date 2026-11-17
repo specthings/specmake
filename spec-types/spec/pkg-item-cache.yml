@@ -19,8 +19,8 @@ spec-info:
         spec-type: pkg-directory-state-pattern-definition
       spec-paths:
         description: |
-          It shall be the list of subdirectories with specification items
-          relative to the source directory state.
+          It shall be the list of subdirectories with specification items relative to the
+          source directory state.
         spec-type: list-str
     description: |
       This set of attributes specifies an item cache directory state.

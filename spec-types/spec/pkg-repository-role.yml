@@ -15,8 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the repository role of links and is used to define the
-      deployed repositories of a package variant.
+      It defines the repository role of links and is used to define the deployed
+      repositories of a package variant.
     mandatory-attributes: all
 spec-name: Repository Link Role
 spec-type: pkg-repository-role

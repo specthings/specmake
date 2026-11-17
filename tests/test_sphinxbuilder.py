@@ -507,13 +507,13 @@ Root Item Type
 This is the root specification item type.
 
 Specification items consist of a defined set of key-value pairs called
-attributes.  Each attribute key name shall be a :ref:`Name <SpecTypeName>`.
-Item attributes may have dictionary, list, integer, floating-point number, and
-string values or a combination of them.  The format of items is defined by the
+attributes. Each attribute key name shall be a :ref:`Name <SpecTypeName>`. Item
+attributes may have dictionary, list, integer, floating-point number, and
+string values or a combination of them. The format of items is defined by the
 type hierarchy rooting in this type.
 
 The ``type`` attribute allows a specialization into domain-specific type
-hierarchies.  For example, for a software specification possible type
+hierarchies. For example, for a software specification possible type
 refinements may be created to specify requirements, specializations of
 requirements, interfaces, test suites, test cases, and requirement validations.
 
@@ -540,10 +540,10 @@ links
 
 type
     The attribute value shall be a :ref:`SpecTypeName`. It shall be the item
-    type.  The selection of types and the level of detail depends on a
-    particular standard and product model.  We need enough flexibility to be in
+    type. The selection of types and the level of detail depends on a
+    particular standard and product model. We need enough flexibility to be in
     line with the European Cooperation for Space Standardization standard
-    ECSS-E-ST-10-06 and possible future applications of other standards.  This
+    ECSS-E-ST-10-06 and possible future applications of other standards. This
     attribute is used for type refinements.
 
 This type is refined by the following types:
@@ -572,9 +572,9 @@ License Item Type
 
 This type refines the :ref:`SpecTypeRootItemType` through the ``type``
 attribute if the value is ``license``. This set of attributes specifies a
-license which a work may take.  The tooling uses the item to present the
-license of a work.  It also uses the item to list the license of a foreign
-part. The following explicit attributes are mandatory:
+license which a work may take. The tooling uses the item to present the license
+of a work. It also uses the item to list the license of a foreign part. The
+following explicit attributes are mandatory:
 
 - ``identifier``
 
@@ -603,7 +603,7 @@ reproduce-text
 
 text
     The attribute value shall be an optional string. If the value is present,
-    then it shall be the license text.  The value shall be present, if
+    then it shall be the license text. The value shall be present, if
     reproduce-text is true.
 
 uri
@@ -617,8 +617,8 @@ Tool Configuration Item Type
 
 This type refines the :ref:`SpecTypeRootItemType` through the ``type``
 attribute if the value is ``tool-config``. This set of attributes specifies the
-configuration of the tools.  The file specitems.yml of a tree holds one such
-item.  A tool reads the item cache and performs every task of its own type. The
+configuration of the tools. The file specitems.yml of a tree holds one such
+item. A tool reads the item cache and performs every task of its own type. The
 following explicit attributes are mandatory:
 
 - ``item-cache``
@@ -684,8 +684,8 @@ Enabled-By Expression
 ^^^^^^^^^^^^^^^^^^^^^
 
 A value of this type shall be an expression which defines under which
-conditions the specification item or parts of it are enabled.  The expression
-is evaluated with the use of an *enabled set*.  This is a set of strings which
+conditions the specification item or parts of it are enabled. The expression is
+evaluated with the use of an *enabled set*. This is a set of strings which
 indicate enabled features.
 
 A value of this type shall be of one of the following variants:
@@ -704,8 +704,8 @@ A value of this type shall be of one of the following variants:
 
   eq
       The attribute value shall be a list of strings. The **eq** operator
-      evaluates a list of strings with at least one element.  If all strings
-      are equal, then the evaluation result is true, otherwise false.
+      evaluates a list of strings with at least one element. If all strings are
+      equal, then the evaluation result is true, otherwise false.
 
   not
       The attribute value shall be an :ref:`SpecTypeEnabledByExpression`. The
@@ -745,9 +745,9 @@ Link
 ^^^^
 
 This set of attributes specifies a link from one specification item to another
-specification item.  The links in a list are ordered.  The first link in the
-list is processed first. All explicit attributes shall be specified. The
-explicit attributes for this type are:
+specification item. The links in a list are ordered. The first link in the list
+is processed first. All explicit attributes shall be specified. The explicit
+attributes for this type are:
 
 role
     The attribute value shall be a :ref:`SpecTypeName`. It shall be the role of
@@ -788,10 +788,10 @@ SPDX License Expression
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 The value shall be a string. It shall be an SPDX license expression as defined
-by SPDX 2.3, section "SPDX license expressions".  Every identifier shall be on
+by SPDX 2.3, section "SPDX license expressions". Every identifier shall be on
 the SPDX License List or it shall be a license reference such as
-``LicenseRef-ECSS``.  Every identifier shall be in its canonical form, so a
-deprecated form such as ``GPL-2.0+`` is invalid.  A work takes one license, so
+``LicenseRef-ECSS``. Every identifier shall be in its canonical form, so a
+deprecated form such as ``GPL-2.0+`` is invalid. A work takes one license, so
 an expression of ``A AND B`` permits no work.
 
 This type is used by the following types:
@@ -803,7 +803,7 @@ This type is used by the following types:
 SPDX License Identifier
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The value shall be a string. It shall be a single SPDX license identifier.  The
+The value shall be a string. It shall be a single SPDX license identifier. The
 identifier shall be on the SPDX License List or it shall be a license reference
 such as ``LicenseRef-ECSS``.
 
@@ -894,7 +894,7 @@ Tool Inline Item
 ^^^^^^^^^^^^^^^^
 
 This set of attributes specifies an item which the configuration adds to the
-item cache.  An example is a package item which a tree refers to and which only
+item cache. An example is a package item which a tree refers to and which only
 a package build provides. All explicit attributes shall be specified. The
 explicit attributes for this type are:
 
@@ -929,7 +929,7 @@ This type is used by the following types:
 Tool Item Cache
 ^^^^^^^^^^^^^^^
 
-This set of attributes specifies the item cache of a configuration.  A
+This set of attributes specifies the item cache of a configuration. A
 configuration which states no path states an empty item cache. None of the
 explicit attributes is mandatory, they are all optional. The explicit
 attributes for this type are:
@@ -948,8 +948,8 @@ initialize-links
 
 paths
     The attribute value shall be a :ref:`SpecTypeToolItemCachePaths`. It shall
-    be the specification item directories.  A dictionary maps a directory to
-    the UID prefix of the items which it holds.
+    be the specification item directories. A dictionary maps a directory to the
+    UID prefix of the items which it holds.
 
 permissive-type-errors
     The attribute value shall be a boolean. It shall be true, if a type error
@@ -980,7 +980,7 @@ A value of this type shall be of one of the following variants:
   attribute value shall be a string.
 
 - The value may be a list. Each list element shall be a string. A list gives
-  the specification item directories.  The items of a directory take the UID
+  the specification item directories. The items of a directory take the UID
   prefix which their path gives.
 
 This type is used by the following types:
@@ -1074,8 +1074,8 @@ root-type
 Tool Task
 ^^^^^^^^^
 
-This set of attributes specifies a task of a tool.  The configuration carries a
-list of tasks.  A tool performs every task of its type. The following explicit
+This set of attributes specifies a task of a tool. The configuration carries a
+list of tasks. A tool performs every task of its type. The following explicit
 attributes are mandatory:
 
 - ``task-name``
@@ -1086,17 +1086,17 @@ The explicit attributes for this type are:
 
 params
     The attribute value may have any type. If the value is present, then it
-    shall be the parameters of the task.  A task uses them as substitution
+    shall be the parameters of the task. A task uses them as substitution
     variables.
 
 task-name
     The attribute value shall be a :ref:`SpecTypeName`. It shall be the name of
-    the task.  The name shall be unique within the configuration.  The messages
+    the task. The name shall be unique within the configuration. The messages
     of a tool use it to name the task.
 
 task-type
     The attribute value shall be a :ref:`SpecTypeName`. It shall be the type of
-    the task.  This attribute is used for type refinements.
+    the task. This attribute is used for type refinements.
 
 This type is refined by the following types:
 

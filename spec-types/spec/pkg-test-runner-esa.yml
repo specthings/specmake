@@ -20,28 +20,25 @@ spec-info:
         spec-type: str-to-str
       delete-remote-branch:
         description: |
-          It shall be true, to delete the remote branch once the request
-          handling finished, otherwise the remote branch is not deleted.
+          It shall be true, to delete the remote branch once the request handling
+          finished, otherwise the remote branch is not deleted.
         spec-type: bool
       git-fetch-polling-interval-in-seconds:
         description: |
-          It shall be the Git fetch polling interval in seconds.  The polling
-          interval determines how often a Git fetch from the remote repository
-          is carried out.
+          It shall be the Git fetch polling interval in seconds. The polling interval
+          determines how often a Git fetch from the remote repository is carried out.
         spec-type: int
       max-overall-timeout-in-seconds:
         description: |
-          It shall be the maximum for the sum of all executable timeout values
-          of a request in seconds.  The test runner splits up its work into
-          multiple requests to the ESA test run repository.  While the timeout
-          of an individual executable exceeds the value, a request with exactly
-          this executable will be sent.
+          It shall be the maximum for the sum of all executable timeout values of a
+          request in seconds. The test runner splits up its work into multiple requests
+          to the ESA test run repository. While the timeout of an individual executable
+          exceeds the value, a request with exactly this executable will be sent.
         spec-type: int
       max-request-delay-in-seconds:
         description: |
-          It shall be the maximum request delay in seconds which is tolerated.
-          A request delay may occur if multiple agents access the boards in
-          parallel.
+          It shall be the maximum request delay in seconds which is tolerated. A request
+          delay may occur if multiple agents access the boards in parallel.
         spec-type: int
       request-policy:
         description: |

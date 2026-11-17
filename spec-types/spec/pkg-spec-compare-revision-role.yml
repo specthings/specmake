@@ -16,8 +16,8 @@ spec-info:
     attributes:
       enabled-set-actions:
         description: |
-          It shall be the list of enabled set actions to produce the previous
-          enabled set from the current enabled set.
+          It shall be the list of enabled set actions to produce the previous enabled set
+          from the current enabled set.
         spec-type: enabled-set-action-list
       label:
         description: |
@@ -44,8 +44,8 @@ spec-info:
           It shall be the list of UIDs of validation test suites.
         spec-type: list-str
     description: |
-      The input link shall reference the repository containing the
-      specification revision.
+      The input link shall reference the repository containing the specification
+      revision.
     mandatory-attributes: all
 spec-name: Specification Comparison Revision Input Link Role
 spec-type: pkg-input-spec-compare-revision-role

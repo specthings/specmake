@@ -16,8 +16,7 @@ spec-info:
     attributes:
       missing-ok:
         description: |
-          It shall be true, if the file or directory may be missing, otherwise
-          false.
+          It shall be true, if the file or directory may be missing, otherwise false.
         spec-type: bool
       path:
         description: |

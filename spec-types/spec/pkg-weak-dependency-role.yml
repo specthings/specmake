@@ -15,8 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the weak dependency role of links and is used to define a
-      package build ordering dependency which is not an input.
+      It defines the weak dependency role of links and is used to define a package
+      build ordering dependency which is not an input.
     mandatory-attributes: all
 spec-name: Weak Dependency Link Role
 spec-type: pkg-weak-dependency-role

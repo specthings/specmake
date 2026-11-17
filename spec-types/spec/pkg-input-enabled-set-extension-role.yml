@@ -16,8 +16,8 @@ spec-info:
     attributes:
       enabled-set-extension:
         description: |
-          It shall be the list of optionally enabled elements.  The additional
-          elements extend the enabled set associated with the link target.
+          It shall be the list of optionally enabled elements. The additional elements
+          extend the enabled set associated with the link target.
         spec-type: pkg-enabled-set-extension-list
     description: null
     mandatory-attributes: all

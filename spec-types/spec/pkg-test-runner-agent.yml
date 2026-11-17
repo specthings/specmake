@@ -35,8 +35,8 @@ spec-info:
           It shall be the list of transports to the test server.
         spec-type: pkg-test-runner-transport-list
     description: |
-      This set of attributes specifies a test runner which submits the tests
-      to a test server through the transport which the enabled set selects.
+      This set of attributes specifies a test runner which submits the tests to a
+      test server through the transport which the enabled set selects.
     mandatory-attributes: all
 spec-name: Agent Test Runner Item Type
 spec-type: pkg-test-runner-agent

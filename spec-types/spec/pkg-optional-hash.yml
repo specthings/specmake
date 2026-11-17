@@ -14,8 +14,8 @@ spec-info:
     - re: ^[A-Za-z0-9+_=-]{44}$
     - re: ^[A-Za-z0-9+_=-]{88}$
     description: |
-      If the value is present, then it shall be a SHA256 or SHA512 hash value
-      encoded in base64url.
+      If the value is present, then it shall be a SHA256 or SHA512 hash value encoded
+      in base64url.
 spec-name: Optional Hash
 spec-type: pkg-optional-hash
 type: spec

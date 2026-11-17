@@ -15,16 +15,14 @@ spec-info:
     attributes:
       elf-note-expected:
         description: |
-          The expression states the values of the note which the test analysis
-          accepts.
+          The expression states the values of the note which the test analysis accepts.
         spec-type: spec-assert-str
       elf-note-key:
         description: |
           It shall be the key of the RTEMS ELF note.
         spec-type: str
     description: |
-      This set of attributes specifies the expected value of an RTEMS ELF
-      note.
+      This set of attributes specifies the expected value of an RTEMS ELF note.
     mandatory-attributes: all
 spec-name: Expected ELF Note
 spec-type: pkg-expected-elf-note

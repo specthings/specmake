@@ -20,17 +20,17 @@ spec-info:
         spec-type: pkg-repository-filter-cpp-defined
       files:
         description: |
-          It shall be the list of path globs which select the files of the rule.
-          A ``*`` and a ``?`` match within one directory.  A ``**`` matches across
-          directories, and a ``**/`` matches no directory too.
+          It shall be the list of path globs which select the files of the rule. A `*`
+          and a `?` match within one directory. A `**` matches across directories, and a
+          `**/` matches no directory too.
         spec-type: list-str
       undefined:
         description: |
           It shall be the list of undefined symbols.
         spec-type: list-str
     description: |
-      This set of attributes specifies a content rule which pipes a file
-      through the ``unifdef`` tool.  An unbalanced conditional fails the filter.
+      This set of attributes specifies a content rule which pipes a file through the
+      `unifdef` tool. An unbalanced conditional fails the filter.
     mandatory-attributes: all
 spec-name: Repository Filter C Preprocessor Rule
 spec-type: pkg-repository-filter-content-rule-cpp

@@ -11,9 +11,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It shall map the name of a source item to a group name.  A null group
-      name states that the item belongs to no group, so the task generates no
-      item for it.
+      It shall map the name of a source item to a group name. A null group name
+      states that the item belongs to no group, so the task generates no item for it.
     generic-attributes:
       description: null
       key-spec-type: str

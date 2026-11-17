@@ -24,17 +24,16 @@ spec-info:
         spec-type: str
       property-name:
         description: |
-          It shall be the name of the test property.  This name is used in test
-          reports.
+          It shall be the name of the test property. This name is used in test reports.
         spec-type: str
       type:
         description: |
-          It shall be the type of the test property.  The type is used to
-          evaluate the property in the analysis of the test results.
+          It shall be the type of the test property. The type is used to evaluate the
+          property in the analysis of the test results.
         spec-type: str
     description: |
-      It defines the test property input role of links.  A test aggregation
-      uses it to provide a property for the analysis of its test results.
+      It defines the test property input role of links. A test aggregation uses it to
+      provide a property for the analysis of its test results.
     mandatory-attributes: all
 spec-name: Test Property Input Link Role
 spec-type: pkg-input-test-property-role

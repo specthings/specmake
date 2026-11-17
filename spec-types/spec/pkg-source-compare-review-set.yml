@@ -12,11 +12,11 @@ spec-info:
     attributes: {}
     description: |
       This set of attributes specifies a set of reviews.
-    mandatory-attributes: all
     generic-attributes:
       description: null
       key-spec-type: str
       value-spec-type: pkg-source-compare-review
+    mandatory-attributes: all
 spec-name: Source Comparison Review Set
 spec-type: pkg-source-compare-review-set
 type: spec

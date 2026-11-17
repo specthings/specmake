@@ -12,23 +12,27 @@ links:
 spec-description: |
   Items of this type shall have the following links:
 
-  * There shall be exactly one link to a ${pkg-directory-state:/spec-name} item
-    with the ${pkg-input-role:/spec-name} and the name ``"source"``.  The link
+  - There shall be exactly one link to a ${pkg-directory-state:/spec-name} item
+    with the ${pkg-input-role:/spec-name} and the name `"source"`. The link
     target directory state item defines the source directory of the file copy
     operation and the list of files to copy.
 
-  * There shall be exactly one link to a ${pkg-directory-state:/spec-name} item
-    with the ${pkg-output-role:/spec-name} and the name ``"build"``.  The link
+  - There shall be exactly one link to a ${pkg-directory-state:/spec-name} item
+    with the ${pkg-output-role:/spec-name} and the name `"build"`. The link
     target directory state item defines the build directory.
 spec-example: null
 spec-info:
   dict:
     attributes:
+      document-accepted-licenses:
+        description: |
+          It shall be the licenses which the document accepts for a part whose license
+          expression permits not the license of the document.
+        spec-type: pkg-accepted-licenses
       document-base-path:
         description: |
-          It shall be the document base path.  Links to other documents will be
-          relative to this path.  Use ``/`` to disable the use of relative
-          paths.
+          It shall be the document base path. Links to other documents will be relative
+          to this path. Use `/` to disable the use of relative paths.
         spec-type: str
       document-components:
         description: null
@@ -38,17 +42,16 @@ spec-info:
         spec-type: pkg-sphinx-contributor-action-list
       document-copyrights:
         description: |
-          It shall be the list of copyright statements of explicit contributors
-          to the document.  The first contributor on the list is the main
-          contributor.
+          It shall be the list of copyright statements of explicit contributors to the
+          document. The first contributor on the list is the main contributor.
         spec-type: copyrights
-      document-html-help-base-name:
-        description: |
-          It shall be the HTML help base name.
-        spec-type: str
       document-html-footer:
         description: |
           It shall be the HTML extra footer.
+        spec-type: str
+      document-html-help-base-name:
+        description: |
+          It shall be the HTML help base name.
         spec-type: str
       document-key:
         description: |
@@ -72,13 +75,8 @@ spec-info:
         spec-type: str
       document-latex-theme:
         description: |
-          It shall be the document LaTeX theme (for example: ``manual`` or ``howto``).
+          It shall be the document LaTeX theme (for example: `manual` or `howto`).
         spec-type: str
-      document-accepted-licenses:
-        description: |
-          It shall be the licenses which the document accepts for a part whose
-          license expression permits not the license of the document.
-        spec-type: pkg-accepted-licenses
       document-license:
         description: |
           It shall be the license of the document.
@@ -88,13 +86,13 @@ spec-info:
         spec-type: pkg-sphinx-release-list
       document-relicensing:
         description: |
-          If the value is present, then it shall be the relicensing rules of
-          the document.
+          If the value is present, then it shall be the relicensing rules of the
+          document.
         spec-type: pkg-relicensing-rule-list
       document-title:
         description: |
-          It shall be the document title.  Use ``$${break}`` to add break hints
-          between words.
+          It shall be the document title. Use `$${break}` to add break hints between
+          words.
         spec-type: str
       document-toctree-maxdepth:
         description: |
@@ -106,19 +104,18 @@ spec-info:
         spec-type: str
       output-html:
         description: |
-          If the value is present, then it shall be the path to the generated
-          HTML document directory relative to the base directory of the
-          directory state production.
+          If the value is present, then it shall be the path to the generated HTML
+          document directory relative to the base directory of the directory state
+          production.
         spec-type: optional-str
       output-pdf:
         description: |
-          If the value is present, then it shall be the path to the generated
-          PDF document relative to the base directory of the directory state
-          production.
+          If the value is present, then it shall be the path to the generated PDF
+          document relative to the base directory of the directory state production.
         spec-type: optional-str
     description: |
-      This set of attributes specifies a document using the Sphinx
-      documentation framework.
+      This set of attributes specifies a document using the Sphinx documentation
+      framework.
     mandatory-attributes:
     - document-base-path
     - document-components

@@ -24,25 +24,23 @@ spec-info:
         spec-type: str
       do-not-run:
         description: |
-          It shall be the list of test executables which the target does not
-          run.  An entry with a reason justifies each coverage gap which only
-          its test executables reach.
+          It shall be the list of test executables which the target does not run. An
+          entry with a reason justifies each coverage gap which only its test executables
+          reach.
         spec-type: pkg-test-runner-do-not-run-list
       max-retry-count-per-executable:
         description: |
-          It shall be the maximum count of retries per executable.  With a
-          value of zero exactly one run per executable is performed.  An
-          executable run is retried if no report was produced, if the test
-          runner reported an error such as a timeout, an exception, or a match
-          with a discard pattern, if the test output contained a begin of test
-          message but no end of test message, if the gcov information was
-          corrupt, or if the test suite report was corrupt.  An executable run
-          with a test state of EXPECTED_FAIL or USER_INPUT is not retried if
-          the test runner reported an error other than a match with a discard
-          pattern or if the test output contained a begin of test message but
-          no end of test message.  The test state of the test-state ELF note
-          of the executable takes precedence over the test state of the test
-          output.
+          It shall be the maximum count of retries per executable. With a value of zero
+          exactly one run per executable is performed. An executable run is retried if no
+          report was produced, if the test runner reported an error such as a timeout, an
+          exception, or a match with a discard pattern, if the test output contained a
+          begin of test message but no end of test message, if the gcov information was
+          corrupt, or if the test suite report was corrupt. An executable run with a test
+          state of EXPECTED_FAIL or USER_INPUT is not retried if the test runner reported
+          an error other than a match with a discard pattern or if the test output
+          contained a begin of test message but no end of test message. The test state of
+          the test-state ELF note of the executable takes precedence over the test state
+          of the test output.
         spec-type: int
       min-timeout-in-seconds:
         description: |
@@ -54,8 +52,8 @@ spec-info:
         spec-type: str
       params:
         description: |
-          It shall be an optional set of parameters which may be used for
-          variable substitution.
+          It shall be an optional set of parameters which may be used for variable
+          substitution.
         spec-type: any
       test-runner-type:
         description: |
@@ -66,12 +64,11 @@ spec-info:
           It shall be the timeout scaling factor.
         spec-type: float
     description: |
-      This set of attributes specifies a test runner.  Let *E* be the
-      test-specific timeout or the default timeout associated with a test
-      executable.  Let *M* be the maximum of *E* and the specified minimum
-      timeout.  Let *S* be *M* multiplied by the specified timeout scaler.  The
-      value *S* is passed to the test runner as the recommended timeout in
-      seconds for each test executable.
+      This set of attributes specifies a test runner. Let *E* be the test-specific
+      timeout or the default timeout associated with a test executable. Let *M* be
+      the maximum of *E* and the specified minimum timeout. Let *S* be *M* multiplied
+      by the specified timeout scaler. The value *S* is passed to the test runner as
+      the recommended timeout in seconds for each test executable.
     mandatory-attributes: all
 spec-name: Test Runner Item Type
 spec-type: pkg-test-runner

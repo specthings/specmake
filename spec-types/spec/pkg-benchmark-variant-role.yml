@@ -20,17 +20,16 @@ spec-info:
         spec-type: str
       priority:
         description: |
-          It shall be the benchmark variant priority.  A benchmark variant
-          which the lexicographically earliest priority value will be the
-          baseline.
+          It shall be the benchmark variant priority. A benchmark variant which the
+          lexicographically earliest priority value will be the baseline.
         spec-type: str
       variant-name:
         description: |
           It shall be the benchmark variant name.
         spec-type: str
     description: |
-      It defines the benchmark variant role of links and is used to register a
-      test log with an associated benchmark variant at the package manual.
+      It defines the benchmark variant role of links and is used to register a test
+      log with an associated benchmark variant at the package manual.
     mandatory-attributes: all
 spec-name: Benchmark Variant Link Role
 spec-type: pkg-benchmark-variant-role

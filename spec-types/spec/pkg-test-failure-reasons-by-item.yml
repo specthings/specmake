@@ -11,12 +11,12 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      This set of attributes contains the reasons of the unexpected test
-      failures of a target by item.
+      This set of attributes contains the reasons of the unexpected test failures of
+      a target by item.
     generic-attributes:
       description: |
-        The key shall be the UID of the item with an unexpected test failure.
-        The value shall be the list of the reasons of the failures.
+        The key shall be the UID of the item with an unexpected test failure. The value
+        shall be the list of the reasons of the failures.
       key-spec-type: str
       value-spec-type: list-str
     mandatory-attributes: none

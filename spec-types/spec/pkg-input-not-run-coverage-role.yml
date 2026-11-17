@@ -15,9 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the not run coverage input role of links.  A link of this
-      role gives a test aggregator the coverage of the tests which a target
-      does not run.
+      It defines the not run coverage input role of links. A link of this role gives
+      a test aggregator the coverage of the tests which a target does not run.
     mandatory-attributes: all
 spec-name: Not Run Coverage Input Link Role
 spec-type: pkg-input-not-run-coverage-role

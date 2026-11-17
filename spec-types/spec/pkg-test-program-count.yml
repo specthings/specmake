@@ -16,22 +16,20 @@ spec-info:
         spec-type: int
       passed:
         description: |
-          It shall be the count of test programs without a failure and
-          without a verification which expects a failure.
+          It shall be the count of test programs without a failure and without a
+          verification which expects a failure.
         spec-type: int
       unexpected-failures:
         description: |
-          It shall be the count of test programs with at least one unexpected
-          failure.
+          It shall be the count of test programs with at least one unexpected failure.
         spec-type: int
       unexpected-passes:
         description: |
-          It shall be the count of test programs without a failure for which
-          a verification expects a failure.
+          It shall be the count of test programs without a failure for which a
+          verification expects a failure.
         spec-type: int
     description: |
-      This set of attributes counts the test programs of a target by their
-      verdict.
+      This set of attributes counts the test programs of a target by their verdict.
     mandatory-attributes: all
 spec-name: Test Program Count
 spec-type: pkg-test-program-count

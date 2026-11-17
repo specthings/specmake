@@ -20,8 +20,8 @@ spec-info:
         spec-type: tool-task-spec-from-source-data
       data-by-uid:
         description: |
-          It shall map the UID of a generated item to the attributes which the
-          task sets in that item and in no other.
+          It shall map the UID of a generated item to the attributes which the task sets
+          in that item and in no other.
         spec-type: tool-task-spec-from-source-data-by-uid
       default-group-name:
         description: |
@@ -56,10 +56,10 @@ spec-info:
           It shall map a type name of the source to a type name of the items.
         spec-type: str-to-str
     description: |
-      This set of attributes specifies a task which generates specification
-      items from the source of another project.  A task states no attribute
-      while it bootstraps a configuration, and a run which generates an item
-      demands the data of that item.
+      This set of attributes specifies a task which generates specification items
+      from the source of another project. A task states no attribute while it
+      bootstraps a configuration, and a run which generates an item demands the data
+      of that item.
     mandatory-attributes: none
 spec-name: Tool Specification From Source Task
 spec-type: tool-task-spec-from-source

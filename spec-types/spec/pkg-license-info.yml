@@ -12,13 +12,12 @@ spec-info:
     attributes:
       copyrights:
         description: |
-          It shall be the copyrights of the parts which the work takes under
-          the license.
+          It shall be the copyrights of the parts which the work takes under the license.
         spec-type: copyrights
       expressions:
         description: |
-          It shall be the license expressions of the parts which the work
-          takes under the license.
+          It shall be the license expressions of the parts which the work takes under the
+          license.
         spec-type: pkg-license-expression-list
       license:
         description: |
@@ -26,12 +25,11 @@ spec-info:
         spec-type: spdx-license-identifier
       provenance:
         description: |
-          It shall be the origins of the parts which the work takes under the
-          license.
+          It shall be the origins of the parts which the work takes under the license.
         spec-type: list-str
     description: |
-      This set of attributes states the parts of a work which the work takes
-      under one license.
+      This set of attributes states the parts of a work which the work takes under
+      one license.
     mandatory-attributes: all
 spec-name: License Information
 spec-type: pkg-license-info

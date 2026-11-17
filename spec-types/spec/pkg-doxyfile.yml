@@ -16,13 +16,11 @@ spec-info:
     attributes:
       generate-html:
         description: |
-          It shall be true, to enable generation of HTML output, otherwise
-          false.
+          It shall be true, to enable generation of HTML output, otherwise false.
         spec-type: bool
       generate-latex:
         description: |
-          It shall be true, to enable generation of LaTeX output, otherwise
-          false.
+          It shall be true, to enable generation of LaTeX output, otherwise false.
         spec-type: bool
     description: |
       This set of attributes specifies a Doxyfile.

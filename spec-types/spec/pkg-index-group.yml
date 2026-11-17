@@ -12,20 +12,18 @@ links:
 spec-description: |
   Items of this type shall have the following links:
 
-  * There shall be exactly one link to a ${pkg-index:/spec-name} item or to
+  - There shall be exactly one link to a ${pkg-index:/spec-name} item or to
     another ${pkg-index-group:/spec-name} item with the
-    ${pkg-index-member-role:/spec-name}.  The link defines the section title
-    and the section order.  A link to another group makes this group a
-    subsection of it, which lets the sections follow the component hierarchy of
-    the package.
+    ${pkg-index-member-role:/spec-name}. The link defines the section title and
+    the section order. A link to another group makes this group a subsection of
+    it, which lets the sections follow the component hierarchy of the package.
 
-  * There shall be links to a ${pkg-directory-state:/spec-name} item with the
-    ${pkg-index-member-role:/spec-name}.  The link target directory state item
+  - There shall be links to a ${pkg-directory-state:/spec-name} item with the
+    ${pkg-index-member-role:/spec-name}. The link target directory state item
     defines a document of the section.
 
-  A package component registers its own sections through these links.  A
-  section which holds neither a document nor a subsection is left out of the
-  page.
+  A package component registers its own sections through these links. A section
+  which holds neither a document nor a subsection is left out of the page.
 spec-example: null
 spec-info:
   dict:

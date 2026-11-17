@@ -16,19 +16,18 @@ spec-info:
     attributes:
       count:
         description: |
-          It shall be the maximum count of substitutions.  The value 0 substitutes
-          each match.
+          It shall be the maximum count of substitutions. The value 0 substitutes each
+          match.
         spec-type: int
       files:
         description: |
-          It shall be the list of path globs which select the files of the rule.
-          A ``*`` and a ``?`` match within one directory.  A ``**`` matches across
-          directories, and a ``**/`` matches no directory too.
+          It shall be the list of path globs which select the files of the rule. A `*`
+          and a `?` match within one directory. A `**` matches across directories, and a
+          `**/` matches no directory too.
         spec-type: list-str
       flags:
         description: |
-          It shall be the list of the names of the ``re`` flags, such as
-          ``MULTILINE``.
+          It shall be the list of the names of the `re` flags, such as `MULTILINE`.
         spec-type: list-str
       pattern:
         description: |
@@ -36,11 +35,11 @@ spec-info:
         spec-type: str
       replacement:
         description: |
-          It shall be the replacement in the form of ``re.sub()``.
+          It shall be the replacement in the form of `re.sub()`.
         spec-type: str
     description: |
-      This set of attributes specifies a content rule which substitutes the
-      matches of a regular expression in the text of a file with ``re.sub()``.
+      This set of attributes specifies a content rule which substitutes the matches
+      of a regular expression in the text of a file with `re.sub()`.
     mandatory-attributes: all
 spec-name: Repository Filter Regular Expression Rule
 spec-type: pkg-repository-filter-content-rule-regex

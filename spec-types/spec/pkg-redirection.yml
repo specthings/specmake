@@ -16,8 +16,8 @@ spec-info:
     attributes:
       params:
         description: |
-          It shall be an optional set of parameters which may be used for
-          variable substitution.
+          It shall be an optional set of parameters which may be used for variable
+          substitution.
         spec-type: any
     description: |
       This set of attributes specifies a build item redirection.

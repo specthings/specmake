@@ -14,10 +14,6 @@ spec-example: null
 spec-info:
   dict:
     attributes:
-      description:
-        description: |
-          It shall be the description of the unpacked archive.
-        spec-type: str
       archive-file:
         description: |
           It shall be the archive file.
@@ -32,10 +28,14 @@ spec-info:
         spec-type: pkg-patch-list
       archive-url:
         description: |
-          It shall be the archive download URL.  A list of URLs may be provided
-          to query multiple download sources.  This may increase the download
-          availability in case of service failures.
+          It shall be the archive download URL. A list of URLs may be provided to query
+          multiple download sources. This may increase the download availability in case
+          of service failures.
         spec-type: str-or-list-str
+      description:
+        description: |
+          It shall be the description of the unpacked archive.
+        spec-type: str
       symbolic-links:
         description: |
           It shall be the list of symbolic links added to the unpacked archive.

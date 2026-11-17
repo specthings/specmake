@@ -10,9 +10,9 @@ spec-example: null
 spec-info:
   list:
     description: |
-      It shall be the license information of a work.  An entry states the
-      parts which the work takes under a license other than its primary
-      license.  The package document reproduces the license of each entry.
+      It shall be the license information of a work. An entry states the parts which
+      the work takes under a license other than its primary license. The package
+      document reproduces the license of each entry.
     spec-type: pkg-license-info
 spec-name: License Information List
 spec-type: pkg-license-info-list

@@ -24,21 +24,20 @@ spec-info:
         spec-type: enabled-set-action-list
       enabled-set-feedback-mapping:
         description: |
-          It shall be the mapping of patterns to replacements.  Each key is a
-          Python regular expression.  It matches an enabled set key of the
-          component in full.  The tool expands the match in the replacement
-          and converts the result to lower case.  The result is an enabled set
-          key of the upper-level component.  Several patterns may match one
-          key.  A value which a variable substitution inserts into a key is
-          part of the regular expression.
+          It shall be the mapping of patterns to replacements. Each key is a Python
+          regular expression. It matches an enabled set key of the component in full. The
+          tool expands the match in the replacement and converts the result to lower
+          case. The result is an enabled set key of the upper-level component. Several
+          patterns may match one key. A value which a variable substitution inserts into
+          a key is part of the regular expression.
         spec-type: str-to-str
     description: |
       This set of attributes specifies a workspace component.
-    mandatory-attributes: all
     generic-attributes:
       description: null
       key-spec-type: name
       value-spec-type: any
+    mandatory-attributes: all
 spec-name: Workspace Component Item Type
 spec-type: pkg-workspace-component
 type: spec

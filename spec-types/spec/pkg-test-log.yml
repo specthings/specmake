@@ -16,11 +16,10 @@ spec-info:
     attributes:
       expected-elf-notes:
         description: |
-          The list states the expected values of RTEMS ELF notes of the
-          executables of the test log.  An entry replaces the built-in
-          expectation of its note.  The built-in expectations hold for the
-          notes without an entry.  The printed lines of the test output keep
-          their built-in expectations.
+          The list states the expected values of RTEMS ELF notes of the executables of
+          the test log. An entry replaces the built-in expectation of its note. The
+          built-in expectations hold for the notes without an entry. The printed lines of
+          the test output keep their built-in expectations.
         spec-type: pkg-expected-elf-note-list
     description: |
       This set of attributes specifies a test log.

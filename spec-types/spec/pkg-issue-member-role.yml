@@ -15,8 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the issue membership role of links and is used to associate an
-      issue with its database.
+      It defines the issue membership role of links and is used to associate an issue
+      with its database.
     mandatory-attributes: all
 spec-name: Issue Member Link Role
 spec-type: pkg-issue-member-role

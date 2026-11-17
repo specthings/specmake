@@ -35,8 +35,7 @@ spec-info:
           It shall be the path to start the search for tarfiles.
         spec-type: str
     description: |
-      This set of attributes specifies a directory state add tarfile members
-      action.
+      This set of attributes specifies a directory state add tarfile members action.
     mandatory-attributes: all
 spec-name: Directory State Add Tarfile Members Action
 spec-type: pkg-action-directory-state-add-tarfile-members

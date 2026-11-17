@@ -19,9 +19,9 @@ spec-info:
           It shall be the path to the base directory of the removal action.
         spec-type: str
     description: |
-      This set of attributes specifies a removal of empty directories action.
-      The action recursively removes all empty subdirectories of the base
-      directory and the base directory itself if it gets empty.
+      This set of attributes specifies a removal of empty directories action. The
+      action recursively removes all empty subdirectories of the base directory and
+      the base directory itself if it gets empty.
     mandatory-attributes: all
 spec-name: Remove Empty Directories Action
 spec-type: pkg-action-remove-empty-directories

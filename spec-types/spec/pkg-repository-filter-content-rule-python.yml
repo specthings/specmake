@@ -17,14 +17,14 @@ spec-info:
       code:
         description: |
           It shall be Python code which defines the function
-          ``filter_content(path: str, content: bytes) -> bytes``.  The function shall
-          return the new content of the file at the path.
+          `filter_content(path: str, content: bytes) -> bytes`. The function shall return
+          the new content of the file at the path.
         spec-type: str
       files:
         description: |
-          It shall be the list of path globs which select the files of the rule.
-          A ``*`` and a ``?`` match within one directory.  A ``**`` matches across
-          directories, and a ``**/`` matches no directory too.
+          It shall be the list of path globs which select the files of the rule. A `*`
+          and a `?` match within one directory. A `**` matches across directories, and a
+          `**/` matches no directory too.
         spec-type: list-str
     description: |
       This set of attributes specifies a content rule which runs Python code.

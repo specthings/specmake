@@ -19,8 +19,7 @@ spec-info:
           It shall be the measured value of the metric.
         spec-type: str
     description: |
-      This set of attributes specifies the verdict of the reviewer for a
-      metric.
+      This set of attributes specifies the verdict of the reviewer for a metric.
     mandatory-attributes: all
 spec-name: SPAMR Metric Verdict
 spec-type: pkg-spamr-metric-verdict

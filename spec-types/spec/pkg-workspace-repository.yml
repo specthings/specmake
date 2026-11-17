@@ -20,8 +20,8 @@ spec-info:
         spec-type: str
       clone-depth:
         description: |
-          If the value is present, it shall be the Git clone depth, otherwise
-          the Git branch of the repository is completely cloned.
+          If the value is present, it shall be the Git clone depth, otherwise the Git
+          branch of the repository is completely cloned.
         spec-type: optional-int
       commit:
         description: |
@@ -59,9 +59,9 @@ spec-info:
         spec-type: optional-str
       origin-fetch:
         description: |
-          It shall be a list of conditional Git ``refspec`` items.  For each
-          enabled ``refspec`` item, a Git fetch command is issued after cloning
-          the repository and before checking out the branch.
+          It shall be a list of conditional Git `refspec` items. For each enabled
+          `refspec` item, a Git fetch command is issued after cloning the repository and
+          before checking out the branch.
         spec-type: str-conditional-list
       origin-url:
         description: |
@@ -69,14 +69,13 @@ spec-info:
         spec-type: optional-str
       post-clone-commands:
         description: |
-          It shall be the list of commands issued after cloning the repository
-          and checking out the branch.  The working directory of the commands
-          is the destination directory.
+          It shall be the list of commands issued after cloning the repository and
+          checking out the branch. The working directory of the commands is the
+          destination directory.
         spec-type: list-list-str
       symbolic-links:
         description: |
-          It shall be the list of symbolic links added to the cloned
-          repository.
+          It shall be the list of symbolic links added to the cloned repository.
         spec-type: pkg-symbolic-link-list
     description: |
       This set of attributes specifies a workspace repository.

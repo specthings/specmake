@@ -11,12 +11,11 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      This set of attributes maps symbols of ``enabled-by`` expressions to
-      their values.
+      This set of attributes maps symbols of `enabled-by` expressions to their
+      values.
     generic-attributes:
       description: |
-        The key shall be the symbol.  The value shall be the value of the
-        symbol.
+        The key shall be the symbol. The value shall be the value of the symbol.
       key-spec-type: str
       value-spec-type: bool
     mandatory-attributes: none

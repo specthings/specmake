@@ -14,6 +14,13 @@ spec-example: null
 spec-info:
   dict:
     attributes:
+      accepted-licenses:
+        description: |
+          It shall be the licenses which a work of the component accepts for a part whose
+          license expression permits not the license of the work. A component which
+          states none takes the accepted licenses of its parent component. A root
+          component which states none accepts no license.
+        spec-type: pkg-accepted-licenses
       component-type:
         description: |
           It shall be the component type.
@@ -24,36 +31,27 @@ spec-info:
         spec-type: list-str
       export-clearance:
         description: |
-          It shall be the attribute paths which the export of the package
-          clears.  The export clears the value of each path in the component
-          and in each attribute action of a template which the component uses
-          directly or through other templates.  A path segment may select a
-          list element by an index in brackets.  The export skips a path which
-          names no value.  A list becomes empty, a dictionary becomes empty,
-          and a string becomes the empty string.
+          It shall be the attribute paths which the export of the package clears. The
+          export clears the value of each path in the component and in each attribute
+          action of a template which the component uses directly or through other
+          templates. A path segment may select a list element by an index in brackets.
+          The export skips a path which names no value. A list becomes empty, a
+          dictionary becomes empty, and a string becomes the empty string.
         spec-type: list-str
-      accepted-licenses:
-        description: |
-          It shall be the licenses which a work of the component accepts for a
-          part whose license expression permits not the license of the work.
-          A component which states none takes the accepted licenses of its
-          parent component.  A root component which states none accepts no
-          license.
-        spec-type: pkg-accepted-licenses
       license:
         description: |
-          It shall be the license of a work of the component.  A component
-          which states none takes the license of its parent component.
+          It shall be the license of a work of the component. A component which states
+          none takes the license of its parent component.
         spec-type: spdx-license-identifier
     description: |
       This set of attributes specifies a package component.
-    mandatory-attributes:
-    - component-type
-    - enabled-set
     generic-attributes:
       description: null
       key-spec-type: name
       value-spec-type: any
+    mandatory-attributes:
+    - component-type
+    - enabled-set
 spec-name: Package Component Item Type
 spec-type: pkg-component
 type: spec

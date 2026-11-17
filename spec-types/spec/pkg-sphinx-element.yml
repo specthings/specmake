@@ -20,22 +20,19 @@ spec-info:
         spec-type: str
       element-key:
         description: |
-          It shall be the element key.  Elements of the same key are listed
-          together.
+          It shall be the element key. Elements of the same key are listed together.
         spec-type: name
       header:
         description: |
-          It shall be the element header.  If more than one element is
-          associated with the element key, then the elements are listed using
-          the header followed by the content of each element.  If exactly one
-          element is associated with the element key, then no list is
-          generated, the header is omitted, and only the content of the element
-          is added to the document.
+          It shall be the element header. If more than one element is associated with the
+          element key, then the elements are listed using the header followed by the
+          content of each element. If exactly one element is associated with the element
+          key, then no list is generated, the header is omitted, and only the content of
+          the element is added to the document.
         spec-type: str
     description: |
       This set of attributes specifies a Sphinx element which can be added to a
-      document together with other elements associated with the same element
-      key.
+      document together with other elements associated with the same element key.
     mandatory-attributes: all
 spec-name: Sphinx Element Item Type
 spec-type: pkg-sphinx-element

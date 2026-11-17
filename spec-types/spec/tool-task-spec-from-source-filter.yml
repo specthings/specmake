@@ -19,8 +19,7 @@ spec-info:
           It shall be the patterns of the names which the task takes.
         spec-type: list-str
     description: |
-      This set of attributes selects the names which the task takes from the
-      source.
+      This set of attributes selects the names which the task takes from the source.
     mandatory-attributes: none
 spec-name: Tool Specification From Source Filter
 spec-type: tool-task-spec-from-source-filter

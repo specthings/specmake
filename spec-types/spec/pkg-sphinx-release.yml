@@ -12,8 +12,8 @@ spec-info:
     attributes:
       changes:
         description: |
-          It shall be a summary of the document changes for this release in
-          Sphinx format.  A variable substitution is performed.
+          It shall be a summary of the document changes for this release in Sphinx
+          format. A variable substitution is performed.
         spec-type: str
       date:
         description: |

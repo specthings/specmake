@@ -12,12 +12,12 @@ spec-info:
     attributes:
       continue:
         description: |
-          It shall be true, to continue with the file mapping process after at
-          least one replacement for the pattern, otherwise false.
+          It shall be true, to continue with the file mapping process after at least one
+          replacement for the pattern, otherwise false.
         spec-type: bool
       count:
         description: |
-          It shall be the maximum replacement count.  If the value is zero, all
+          It shall be the maximum replacement count. If the value is zero, all
           occurrences will be replaced.
         spec-type: int
       pattern:

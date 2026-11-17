@@ -15,10 +15,9 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the directory state exclude role of links.  Such links are
-      used to exclude the files of the referenced
-      ${pkg-directory-state:/spec-name} from the pattern defined directory
-      state.
+      It defines the directory state exclude role of links. Such links are used to
+      exclude the files of the referenced ${pkg-directory-state:/spec-name} from the
+      pattern defined directory state.
     mandatory-attributes: all
 spec-name: Directory State Exclude Link Role
 spec-type: pkg-directory-state-exclude-role

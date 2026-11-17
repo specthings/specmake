@@ -15,8 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the test log input role of links.  It is used to provide a
-      test log file with test results to a test aggregator.
+      It defines the test log input role of links. It is used to provide a test log
+      file with test results to a test aggregator.
     mandatory-attributes: all
 spec-name: Test Log Input Link Role
 spec-type: pkg-input-test-log-role

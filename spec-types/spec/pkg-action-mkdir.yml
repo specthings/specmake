@@ -20,8 +20,8 @@ spec-info:
         spec-type: bool
       parents:
         description: |
-          It shall be true, if missing parent directories shall be created,
-          otherwise false.
+          It shall be true, if missing parent directories shall be created, otherwise
+          false.
         spec-type: bool
       path:
         description: |
