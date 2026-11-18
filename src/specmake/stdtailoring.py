@@ -177,6 +177,9 @@ def _add_clause(content: TextContent, builder: SphinxBuilder, name: str,
                     f":ref:`tailoring table <CM{clause.ident}>`.")
 
 
+_TAILORING_KEY = "ecss-tailoring"
+
+
 def _ecss_order(item: Item) -> list:
     return [int(i) for i in item["section"].split(".")] + [item["bullet"]]
 
@@ -186,6 +189,7 @@ class StandardTailoringProvider(DocumentBuilderValueProvider):
 
     def __init__(self, builder: SphinxBuilder) -> None:
         super().__init__(builder)
+        self._warned_no_tailoring = False
         mapper = builder.mapper
         for name in [builder.item.type, "pkg/sphinx-section"]:
             mapper.add_get_value(f"{name}:/standard-tailoring",
@@ -262,33 +266,47 @@ class StandardTailoringProvider(DocumentBuilderValueProvider):
             content.add_grid_table(rows, [30, 10, 60])
         return content.join()
 
+    def _get_clause_reference(self, ctx: ItemGetValueContext,
+                              name: str) -> str:
+        # A build without the standard tailoring renders the clause as text.
+        try:
+            self.builder.get_resource(_TAILORING_KEY)
+        except KeyError:
+            if not self._warned_no_tailoring:
+                self._warned_no_tailoring = True
+                logging.warning(
+                    "%s: there is no resource associated with resource key "
+                    "'%s', so the ECSS clause references have no link",
+                    self.builder.item.uid, _TAILORING_KEY)
+            return name
+        return self.get_reference(ctx, _TAILORING_KEY, name, ctx.item.ident)
+
     def _get_ecss_clause(self, ctx: ItemGetValueContext) -> str:
         item = ctx.item
         name = f"{item['section']}{item['bullet']}"
-        return self.get_reference(ctx, "ecss-tailoring", name, item.ident)
+        return self._get_clause_reference(ctx, name)
 
     def _get_ecss_clause_long(self, ctx: ItemGetValueContext) -> str:
         item = ctx.item
         name = f"{item['section']}{item['bullet']} ({item['name']})"
-        return self.get_reference(ctx, "ecss-tailoring", name, item.ident)
+        return self._get_clause_reference(ctx, name)
 
     def _get_ecss_clause_section(self, ctx: ItemGetValueContext) -> str:
         item = ctx.item
-        return self.get_reference(ctx, "ecss-tailoring", item["section"],
-                                  item.ident)
+        return self._get_clause_reference(ctx, item["section"])
 
     def _get_ecss_standard_and_clause(self, ctx: ItemGetValueContext) -> str:
         item = ctx.item
         name = item.parent("requirement-refinement")["name"]
         name = f"{name} - {item['section']}{item['bullet']}"
-        return self.get_reference(ctx, "ecss-tailoring", name, item.ident)
+        return self._get_clause_reference(ctx, name)
 
     def _get_ecss_standard_and_clause_long(self,
                                            ctx: ItemGetValueContext) -> str:
         item = ctx.item
         name = item.parent("requirement-refinement")["name"]
         name = f"{name} - {item['section']}{item['bullet']} ({item['name']})"
-        return self.get_reference(ctx, "ecss-tailoring", name, item.ident)
+        return self._get_clause_reference(ctx, name)
 
 
 def _export_data(item: Item, present: bool, built_later: bool) -> Any:
