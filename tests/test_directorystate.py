@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# REUSE-IgnoreStart
+
 import logging
 import os
 import pytest
@@ -742,3 +744,6 @@ def test_directorystate_input_file_list():
         "${.:/input-file-list-with-hashes:relpath=%(.:/component/base),source,source}"
     ) == """- :file:`hello.​py` with an SHA512 digest of
   f​6​1​8​0​e​b​f​d​6​f​b​7​d​f​f​1​c​d​c​d​a​5​6​e​6​0​e​b​6​1​1​4​5​1​8​d​1​4​6​7​e​0​e​7​a​a​f​d​2​d​3​b​7​e​b​0​1​6​c​f​7​8​5​c​7​9​8​0​3​a​4​0​c​b​6​d​d​6​0​f​4​9​c​d​7​c​1​4​1​7​5​2​6​a​7​6​e​b​3​4​5​a​e​8​0​6​c​a​4​c​4​2​8​c​a​9​d​6​d​c​8​7​d​1​c​b​a"""
+
+
+# REUSE-IgnoreEnd

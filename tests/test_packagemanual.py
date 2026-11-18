@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# REUSE-IgnoreStart
+
 import contextlib
 import logging
 import os
@@ -1524,3 +1526,6 @@ There is no coverage data available.
 
 And 2 more in scope s of t and configuration k of component c.
 """
+
+
+# REUSE-IgnoreEnd

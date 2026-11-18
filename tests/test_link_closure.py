@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# REUSE-IgnoreStart
+
 import os
 
 import pytest
@@ -157,3 +159,6 @@ def test_link_closure_check_order(tmpdir, capsys):
     assert exc.value.code == 1
     assert "differs in the order or in duplicate lines" in capsys.readouterr(
     ).err
+
+
+# REUSE-IgnoreEnd

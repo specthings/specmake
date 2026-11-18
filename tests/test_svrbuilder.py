@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# REUSE-IgnoreStart
+
 from specmake import SVRBuilder
 
 from .util import build_document
@@ -1531,3 +1533,6 @@ def test_svrbuilder_sdds(caplog, tmpdir):
     assert f"| {other_func} | {other_c} |" in text
     assert f"| {blub} | {group_spec} |" in text
     assert f"| {other_func} | {func_spec} |" in text
+
+
+# REUSE-IgnoreEnd

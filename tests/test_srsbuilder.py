@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# REUSE-IgnoreStart
+
 import pytest
 
 from .util import build_document
@@ -1500,3 +1502,6 @@ Refines
 Validation
     This design property is **not validated**.
 """ in text
+
+
+# REUSE-IgnoreEnd

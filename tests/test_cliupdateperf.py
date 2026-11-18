@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# REUSE-IgnoreStart
+
 import json
 from pathlib import Path
 
@@ -243,3 +245,6 @@ def test_a_report_without_info_gets_parsed(tmp_path):
     assert sorted(limits["/rtems/req/perf"]) == [
         "DirtyCache", "FullCache", "HotCache", "Load/1"
     ]
+
+
+# REUSE-IgnoreEnd

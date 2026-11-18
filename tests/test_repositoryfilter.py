@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# REUSE-IgnoreStart
+
 import copy
 import logging
 import os
@@ -560,3 +562,6 @@ def test_repository_filter_prepare_directory(tmpdir):
     assert repository_filter.content_filter.dropped_paths == {
         "a.yml", "b/c.yml"
     }
+
+
+# REUSE-IgnoreEnd

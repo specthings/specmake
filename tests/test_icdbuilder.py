@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# REUSE-IgnoreStart
+
 from .util import build_document
 
 
@@ -2596,3 +2598,6 @@ Interface placement
 Validation
     This type is **not validated**.
 .. icd-requirements-and-design end"""
+
+
+# REUSE-IgnoreEnd

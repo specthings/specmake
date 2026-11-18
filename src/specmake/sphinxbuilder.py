@@ -65,6 +65,7 @@ _EXTENSIONS = (".md", ".rst")
 
 _COMMENT = {".md": "%", ".rst": ".."}
 
+# REUSE-IgnoreStart
 _HEADERS = {
     ".md":
     re.compile(
@@ -77,6 +78,7 @@ _HEADERS = {
         r"((\.\. Copyright \(C\).*\n)+)\n",
         flags=re.MULTILINE)
 }
+# REUSE-IgnoreEnd
 
 _INVISIBLE_SPACES_AT = re.compile(r"([\/_-]+)")
 
@@ -934,11 +936,13 @@ class SphinxBuilder(DirectoryState):
         match = _HEADERS[extension].match(text)
         if match is None:
             comment = _COMMENT[extension]
+            # REUSE-IgnoreStart
             raise ValueError(
                 f"{self.uid}: the file {path} carries no header of the "
                 f"expected shape: a line '{comment} "
                 "SPDX-License-Identifier: <expression>', a blank line, the "
                 f"lines '{comment} Copyright (C) ...' and a blank line")
+            # REUSE-IgnoreEnd
         the_license = match.group(1)
         statements = [
             statement.partition(" ")[2]

@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# REUSE-IgnoreStart
+
 from pathlib import Path
 
 from .util import create_package
@@ -120,3 +122,6 @@ For this package version, the following issues which were newly or already open 
 
     \\end{{footnotesize}}
 """
+
+
+# REUSE-IgnoreEnd
