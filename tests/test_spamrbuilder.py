@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# REUSE-IgnoreStart
+
 from pathlib import Path
 
 import pytest
@@ -490,3 +492,6 @@ def test_spamrbuilder_code_metrics_without_file_lines(tmpdir):
         encoding="utf-8")
     with pytest.raises(ValueError, match="--std.code.filelines.code"):
         _load_code_metrics(str(path), [])
+
+
+# REUSE-IgnoreEnd

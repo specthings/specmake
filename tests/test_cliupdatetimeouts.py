@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# REUSE-IgnoreStart
+
 import json
 
 import pytest
@@ -366,3 +368,6 @@ def test_the_reset_takes_a_report_of_the_last_update(tmp_path):
 
     # The same report fills the item again, so the reset is repeatable
     assert data["timeouts"]["default"] == {"a.exe": [1.5]}
+
+
+# REUSE-IgnoreEnd

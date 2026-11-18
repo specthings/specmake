@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# REUSE-IgnoreStart
+
 import logging
 import os
 from pathlib import Path
@@ -1408,3 +1410,6 @@ def test_sphinxbuilder_rejects_a_file_header(caplog, tmp_path, monkeypatch):
         encoding="utf-8")
     with pytest.raises(ValueError, match="permits neither"):
         doc.run()
+
+
+# REUSE-IgnoreEnd

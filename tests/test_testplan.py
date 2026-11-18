@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# REUSE-IgnoreStart
+
 from pathlib import Path
 
 import specmake
@@ -1238,3 +1240,6 @@ The following items are not specifically validated by a test:
         "${.:/document-license-text:CC-BY-SA-4.0}")
     assert "© 2026 Alice" in license_text
     assert "© 2026 Bob" in license_text
+
+
+# REUSE-IgnoreEnd

@@ -28,6 +28,10 @@ Git tracks two pickles of types:
 | `src/specmake/spec.pickle` | `spec-types/spec/` | `make` |
 | `tests/spec.pickle` | `tests/spec-types/spec/` | `uv run specpickle tests/spec-types tests/spec.pickle` |
 
+`make analyse` runs `reuse lint`. A new file needs an SPDX header or an entry
+in `REUSE.toml`. Enclose license identifiers which a file holds as data in
+`REUSE-IgnoreStart` and `REUSE-IgnoreEnd` comments.
+
 ## Architecture
 
 specmake builds a package from items of

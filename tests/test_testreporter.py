@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# REUSE-IgnoreStart
+
 import base64
 from pathlib import Path
 from types import SimpleNamespace
@@ -2399,3 +2401,6 @@ def test_report_head_of_a_file_reuse():
         "run-executable-sha512": _digest(1)
     })
     assert text.startswith("This report was produced by the")
+
+
+# REUSE-IgnoreEnd
