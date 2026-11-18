@@ -77,6 +77,25 @@ def test_stdtailoring(caplog, tmpdir):
             "${/standard/clause-0:/standard-and-clause}"
         ) == "`ABCD-X-ST-01Y Rev. 42 - 4.3.1.1x <../doc/path/to/ecss/tailoring-2#standardclause0>`__"
 
+    # Check standard and clause text without a standard tailoring resource
+    with builder_2.component_scope(director["/pkg/component-3"]):
+        caplog.clear()
+        assert builder_2.substitute(
+            "${/standard/clause-0:/clause}") == "4.3.1.1x"
+        assert builder_2.substitute(
+            "${/standard/clause-0:/clause-section}") == "4.3.1.1"
+        assert builder_2.substitute(
+            "${/standard/clause-0:/standard-and-clause}"
+        ) == "ABCD-X-ST-01Y Rev. 42 - 4.3.1.1x"
+        warnings = [
+            record.getMessage() for record in caplog.records
+            if record.levelname == "WARNING"
+        ]
+        assert warnings == [
+            "/pkg/doc-2: there is no resource associated with resource key "
+            "'ecss-tailoring', so the ECSS clause references have no link"
+        ]
+
     # A citation takes no content of the clause, a clause name does.  The
     # document registers a mapped part once it has a content context.
     assert isinstance(builder.content_context, ContentContext)
