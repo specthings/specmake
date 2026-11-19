@@ -523,6 +523,9 @@ def test_builditemmapper():
                               "https://x.y") == "`name <https://x.y>`__"
     mapper.base_path = "/"
     assert mapper.format_reference("name", "label") == ":ref:`name <label>`"
+    assert mapper.format_reference("a<b>c",
+                                   "label") == ":ref:`a\\<b>c <label>`"
+    assert mapper.format_link("a<b>c", "target") == "`a<b>c <target>`__"
 
     mapper.set_format("foobar.md")
     assert mapper.base_path == "/"
@@ -534,6 +537,8 @@ def test_builditemmapper():
     assert mapper.format_link("name", "https://x.y") == "[name](https://x.y)"
     mapper.base_path = "/"
     assert mapper.format_reference("name", "label") == "{ref}`name <label>`"
+    assert mapper.format_reference("a<b>c", "label") == "[a<b>c](label)"
+    assert mapper.format_link("a<b>c", "target") == "[a<b>c](target)"
 
     mapper.set_format("foobar.rst")
     assert mapper.base_path == "/"
