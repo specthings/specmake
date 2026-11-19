@@ -1,0 +1,21 @@
+SPDX-License-Identifier: CC-BY-SA-4.0
+aim: null
+bullet: a
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+ecss-type: requirement
+enabled-by: true
+expected-output: null
+links:
+- role: requirement-refinement
+  uid: standard
+name: Body 0
+non-functional-type: ecss
+notes: []
+rationale: null
+references: []
+requirement-type: non-functional
+section: 5.1.1
+text: |
+  The clause clause-0 shall exist.
+type: requirement

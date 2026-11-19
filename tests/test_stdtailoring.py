@@ -30,7 +30,7 @@ import pytest
 
 from specitems import ContentContext
 
-from specmake import DocumentBuilder, ECSSClause
+from specmake import DocumentBuilder, ECSSAnnex, ECSSClause
 from specmake.rtems import get_substitution_errors
 
 from .util import create_package
@@ -61,6 +61,22 @@ def test_stdtailoring(caplog, tmpdir):
     assert builder.substitute(
         "${/standard/clause-0:/standard-and-clause-long}"
     ) == ":ref:`ABCD-X-ST-01Y Rev. 42 - 4.3.1.1x (Clause 0 name) <StandardClause0>`"
+
+    # Check the references to a clause of an annex
+    assert builder.substitute("${/standard/clause-2:/clause}"
+                              ) == ":ref:`B.2.1\\<4.1>a <StandardClause2>`"
+    assert builder.substitute("${/standard/clause-2:/clause-section}"
+                              ) == ":ref:`B.2.1\\<4.1> <StandardClause2>`"
+    assert builder.substitute(
+        "${/standard/clause-2:/clause-long}"
+    ) == ":ref:`B.2.1\\<4.1>a (Clause 2 name) <StandardClause2>`"
+    assert builder.substitute(
+        "${/standard/clause-2:/standard-and-clause}"
+    ) == ":ref:`ABCD-X-ST-01Y Rev. 42 - B.2.1\\<4.1>a <StandardClause2>`"
+    assert builder.substitute(
+        "${/standard/clause-2:/standard-and-clause-long}") == (
+            ":ref:`ABCD-X-ST-01Y Rev. 42 - B.2.1\\<4.1>a (Clause 2 name) "
+            "<StandardClause2>`")
 
     # Check standard and clause links
     assert builder_2.substitute(
@@ -145,7 +161,7 @@ Tailoring of ABCD-X-ST-01Y Rev. 42
 Clause 1 name (1.2.3.4y)
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. topic:: ABCD-X-ST-01Y Rev. 42 - Clause 1.2.3.4y - ABCD-X-ST-01_clause-1
+.. topic:: ABCD-X-ST-01Y Rev. 42 - Clause 1.2.3.4y - ABCD-X-ST-01_clause-1 - Permission
 
     The clause shall be 1.
 
@@ -239,6 +255,7 @@ For an overview of all clauses, see the :ref:`tailoring table <CMStandardClause0
         "copyrights": [
             "Copyright (C) 2025 embedded brains GmbH & Co. KG",
         ],
+        "ecss-type": "requirement",
         "enabled-by": True,
         "expected-output": None,
         "links": [
@@ -258,6 +275,31 @@ For an overview of all clauses, see the :ref:`tailoring table <CMStandardClause0
         "type": "requirement",
     }
 
+    annex = director["/standard/annex-b"]
+    assert isinstance(annex, ECSSAnnex)
+    assert director.factory.export_data(annex.item, True, 0) == {
+        "SPDX-License-Identifier": "CC-BY-SA-4.0",
+        "annex": "B",
+        "copyrights": [
+            "Copyright (C) 2026 embedded brains GmbH & Co. KG",
+        ],
+        "enabled-by": True,
+        "links": [
+            {
+                "role": "requirement-refinement",
+                "uid": "standard",
+            },
+        ],
+        "name": "Text removed due to license issues",
+        "non-functional-type": "ecss-annex",
+        "rationale": None,
+        "references": [],
+        "requirement-type": "non-functional",
+        "text": "The ${/glossary/ecss:/term} standard ABCD-X-ST-01Y Rev. 42 "
+        "shall contain the\nannex B.\n",
+        "type": "requirement",
+    }
+
 
 def test_stdtailoring_substitution_errors(caplog, tmpdir):
     package = create_package(caplog, Path(tmpdir), Path("stdtailoring/spec"))
@@ -273,6 +315,137 @@ def test_stdtailoring_substitution_errors(caplog, tmpdir):
     clause.data["text"] = "See ${/standard/clause-0:/nix}."
     assert [uid for uid, _ in get_substitution_errors(clause)
             ] == ["/standard/clause-1"]
+
+
+def test_stdtailoring_annexes(caplog, tmpdir):
+    package = create_package(caplog, Path(tmpdir), Path("stdtailoring/spec"))
+    builder = package.director["/pkg/doc-2"]
+
+    # A tailoring of a standard or an annex covers each of its clauses which
+    # has no tailoring of its own.  An annex without a tailoring is missing.
+    assert builder.substitute(
+        "${.:/standard-tailoring}") == '''.. _Standard2Standard:
+
+Tailoring of ABCD-Y-ST-02
+-------------------------
+
+Tailoring Status: N/A
+    The body clauses apply where another standard calls on them.
+
+.. list-table:: Compliance matrix of ABCD-Y-ST-02
+    :widths: 13, 12, 13, 12, 13, 12, 13, 12
+    :header-rows: 1
+
+    * - Clause
+      - Status
+      - Clause
+      - Status
+      - Clause
+      - Status
+      - Clause
+      - Status
+    * - 5.2.1a
+      - .. _CMStandard2Clause1:
+
+        :ref:`Y <Standard2Clause1>`
+      - ​
+      - ​
+      - ​
+      - ​
+      - ​
+      - ​
+
+.. _Standard2Clause1:
+
+Body 1 (5.2.1a)
+^^^^^^^^^^^^^^^
+
+.. topic:: ABCD-Y-ST-02 - Clause 5.2.1a - ABCD-Y-ST-02_clause-1
+
+    The clause clause-1 shall exist.
+
+Tailoring Status: Y
+    Yes.
+
+For an overview of all clauses, see the :ref:`tailoring table <CMStandard2Clause1>`.
+
+.. _Standard2StandardAnnexes:
+
+Annexes of ABCD-Y-ST-02
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _Standard2AnnexA:
+
+Annex A name (Annex A)
+""""""""""""""""""""""
+
+Tailoring Status: N/A
+    The package does not deliver the document.
+
+.. _Standard2AnnexB:
+
+Annex B name (Annex B)
+""""""""""""""""""""""
+
+.. list-table:: Compliance matrix of ABCD-Y-ST-02 Annex B
+    :widths: 13, 12, 13, 12, 13, 12, 13, 12
+    :header-rows: 1
+
+    * - Clause
+      - Status
+      - Clause
+      - Status
+      - Clause
+      - Status
+      - Clause
+      - Status
+    * - B.2.1<2.1>b
+      - .. _CMStandard2Row2:
+
+        :ref:`N <Standard2Row2>`
+      - B.2.1<10>a
+      - .. _CMStandard2Row1:
+
+        :ref:`Y <Standard2Row1>`
+      - ​
+      - ​
+      - ​
+      - ​
+
+.. _Standard2Row2:
+
+Row 2 (B.2.1<2.1>b)
+"""""""""""""""""""
+
+.. topic:: ABCD-Y-ST-02 - Clause B.2.1<2.1>b - ABCD-Y-ST-02_row-2
+
+    The clause row-2 shall exist.
+
+Tailoring Status: N
+    No.
+
+For an overview of all clauses, see the :ref:`tailoring table <CMStandard2Row2>`.
+
+.. _Standard2Row1:
+
+Row 1 (B.2.1<10>a)
+""""""""""""""""""
+
+.. topic:: ABCD-Y-ST-02 - Clause B.2.1<10>a - ABCD-Y-ST-02_row-1
+
+    The clause row-1 shall exist.
+
+Tailoring Status: Y
+    Yes.
+
+For an overview of all clauses, see the :ref:`tailoring table <CMStandard2Row1>`.'''
+
+    # A clause needs a tailoring if its standard or annex has none
+    row = package.item.cache["/standard-2/row-2"]
+    row.child_link("statement-of-compliance").data["role"] = "nix"
+    with pytest.raises(ValueError,
+                       match="/standard-2/row-2: the clause has no tailoring"):
+        builder.substitute("${.:/standard-tailoring}")
 
 
 def _trace_links(item):

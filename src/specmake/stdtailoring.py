@@ -26,6 +26,7 @@
 
 import logging
 import os
+import textwrap
 from typing import Any
 
 from specitems import (Item, ItemGetValueContext, Link, TextContent,
@@ -36,8 +37,22 @@ from .sphinxbuilder import (SphinxBuilder, DocumentBuilderValueProvider,
 from .pkgitems import BuildItem, BuildItemFactory, export_data
 
 
+def _clause_section(clause: Item) -> str:
+    section = clause["section"]
+    annex_section = clause.get("annex-section", None)
+    if annex_section is None:
+        return section
+    return f"{section}<{annex_section}>"
+
+
+def _clause_number(clause: Item) -> str:
+    return f"{_clause_section(clause)}{clause['bullet']}"
+
+
 def _add_compliance_matrix(content: TextContent, name: str,
                            clauses: list[Item]) -> None:
+    if not clauses:
+        return
     table_name = f"Compliance matrix of {name}"
     options = [":widths: 13, 12, 13, 12, 13, 12, 13, 12", ":header-rows: 1"]
     with content.directive("list-table", table_name, options):
@@ -52,7 +67,7 @@ def _add_compliance_matrix(content: TextContent, name: str,
         for index, clause in enumerate(clauses):
             star = "*" if index % 4 == 0 else " "
             link = clause.child_link("statement-of-compliance")
-            the_clause = f"{clause['section']}{clause['bullet']}"
+            the_clause = _clause_number(clause)
             content.append(f"""{star} - {the_clause}
   - .. _CM{clause.ident}:
 
@@ -155,12 +170,15 @@ def _add_clause(content: TextContent, builder: SphinxBuilder, name: str,
     status = link["supplier-status"]
     by_kind = _trace_members(link.item)
     _check_statement(link.item, status, by_kind)
-    the_clause = f"{clause['section']}{clause['bullet']}"
+    the_clause = _clause_number(clause)
     header = f"{clause['name']} ({the_clause})"
     with content.section(header, label=clause.ident):
         ident = f"{name[:12]}_{os.path.basename(clause.uid)}"
-        _add_topic(content, builder, clause,
-                   f"{name} - Clause {the_clause} - {ident}", clause["text"])
+        topic = f"{name} - Clause {the_clause} - {ident}"
+        ecss_type = clause.get("ecss-type", "requirement")
+        if ecss_type != "requirement":
+            topic = f"{topic} - {ecss_type.capitalize()}"
+        _add_topic(content, builder, clause, topic, clause["text"])
         _add_topic(content, builder, clause, "Aim", clause["aim"])
         if len(clause["notes"]) == 1:
             _add_topic(content, builder, clause, "Note", clause["notes"][0])
@@ -180,8 +198,88 @@ def _add_clause(content: TextContent, builder: SphinxBuilder, name: str,
 _TAILORING_KEY = "ecss-tailoring"
 
 
-def _ecss_order(item: Item) -> list:
-    return [int(i) for i in item["section"].split(".")] + [item["bullet"]]
+def _standard(item: Item) -> Item:
+    # The clause of an annex refines the annex, which refines the standard.
+    parent = item.parent("requirement-refinement")
+    if parent.type == "requirement/non-functional/ecss-annex":
+        return parent.parent("requirement-refinement")
+    return parent
+
+
+def _section_order(section: str) -> tuple[tuple[int, int, str], ...]:
+    # The section number of an annex starts with the letter of the annex.
+    return tuple((0, int(part), "") if part.isdigit() else (1, 0, part)
+                 for part in section.split("."))
+
+
+def _ecss_order(item: Item) -> tuple:
+    return (_section_order(item["section"]),
+            _section_order(item.get("annex-section", "0")), item["bullet"])
+
+
+def _is_tailored(item: Item) -> bool:
+    return any(item.links_to_children("statement-of-compliance"))
+
+
+def _add_statements(content: TextContent, builder: SphinxBuilder,
+                    item: Item) -> bool:
+    # A tailoring of a standard or an annex covers each of its clauses
+    # which has no tailoring of its own.
+    covered = False
+    for link in item.links_to_children("statement-of-compliance"):
+        covered = True
+        content.add_definition_item(
+            f"Tailoring Status: {link['supplier-status']}",
+            builder.substitute(link.item["text"], link.item))
+    return covered
+
+
+def _ecss_children(item: Item, type_name: str) -> list[Item]:
+    return [
+        child for child in item.children("requirement-refinement")
+        if child.type == type_name
+    ]
+
+
+def _tailored_clauses(item: Item, covered: bool) -> list[Item]:
+    clauses = sorted(_ecss_children(item, "requirement/non-functional/ecss"),
+                     key=_ecss_order)
+    if covered:
+        return [clause for clause in clauses if _is_tailored(clause)]
+    for clause in clauses:
+        if not _is_tailored(clause):
+            raise ValueError(f"{clause.uid}: the clause has no tailoring")
+    return clauses
+
+
+def _add_clauses(content: TextContent, builder: SphinxBuilder, name: str,
+                 matrix_name: str, item: Item) -> None:
+    covered = _add_statements(content, builder, item)
+    clauses = _tailored_clauses(item, covered)
+    _add_compliance_matrix(content, matrix_name, clauses)
+    for clause in clauses:
+        _add_clause(content, builder, name, clause)
+
+
+def _add_annexes(content: TextContent, builder: SphinxBuilder, name: str,
+                 std: Item) -> None:
+    annexes = [
+        annex for annex in sorted(_ecss_children(
+            std, "requirement/non-functional/ecss-annex"),
+                                  key=lambda annex: annex["annex"])
+        if _is_tailored(annex) or any(
+            _is_tailored(clause) for clause in _ecss_children(
+                annex, "requirement/non-functional/ecss"))
+    ]
+    if not annexes:
+        return
+    with content.section(f"Annexes of {name}", label=f"{std.ident}Annexes"):
+        for annex in annexes:
+            letter = annex["annex"]
+            with content.section(f"{annex['name']} (Annex {letter})",
+                                 label=annex.ident):
+                _add_clauses(content, builder, name, f"{name} Annex {letter}",
+                             annex)
 
 
 class StandardTailoringProvider(DocumentBuilderValueProvider):
@@ -219,14 +317,8 @@ class StandardTailoringProvider(DocumentBuilderValueProvider):
             for std in builder.item.parents("standard-tailoring"):
                 name = builder.substitute(std["name"], std)
                 with content.section(f"Tailoring of {name}", label=std.ident):
-                    children = std.children("requirement-refinement")
-                    clauses = sorted(
-                        (clause for clause in children
-                         if clause.type == "requirement/non-functional/ecss"),
-                        key=_ecss_order)
-                    _add_compliance_matrix(content, name, clauses)
-                    for clause in clauses:
-                        _add_clause(content, builder, name, clause)
+                    _add_clauses(content, builder, name, name, std)
+                    _add_annexes(content, builder, name, std)
             return content.join()
 
     def _get_clause_traceability(self, ctx: ItemGetValueContext) -> str:
@@ -237,7 +329,7 @@ class StandardTailoringProvider(DocumentBuilderValueProvider):
             if "kind" not in member.data:
                 continue
             kind = _member_kind(member)
-            clauses: list[tuple[list, str]] = []
+            clauses: list[tuple[tuple, str]] = []
             for trace in member.item.links_to_children(_TRACE_ROLE):
                 if (trace.item.type != "statement-of-compliance"
                         or _key(trace) != _key(member)):
@@ -284,30 +376,26 @@ class StandardTailoringProvider(DocumentBuilderValueProvider):
         return self.get_reference(ctx, _TAILORING_KEY, name, ctx.item.ident)
 
     def _get_ecss_clause(self, ctx: ItemGetValueContext) -> str:
-        item = ctx.item
-        name = f"{item['section']}{item['bullet']}"
-        return self._get_clause_reference(ctx, name)
+        return self._get_clause_reference(ctx, _clause_number(ctx.item))
 
     def _get_ecss_clause_long(self, ctx: ItemGetValueContext) -> str:
         item = ctx.item
-        name = f"{item['section']}{item['bullet']} ({item['name']})"
+        name = f"{_clause_number(item)} ({item['name']})"
         return self._get_clause_reference(ctx, name)
 
     def _get_ecss_clause_section(self, ctx: ItemGetValueContext) -> str:
-        item = ctx.item
-        return self._get_clause_reference(ctx, item["section"])
+        return self._get_clause_reference(ctx, _clause_section(ctx.item))
 
     def _get_ecss_standard_and_clause(self, ctx: ItemGetValueContext) -> str:
         item = ctx.item
-        name = item.parent("requirement-refinement")["name"]
-        name = f"{name} - {item['section']}{item['bullet']}"
+        name = f"{_standard(item)['name']} - {_clause_number(item)}"
         return self._get_clause_reference(ctx, name)
 
     def _get_ecss_standard_and_clause_long(self,
                                            ctx: ItemGetValueContext) -> str:
         item = ctx.item
-        name = item.parent("requirement-refinement")["name"]
-        name = f"{name} - {item['section']}{item['bullet']} ({item['name']})"
+        name = (f"{_standard(item)['name']} - {_clause_number(item)} "
+                f"({item['name']})")
         return self._get_clause_reference(ctx, name)
 
 
@@ -328,3 +416,23 @@ class ECSSClause(BuildItem):
                         type_name: str) -> None:
         BuildItem.prepare_factory(factory, type_name)
         factory.add_export_data(type_name, _export_data)
+
+
+def _export_annex_data(item: Item, present: bool, built_later: bool) -> Any:
+    data = export_data(item, present, built_later)
+    name = item.parent("requirement-refinement")["name"]
+    text = (f"The ${{/glossary/ecss:/term}} standard {name} shall contain "
+            f"the annex {item['annex']}.")
+    data["name"] = "Text removed due to license issues"
+    data["text"] = "\n".join(textwrap.wrap(text, 77)) + "\n"
+    return data
+
+
+class ECSSAnnex(BuildItem):
+    """ Controls the ECSS annex data export. """
+
+    @classmethod
+    def prepare_factory(cls, factory: BuildItemFactory,
+                        type_name: str) -> None:
+        BuildItem.prepare_factory(factory, type_name)
+        factory.add_export_data(type_name, _export_annex_data)

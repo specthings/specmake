@@ -54,7 +54,7 @@ from .specdocbuilder import SpecDocumentBuilder
 from .specitemcache import SpecItemCache
 from .sreldbuilder import SRelDBuilder
 from .srsbuilder import SRSBuilder
-from .stdtailoring import ECSSClause
+from .stdtailoring import ECSSAnnex, ECSSClause
 from .svrbuilder import SVRBuilder
 from .testaggregator import TestAggregator
 from .testplanbuilder import TestPlanBuilder
@@ -113,6 +113,7 @@ _CONSTRUCTORS = (
     ("pkg/test-runner/agent", AgentTestRunner),
     ("pkg/test-runner/subprocess", SubprocessTestRunner),
     ("requirement/non-functional/ecss", ECSSClause),
+    ("requirement/non-functional/ecss-annex", ECSSAnnex),
 )
 
 _EXPORT_DATA = (
