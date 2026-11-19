@@ -219,9 +219,11 @@ class StandardTailoringProvider(DocumentBuilderValueProvider):
             for std in builder.item.parents("standard-tailoring"):
                 name = builder.substitute(std["name"], std)
                 with content.section(f"Tailoring of {name}", label=std.ident):
-                    clauses = list(
-                        sorted(std.children("requirement-refinement"),
-                               key=_ecss_order))
+                    children = std.children("requirement-refinement")
+                    clauses = sorted(
+                        (clause for clause in children
+                         if clause.type == "requirement/non-functional/ecss"),
+                        key=_ecss_order)
                     _add_compliance_matrix(content, name, clauses)
                     for clause in clauses:
                         _add_clause(content, builder, name, clause)
