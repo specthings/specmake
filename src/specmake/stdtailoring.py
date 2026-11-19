@@ -27,7 +27,7 @@
 import logging
 import os
 import textwrap
-from typing import Any
+from typing import Any, Iterator
 
 from specitems import (Item, ItemGetValueContext, Link, TextContent,
                        TextMapper, get_citation_group_members, list_terms)
@@ -112,6 +112,13 @@ def _trace_members(statement: Item) -> dict[str, list[Link]]:
                              f"'{_group_name(trace)}' is empty")
         for member in members:
             by_kind[_member_kind(member)].append(member)
+    # A clause is the citation group of the sections which carry its content
+    clause = statement.parent("statement-of-compliance")
+    for member in get_citation_group_members(clause):
+        if _member_kind(member) != "output":
+            raise ValueError(f"{member.item.uid}: the citation group member "
+                             f"'{clause.uid}' needs the kind output")
+        by_kind["output"].append(member)
     return by_kind
 
 
@@ -127,9 +134,10 @@ def _format_member(builder: SphinxBuilder, member: Link) -> str:
     return f"{link} {cite}"
 
 
-def _check_statement(statement: Item, status: str,
+def _check_statement(statement: Item, clause: Item, status: str,
                      by_kind: dict[str, list[Link]]) -> None:
-    if not any(by_kind.values()):
+    # The tailoring of a clause of an annex is always traced
+    if not any(by_kind.values()) and "annex-section" not in clause.data:
         return
     uid = statement.uid
     if status != "Y" and not statement["text"].strip():
@@ -169,7 +177,7 @@ def _add_clause(content: TextContent, builder: SphinxBuilder, name: str,
     link = clause.child_link("statement-of-compliance")
     status = link["supplier-status"]
     by_kind = _trace_members(link.item)
-    _check_statement(link.item, status, by_kind)
+    _check_statement(link.item, clause, status, by_kind)
     the_clause = _clause_number(clause)
     header = f"{clause['name']} ({the_clause})"
     with content.section(header, label=clause.ident):
@@ -196,6 +204,20 @@ def _add_clause(content: TextContent, builder: SphinxBuilder, name: str,
 
 
 _TAILORING_KEY = "ecss-tailoring"
+
+
+def _served_clauses(member: Link) -> Iterator[tuple[Item, str]]:
+    group = member.item
+    if group.type == "requirement/non-functional/ecss":
+        for link in group.links_to_children("statement-of-compliance"):
+            yield group, link["supplier-status"]
+        return
+    for trace in group.links_to_children(_TRACE_ROLE):
+        if (trace.item.type != "statement-of-compliance"
+                or _key(trace) != _key(member)):
+            continue
+        link = trace.item.parent_link("statement-of-compliance")
+        yield link.item, link["supplier-status"]
 
 
 def _standard(item: Item) -> Item:
@@ -330,16 +352,10 @@ class StandardTailoringProvider(DocumentBuilderValueProvider):
                 continue
             kind = _member_kind(member)
             clauses: list[tuple[tuple, str]] = []
-            for trace in member.item.links_to_children(_TRACE_ROLE):
-                if (trace.item.type != "statement-of-compliance"
-                        or _key(trace) != _key(member)):
-                    continue
-                link = trace.item.parent_link("statement-of-compliance")
-                clause = link.item
+            for clause, status in _served_clauses(member):
                 name = builder.substitute(
                     f"${{{clause.uid}:/standard-and-clause}}")
-                clauses.append((_ecss_order(clause),
-                                f"{name} ({link['supplier-status']})"))
+                clauses.append((_ecss_order(clause), f"{name} ({status})"))
             if not clauses:
                 if kind != "method":
                     logging.warning(

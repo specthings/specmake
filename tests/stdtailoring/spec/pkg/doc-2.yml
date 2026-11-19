@@ -33,6 +33,12 @@ links:
   path: /group.html
   role: citation-group-member
   uid: group
+- kind: output
+  label: RowLabel
+  name: Row section
+  path: /row.html
+  role: citation-group-member
+  uid: /standard-2/row-1
 - hash: null
   name: component
   role: input
