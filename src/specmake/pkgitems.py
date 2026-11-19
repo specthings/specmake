@@ -110,10 +110,16 @@ def _link_sphinx(mapper: "BuildItemMapper", name: str, target: str) -> str:
 
 
 def _ref_markdown(name: str, label: str) -> str:
+    # A MyST role cannot escape the angle bracket which starts the label.
+    if "<" in name:
+        return f"[{name}]({label})"
     return f"{{ref}}`{name} <{label}>`"
 
 
 def _ref_sphinx(name: str, label: str) -> str:
+    # The role of Sphinx takes the first unescaped angle bracket as the start
+    # of the label.
+    name = name.replace("<", "\\<")
     return f":ref:`{name} <{label}>`"
 
 
