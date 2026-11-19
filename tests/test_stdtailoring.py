@@ -237,12 +237,14 @@ For an overview of all clauses, see the :ref:`tailoring table <CMStandardClause0
     | Section                           | Role    | Clauses                                                                                  |
     +===================================+=========+==========================================================================================+
     | :ref:`Group section <GroupLabel>` | Process | `ABCD-X-ST-01Y Rev. 42 - 4.3.1.1x <../doc/path/to/ecss/tailoring#standardclause0>`__ (Y) |
+    +-----------------------------------+---------+------------------------------------------------------------------------------------------+
+    | :ref:`Row section <RowLabel>`     | Output  | `ABCD-Y-ST-02 - B.2.1<10>a <../doc/path/to/ecss/tailoring#standard2row1>`__ (Y)          |
     +-----------------------------------+---------+------------------------------------------------------------------------------------------+"""
     assert builder.substitute("${/pkg/group:/cite-group}") == (
         "`Title, Group section <../doc-2/group.html#grouplabel>`__ "
         ":cite:`PkgDoc2`")
-    group_member = _member_links(builder_2.item)[0]
-    del group_member.data["kind"]
+    for member in _member_links(builder_2.item):
+        del member.data["kind"]
     assert builder_2.substitute("${.:/ecss-clause-traceability}") == (
         "No section of this document serves a tailoring decision.")
 
@@ -438,14 +440,33 @@ Row 1 (B.2.1<10>a)
 Tailoring Status: Y
     Yes.
 
+Output
+    `Title, Row section <row.html#rowlabel>`__ :cite:`PkgDoc2`
+
 For an overview of all clauses, see the :ref:`tailoring table <CMStandard2Row1>`.'''
+
+    def check(match):
+        with pytest.raises(ValueError, match=match):
+            builder.substitute("${.:/standard-tailoring}")
+
+    # A section which carries the content of a clause is an output
+    member = _member_links(builder.item)[1]
+    member.data["kind"] = "process"
+    check("/pkg/doc-2: the citation group member '/standard-2/row-1' needs "
+          "the kind output")
+    member.data["kind"] = "output"
+
+    # The tailoring of a clause of an annex is traced even without a member
+    statement = package.item.cache["/standard-2/tailoring-row-2"]
+    statement.data["text"] = " "
+    check("/standard-2/tailoring-row-2: a tailoring status of N needs a "
+          "justification")
+    statement.data["text"] = "No.\n"
 
     # A clause needs a tailoring if its standard or annex has none
     row = package.item.cache["/standard-2/row-2"]
     row.child_link("statement-of-compliance").data["role"] = "nix"
-    with pytest.raises(ValueError,
-                       match="/standard-2/row-2: the clause has no tailoring"):
-        builder.substitute("${.:/standard-tailoring}")
+    check("/standard-2/row-2: the clause has no tailoring")
 
 
 def _trace_links(item):
