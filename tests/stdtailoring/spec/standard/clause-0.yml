@@ -3,6 +3,7 @@ aim: null
 bullet: x
 copyrights:
 - Copyright (C) 2025 embedded brains GmbH & Co. KG
+ecss-type: requirement
 enabled-by: true
 expected-output: null
 links:

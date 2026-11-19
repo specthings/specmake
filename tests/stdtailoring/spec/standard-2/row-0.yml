@@ -1,0 +1,22 @@
+SPDX-License-Identifier: CC-BY-SA-4.0
+aim: null
+annex-section: '1'
+bullet: a
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+ecss-type: requirement
+enabled-by: true
+expected-output: null
+links:
+- role: requirement-refinement
+  uid: annex-a
+name: Row 0
+non-functional-type: ecss
+notes: []
+rationale: null
+references: []
+requirement-type: non-functional
+section: A.2.1
+text: |
+  The clause row-0 shall exist.
+type: requirement

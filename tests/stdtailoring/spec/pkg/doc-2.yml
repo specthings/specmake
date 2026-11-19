@@ -37,6 +37,8 @@ links:
   name: component
   role: input
   uid: component
+- role: standard-tailoring
+  uid: /standard-2/standard
 output-html: null
 output-pdf: null
 pkg-type: directory-state
