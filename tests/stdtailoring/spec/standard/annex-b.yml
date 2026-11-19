@@ -1,0 +1,16 @@
+SPDX-License-Identifier: CC-BY-SA-4.0
+annex: B
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: requirement-refinement
+  uid: standard
+name: Annex B name
+non-functional-type: ecss-annex
+rationale: null
+references: []
+requirement-type: non-functional
+text: |
+  The standard shall contain the annex B.
+type: requirement
