@@ -64,80 +64,73 @@ from .testrunner import (TestRunner, GRMONManualTestRunner,
 from .testrunneragent import AgentTestRunner
 from .testrunneresa import ESATestRunner
 
+_CONSTRUCTORS = (
+    ("pkg/component/generic", GenericPackageComponent),
+    ("pkg/component/rtems", RTEMSPackageComponent),
+    ("pkg/directory-state/explicit", DirectoryState),
+    ("pkg/directory-state/patterns", DirectoryState),
+    ("pkg/directory-state/test-coverage", DirectoryState),
+    ("pkg/directory-state/unpacked-archive", DirectoryState),
+    ("pkg/directory-state/archive", Archiver),
+    ("pkg/directory-state/ctrf", CTRFCollector),
+    ("pkg/directory-state/doxyfile", Doxyfile),
+    ("pkg/directory-state/gcda-producer", GCDAProducer),
+    ("pkg/directory-state/index", Indexer),
+    ("pkg/directory-state/not-run-coverage", NotRunCoverage),
+    ("pkg/directory-state/item-cache", ItemCacheDirectoryState),
+    ("pkg/directory-state/membench-collector", MembenchCollector),
+    ("pkg/directory-state/package-summary", PackageSummary),
+    ("pkg/directory-state/performance-images", BuildPerformanceImages),
+    ("pkg/directory-state/quality-scanner", QualityScanner),
+    ("pkg/directory-state/repository", RepositoryState),
+    ("pkg/directory-state/repository-subset", RepositorySubset),
+    ("pkg/directory-state/rtems-tests-images", BuildRTEMSTestsImages),
+    ("pkg/directory-state/run-executable-command", RunExecutableCommand),
+    ("pkg/directory-state/sdd-linker", SDDLinker),
+    ("pkg/directory-state/sphinx/ddf-sreld", SRelDBuilder),
+    ("pkg/directory-state/sphinx/djf-svr", SVRBuilder),
+    ("pkg/directory-state/sphinx/generic", DocumentBuilder),
+    ("pkg/directory-state/sphinx/package-manual", PackageManualBuilder),
+    ("pkg/directory-state/sphinx/paf-spamr", SpamrBuilder),
+    ("pkg/directory-state/sphinx/spec", SpecDocumentBuilder),
+    ("pkg/directory-state/sphinx/test-plan", TestPlanBuilder),
+    ("pkg/directory-state/sphinx/test-report", TestReporter),
+    ("pkg/directory-state/sphinx/ts-icd", ICDBuilder),
+    ("pkg/directory-state/sphinx/ts-srs", SRSBuilder),
+    ("pkg/directory-state/test-log", TestLog),
+    ("pkg/index-group", IndexGroup),
+    ("pkg/link-hub", LinkHub),
+    ("pkg/package-changes", PackageChanges),
+    ("pkg/redirection", Redirection),
+    ("pkg/rtems-item-cache", RTEMSItemCache),
+    ("pkg/run-actions", RunActions),
+    ("pkg/spec-compare-registry", CompareSpecsRegistry),
+    ("pkg/spec-item-cache", SpecItemCache),
+    ("pkg/test-aggregator", TestAggregator),
+    ("pkg/test-runner/esa", ESATestRunner),
+    ("pkg/test-runner/dummy", TestRunner),
+    ("pkg/test-runner/grmon-manual", GRMONManualTestRunner),
+    ("pkg/test-runner/agent", AgentTestRunner),
+    ("pkg/test-runner/subprocess", SubprocessTestRunner),
+    ("requirement/non-functional/ecss", ECSSClause),
+)
+
+_EXPORT_DATA = (
+    ("pkg/component/generic", export_component_data),
+    ("pkg/component/rtems", export_component_data),
+    ("pkg/template/component", export_template_data),
+    ("pkg/template/file-item", export_template_data),
+    ("pkg/template/inline-item", export_template_data),
+    ("pkg/template/redirect", export_template_data),
+    ("pkg/repository-filter", export_no_data),
+)
+
 
 def create_build_item_factory() -> BuildItemFactory:
     """ Create the default build item factory. """
     factory = BuildItemFactory()
-    factory.add_constructor("pkg/component/generic", GenericPackageComponent)
-    factory.add_constructor("pkg/component/rtems", RTEMSPackageComponent)
-    for type_name in ("pkg/component/generic", "pkg/component/rtems"):
-        factory.add_export_data(type_name, export_component_data)
-    for type_name in ("pkg/template/component", "pkg/template/file-item",
-                      "pkg/template/inline-item", "pkg/template/redirect"):
-        factory.add_export_data(type_name, export_template_data)
-    factory.add_export_data("pkg/repository-filter", export_no_data)
-    for type_name in ("pkg/directory-state/explicit",
-                      "pkg/directory-state/patterns",
-                      "pkg/directory-state/test-coverage",
-                      "pkg/directory-state/unpacked-archive"):
-        factory.add_constructor(type_name, DirectoryState)
-    factory.add_constructor("pkg/directory-state/archive", Archiver)
-    factory.add_constructor("pkg/directory-state/ctrf", CTRFCollector)
-    factory.add_constructor("pkg/directory-state/doxyfile", Doxyfile)
-    factory.add_constructor("pkg/directory-state/gcda-producer", GCDAProducer)
-    factory.add_constructor("pkg/directory-state/index", Indexer)
-    factory.add_constructor("pkg/directory-state/not-run-coverage",
-                            NotRunCoverage)
-    factory.add_constructor("pkg/directory-state/item-cache",
-                            ItemCacheDirectoryState)
-    factory.add_constructor("pkg/directory-state/membench-collector",
-                            MembenchCollector)
-    factory.add_constructor("pkg/directory-state/package-summary",
-                            PackageSummary)
-    factory.add_constructor("pkg/directory-state/performance-images",
-                            BuildPerformanceImages)
-    factory.add_constructor("pkg/directory-state/quality-scanner",
-                            QualityScanner)
-    factory.add_constructor("pkg/directory-state/repository", RepositoryState)
-    factory.add_constructor("pkg/directory-state/repository-subset",
-                            RepositorySubset)
-    factory.add_constructor("pkg/directory-state/rtems-tests-images",
-                            BuildRTEMSTestsImages)
-    factory.add_constructor("pkg/directory-state/run-executable-command",
-                            RunExecutableCommand)
-    factory.add_constructor("pkg/directory-state/sdd-linker", SDDLinker)
-    factory.add_constructor("pkg/directory-state/sphinx/ddf-sreld",
-                            SRelDBuilder)
-    factory.add_constructor("pkg/directory-state/sphinx/djf-svr", SVRBuilder)
-    factory.add_constructor("pkg/directory-state/sphinx/generic",
-                            DocumentBuilder)
-    factory.add_constructor("pkg/directory-state/sphinx/package-manual",
-                            PackageManualBuilder)
-    factory.add_constructor("pkg/directory-state/sphinx/paf-spamr",
-                            SpamrBuilder)
-    factory.add_constructor("pkg/directory-state/sphinx/spec",
-                            SpecDocumentBuilder)
-    factory.add_constructor("pkg/directory-state/sphinx/test-plan",
-                            TestPlanBuilder)
-    factory.add_constructor("pkg/directory-state/sphinx/test-report",
-                            TestReporter)
-    factory.add_constructor("pkg/directory-state/sphinx/ts-icd", ICDBuilder)
-    factory.add_constructor("pkg/directory-state/sphinx/ts-srs", SRSBuilder)
-    factory.add_constructor("pkg/directory-state/test-log", TestLog)
-    factory.add_constructor("pkg/index-group", IndexGroup)
-    factory.add_constructor("pkg/link-hub", LinkHub)
-    factory.add_constructor("pkg/package-changes", PackageChanges)
-    factory.add_constructor("pkg/redirection", Redirection)
-    factory.add_constructor("pkg/rtems-item-cache", RTEMSItemCache)
-    factory.add_constructor("pkg/run-actions", RunActions)
-    factory.add_constructor("pkg/spec-compare-registry", CompareSpecsRegistry)
-    factory.add_constructor("pkg/spec-item-cache", SpecItemCache)
-    factory.add_constructor("pkg/test-aggregator", TestAggregator)
-    factory.add_constructor("pkg/test-runner/esa", ESATestRunner)
-    factory.add_constructor("pkg/test-runner/dummy", TestRunner)
-    factory.add_constructor("pkg/test-runner/grmon-manual",
-                            GRMONManualTestRunner)
-    factory.add_constructor("pkg/test-runner/agent", AgentTestRunner)
-    factory.add_constructor("pkg/test-runner/subprocess", SubprocessTestRunner)
-    factory.add_constructor("requirement/non-functional/ecss", ECSSClause)
+    for type_name, constructor in _CONSTRUCTORS:
+        factory.add_constructor(type_name, constructor)
+    for type_name, export_data in _EXPORT_DATA:
+        factory.add_export_data(type_name, export_data)
     return factory
