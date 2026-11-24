@@ -484,10 +484,14 @@ def _count(count: int, singular: str, plural: str) -> str:
     return f"{count} {singular if count == 1 else plural}"
 
 
-def _add_status(content: TextContent, verdicts: list[_Verdicts],
+def _add_status(content: TextContent,
+                verdicts: list[_Verdicts],
                 not_validated: list[NotValidatedItem],
                 failed_substitutions: list[_FailedSubstitution],
-                root_inspected: bool) -> None:
+                root_inspected: bool,
+                failed_inspections: list[dict] | None = None) -> None:
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
     # The test report lists the coverage issues of a target under the UID of
     # the target.  A coverage scope which misses its limits and a stale gap
     # item are coverage issues of their target.
@@ -515,6 +519,10 @@ def _add_status(content: TextContent, verdicts: list[_Verdicts],
             _count(len(failed_substitutions),
                    "item text fails the substitution",
                    "item texts fail the substitution"))
+    if failed_inspections:
+        causes.append(
+            _count(len(failed_inspections), "inspection scope fails the check",
+                   "inspection scopes fail the check"))
     if causes:
         with content.section("❌ Failed"):
             content.add_list(causes)
@@ -522,9 +530,37 @@ def _add_status(content: TextContent, verdicts: list[_Verdicts],
         with content.section("✅ Passed"):
             root = "  The specification root is validated.  All item " \
                 "texts pass the substitution." if root_inspected else ""
+            inspections = "  All inspection scopes pass the check." \
+                if failed_inspections is not None else ""
             content.add("There are no unexpected test failures.  All "
                         "coverage scopes meet their limits.  There are no "
-                        f"stale gap items.{root}")
+                        f"stale gap items.{root}{inspections}")
+
+
+def _add_failed_inspections(content: TextContent,
+                            failed_inspections: list[dict] | None) -> None:
+    if not failed_inspections:
+        return
+    with content.section("Failed inspections"):
+        rows = [["Inspection", "Scope", "State", "Detail"]]
+        rows.extend([
+            content.escape(result["uid"]),
+            content.escape(result["scope"]), result["state"],
+            content.escape(result["detail"])
+        ] for result in failed_inspections)
+        content.add_simple_table(rows)
+
+
+def _gather_failed_inspections(
+        checks: list[DirectoryState]) -> list[dict] | None:
+    if not checks:
+        return None
+    failed: list[dict] = []
+    for check in checks:
+        report = check.json_load()
+        key = "fails-strict" if report["strict"] else "fails"
+        failed.extend(result for result in report["results"] if result[key])
+    return failed
 
 
 def _add_warnings(content: TextContent, retried: list[RetriedProgram]) -> None:
@@ -699,7 +735,9 @@ class PackageSummary(DirectoryState):
     aggregation inspects the specification root and the item texts.  A test
     program with failed attempts gives a warning.  The summary omits the
     sections of warnings, failures, not validated items, failed substitutions,
-    gaps, stale gap items and retried test programs without entries.  The
+    failed inspections, gaps, stale gap items and retried test programs
+    without entries.  A scope which fails the gate of an inspection check
+    fails the package.  The
     summary lists the repositories of the package, unless the
     list-repositories attribute is false.
     """
@@ -712,18 +750,24 @@ class PackageSummary(DirectoryState):
             assert isinstance(test_aggregator, TestAggregator)
             test_aggregators.append(test_aggregator)
         aggregations = _gather_aggregations(test_aggregators)
+        checks: list[DirectoryState] = []
+        for check in self.inputs("inspection-check"):
+            assert isinstance(check, DirectoryState)
+            checks.append(check)
+        failed_inspections = _gather_failed_inspections(checks)
         content = CommonMarkContent(0, context=self.mapper.context)
         with content.section(f"Package summary - {self.component['ident']}"):
             _add_status(content, aggregations.verdicts,
                         aggregations.not_validated,
                         aggregations.failed_substitutions,
-                        bool(test_aggregators))
+                        bool(test_aggregators), failed_inspections)
             _add_warnings(content, aggregations.retried)
             _add_test_overview(content, aggregations.verdicts)
             _add_unexpected_failures(content, aggregations.verdicts)
             _add_not_validated(content, aggregations.not_validated)
             _add_failed_substitutions(content,
                                       aggregations.failed_substitutions)
+            _add_failed_inspections(content, failed_inspections)
             _add_coverage(content, aggregations.scopes)
             rows = [[
                 "Component", "Target", "Configuration", "Scope", "File", "Spot"

@@ -571,6 +571,8 @@ class InspectionCheck(DirectoryState):
         report: dict[str, Any] = {
             "inspections":
             current_digests(items, self._state_of, bases),
+            "strict":
+            self["strict"],
             "results": [{
                 "detail": result.detail,
                 "fails": result.state.fails(),
