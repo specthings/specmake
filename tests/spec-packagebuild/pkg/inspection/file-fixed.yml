@@ -1,0 +1,26 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: inspection
+date: '2026-11-24'
+findings: The file has a defect.
+inspectors:
+- first-name: Frank
+  last-name: Kuehndel
+  organization: embedded brains GmbH & Co. KG
+links:
+- role: inspected
+  uid: ../source/test-files
+  scopes:
+  - scope: file
+    anchor: line
+    file: dir/gone.txt
+    ranges: null
+    hash: eilvq1Nks0zj4EdtVb8pG9QaoIXl7PKpaIPlk6oYNv7SL3JCr0jVSvGPVcjR3vE-yTFMkmZmoLpj92Y1AAkFZQ==
+- role: issue
+  status: closed
+  uid: ../issue/issue
+method: Inspection of the artefact.
+pkg-type: inspection
+type: pkg
+verdict: non-compliant

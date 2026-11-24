@@ -31,6 +31,7 @@ from .docbuilder import DocumentBuilder
 from .doxyfile import Doxyfile
 from .gcdaproducer import GCDAProducer
 from .icdbuilder import ICDBuilder
+from .inspection import InspectionCheck
 from .itemcachestate import ItemCacheDirectoryState
 from .linkhub import LinkHub
 from .membenchcollector import MembenchCollector
@@ -76,6 +77,7 @@ _CONSTRUCTORS = (
     ("pkg/directory-state/doxyfile", Doxyfile),
     ("pkg/directory-state/gcda-producer", GCDAProducer),
     ("pkg/directory-state/index", Indexer),
+    ("pkg/directory-state/inspection-check", InspectionCheck),
     ("pkg/directory-state/not-run-coverage", NotRunCoverage),
     ("pkg/directory-state/item-cache", ItemCacheDirectoryState),
     ("pkg/directory-state/membench-collector", MembenchCollector),
