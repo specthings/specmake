@@ -67,6 +67,10 @@ links:
   uid: pkg-input-role
 - role: spec-refinement
   spec-key: name
+  spec-value: inspection-check
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
   spec-value: link-hub
   uid: pkg-input-role
 - role: spec-refinement

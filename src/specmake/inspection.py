@@ -35,9 +35,10 @@ import os
 from typing import Any, Callable, Iterable, Iterator
 import urllib.parse
 
-from specitems import Item, data_digest, hash_file
+from specitems import Item, Link, TextContent, data_digest, hash_file
 
 from .directorystate import DirectoryState
+from .pkgitems import BuildItemMapper
 
 #: The item data keys which the digest of an item scope does not cover.  A
 #: copyright year bump does not change an artefact, and the buildspace adds
@@ -583,3 +584,106 @@ class InspectionCheck(DirectoryState):
         self.description.add(
             "Check the digests and the judgements of the inspections and "
             f"produce the report {self.description.path(self.file)}.")
+
+
+def _person(person: dict) -> str:
+    return f"{person['first-name']} {person['last-name']} " \
+        f"({person['organization']})"
+
+
+def _issue(mapper: BuildItemMapper, link: Link) -> str:
+    issue = link.item
+    database = issue.parent("issue-member")
+    url = mapper.substitute(database["url"], issue)
+    identifier = mapper.substitute(database["format-identifier"], issue)
+    name = f"{database['name']} {identifier}"
+    return f"{mapper.format_link(name, url)} ({link['status']})"
+
+
+def _optional(value: str | None) -> str:
+    return "not recorded" if value is None else value.strip()
+
+
+def _history(item: Item) -> list[str]:
+    rounds: list[str] = []
+    while True:
+        superseded = [
+            link.item
+            for link in item.links_to_parents("inspection-supersedes")
+        ]
+        if not superseded:
+            return rounds
+        item = superseded[0]
+        rounds.append(f"{_optional(item['date'])} "
+                      f"({_optional(item['verdict'])})")
+
+
+def _add_inspection(content: TextContent, mapper: BuildItemMapper, item: Item,
+                    states: dict[tuple[str, str], dict]) -> None:
+    with content.section(f"Inspection {item.uid}"):
+        inspectors = ", ".join(
+            _person(person) for person in item["inspectors"])
+        content.add_definition_item("Inspectors", inspectors or "not recorded")
+        content.add_definition_item("Date", _optional(item["date"]))
+        content.add_definition_item(
+            "Verdict",
+            _optional(item["verdict"]).replace("-", " "))
+        content.add_definition_item("Method", _optional(item["method"]))
+        content.add_definition_item("Findings", _optional(item["findings"]))
+        issues = [
+            _issue(mapper, link) for link in item.links_to_parents("issue")
+        ]
+        if issues:
+            content.add_definition_item("Issues", ", ".join(issues))
+        history = _history(item)
+        if history:
+            content.add_definition_item("Supersedes", ", ".join(history))
+        rows = [("Scope", "Artefact", "State")]
+        judgement = states.get((item.uid, "judgement"))
+        if judgement is not None:
+            rows.append(("judgement", "", judgement["state"]))
+        for link in item.links_to_parents("inspected"):
+            for scope in link["scopes"]:
+                name = _scope_name(scope)
+                rows.append((content.escape(name), link.item.uid,
+                             states[(item.uid, name)]["state"]))
+        content.add_simple_table(rows)
+
+
+def render_group(content: TextContent, mapper: BuildItemMapper, group: Item,
+                 report: dict) -> None:
+    """
+    Render the inspection group with the states of the check report.
+
+    The label of the section of the group follows from the UID of the group,
+    so that a citation group member link to the section survives a change of
+    the group name.
+
+    Args:
+        content: The content which receives the inspection group.
+        mapper: The mapper of the document.
+        group: The inspection group item.
+        report: The report of the inspection check.
+    """
+    states = {
+        (result["uid"], result["scope"]): result
+        for result in report["results"]
+    }
+    with content.section(group["name"], label_tail=group.ident):
+        content.add(group["text"])
+        members = sorted(
+            (link.item for link in group.links_to_children("inspection-member")
+             if not is_superseded(link.item)),
+            key=lambda item: item.uid)
+        for member in members:
+            _add_inspection(content, mapper, member, states)
+        undispositioned = [
+            result for result in report["results"]
+            if result["uid"] == group.uid
+        ]
+        if undispositioned:
+            content.add("These findings have no inspection:")
+            content.add_simple_table([("Finding", "Detail")] +
+                                     [(content.escape(result["scope"]),
+                                       result["detail"])
+                                      for result in undispositioned])

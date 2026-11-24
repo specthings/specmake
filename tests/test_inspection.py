@@ -200,6 +200,54 @@ def test_load_findings():
                      "Value stored to 'num' is never read")] == 2
 
 
+def test_inspection_group(caplog, tmpdir):
+    package = create_package(caplog, Path(tmpdir), Path("spec-packagebuild"),
+                             ["inspection", "sphinx-builder"])
+    package.director["/pkg/inspection/check"].build()
+    doc = package.director["/pkg/deployment/doc"]
+    text = doc.substitute("${.:/inspection-group:1:/pkg/inspection/group}")
+    assert text.startswith(""".. _PkgInspectionGroup:
+
+Static analysis
+---------------
+
+The members inspect the findings of the static analysis.
+""")
+    assert """Inspection /pkg/inspection/finding-ok
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Inspectors
+    Frank Kuehndel (embedded brains GmbH & Co. KG)
+
+Date
+    2026-11-24
+
+Verdict
+    not applicable
+""" in text
+    assert """Supersedes
+    2026-11-24 (not-applicable)""" in text
+    assert "Issues\n    `Issue issue 42 <https://www.foo.org/bar?id=42>`__ " \
+        "(closed)" in text
+    assert """Inspectors
+    not recorded
+
+Date
+    not recorded""" in text
+    assert "    judgement                             unjudged\n" in text
+    assert "file dir/gone.txt /pkg/source/test-files absent" in text
+    assert "These findings have no inspection:" in text
+    assert "Cppcheck syntaxError /elsewhere/c.c: syntax error" in text
+    text = doc.substitute(
+        "${.:/inspection-group:1:/pkg/inspection/group-empty}")
+    assert text == """.. _PkgInspectionGroupEmpty:
+
+No inspections
+--------------
+
+The group has no members."""
+
+
 def test_state_fails():
     assert State.STALE.fails()
     assert not State.NOT_CHECKED.fails()
@@ -313,6 +361,9 @@ def test_renew():
             "ranges": None,
             "scope": "file"
         }]
+    }, {
+        "role": "inspection-member",
+        "uid": "group"
     }, {
         "role": "issue",
         "status": "closed",
