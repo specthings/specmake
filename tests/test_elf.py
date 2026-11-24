@@ -90,6 +90,15 @@ def test_loadable_digest_covers_loaded_parts(elf_class, order):
     assert len(set(digests)) == len(digests)
 
 
+@pytest.mark.parametrize("elf_class,order", _FORMATS)
+def test_loadable_digest_of_segment_without_file_content(elf_class, order):
+    bss = Segment(0x3000, 0x3000, b"", memsz=0x1000, flags=6)
+    base = elf_loadable_sha512(build_elf(elf_class, order, _SEGMENTS + [bss]))
+    assert elf_loadable_sha512(
+        build_elf(elf_class, order,
+                  _SEGMENTS + [bss._replace(offset=0x100000)])) == base
+
+
 def test_loadable_digest_differs_by_format():
     digests = set(
         elf_loadable_sha512(build_elf(elf_class, order, _SEGMENTS))

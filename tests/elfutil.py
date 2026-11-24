@@ -36,6 +36,7 @@ class Segment(NamedTuple):
     memsz: int = -1
     flags: int = 5
     p_type: int = 1
+    offset: int = -1
 
 
 class Note(NamedTuple):
@@ -132,6 +133,8 @@ def build_elf(elf_class: int,
         f"{order}HHI{word}{word}{word}IHHHHHH", 2, machine, 1, entry, ehsize,
         shoff, flags, ehsize, phentsize, phnum, shentsize, shnum, 0)
     for index, (segment, offset) in enumerate(zip(segments, offsets)):
+        if segment.offset >= 0:
+            offset = segment.offset
         memsz = len(segment.content) if segment.memsz < 0 else segment.memsz
         if is_64:
             header = struct.pack(f"{order}IIQQQQQQ", segment.p_type,

@@ -128,7 +128,7 @@ def _elf_segments(data: bytes, header: dict) -> list:
              _align) = fields
         if p_type != 1:
             continue
-        if offset + filesz > len(data):
+        if filesz > 0 and offset + filesz > len(data):
             raise ValueError(
                 f"the ELF file is truncated in the segment {index}")
         segments.append(
