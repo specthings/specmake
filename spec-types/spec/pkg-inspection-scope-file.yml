@@ -1,0 +1,36 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: scope
+  spec-value: file
+  uid: pkg-inspection-scope
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      anchor:
+        description: |
+          It shall state how the line ranges are bound to the file.
+        spec-type: pkg-inspection-anchor
+      file:
+        description: |
+          It shall be the path to the inspected file relative to the directory
+          of the link target.
+        spec-type: str
+      ranges:
+        description: |
+          If the value is present, then it shall be the list of inspected line
+          ranges, otherwise the whole file is inspected.
+        spec-type: pkg-inspection-line-range-list
+    description: |
+      This set of attributes specifies an inspected file.
+    mandatory-attributes: all
+spec-name: Inspection File Scope
+spec-type: pkg-inspection-scope-file
+type: spec

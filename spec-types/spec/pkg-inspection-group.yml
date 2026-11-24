@@ -1,0 +1,32 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: pkg-type
+  spec-value: inspection-group
+  uid: pkg-root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      name:
+        description: |
+          It shall be the human readable name of the inspection group.
+        spec-type: str
+      text:
+        description: |
+          It shall describe the inspection group.
+        spec-type: str
+    description: |
+      This set of attributes specifies a group of inspections.  A group may be
+      a member of another group and may declare an analysis whose findings
+      shall all be inspected.
+    mandatory-attributes: all
+spec-name: Inspection Group Item Type
+spec-type: pkg-inspection-group
+type: spec
