@@ -240,6 +240,11 @@ Date
     assert "file dir/gone.txt /pkg/source/test-files absent" in text
     assert "These findings have no inspection:" in text
     assert "Cppcheck syntaxError /elsewhere/c.c: syntax error" in text
+    # A round without scopes and without a judgement result has no table.
+    text = doc.substitute(
+        "${.:/inspection-group:1:/pkg/inspection/group-history}")
+    assert "Review without scopes." in text
+    assert ".. table::" not in text
     text = doc.substitute(
         "${.:/inspection-group:1:/pkg/inspection/group-empty}")
     assert text == """.. _PkgInspectionGroupEmpty:
