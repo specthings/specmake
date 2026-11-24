@@ -951,13 +951,30 @@ class PackageComponent(BuildItem):
     def run(self) -> None:
         self.description.add("Provide settings for the component.")
 
+    def ancestors(self) -> Iterator["PackageComponent"]:
+        """ Yield the ancestors of the component from its parent upwards. """
+        component = self._parent
+        while component is not None:
+            yield component
+            component = component._parent
+
+    def is_related(self, other: "PackageComponent") -> bool:
+        """
+        Return true, if the other component is this component, an ancestor or
+        a descendant of it, otherwise false.
+        """
+        return other is self or other in self.ancestors(
+        ) or self in other.ancestors()
+
     def is_item_enabled(self, enabled_set: EnabledSet, item: Item) -> bool:
         """
         Return true, if the item is enabled for the enabled set, otherwise
         false.
 
-        Where the item belongs to a component, the enabled set of the component
-        is used.
+        Where the item belongs to a component, the enabled set of that
+        component is used.  The item of a component which is not related to
+        this component is disabled, so the scope of a component does not see
+        the items of another branch of the component tree.
         """
         try:
             component_item = build_item_input(item, "component")
@@ -965,6 +982,10 @@ class PackageComponent(BuildItem):
             return is_enabled(enabled_set, item["enabled-by"])
         component = self.director[component_item.uid]
         assert isinstance(component, PackageComponent)
+        if not self.is_related(component):
+            logging.debug("%s: is disabled in the scope of %s", item.uid,
+                          self.uid)
+            return False
         enabled = is_enabled(component.selection.enabled_set,
                              item["enabled-by"])
         if not enabled:
