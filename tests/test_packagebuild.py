@@ -833,3 +833,30 @@ def test_export_clearance_attribute_path():
             factory.export_data(item_cache["/c"], True, order)
         with pytest.raises(ValueError, match=message):
             factory.export_data(item_cache["/t"], True, order)
+
+
+def test_component_scope_hides_unrelated_components(caplog, tmpdir):
+    package = create_package(caplog, Path(tmpdir), Path("spec-packagebuild"),
+                             [])
+    director = package.director
+    root = director["/pkg/component"]
+    sub = director["/pkg/sub/component"]
+    sub_s = director["/pkg/sub/s/component"]
+    sub_t = director["/pkg/sub/t/component"]
+    assert sub_s.is_related(sub_s)
+    assert sub_s.is_related(sub)
+    assert sub_s.is_related(root)
+    assert root.is_related(sub_s)
+    assert not sub_s.is_related(sub_t)
+    assert not sub_t.is_related(sub_s)
+
+    # The item of a component is enabled with the enabled set of its own
+    # component, but only in the scope of a related component.
+    item = director.item_cache["/pkg/sub/t/link-hub"]
+    item["enabled-by"] = "sub-sub-t"
+    assert sub_t.selection.is_enabled(item)
+    assert sub.selection.is_enabled(item)
+    assert root.selection.is_enabled(item)
+    assert not sub_s.selection.is_enabled(item)
+    item["enabled-by"] = "sub-sub-s"
+    assert not sub_t.selection.is_enabled(item)
