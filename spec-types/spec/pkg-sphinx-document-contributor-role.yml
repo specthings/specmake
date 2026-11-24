@@ -1,0 +1,32 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: document-contributor
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      action:
+        description: |
+          It shall be the action which the contributor performed, for example
+          "Written by".
+        spec-type: str
+    description: |
+      It defines the document contributor role of links. A Sphinx document item
+      links to the person items of its contributors. The order of the links
+      gives the order of the actions and of the contributors of an action. The
+      links take precedence over the document contributors attribute. The
+      organization of a contributor is the affiliation which is valid in the
+      year of the document.
+    mandatory-attributes: all
+spec-name: Sphinx Document Contributor Link Role
+spec-type: pkg-sphinx-document-contributor-role
+type: spec

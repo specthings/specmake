@@ -4,10 +4,6 @@ copyrights:
 enabled-by: inspection
 date: '2026-11-24'
 findings: null
-inspectors:
-- first-name: Frank
-  last-name: Kuehndel
-  organization: embedded brains GmbH & Co. KG
 links:
 - role: inspected
   uid: ../source/test-files
@@ -17,6 +13,8 @@ links:
     file: dir/a.txt
     ranges: null
     hash: null
+- role: inspector
+  uid: /person/p0001
 method: Inspection of the artefact.
 pkg-type: inspection
 type: pkg

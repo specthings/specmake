@@ -4,13 +4,13 @@ copyrights:
 enabled-by: inspection
 date: '2021-11-26'
 findings: null
-inspectors:
-- first-name: Frank
-  last-name: Kuehndel
-  organization: embedded brains GmbH & Co. KG
 links:
 - role: inspection-member
   uid: group-history
+- role: inspector
+  uid: /person/p0001
+- role: inspector
+  uid: /person/p0002
 method: |
   Review without scopes.
 pkg-type: inspection

@@ -4,10 +4,6 @@ copyrights:
 enabled-by: inspection
 date: '2026-11-24'
 findings: null
-inspectors:
-- first-name: Frank
-  last-name: Kuehndel
-  organization: embedded brains GmbH & Co. KG
 links:
 - role: inspected
   uid: ../spamr/cppcheck
@@ -18,6 +14,8 @@ links:
     rule: variableScope
     tool: Cppcheck
     hash: 4gxjmiIabDDphR7ftUEwoQU-jH0AsHtL9adzn_1Sf1jXWebfKRLU2QLYBOfp7fbXbf0Ha4hCTPmMr3vXsJoSGg==
+- role: inspector
+  uid: /person/p0001
 method: Inspection of the artefact.
 pkg-type: inspection
 type: pkg

@@ -219,7 +219,7 @@ The members inspect the findings of the static analysis.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Inspectors
-    Frank Kuehndel (embedded brains GmbH & Co. KG)
+    Erika Mustermann (New Company)
 
 Date
     2026-11-24
@@ -244,6 +244,9 @@ Date
     text = doc.substitute(
         "${.:/inspection-group:1:/pkg/inspection/group-history}")
     assert "Review without scopes." in text
+    # The affiliation follows the date 2021-11-26 of the inspection.
+    assert """Inspectors
+    Erika Mustermann (Old Company), Reviewer A""" in text
     assert ".. table::" not in text
     text = doc.substitute(
         "${.:/inspection-group:1:/pkg/inspection/group-empty}")
@@ -383,6 +386,7 @@ def test_baseline():
 
 def test_renew():
     data = load_data(str(_INSPECTIONS / "file-fixed.yml"))
+    data["links"].append({"role": "inspector", "uid": "/person/p0001"})
     report = _report("/i", [[({
         "anchor": "line",
         "file": "dir/gone.txt",
@@ -394,7 +398,7 @@ def test_renew():
     assert new["verdict"] is None
     assert new["method"] is None
     assert new["findings"] is None
-    assert new["inspectors"] == []
+    assert "inspectors" not in new
     assert new["pkg-type"] == "inspection"
     assert new["links"] == [{
         "role": "inspection-supersedes",

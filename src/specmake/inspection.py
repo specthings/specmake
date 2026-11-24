@@ -35,7 +35,7 @@ import os
 from typing import Any, Callable, Iterable, Iterator
 import urllib.parse
 
-from specitems import Item, Link, TextContent, data_digest, hash_file
+from specitems import Item, Link, Person, TextContent, data_digest, hash_file
 
 from .directorystate import DirectoryState
 from .pkgitems import BuildItemMapper
@@ -340,10 +340,17 @@ def is_superseded(item: Item) -> bool:
     return any(item.links_to_children("inspection-supersedes"))
 
 
+def _get_inspectors(item: Item) -> list[str]:
+    return [
+        _linked_person(Person(link.item), item["date"])
+        for link in item.links_to_parents("inspector")
+    ]
+
+
 def _check_judgement(item: Item) -> Iterator[Result]:
     missing = [
         key for key in ("date", "inspectors", "method", "verdict")
-        if not item[key]
+        if not (_get_inspectors(item) if key == "inspectors" else item[key])
     ]
     if missing:
         yield Result(item.uid, State.UNJUDGED, "judgement",
@@ -524,7 +531,8 @@ def renew(data: dict, uid: str, report: dict) -> dict:
             "scopes": scopes
         })
     for link in data["links"]:
-        if link["role"] not in ("inspected", "inspection-supersedes"):
+        if link["role"] not in ("inspected", "inspection-supersedes",
+                                "inspector"):
             links.append(dict(link))
     return {
         "SPDX-License-Identifier": data["SPDX-License-Identifier"],
@@ -532,7 +540,6 @@ def renew(data: dict, uid: str, report: dict) -> dict:
         "date": None,
         "enabled-by": data["enabled-by"],
         "findings": None,
-        "inspectors": [],
         "links": links,
         "method": None,
         "pkg-type": "inspection",
@@ -588,9 +595,11 @@ class InspectionCheck(DirectoryState):
             f"produce the report {self.description.path(self.file)}.")
 
 
-def _person(person: dict) -> str:
-    return f"{person['first-name']} {person['last-name']} " \
-        f"({person['organization']})"
+def _linked_person(person: Person, date: str | None) -> str:
+    organizations = ", ".join(organization["name"]
+                              for organization in person.affiliations(date))
+    return f"{person.full_name} ({organizations})" if organizations \
+        else person.full_name
 
 
 def _issue(mapper: BuildItemMapper, link: Link) -> str:
@@ -623,8 +632,7 @@ def _history(item: Item) -> list[str]:
 def _add_inspection(content: TextContent, mapper: BuildItemMapper, item: Item,
                     states: dict[tuple[str, str], dict]) -> None:
     with content.section(f"Inspection {item.uid}"):
-        inspectors = ", ".join(
-            _person(person) for person in item["inspectors"])
+        inspectors = ", ".join(_get_inspectors(item))
         content.add_definition_item("Inspectors", inspectors or "not recorded")
         content.add_definition_item("Date", _optional(item["date"]))
         content.add_definition_item(
