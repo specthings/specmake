@@ -26,11 +26,23 @@
 
 from pathlib import Path
 
+from specware import gather_build_files
+
+import specmake.reposubset
+
 from .util import create_package
 
 
-def test_reposubset(caplog, tmpdir):
+def test_reposubset(caplog, tmpdir, monkeypatch):
     tmp_dir = Path(tmpdir)
+    configs = []
+
+    def _gather_build_files(config, *args):
+        configs.append(config)
+        return gather_build_files(config, *args)
+
+    monkeypatch.setattr(specmake.reposubset, "gather_build_files",
+                        _gather_build_files)
     spec_dir = Path(__file__).parent / "spec-packagebuild" / "build"
     sub_repo_dir = tmp_dir / "pkg" / "sub-repo"
     files = [
@@ -59,5 +71,6 @@ def test_reposubset(caplog, tmpdir):
     assert not a.exists()
     director.build_package(only=[uid], force=[uid])
     assert a.is_file()
+    assert configs[-1]["top-directory"] == str(tmp_dir / "repo")
     for file in files:
         assert file.exists()

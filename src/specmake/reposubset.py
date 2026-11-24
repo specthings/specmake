@@ -48,8 +48,15 @@ class RepositorySubset(DirectoryState):
             yield from item.substitute(link["enabled-set-extension"])
 
     def gather_files(self) -> list[str]:
-        """ Gather the files of the repository subset. """
+        """
+        Gather the files of the repository subset.
+
+        The build specification evaluates its path operators relative to the
+        directory of the source.
+        """
         logging.info("%s: gather repository subset", self.uid)
+        source = self.input("source")
+        assert isinstance(source, DirectoryState)
         enabled_set = list(self.enabled_set)
         for enable_enabled_by in itertools.chain(
                 self["enabled-set-extension"],
@@ -75,7 +82,8 @@ class RepositorySubset(DirectoryState):
             "bsp": self["bsp"],
             "enabled-set": enabled_set,
             "base-directory-map": self["base-directory-map"],
-            "build-uids": self["build-uids"]
+            "build-uids": self["build-uids"],
+            "top-directory": source.directory
         }
         files = gather_build_files(config, item_cache,
                                    self["include-test-header"])
