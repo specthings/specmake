@@ -649,7 +649,8 @@ def _add_inspection(content: TextContent, mapper: BuildItemMapper, item: Item,
                 name = _scope_name(scope)
                 rows.append((content.escape(name), link.item.uid,
                              states[(item.uid, name)]["state"]))
-        content.add_simple_table(rows)
+        if len(rows) > 1:
+            content.add_simple_table(rows)
 
 
 def render_group(content: TextContent, mapper: BuildItemMapper, group: Item,
