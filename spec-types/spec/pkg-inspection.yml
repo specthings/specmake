@@ -1,0 +1,48 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: pkg-type
+  spec-value: inspection
+  uid: pkg-root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      date:
+        description: |
+          If the value is present, then it shall be the date of the inspection,
+          otherwise the inspection is not judged.
+        spec-type: pkg-inspection-date
+      findings:
+        description: |
+          If the value is present, then it shall state what the inspectors found.
+        spec-type: optional-str
+      inspectors:
+        description: |
+          It shall be the list of persons which carried out the inspection.  An
+          empty list means that the inspection is not judged.
+        spec-type: pkg-inspection-person-list
+      method:
+        description: |
+          If the value is present, then it shall state what the inspectors did,
+          otherwise the inspection is not judged.
+        spec-type: optional-str
+      verdict:
+        description: |
+          If the value is present, then it shall be the verdict of the
+          inspection, otherwise the inspection is not judged.
+        spec-type: pkg-inspection-verdict
+    description: |
+      This set of attributes specifies one inspection of one or more artefacts.
+      An inspection item is one inspection round.  A repeated inspection is a
+      new item which supersedes this one.
+    mandatory-attributes: all
+spec-name: Inspection Item Type
+spec-type: pkg-inspection
+type: spec

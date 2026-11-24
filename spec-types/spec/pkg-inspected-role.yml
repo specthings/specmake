@@ -1,0 +1,29 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: inspected
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      scopes:
+        description: |
+          It shall be the list of inspected scopes of the link target.
+        spec-type: pkg-inspection-scope-list
+    description: |
+      It defines the inspected role of links.  The link target shall be the
+      inspected artefact.  For file scopes it shall be a directory state, for
+      item scopes it shall be the inspected item itself, and for finding scopes
+      it shall be a directory state with SARIF files.
+    mandatory-attributes: all
+spec-name: Inspected Link Role
+spec-type: pkg-inspected-role
+type: spec

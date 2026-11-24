@@ -1,0 +1,24 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  none: null
+  str:
+    assert:
+      in:
+      - compliant
+      - non-compliant
+      - not-applicable
+    description: |
+      If the value is present, then it shall be the verdict of an inspection.
+      The digests of the inspected content determine whether an inspection is
+      stale, so staleness is no verdict.
+spec-name: Inspection Verdict
+spec-type: pkg-inspection-verdict
+type: spec

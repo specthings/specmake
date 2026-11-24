@@ -1,0 +1,32 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  str:
+    assert:
+      in:
+      - content
+      - line
+    description: |
+      It shall state how the line ranges of a file scope are bound to the
+      file.
+
+      line
+          The ranges cover the lines with their recorded numbers.
+
+      content
+          The ranges cover a block of lines which may move within the file.
+          If the recorded lines do not match the digest, then the check
+          searches the file for the ranges shifted by the same offset.  The
+          nearest match wins.
+
+      The anchor has no effect for a scope without line ranges.
+spec-name: Inspection Anchor
+spec-type: pkg-inspection-anchor
+type: spec

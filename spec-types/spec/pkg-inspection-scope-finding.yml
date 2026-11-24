@@ -1,0 +1,44 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: scope
+  spec-value: finding
+  uid: pkg-inspection-scope
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      file:
+        description: |
+          It shall be the file of the finding relative to the source directories
+          of the inspection check, or "-" if the finding has no location.
+        spec-type: str
+      message:
+        description: |
+          It shall be the message of the finding.
+        spec-type: str
+      rule:
+        description: |
+          It shall be the rule which reported the finding.
+        spec-type: str
+      tool:
+        description: |
+          It shall be the name of the static analyser which reported the
+          finding.
+        spec-type: str
+    description: |
+      This set of attributes specifies the inspected findings of a static
+      analyser with the same tool, rule, file and message.  The line of a
+      finding is not part of its identity, since it moves when unrelated code
+      moves.  The digest covers the count of the findings, so a new finding
+      with the same identity makes the scope stale.
+    mandatory-attributes: all
+spec-name: Inspection Finding Scope
+spec-type: pkg-inspection-scope-finding
+type: spec

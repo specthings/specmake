@@ -1,0 +1,25 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: directory-state-type
+  spec-value: inspection-check
+  uid: pkg-directory-state
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      This set of attributes specifies the check of the inspections of the
+      package.  The check writes a report with the state of each inspected
+      scope and the current digest of its content.  The inputs named source
+      are the source directories which the files of findings are relative to.
+    mandatory-attributes: all
+spec-name: Inspection Check Item Type
+spec-type: pkg-inspection-check
+type: spec
