@@ -24,12 +24,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import json
 from pathlib import Path
+import shutil
 
 import pytest
 
 from specitems import hash_file_lines, load_data
 
+from specmake.cliupdateinspections import cliupdateinspections
 from specmake.inspection import (State, baseline, item_digest, load_findings,
                                  renew)
 
@@ -315,3 +318,56 @@ def test_renew():
         "status": "closed",
         "uid": "../issue/issue"
     }]
+
+
+def _spec(tmp_path: Path) -> Path:
+    spec = tmp_path / "spec"
+    (spec / "pkg" / "inspection").mkdir(parents=True)
+    shutil.copy(_INSPECTIONS / "file-ok.yml", spec / "pkg" / "inspection")
+    return spec
+
+
+def _run(tmp_path: Path, *args: str) -> None:
+    cliupdateinspections([
+        "specupdateinspections", "--spec-directory",
+        str(tmp_path / "spec"), "--cache-directory",
+        str(tmp_path / "cache"), *args
+    ])
+
+
+def test_cliupdateinspections(caplog, tmpdir):
+    tmp_path = Path(tmpdir)
+    _, report = _build(caplog, tmp_path / "build")
+    report_file = tmp_path / "report.json"
+    report_file.write_text(json.dumps(report), encoding="utf-8")
+    spec = _spec(tmp_path)
+    item_file = spec / "pkg" / "inspection" / "file-ok.yml"
+    uid = "/pkg/inspection/file-ok"
+    _run(tmp_path, uid, str(report_file))
+    data = load_data(str(item_file))
+    assert data["links"][0]["scopes"][0]["hash"] == _A_TXT
+    assert data["links"][1]["scopes"][0]["hash"] is not None
+    before = item_file.read_text(encoding="utf-8")
+    _run(tmp_path, uid, str(report_file))
+    assert item_file.read_text(encoding="utf-8") == before
+    output = tmp_path / "new.yml"
+    _run(tmp_path, "--renew", "--output", str(output), uid, str(report_file))
+    assert load_data(str(output))["links"][0] == {
+        "role": "inspection-supersedes",
+        "uid": uid
+    }
+
+
+def test_cliupdateinspections_errors(tmpdir):
+    tmp_path = Path(tmpdir)
+    _spec(tmp_path)
+    report_file = tmp_path / "report.json"
+    report_file.write_text(json.dumps({"inspections": {}}), encoding="utf-8")
+    uid = "/pkg/inspection/file-ok"
+    with pytest.raises(SystemExit, match="--renew needs an --output file"):
+        _run(tmp_path, "--renew", uid, str(report_file))
+    with pytest.raises(SystemExit, match="there is no item /nope"):
+        _run(tmp_path, "/nope", str(report_file))
+    with pytest.raises(SystemExit,
+                       match=f"{uid}: the report has no inspection {uid}"):
+        _run(tmp_path, uid, str(report_file))
