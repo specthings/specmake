@@ -13,7 +13,13 @@ spec-description: null
 spec-example: null
 spec-info:
   dict:
-    attributes: {}
+    attributes:
+      strict:
+        description: |
+          It shall be true, if the release gate applies, otherwise false.  The
+          release gate also fails a scope which is not baselined or not
+          checked.
+        spec-type: bool
     description: |
       This set of attributes specifies the check of the inspections of the
       package.  The check writes a report with the state of each inspected

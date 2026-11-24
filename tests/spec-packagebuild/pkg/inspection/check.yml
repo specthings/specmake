@@ -22,5 +22,10 @@ links:
   name: inspection-check
   role: input-to
   uid: ../deployment/doc
+- hash: null
+  name: inspection-check
+  role: input-to
+  uid: ../deployment/doc-package-summary
 pkg-type: directory-state
+strict: false
 type: pkg

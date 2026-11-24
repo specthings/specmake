@@ -30,13 +30,14 @@ import shutil
 
 import pytest
 
-from specitems import hash_file_lines, load_data
+from specitems import CommonMarkContent, hash_file_lines, load_data
 
 from specmake.cliupdateinspections import cliupdateinspections
 from specmake.inspection import (State, baseline, item_digest, load_findings,
                                  renew)
 
 import specmake.inspection
+import specmake.packagemanual
 
 from .util import create_package, get_and_clear_log
 
@@ -65,6 +66,7 @@ def _states(report: dict) -> dict[tuple[str, str], str]:
 def test_inspection_check(caplog, tmpdir):
     director, report = _build(caplog, Path(tmpdir))
     states = _states(report)
+    assert report["strict"] is False
     pre = "/pkg/inspection/"
     assert states[(f"{pre}file-ok", "file dir/a.txt")] == "valid"
     assert states[(f"{pre}file-ok",
@@ -246,6 +248,49 @@ No inspections
 --------------
 
 The group has no members."""
+
+
+def _summary(director) -> str:
+    director["/pkg/inspection/check"].build()
+    summary = director["/pkg/deployment/doc-package-summary"]
+    # The repositories of the fixture package are not built.
+    summary.item["list-repositories"] = False
+    summary.build(force=True)
+    with open(summary.file, "r", encoding="utf-8") as src:
+        return src.read()
+
+
+def test_package_summary(caplog, tmpdir):
+    package = create_package(caplog, Path(tmpdir), Path("spec-packagebuild"),
+                             ["inspection", "package-manual"])
+    director = package.director
+    text = _summary(director)
+    report = director["/pkg/inspection/check"].json_load()
+    failed = [result for result in report["results"] if result["fails"]]
+    assert f"- {len(failed)} inspection scopes fail the check" in text
+    assert "## Failed inspections" in text
+    assert "/pkg/inspection/file-stale" in text
+    assert "/pkg/inspection/not-baselined" not in text
+
+    # The release gate also fails the scopes which are not baselined.
+    director.item_cache["/pkg/inspection/check"]["strict"] = True
+    text = _summary(director)
+    report = director["/pkg/inspection/check"].json_load()
+    assert report["strict"] is True
+    failed = [result for result in report["results"] if result["fails-strict"]]
+    assert f"- {len(failed)} inspection scopes fail the check" in text
+    assert "/pkg/inspection/not-baselined" in text
+
+
+def test_package_summary_passed():
+    content = CommonMarkContent(0, context="BSD-2-Clause")
+    specmake.packagemanual._add_status(content, [], [], [], False, [])
+    assert str(content) == """<a id="Passed"></a>
+
+# ✅ Passed
+
+There are no unexpected test failures.  All coverage scopes meet their limits.  There are no stale gap items.  All inspection scopes pass the check.
+"""
 
 
 def test_state_fails():
