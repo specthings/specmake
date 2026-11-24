@@ -1,0 +1,20 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: inspection
+date: null
+findings: null
+inspectors: []
+links:
+- role: inspected
+  uid: ../source/test-files
+  scopes:
+  - scope: file
+    anchor: line
+    file: dir/a.txt
+    ranges: null
+    hash: eilvq1Nks0zj4EdtVb8pG9QaoIXl7PKpaIPlk6oYNv7SL3JCr0jVSvGPVcjR3vE-yTFMkmZmoLpj92Y1AAkFZQ==
+method: null
+pkg-type: inspection
+type: pkg
+verdict: null
