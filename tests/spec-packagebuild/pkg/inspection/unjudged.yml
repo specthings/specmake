@@ -4,7 +4,6 @@ copyrights:
 enabled-by: inspection
 date: null
 findings: null
-inspectors: []
 links:
 - role: inspected
   uid: ../source/test-files

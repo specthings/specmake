@@ -38,7 +38,10 @@ spec-info:
         description: null
         spec-type: pkg-sphinx-component-list
       document-contributors:
-        description: null
+        description: |
+          If the attribute is present, then its value shall be the list of
+          document contributors by action.  The document contributor links take
+          precedence over the value.
         spec-type: pkg-sphinx-contributor-action-list
       document-copyrights:
         description: |
@@ -119,7 +122,6 @@ spec-info:
     mandatory-attributes:
     - document-base-path
     - document-components
-    - document-contributors
     - document-copyrights
     - document-html-footer
     - document-html-help-base-name

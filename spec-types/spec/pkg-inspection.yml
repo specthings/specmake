@@ -23,11 +23,6 @@ spec-info:
         description: |
           If the value is present, then it shall state what the inspectors found.
         spec-type: optional-str
-      inspectors:
-        description: |
-          It shall be the list of persons which carried out the inspection.  An
-          empty list means that the inspection is not judged.
-        spec-type: pkg-inspection-person-list
       method:
         description: |
           If the value is present, then it shall state what the inspectors did,
@@ -41,7 +36,8 @@ spec-info:
     description: |
       This set of attributes specifies one inspection of one or more artefacts.
       An inspection item is one inspection round.  A repeated inspection is a
-      new item which supersedes this one.
+      new item which supersedes this one.  An inspection without inspector
+      links is not judged.
     mandatory-attributes: all
 spec-name: Inspection Item Type
 spec-type: pkg-inspection

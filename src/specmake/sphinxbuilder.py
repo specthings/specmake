@@ -39,6 +39,7 @@ from typing import Any, Callable, Iterator, Optional
 import yaml
 
 from specitems import (ContentContext, ROW_SPAN, BibTeXCitationProvider,
+                       BibTeXName, Person, get_affiliations,
                        DocumentGlossaryConfig, GlossaryConfig, Item, ItemCache,
                        ItemGetValueContext, ItemMapper, ItemValueProvider,
                        Link, SphinxContent, TextContent, generate_glossary,
@@ -125,20 +126,41 @@ def _no_action(_source_dir: str, _build_dir: str,
     pass
 
 
+def _get_linked_contributors(item: Item,
+                             mapper: ItemMapper) -> list[tuple[str, Person]]:
+    actions: dict[str, list[Person]] = {}
+    for link in item.links_to_parents("document-contributor"):
+        actions.setdefault(mapper.substitute(link["action"], item),
+                           []).append(Person(link.item))
+    return [(action, person) for action, persons in actions.items()
+            for person in persons]
+
+
+def _get_contributor_rows(item: Item,
+                          mapper: ItemMapper) -> list[tuple[str, str, str]]:
+    linked = _get_linked_contributors(item, mapper)
+    if linked:
+        year = _document_year(item, mapper)
+        return [(action, person.full_name,
+                 ", ".join(organization["name"]
+                           for organization in person.affiliations(year)))
+                for action, person in linked]
+    return [(action["action"],
+             f"{contributor['first-name']} {contributor['last-name']}",
+             contributor["organization"]) for action in mapper.substitute_data(
+                 item.get("document-contributors", None) or [])
+            for contributor in action["contributors"]]
+
+
 def _get_contributors(ctx: ItemGetValueContext) -> str:
     header = ("Action", "Name", "Organization", "Signature")
     rows: list[tuple[str | int, str, str, str]] = [header]
     last_action = ""
-    for action in ctx.mapper.substitute_data(
-            ctx.item["document-contributors"]):
-        name = action["action"]
-        for contributor in action["contributors"]:
-            first = contributor["first-name"]
-            last = contributor["last-name"]
-            action_cell = ROW_SPAN if name == last_action else name
-            rows.append((action_cell, f"{first} {last}",
-                         contributor["organization"], ""))
-            last_action = name
+    for action, name, organization in _get_contributor_rows(
+            ctx.item, ctx.mapper):
+        action_cell = ROW_SPAN if action == last_action else action
+        rows.append((action_cell, name, organization, ""))
+        last_action = action
     mapper = ctx.mapper
     assert isinstance(mapper, BuildItemMapper)
     content = mapper.create_content()
@@ -284,27 +306,46 @@ class _CitationProvider(BibTeXCitationProvider):
                                       self.get_cite_group)
 
     def _get_document_fields(
-            self, item: Item) -> tuple[str, dict[str, str | list[str]]]:
-        organizations: set[str] = set()
-        authors: set[str] = set()
-        for action in item["document-contributors"]:
-            for contributor in action["contributors"]:
-                first = contributor["first-name"]
-                last = contributor["last-name"]
-                authors.add(f"{last}, {first}")
-                organizations.add(contributor["organization"])
+        self, item: Item
+    ) -> tuple[str, dict[str, str | list[str] | list[BibTeXName]]]:
         mapper = self.mapper
         assert isinstance(mapper, BuildItemMapper)
         url = mapper.relpath(
             mapper.substitute(f"{item['directory']}/{item['output-pdf']}",
                               item))
-        fields: dict[str, str | list[str]] = {
-            "author": sorted(authors),
-            "organization": ", ".join(sorted(organizations)),
+        year = _document_year(item, self.mapper)
+        fields: dict[str, str | list[str] | list[BibTeXName]] = {
             "title": _normal_title(item),
             "url": url,
-            "year": _document_year(item, self.mapper)
+            "year": year
         }
+        persons = list(
+            dict.fromkeys(
+                person
+                for _, person in _get_linked_contributors(item, self.mapper)))
+        if persons:
+            fields["author"] = [
+                BibTeXName(person.name, person.first_name)
+                for person in persons
+            ]
+            affiliations = get_affiliations(
+                (person.item for person in persons), year)
+            if affiliations:
+                fields["organization"] = [
+                    BibTeXName(organization["name"], is_organization=True)
+                    for organization in affiliations
+                ]
+            return "manual", fields
+        organizations: set[str] = set()
+        authors: set[str] = set()
+        for action in item.get("document-contributors", None) or []:
+            for contributor in action["contributors"]:
+                first = contributor["first-name"]
+                last = contributor["last-name"]
+                authors.add(f"{last}, {first}")
+                organizations.add(contributor["organization"])
+        fields["author"] = sorted(authors)
+        fields["organization"] = ", ".join(sorted(organizations))
         return "manual", fields
 
     def get_cite_group(self, ctx: ItemGetValueContext) -> str:
