@@ -18,5 +18,9 @@ links:
   name: source
   role: input
   uid: ../spamr/rtems-qual-only
+- hash: null
+  name: inspection-check
+  role: input-to
+  uid: ../deployment/doc
 pkg-type: directory-state
 type: pkg

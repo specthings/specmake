@@ -14,6 +14,8 @@ links:
     file: dir/a.txt
     ranges: null
     hash: eilvq1Nks0zj4EdtVb8pG9QaoIXl7PKpaIPlk6oYNv7SL3JCr0jVSvGPVcjR3vE-yTFMkmZmoLpj92Y1AAkFZQ==
+- role: inspection-member
+  uid: group
 method: null
 pkg-type: inspection
 type: pkg

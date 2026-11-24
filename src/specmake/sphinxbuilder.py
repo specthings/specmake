@@ -49,6 +49,7 @@ from specware import run_command
 
 from .directorystate import DirectoryState
 from .dirstatebase import export_directory_state_data
+from .inspection import render_group
 from .pkgitems import (BuildItem, BuildItemFactory, BuildItemMapper,
                        PackageBuildDirector, PackageComponent)
 from .testoutputparser import augment_report
@@ -428,6 +429,8 @@ class SphinxBuilder(DirectoryState):
         self.mapper.add_get_value(f"{my_type}:/item-files",
                                   self._get_item_files)
         self.mapper.add_get_value(f"{my_type}:/ref", self._get_ref)
+        self.mapper.add_get_value(f"{my_type}:/inspection-group",
+                                  self._get_inspection_group)
         for name in [my_type, "pkg/sphinx-section"]:
             self.mapper.add_get_value(f"{name}:/build-description",
                                       self._get_build_description)
@@ -872,6 +875,15 @@ class SphinxBuilder(DirectoryState):
                          epilogue=kwargs.get("epilogue"),
                          empty=kwargs.get("empty"))
         return content.join()
+
+    def _get_inspection_group(self, ctx: ItemGetValueContext) -> str:
+        with self.section_content(ctx) as (content, uid):
+            assert uid
+            check = self.input("inspection-check")
+            assert isinstance(check, DirectoryState)
+            render_group(content, self.mapper, self.item.cache[uid],
+                         check.json_load())
+            return "\n".join(content)
 
     def _get_ref(self, ctx: ItemGetValueContext) -> str:
         args, kwargs = ctx.unpack_args_dict(ctx.mapper.substitute)
