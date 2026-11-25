@@ -406,6 +406,10 @@ def test_packagebuild(caplog, tmpdir, monkeypatch):
     c.git_add(["modules/foobar"])
     assert command == []
 
+    command = []
+    c.git_remove(["modules/foobar"])
+    assert command == []
+
     assert c.git_is_clean()
     assert command == []
 
@@ -446,8 +450,19 @@ def test_packagebuild(caplog, tmpdir, monkeypatch):
     ]
 
     command = []
+    c.git_remove(["modules/foobar"])
+    assert command == [
+        str(tmp_dir / "pkg"), "git", "rm", "--cached", "--ignore-unmatch",
+        "--quiet", "--pathspec-from-file=-", "--pathspec-file-nul"
+    ]
+
+    command = []
     director.add_submodule("modules")
     c.git_add(["modules/foobar"])
+    assert command == []
+
+    command = []
+    c.git_remove(["modules/foobar"])
     assert command == []
 
 

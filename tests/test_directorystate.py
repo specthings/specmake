@@ -29,6 +29,7 @@
 import logging
 import os
 import pytest
+import subprocess
 
 from specitems import Link
 
@@ -747,3 +748,107 @@ def test_directorystate_input_file_list():
 
 
 # REUSE-IgnoreEnd
+
+
+def _git(directory, *args):
+    return subprocess.run(["git", *args],
+                          check=True,
+                          capture_output=True,
+                          cwd=directory,
+                          text=True).stdout
+
+
+def test_directorystate_commit_vanished_files(tmp_path):
+    director = create_test_director()
+    director.factory.add_constructor("pkg/directory-state/patterns",
+                                     DirectoryState)
+    director.git_directory = str(tmp_path)
+    _git(tmp_path, "init", "--quiet")
+    base = tmp_path / "base"
+    base.mkdir()
+    for name in ("a", "b", "c"):
+        (base / name).write_text(name)
+    data = {
+        "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+        "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        "license-info": [],
+        "directory": str(base),
+        "directory-state-type": "patterns",
+        "enabled-by": True,
+        "files": [{
+            "file": "x",
+            "hash": None
+        }],
+        "hash": None,
+        "links": [],
+        "patterns": "*",
+        "pkg-type": "directory-state",
+        "type": "pkg"
+    }
+    item = director.item_cache.add_item("/directory-state", data)
+    item.file = str(tmp_path / "item.yml")
+    dir_state = director["/directory-state"]
+
+    # Git does not track the file x of the item
+    dir_state.load()
+    dir_state.commit("Add")
+    assert _git(tmp_path, "ls-files", "base") == "base/a\nbase/b\nbase/c\n"
+
+    # The make step deletes a file
+    (base / "b").unlink()
+    dir_state.load()
+    dir_state.commit("Update")
+    assert _git(tmp_path, "ls-files", "base") == "base/a\nbase/c\n"
+    assert _git(tmp_path, "status", "--short") == ""
+
+    # A discarded file is passed to Git only once
+    dir_state.discard()
+    dir_state.commit("Discard")
+    assert _git(tmp_path, "ls-files", "base") == ""
+    assert _git(tmp_path, "status", "--short") == ""
+
+    # The compaction moves the base of the committed files
+    (base / "d").mkdir()
+    (base / "d" / "e").write_text("e")
+    (base / "d" / "f").write_text("f")
+    dir_state.set_files(["d/e", "d/f"])
+    dir_state.commit("Add directory")
+    dir_state.compact()
+    assert dir_state.directory == str(base / "d")
+    (base / "d" / "f").unlink()
+    dir_state.set_files(["e"])
+    dir_state.commit("Compact")
+    assert _git(tmp_path, "ls-files", "base") == "base/d/e\n"
+    assert _git(tmp_path, "status", "--short") == ""
+
+
+def test_directorystate_commit_vanished_files_without_git(tmp_path):
+    director = create_test_director()
+    director.factory.add_constructor("pkg/directory-state/patterns",
+                                     DirectoryState)
+    assert director.git_directory is None
+    for name in ("a", "b"):
+        (tmp_path / name).write_text(name)
+    data = {
+        "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+        "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+        "license-info": [],
+        "directory": str(tmp_path),
+        "directory-state-type": "patterns",
+        "enabled-by": True,
+        "files": [],
+        "hash": None,
+        "links": [],
+        "patterns": "[ab]",
+        "pkg-type": "directory-state",
+        "type": "pkg"
+    }
+    item = director.item_cache.add_item("/directory-state", data)
+    item.file = str(tmp_path / "item.yml")
+    dir_state = director["/directory-state"]
+    dir_state.load()
+    dir_state.commit("Add")
+    (tmp_path / "b").unlink()
+    dir_state.load()
+    dir_state.commit("Update")
+    assert list(dir_state.files(".")) == ["./a"]

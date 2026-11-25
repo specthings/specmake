@@ -798,6 +798,32 @@ class BuildItem():
                            input="\0".join(what).encode("utf-8"),
                            cwd=directory)
 
+    def git_remove(self, what: Iterable[str]) -> None:
+        """
+        Remove the files from the Git index.  Files which Git does not track
+        are ignored.
+        """
+        directory = self.git_directory
+        if directory is None:
+            return
+        submodules = self.director.submodules
+        if submodules:
+            what = [path for path in what if not path.startswith(submodules)]
+        what = [os.path.relpath(path, directory) for path in what]
+        if what:
+            command = [
+                "git", "rm", "--cached", "--ignore-unmatch", "--quiet",
+                "--pathspec-from-file=-", "--pathspec-file-nul"
+            ]
+            logging.info(
+                "%s: remove files %s from Git by running in '%s' "
+                "with file list provided by stdin: %s", self.uid, what,
+                directory, " ".join(command))
+            subprocess.run(command,
+                           check=True,
+                           input="\0".join(what).encode("utf-8"),
+                           cwd=directory)
+
     def git_is_clean(self) -> bool:
         """
         Return true, if the Git repository is clean or Git is not used,

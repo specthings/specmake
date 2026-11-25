@@ -138,6 +138,7 @@ class DirectoryStateBase(BuildItem):
         self._files: dict[str, Optional[str]] = dict(
             (file_info["file"], file_info["hash"])
             for file_info in item.get("files", []))
+        self._committed_files = set(self._files)
         if self.item.get("directory-state-load-before-use", False):
             self.load()
 
@@ -332,6 +333,9 @@ class DirectoryStateBase(BuildItem):
             self.item["hash"] = None
             self._files = dict(
                 (os.path.relpath(path, prefix), None) for path in self._files)
+            self._committed_files = set(
+                os.path.relpath(path, prefix)
+                for path in self._committed_files)
             self._update_item_files()
 
     def _update_item_files(self):
@@ -681,10 +685,19 @@ class DirectoryStateBase(BuildItem):
 {self.description.path(self.directory)}.""")
 
     def commit(self, reason: str) -> None:
+        base = self.directory
+        vanished = [
+            os.path.join(base, path)
+            for path in sorted(self._committed_files - self._files.keys() -
+                               self._discarded_files)
+            if not os.path.lexists(os.path.join(base, path))
+        ]
+        if vanished:
+            self.git_remove(vanished)
+        self._committed_files = set(self._files)
         files = self._discarded_files.union(self._files.keys())
         self._discarded_files.clear()
         if files:
-            base = self.directory
             self.git_add([os.path.join(base, path) for path in sorted(files)])
         super().commit(reason)
 
