@@ -1,0 +1,25 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+date: '2026-11-25'
+enabled-by: paf-spamr
+findings: null
+links:
+- role: inspected
+  uid: nopinion
+  scopes:
+  - scope: finding
+    file: librtemscpu.a/m.o
+    logical-location: f
+    message: TN-0009 back-to-back-store
+    rule: TN-0009/back-to-back-store
+    tool: nopinion
+    hash: null
+- role: inspection-member
+  uid: group-nopinion
+- role: inspector
+  uid: /person/p0001
+method: Inspection of the instruction sequence.
+pkg-type: inspection
+type: pkg
+verdict: not-applicable

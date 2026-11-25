@@ -17,7 +17,8 @@ spec-info:
     description: |
       It defines the inspection covered analysis role of links.  The link
       target shall be a directory state with SARIF files.  A member of the
-      inspection group shall inspect each finding of these files.
+      inspection group shall inspect each finding of these files which the
+      producer does not suppress.
     mandatory-attributes: all
 spec-name: Inspection Covered Analysis Link Role
 spec-type: pkg-inspection-covered-analysis-role

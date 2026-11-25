@@ -30,11 +30,11 @@ import shutil
 
 import pytest
 
-from specitems import CommonMarkContent, hash_file_lines, load_data
+from specitems import (CommonMarkContent, data_digest, hash_file_lines,
+                       load_data)
 
 from specmake.cliupdateinspections import cliupdateinspections
-from specmake.inspection import (State, baseline, item_digest, load_findings,
-                                 renew)
+from specmake.inspection import State, baseline, item_digest, renew
 
 import specmake.inspection
 import specmake.packagemanual
@@ -180,26 +180,40 @@ def test_inspection_check_no_analysis(caplog, tmpdir):
         package.director["/pkg/inspection/check"].build()
 
 
-def test_load_findings():
-    spamr = Path(__file__).parent / "test-files" / "pkg" / "build" / "src" / \
-        "spamr"
-    paths = [
-        str(spamr / "clang-analyzer" / "2026-10-13-100000-1-1" /
-            "report-a.sarif"),
-        str(spamr / "quality-scanner" /
-            "tbd-tbc-in-documentation-sources.sarif")
+def test_inspection_finding_identity(caplog, tmpdir):
+    package = create_package(caplog, Path(tmpdir), Path("spec-packagebuild"),
+                             ["inspection", "paf-spamr"])
+    check = package.director["/pkg/inspection/check"]
+    check.build()
+    report = check.json_load()
+    states = _states(report)
+    nopinion = "finding nopinion TN-0009/back-to-back-store " \
+        "librtemscpu.a/m.o f: TN-0009 back-to-back-store"
+    assert states[("/pkg/spamr/inspection-nopinion",
+                   nopinion)] == "not baselined"
+    # The digest covers the identity of the finding and not its count
+    digest = report["inspections"]["/pkg/spamr/inspection-nopinion"][0][
+        "scopes"][0]["digest"]
+    assert digest == data_digest({
+        "finding": [
+            "nopinion", "TN-0009/back-to-back-store", "librtemscpu.a/m.o", "f",
+            "TN-0009 back-to-back-store"
+        ]
+    })
+    item = package.director.item_cache["/pkg/spamr/inspection-nopinion"]
+    item.data["links"][0]["scopes"][0]["hash"] = digest
+    check.build()
+    assert _states(check.json_load())[("/pkg/spamr/inspection-nopinion",
+                                       nopinion)] == "valid"
+    # A suppressed finding needs no inspection
+    scanner = sorted(scope for (uid, scope), state in states.items()
+                     if uid == "/pkg/spamr/group-quality-scanner")
+    assert scanner == [
+        "QualityScanner TBC /pkg/component /pkg/component:/name: TBC found",
+        "QualityScanner TBD /pkg/source/doc-a: source/a.rst: TBD found",
+        "QualityScanner TBD /rtems/req/action /rtems/req/action:/text: "
+        "TBD found"
     ]
-    findings = load_findings(paths, ["/opt/rtems"])
-    assert findings[("clang", "deadcode.DeadStores", "cpukit/dev/iovprintf.c",
-                     "Value stored to 'num' is never read")] == 1
-    assert findings[("QualityScanner", "TBD", "/rtems/req/action",
-                     "TBD found")] == 1
-    assert findings[("QualityScanner", "TBD",
-                     "/pkg/source/doc-a: source/a.rst", "TBD found")] == 1
-    # Findings with the same identity are counted.
-    findings = load_findings(paths + paths[:1], ["/opt/rtems"])
-    assert findings[("clang", "deadcode.DeadStores", "cpukit/dev/iovprintf.c",
-                     "Value stored to 'num' is never read")] == 2
 
 
 def test_inspection_group(caplog, tmpdir):
