@@ -1,0 +1,22 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+date: null
+enabled-by: paf-spamr
+findings: null
+links:
+- role: inspected
+  uid: nopinion
+  scopes:
+  - scope: finding
+    file: librtemscpu.a/n.o
+    message: TN-0011 atomic-not-aligned possible
+    rule: TN-0011/atomic-not-aligned
+    tool: nopinion
+    hash: null
+- role: inspection-member
+  uid: group-nopinion
+method: null
+pkg-type: inspection
+type: pkg
+verdict: null

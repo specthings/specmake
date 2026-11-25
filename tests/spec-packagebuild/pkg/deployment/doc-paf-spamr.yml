@@ -57,21 +57,33 @@ links:
   role: input
   uid: ../spamr/rtems
 - hash: null
-  name: clang-analyzer
+  name: analysis
+  role: input
+  uid: ../spamr/cppcheck
+- hash: null
+  name: analysis
   role: input
   uid: ../spamr/clang-analyzer
 - hash: null
-  name: cppcheck
+  name: analysis
   role: input
-  uid: ../spamr/cppcheck
+  uid: ../spamr/nopinion
+- hash: null
+  name: analysis
+  role: input
+  uid: ../spamr/quality-scanner
 - hash: null
   name: metrixplusplus
   role: input
   uid: ../spamr/metrixplusplus
-- hash: null
-  name: quality-scanner
-  role: input
-  uid: ../spamr/quality-scanner
+- role: spamr-inspection-group
+  uid: ../spamr/group-cppcheck
+- role: spamr-inspection-group
+  uid: ../spamr/group-clang-analyzer
+- role: spamr-inspection-group
+  uid: ../spamr/group-nopinion
+- role: spamr-inspection-group
+  uid: ../spamr/group-quality-scanner
 - hash: null
   name: source
   role: input

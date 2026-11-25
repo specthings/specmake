@@ -12,9 +12,12 @@ links:
   uid: pkg-sphinx-document
 spec-description: |
   The item shall have a link with the ${pkg-quality-model-role:/spec-name} to the
-  quality model. It shall have the inputs `clang-analyzer`, `cppcheck`,
-  `metrixplusplus` and `quality-scanner` with the outputs of the analysis tools.
-  The `rtems` inputs shall be the source directories of the analysed code. The
+  quality model. The links with the
+  ${pkg-spamr-inspection-group-role:/spec-name} shall name the inspection
+  groups which the report presents, in the order of the report. Each analysis
+  which a group covers shall be an `analysis` input, so that the report follows
+  the analyses. The `metrixplusplus` input shall be the output of metrix++. The
+  `rtems` inputs shall be the source directories of the analysed code. The
   `package-changes` input shall provide the status of the issues for the package.
 spec-example: null
 spec-info:

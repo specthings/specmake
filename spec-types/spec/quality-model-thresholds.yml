@@ -77,6 +77,13 @@ spec-info:
           If the value is present, then it shall be the threshold of the metric Safety
           activities adequacy. Otherwise, the metric is not applicable.
         spec-type: optional-int
+      static-analysis-disposition:
+        description: |
+          If the value is present, then it shall be the threshold of the metric
+          Static analysis disposition in percent.  The value is the minimum
+          share of the findings of the inspection groups of the report which
+          have a disposition.  Otherwise, the metric is not applicable.
+        spec-type: optional-int
       spr-ncr-status:
         description: |
           If the value is present, then it shall be the threshold of the metric SPR/NCR

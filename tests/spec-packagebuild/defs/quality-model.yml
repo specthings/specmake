@@ -2,7 +2,13 @@ SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
 enabled-by: true
-links: []
+links:
+- metric: requirement-completeness
+  role: metric-source
+  uid: /pkg/spamr/group-quality-scanner
+- metric: user-documentation-completeness
+  role: metric-source
+  uid: /pkg/spamr/group-quality-scanner
 thresholds:
   comment-frequency: 30
   cyclomatic-complexity: 10
@@ -17,6 +23,7 @@ thresholds:
   rid-action-status: null
   safety-activities-adequacy: 1
   spr-ncr-status: null
+  static-analysis-disposition: 100
   user-documentation-clarity: 0
   user-documentation-completeness: 0
   user-manual-suitability: 1

@@ -1,0 +1,29 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: metric-source
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      metric:
+        description: |
+          It shall be the key of the metric of the quality model thresholds.
+        spec-type: str
+    description: |
+      It defines the metric source role of links.  The link source shall be a
+      quality model and the link target shall be an inspection group.  The open
+      findings of the analyses which the group covers are the source of the
+      metric.
+    mandatory-attributes: all
+spec-name: Metric Source Link Role
+spec-type: pkg-metric-source-role
+type: spec

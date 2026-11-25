@@ -1,0 +1,26 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+date: '2026-11-25'
+enabled-by: paf-spamr
+findings: null
+links:
+- role: inspected
+  uid: cppcheck
+  scopes:
+  - scope: finding
+    file: cpukit/a.c
+    message: "The scope of the variable 'x' can be reduced."
+    rule: variableScope
+    tool: Cppcheck
+    hash: null
+  - scope: item
+    hash: null
+- role: inspection-member
+  uid: group-cppcheck
+- role: inspector
+  uid: /person/p0001
+method: Inspection of the finding.
+pkg-type: inspection
+type: pkg
+verdict: compliant

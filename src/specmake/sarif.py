@@ -168,3 +168,20 @@ def load(paths: Iterable[str], bases: list[str]) -> Iterator[Finding]:
             artifacts = run.get("artifacts", [])
             for result in run.get("results", []):
                 yield _finding(tool, result, artifacts, bases)
+
+
+def documents(paths: Iterable[str]) -> list[str]:
+    """
+    Return the sorted UIDs of the artifacts of the kind document of the SARIF
+    files.
+    """
+    uids: set[str] = set()
+    for path in paths:
+        with open(path, "r", encoding="utf-8") as src:
+            sarif = json.load(src)
+        for run in sarif["runs"]:
+            for artifact in run.get("artifacts", []):
+                properties = artifact.get("properties", {})
+                if properties.get("kind") == "document":
+                    uids.add(properties["uid"])
+    return sorted(uids)

@@ -7,6 +7,10 @@ links:
   uid: root
 - role: spec-refinement
   spec-key: name
+  spec-value: analysis
+  uid: pkg-input-role
+- role: spec-refinement
+  spec-key: name
   spec-value: archive
   uid: pkg-input-role
 - role: spec-refinement
