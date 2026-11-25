@@ -16,8 +16,21 @@ spec-info:
     attributes:
       file:
         description: |
-          It shall be the file of the finding relative to the source directories
-          of the inspection check, or "-" if the finding has no location.
+          It shall be the path of the artifact of the finding.  A file is
+          relative to the source directories of the inspection check.  The path
+          of a nested artifact is the path of its parent, a slash and the URI
+          of the nested artifact.  A nested artifact has a parent index as
+          specified by section 3.24.3 of the Static Analysis Results
+          Interchange Format (SARIF) Version 2.1.0.  It shall be "-" if the
+          finding has no location.
+        spec-type: str
+      logical-location:
+        description: |
+          It shall be the fully qualified name of the logical location of the
+          finding, or its name if the log gives no fully qualified name.  The
+          logical location, its fully qualified name and its name are specified
+          by sections 3.33, 3.33.5 and 3.33.4 of the Static Analysis Results
+          Interchange Format (SARIF) Version 2.1.0.
         spec-type: str
       message:
         description: |
@@ -34,11 +47,17 @@ spec-info:
         spec-type: str
     description: |
       This set of attributes specifies the inspected findings of a static
-      analyser with the same tool, rule, file and message.  The line of a
-      finding is not part of its identity, since it moves when unrelated code
-      moves.  The digest covers the count of the findings, so a new finding
-      with the same identity makes the scope stale.
-    mandatory-attributes: all
+      analyser with the same tool, rule, file, logical location and message.
+      A finding without a logical location has no logical location attribute.
+      The line of a finding is not part of its identity, since it moves when
+      unrelated code moves.  The digest covers the identity and not the count of the
+      findings, since one inspection judges the findings of each variant of an
+      analysis.
+    mandatory-attributes:
+    - file
+    - message
+    - rule
+    - tool
 spec-name: Inspection Finding Scope
 spec-type: pkg-inspection-scope-finding
 type: spec

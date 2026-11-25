@@ -25,20 +25,18 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import base64
-import collections
 from dataclasses import dataclass
 import enum
 import hashlib
-import json
 import logging
 import os
 from typing import Any, Callable, Iterable, Iterator
-import urllib.parse
 
 from specitems import Item, Link, Person, TextContent, data_digest, hash_file
 
 from .directorystate import DirectoryState
 from .pkgitems import BuildItemMapper
+from .sarif import Finding, FindingKey, load
 
 #: The item data keys which the digest of an item scope does not cover.  A
 #: copyright year bump does not change an artefact, and the buildspace adds
@@ -52,9 +50,6 @@ _GROUP_TYPE = "pkg/inspection-group"
 #: Maps an inspected artefact to its directory state, or to None if the
 #: artefact has no directory state.
 StateOf = Callable[[Item], DirectoryState | None]
-
-#: The identity of a finding: the tool, the rule, the file and the message.
-_FindingKey = tuple[str, str, str, str]
 
 
 class State(enum.Enum):
@@ -161,66 +156,24 @@ def _scope_name(scope: dict) -> str:
         ranges = ",".join(f"{begin}:{last}" for begin, last in _ranges(scope))
         return f"file {scope['file']} lines {ranges}"
     if kind == "finding":
-        return f"finding {scope['tool']} {scope['rule']} {scope['file']}: " \
+        location = scope.get("logical-location")
+        where = scope["file"] if location is None else \
+            f"{scope['file']} {location}"
+        return f"finding {scope['tool']} {scope['rule']} {where}: " \
             f"{scope['message']}"
     return "item"
 
 
-def _finding_key(scope: dict) -> _FindingKey:
+def finding_key(scope: dict) -> FindingKey:
+    """ Return the identity of the finding of the inspection scope. """
     return (str(scope["tool"]), str(scope["rule"]), str(scope["file"]),
-            str(scope["message"]))
+            scope.get("logical-location"), str(scope["message"]))
 
 
-def _relative_path(uri: str, bases: list[str]) -> str:
-    if uri.startswith("file://"):
-        uri = urllib.parse.urlparse(uri).path
-    path = urllib.parse.unquote(uri)
-    for base in bases:
-        if path.startswith(f"{base}/"):
-            return os.path.relpath(path, base)
-    return path
-
-
-def _result_file(result: dict, artifacts: list[dict], bases: list[str]) -> str:
-    locations = result.get("locations") or [{}]
-    location = locations[0].get("physicalLocation",
-                                {}).get("artifactLocation", {})
-    if "index" in location:
-        artifact = artifacts[location["index"]]
-        properties = artifact.get("properties", {})
-        if "uid" in properties:
-            if properties["kind"] == "document":
-                return f"{properties['uid']}: {properties['path']}"
-            return properties["uid"]
-        location = artifact.get("location", location)
-    uri = location.get("uri")
-    return "-" if uri is None else _relative_path(uri, bases)
-
-
-def load_findings(paths: Iterable[str],
-                  bases: list[str]) -> collections.Counter[_FindingKey]:
-    """
-    Load the findings of the SARIF files.
-
-    The line of a finding is not part of its identity, since it moves when
-    unrelated code moves.  Findings with the same identity are counted.
-
-    Args:
-        paths: The paths of the SARIF files.
-        bases: The source directories which the file paths are relative to.
-    """
-    findings: collections.Counter[_FindingKey] = collections.Counter()
-    for path in paths:
-        with open(path, "r", encoding="utf-8") as src:
-            sarif = json.load(src)
-        for run in sarif["runs"]:
-            tool = run["tool"]["driver"]["name"]
-            artifacts = run.get("artifacts", [])
-            for result in run.get("results", []):
-                findings[(tool, result["ruleId"],
-                          _result_file(result, artifacts,
-                                       bases), result["message"]["text"])] += 1
-    return findings
+def _key_name(key: FindingKey) -> str:
+    tool, rule, file, location, message = key
+    where = file if location is None else f"{file} {location}"
+    return f"{tool} {rule} {where}: {message}"
 
 
 class _Context:
@@ -229,7 +182,7 @@ class _Context:
     def __init__(self, state_of: StateOf, bases: list[str]) -> None:
         self._state_of = state_of
         self._bases = bases
-        self._findings: dict[str, collections.Counter[_FindingKey]] = {}
+        self._findings: dict[str, list[Finding]] = {}
 
     def directory(self, target: Item) -> str | None:
         """
@@ -240,8 +193,7 @@ class _Context:
             return None
         return state.directory
 
-    def findings(self, target: Item,
-                 user: Item) -> collections.Counter[_FindingKey]:
+    def findings(self, target: Item, user: Item) -> list[Finding]:
         """
         Return the findings of the SARIF files of the target.
 
@@ -256,7 +208,7 @@ class _Context:
             if not paths:
                 raise ValueError(f"{user.uid}: the analysis {target.uid} is "
                                  "no directory state with SARIF files")
-            self._findings[target.uid] = load_findings(paths, self._bases)
+            self._findings[target.uid] = list(load(paths, self._bases))
         return self._findings[target.uid]
 
     def locate(self, scope: dict, target: Item,
@@ -274,11 +226,18 @@ class _Context:
 
     def _finding_digest(self, scope: dict, target: Item,
                         user: Item) -> str | None:
-        key = _finding_key(scope)
-        count = self.findings(target, user)[key]
-        if count == 0:
+        """
+        Return the digest of the identity of the finding, or None if the
+        target has no such finding.
+
+        The count of the findings with the identity is no part of the digest.
+        One inspection judges a finding in each variant of an analysis, and
+        the count may differ between the variants.
+        """
+        key = finding_key(scope)
+        if all(finding.key != key for finding in self.findings(target, user)):
             return None
-        return data_digest({"count": count, "finding": list(key)})
+        return data_digest({"finding": list(key)})
 
     def _file_digest(self, scope: dict,
                      target: Item) -> tuple[str | None, _Ranges | None]:
@@ -361,7 +320,7 @@ def _check_judgement(item: Item) -> Iterator[Result]:
                      "no issue tracks the non-compliance")
 
 
-def _inspected_finding_keys(group: Item) -> set[tuple[str, _FindingKey]]:
+def _inspected_finding_keys(group: Item) -> set[tuple[str, FindingKey]]:
     keys = set()
     for member in group.links_to_children("inspection-member"):
         inspection = member.item
@@ -370,19 +329,24 @@ def _inspected_finding_keys(group: Item) -> set[tuple[str, _FindingKey]]:
         for link in inspection.links_to_parents("inspected"):
             for scope in link["scopes"]:
                 if scope["scope"] == "finding":
-                    keys.add((link.item.uid, _finding_key(scope)))
+                    keys.add((link.item.uid, finding_key(scope)))
     return keys
 
 
 def _check_group(group: Item, context: _Context) -> Iterator[Result]:
+    """
+    Yield a result for each finding of a covered analysis which neither a
+    member inspects nor its producer suppresses.
+    """
     inspected = _inspected_finding_keys(group)
     for link in group.links_to_parents("inspection-covered-analysis"):
-        for key in sorted(context.findings(link.item, group)):
+        open_keys = set(finding.key
+                        for finding in context.findings(link.item, group)
+                        if finding.suppression is None)
+        for key in sorted(open_keys, key=_key_name):
             if (link.item.uid, key) not in inspected:
-                tool, rule, file, message = key
                 yield Result(
-                    group.uid, State.UNDISPOSITIONED,
-                    f"{tool} {rule} {file}: {message}",
+                    group.uid, State.UNDISPOSITIONED, _key_name(key),
                     f"no member inspects this finding of {link.item.uid}")
 
 
