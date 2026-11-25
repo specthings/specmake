@@ -26,20 +26,21 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import collections
+from dataclasses import dataclass
 import csv
 import functools
-import json
 import os
-from typing import Any, Callable, NamedTuple, Optional
-import urllib.parse
+from typing import Callable, NamedTuple, Optional
 
-from specitems import Item, ItemGetValueContext, SphinxContent
+from specitems import Item, ItemGetValueContext, SphinxContent, TextContent
 
 from .directorystate import DirectoryState
 from .docbuilder import DocumentBuilder
+from .inspection import finding_key, is_superseded
 from .packagechanges import PackageChanges
 from .pkgitems import BuildItem, PackageBuildDirector
 from .rtems import RTEMSItemCache
+from .sarif import Finding, documents, load, relative_path
 
 # The metrics of the quality model which the report checks, in the order of
 # the quality model table of the software product assurance plan.
@@ -55,6 +56,7 @@ _METRICS = (
     ("lines-of-code", "Lines of code (LOC)"),
     ("comment-frequency", "Comment frequency"),
     ("requirement-testability", "Requirement testability"),
+    ("static-analysis-disposition", "Static analysis disposition"),
     ("spr-ncr-status", "SPR/NCR status"),
     ("safety-activities-adequacy", "Safety activities adequacy"),
     ("user-documentation-clarity", "User documentation clarity"),
@@ -70,31 +72,10 @@ _MANUAL_METRICS = frozenset(
      "safety-activities-adequacy", "user-documentation-clarity",
      "user-manual-suitability", "milestone-tracking"))
 
-_PERCENT_METRICS = frozenset(("comment-frequency", "requirement-testability"))
-
-_ANNEX_FINDINGS = {
-    "clang-analyzer": "AnnexClangFindings",
-    "cppcheck": "AnnexCppcheckFindings",
-    "quality-scanner": "AnnexTBDTBCFindings"
-}
+_PERCENT_METRICS = frozenset(("comment-frequency", "requirement-testability",
+                              "static-analysis-disposition"))
 
 _ANNEX_CODE_METRICS = "AnnexCodeMetrics"
-
-_TOOL_NAMES = {
-    "clang-analyzer": "Clang",
-    "cppcheck": "Cppcheck",
-    "quality-scanner": "QualityScanner"
-}
-
-
-class _Finding(NamedTuple):
-    tool: str
-    rule: str
-    location: str
-    message: str
-    suppression: Optional[str]
-    item: Optional[str] = None
-    document: Optional[str] = None
 
 
 class _Region(NamedTuple):
@@ -116,19 +97,6 @@ class _Region(NamedTuple):
 class _CodeMetrics(NamedTuple):
     functions: list[_Region]
     file_lines: dict[str, int]
-
-
-def _uri_to_path(uri: str) -> str:
-    if uri.startswith("file://"):
-        uri = urllib.parse.urlparse(uri).path
-    return urllib.parse.unquote(uri)
-
-
-def _relative_path(path: str, bases: list[str]) -> str:
-    for base in bases:
-        if path.startswith(f"{base}/"):
-            return os.path.relpath(path, base)
-    return path
 
 
 def _files(state: BuildItem, suffix: str) -> list[str]:
@@ -159,7 +127,7 @@ def _load_code_metrics(path: str, bases: list[str]) -> _CodeMetrics:
                 "--std.code.filelines.preprocessor of metrix++")
         for row in reader:
             kind = row["type"]
-            file_path = _relative_path(row["file"], bases)
+            file_path = relative_path(row["file"], bases)
             if kind == "file":
                 # A region shares a line with its enclosing region if both
                 # have code on it, so only the file metrics count each line
@@ -178,72 +146,75 @@ def _load_code_metrics(path: str, bases: list[str]) -> _CodeMetrics:
     return _CodeMetrics(functions, file_lines)
 
 
-def _scanner_finding(result: dict[str, Any], artifacts: list[dict[str, Any]],
-                     suppression: Optional[str]) -> _Finding:
-    location = result["locations"][0]
-    physical = location["physicalLocation"]
-    properties = artifacts[physical["artifactLocation"]["index"]]["properties"]
-    uid = properties["uid"]
-    if properties["kind"] == "document":
-        document = f"{uid}: {properties['path']}"
-        return _Finding(_TOOL_NAMES["quality-scanner"], result["ruleId"],
-                        f"{document}:{physical['region']['startLine']}",
-                        result["message"]["text"], suppression, None, document)
-    return _Finding(_TOOL_NAMES["quality-scanner"], result["ruleId"],
-                    location["logicalLocations"][0]["fullyQualifiedName"],
-                    result["message"]["text"], suppression, uid, None)
+@dataclass(frozen=True)
+class _Disposed:
+    """ This class represents a finding of an analysis and its disposition. """
+
+    finding: Finding
+    disposition: str | None
 
 
-def _tool_location(result: dict[str, Any], artifacts: list[dict[str, Any]],
-                   bases: list[str]) -> str:
-    locations = result.get("locations") or [{}]
-    physical = locations[0].get("physicalLocation", {})
-    artifact_location = physical.get("artifactLocation", {})
-    uri = artifact_location.get("uri", None)
-    if uri is None and "index" in artifact_location:
-        artifact = artifacts[artifact_location["index"]]
-        uri = artifact.get("location", {}).get("uri", None)
-    if uri is None:
-        return "-"
-    file_path = _relative_path(_uri_to_path(uri), bases)
-    line = physical.get("region", {}).get("startLine", None)
-    return file_path if line is None else f"{file_path}:{line}"
+@dataclass(frozen=True)
+class _Group:
+    """ This class represents an inspection group of the report. """
+
+    item: Item
+    findings: list[_Disposed]
+    paths: list[str]
+
+    @property
+    def results_label(self) -> str:
+        """ Is the label of the section of the results of the group. """
+        return f"SpamrResults{self.item.ident}"
+
+    @property
+    def findings_label(self) -> str:
+        """ Is the label of the annex section of the findings of the group. """
+        return f"SpamrFindings{self.item.ident}"
+
+    def open_findings(self) -> list[Finding]:
+        """ Return the findings without a disposition. """
+        return [
+            disposed.finding for disposed in self.findings
+            if disposed.disposition is None
+        ]
 
 
-def _load_findings(tool: str, paths: list[str],
-                   bases: list[str]) -> list[_Finding]:
-    findings: list[_Finding] = []
-    for path in paths:
-        with open(path, "r", encoding="utf-8") as src:
-            sarif = json.load(src)
-        for run in sarif["runs"]:
-            artifacts = run.get("artifacts", [])
-            for result in run.get("results", []):
-                suppressions = result.get("suppressions", [])
-                suppression = suppressions[0].get("justification",
-                                                  "") if suppressions else None
-                if tool == "quality-scanner":
-                    findings.append(
-                        _scanner_finding(result, artifacts, suppression))
-                    continue
-                findings.append(
-                    _Finding(_TOOL_NAMES[tool], result["ruleId"],
-                             _tool_location(result, artifacts, bases),
-                             result["message"]["text"], suppression))
-    return findings
+def _inspections(group: Item) -> dict[tuple[str, tuple], Item]:
+    """
+    Return the current judged inspections of the group by the analysis and the
+    identity of the inspected finding.
+    """
+    inspections: dict[tuple[str, tuple], Item] = {}
+    for link in group.links_to_children("inspection-member"):
+        inspection = link.item
+        if is_superseded(inspection) or inspection["verdict"] is None:
+            continue
+        for inspected in inspection.links_to_parents("inspected"):
+            for scope in inspected["scopes"]:
+                if scope["scope"] == "finding":
+                    inspections[(inspected.item.uid,
+                                 finding_key(scope))] = inspection
+    return inspections
 
 
-def _load_scanned_documents(paths: list[str]) -> list[str]:
-    uids: set[str] = set()
-    for path in paths:
-        with open(path, "r", encoding="utf-8") as src:
-            sarif = json.load(src)
-        for run in sarif["runs"]:
-            for artifact in run.get("artifacts", []):
-                properties = artifact["properties"]
-                if properties["kind"] == "document":
-                    uids.add(properties["uid"])
-    return sorted(uids)
+def _location(content: SphinxContent, finding: Finding) -> str:
+    """
+    Return the location of the finding with the file of a file artifact in the
+    format of a path.
+    """
+    artifact = finding.artifact
+    if artifact.display == "-":
+        return _cell(content, finding.location)
+    if artifact.item or artifact.document or \
+            not finding.location.startswith(artifact.display):
+        return _breakable(content, finding.location)
+    rest = finding.location[len(artifact.display):]
+    return f"{content.path(artifact.display)}{content.escape(rest)}"
+
+
+def _disposition(content: TextContent, disposition: str | None) -> str:
+    return "**open**" if disposition is None else content.escape(disposition)
 
 
 def _count(count: int, singular: str, plural: str) -> str:
@@ -264,15 +235,6 @@ def _breakable(content: SphinxContent, text: str) -> str:
     return text
 
 
-def _file_location(content: SphinxContent, location: str) -> str:
-    if location == "-":
-        return _cell(content, location)
-    path, separator, line = location.rpartition(":")
-    if separator and line.isdigit():
-        return f"{content.path(path)}:{line}"
-    return content.path(location)
-
-
 def _bold_if(text: str, condition: bool) -> str:
     return f"**{text}**" if condition else text
 
@@ -286,19 +248,10 @@ class SpamrBuilder(DocumentBuilder):
     def __init__(self, director: PackageBuildDirector, item: Item):
         super().__init__(director, item)
         for name, method in (
-            ("annex-clang-analyzer-findings",
-             self._annex_clang_analyzer_findings),
-            ("annex-cppcheck-findings", self._annex_cppcheck_findings),
             ("annex-files", self._annex_files),
             ("annex-functions", self._annex_functions),
-            ("annex-quality-scanner-findings",
-             self._annex_quality_scanner_findings),
-            ("annex-quality-scanner-suppressions",
-             self._annex_quality_scanner_suppressions),
-            ("clang-analyzer-results", self._clang_analyzer_results),
             ("code-metrics", self._code_metrics),
             ("code-size", self._code_size),
-            ("cppcheck-results", self._cppcheck_results),
             ("metrics-overview", self._metrics_overview),
             ("requirement-implementation-and-vv-coverage",
              self._requirement_implementation_and_vv_coverage),
@@ -314,6 +267,10 @@ class SpamrBuilder(DocumentBuilder):
         ):
             self.mapper.add_get_value(f"{self.item.type}:/{name}",
                                       self._content(method))
+        self.mapper.add_get_value(f"{self.item.type}:/static-analysis",
+                                  self._get_static_analysis)
+        self.mapper.add_get_value(f"{self.item.type}:/annex-static-analysis",
+                                  self._get_annex_static_analysis)
         self._compute: dict[str, Callable[[Optional[int]], tuple[
             str, bool]]] = {
                 "comment-frequency": self._metric_comment_frequency,
@@ -328,6 +285,8 @@ class SpamrBuilder(DocumentBuilder):
                 self._metric_requirement_testability,
                 "rid-action-status": self._metric_rid_action_status,
                 "spr-ncr-status": self._metric_spr_ncr_status,
+                "static-analysis-disposition":
+                self._metric_static_analysis_disposition,
                 "user-documentation-completeness":
                 self._metric_user_documentation_completeness,
                 "vv-coverage": self._metric_vv_coverage,
@@ -353,8 +312,12 @@ class SpamrBuilder(DocumentBuilder):
         super().run()
 
     @functools.cached_property
+    def _quality_model(self) -> Item:
+        return self.item.parent("quality-model")
+
+    @functools.cached_property
     def _thresholds(self) -> dict[str, Optional[int]]:
-        return self.item.parent("quality-model")["thresholds"]
+        return self._quality_model["thresholds"]
 
     @functools.cached_property
     def _source_directories(self) -> list[str]:
@@ -364,12 +327,47 @@ class SpamrBuilder(DocumentBuilder):
             directories.append(state.directory)
         return directories
 
+    def _group(self, group: Item) -> _Group:
+        """
+        Return the findings of the analyses which the group covers, each with
+        its disposition.
+
+        A judged inspection of the group or a suppression of the producer is
+        the disposition of a finding.
+        """
+        inspections = _inspections(group)
+        findings: list[_Disposed] = []
+        all_paths: list[str] = []
+        for link in group.links_to_parents("inspection-covered-analysis"):
+            analysis = link.item
+            paths = _files(self.director[analysis.uid], ".sarif")
+            all_paths.extend(paths)
+            for finding in load(paths, self._source_directories):
+                inspection = inspections.get((analysis.uid, finding.key))
+                if inspection is not None:
+                    verdict = inspection["verdict"].replace("-", " ")
+                    disposition: str | None = f"{verdict} ({inspection.uid})"
+                elif finding.suppression is not None:
+                    disposition = f"suppressed: {finding.suppression}"
+                else:
+                    disposition = None
+                findings.append(_Disposed(finding, disposition))
+        return _Group(group, findings, all_paths)
+
     @functools.cached_property
-    def _findings(self) -> dict[str, list[_Finding]]:
-        return dict((tool,
-                     _load_findings(tool, _files(self.input(tool), ".sarif"),
-                                    self._source_directories))
-                    for tool in _TOOL_NAMES)
+    def _groups(self) -> list[_Group]:
+        return [
+            self._group(group)
+            for group in self.item.parents("spamr-inspection-group")
+        ]
+
+    def _metric_source(self, metric: str) -> _Group:
+        """ Return the group which the quality model links to the metric. """
+        for link in self._quality_model.links_to_parents("metric-source"):
+            if link["metric"] == metric:
+                return self._group(link.item)
+        raise ValueError(f"{self._quality_model.uid}: the metric '{metric}' "
+                         "has no metric source")
 
     @functools.cached_property
     def _code(self) -> _CodeMetrics:
@@ -397,18 +395,18 @@ class SpamrBuilder(DocumentBuilder):
     def _is_open(self, issue: Item) -> bool:
         return issue in self._issue_status[1]
 
-    def _scanner_items(self) -> set[str]:
-        return set(finding.item
-                   for finding in self._findings["quality-scanner"]
-                   if finding.suppression is None and finding.item)
+    def _open_items(self, metric: str) -> set[str]:
+        return set(finding.artifact.item
+                   for finding in self._metric_source(metric).open_findings()
+                   if finding.artifact.item)
 
-    def _scanner_documents(self) -> set[str]:
-        return set(finding.document
-                   for finding in self._findings["quality-scanner"]
-                   if finding.suppression is None and finding.document)
+    def _open_documents(self, metric: str) -> set[str]:
+        return set(finding.artifact.document
+                   for finding in self._metric_source(metric).open_findings()
+                   if finding.artifact.document)
 
     def _incomplete_requirements(self) -> list[Item]:
-        uids = self._scanner_items()
+        uids = self._open_items("requirement-completeness")
         return [req for req in self._requirements if req.uid in uids]
 
     def _testable_requirements(self) -> list[Item]:
@@ -545,11 +543,23 @@ class SpamrBuilder(DocumentBuilder):
 
     def _metric_user_documentation_completeness(
             self, threshold: Optional[int]) -> tuple[str, bool]:
-        documents = len(self._scanner_documents())
-        items = len(self._scanner_items())
-        return (f"{_count(documents, 'document file', 'document files')}, "
-                f"{_count(items, 'item', 'items')}", threshold is not None
-                and documents <= threshold and items <= threshold)
+        metric = "user-documentation-completeness"
+        document_count = len(self._open_documents(metric))
+        item_count = len(self._open_items(metric))
+        return (
+            f"{_count(document_count, 'document file', 'document files')}, "
+            f"{_count(item_count, 'item', 'items')}", threshold is not None
+            and document_count <= threshold and item_count <= threshold)
+
+    def _metric_static_analysis_disposition(
+            self, threshold: Optional[int]) -> tuple[str, bool]:
+        total = sum(len(group.findings) for group in self._groups)
+        disposed = total - sum(
+            len(group.open_findings()) for group in self._groups)
+        percent = 100.0 * disposed / total if total else 100.0
+        return (f"{percent:.1f} % ({disposed} of "
+                f"{_count(total, 'finding', 'findings')})",
+                threshold is not None and percent >= threshold)
 
     def _metric_spr_ncr_status(self,
                                threshold: Optional[int]) -> tuple[str, bool]:
@@ -613,14 +623,14 @@ class SpamrBuilder(DocumentBuilder):
     def _requirements_completeness(self, content: SphinxContent) -> None:
         incomplete = [req.uid for req in self._incomplete_requirements()]
         total = len(self._requirements)
-        content.wrap(f"""The quality scanner found an open TBD or TBC in
-{len(incomplete)} of
+        group = self._metric_source("requirement-completeness")
+        content.wrap(f"""The analysis {content.escape(group.item["name"])}
+found an open finding in {len(incomplete)} of
 {_count(total, "related requirement", "related requirements")}.""")
         if incomplete:
             content.add_list(incomplete)
-        content.wrap(f"""Section
-:ref:`{_ANNEX_FINDINGS["quality-scanner"]}` lists each finding and each
-suppression of the quality scanner.""")
+        content.wrap(f"""Section :ref:`{group.findings_label}` lists each
+finding with its disposition.""")
 
     def _vv_coverage_unit_integration(self, content: SphinxContent) -> None:
         covered, total = self._vv_coverage()
@@ -640,24 +650,6 @@ suppression of the quality scanner.""")
         content.wrap(f"""The package has
 {_count(total, "related requirement", "related requirements")}.
 {len(self._testable_requirements())} of them are verified by test.""")
-
-    def _tool_results(self, content: SphinxContent, tool: str) -> None:
-        findings = self._findings[tool]
-        counts = collections.Counter(finding.rule for finding in findings)
-        content.wrap(f"""The tool reported
-{_count(len(findings), "finding", "findings")}.
-Section :ref:`{_ANNEX_FINDINGS[tool]}` lists each finding.""")
-        if counts:
-            rows: list[tuple[str, ...]] = [("Rule", "Findings")]
-            rows.extend((content.code(rule), str(counts[rule]))
-                        for rule in sorted(counts))
-            content.add_grid_table(rows, [80, 20])
-
-    def _cppcheck_results(self, content: SphinxContent) -> None:
-        self._tool_results(content, "cppcheck")
-
-    def _clang_analyzer_results(self, content: SphinxContent) -> None:
-        self._tool_results(content, "clang-analyzer")
 
     def _code_metrics(self, content: SphinxContent) -> None:
         rows: list[tuple[str,
@@ -683,18 +675,18 @@ function and file which exceeds a threshold. The file
 regions.""")
 
     def _user_documentation_completeness(self, content: SphinxContent) -> None:
-        documents = _load_scanned_documents(
-            _files(self.input("quality-scanner"), ".sarif"))
-        documents_with_findings = len(self._scanner_documents())
-        items_with_findings = len(self._scanner_items())
-        content.wrap(f"""The quality scanner found an open TBD or TBC in
-{_count(documents_with_findings, "document file", "document files")} and in
-{_count(items_with_findings, "item", "items")}.
-Section :ref:`{_ANNEX_FINDINGS["quality-scanner"]}` lists each finding and
-each suppression.""")
-        if documents:
-            content.add("The quality scanner scanned these documents:")
-            content.add_list(documents)
+        metric = "user-documentation-completeness"
+        group = self._metric_source(metric)
+        content.wrap(f"""The analysis {content.escape(group.item["name"])}
+found an open finding in
+{_count(len(self._open_documents(metric)), "document file", "document files")}
+and in {_count(len(self._open_items(metric)), "item", "items")}.
+Section :ref:`{group.findings_label}` lists each finding with its
+disposition.""")
+        scanned = documents(group.paths)
+        if scanned:
+            content.add("The analysis scanned these documents:")
+            content.add_list(scanned)
 
     def _spr_ncr_status(self, content: SphinxContent) -> None:
         counts: dict[str, list[int]] = collections.defaultdict(lambda: [0, 0])
@@ -746,45 +738,6 @@ the label RID.""")
 {sum(self._code.file_lines.values())} lines of code and preprocessor
 directives.""")
 
-    def _annex_tool_findings(self, content: SphinxContent, tool: str) -> None:
-        rows: list[tuple[str, ...]] = [("Rule", "Location", "Message")]
-        rows.extend((content.escape(finding.rule),
-                     _file_location(content, finding.location),
-                     content.escape(finding.message))
-                    for finding in self._findings[tool])
-        if len(rows) == 1:
-            content.add("The tool reported no finding.")
-        else:
-            content.add_grid_table(rows, [24, 38, 38], font_size=-2)
-
-    def _annex_cppcheck_findings(self, content: SphinxContent) -> None:
-        self._annex_tool_findings(content, "cppcheck")
-
-    def _annex_clang_analyzer_findings(self, content: SphinxContent) -> None:
-        self._annex_tool_findings(content, "clang-analyzer")
-
-    def _annex_quality_scanner_findings(self, content: SphinxContent) -> None:
-        rows: list[tuple[str, ...]] = [("Marker", "Location")]
-        rows.extend((finding.rule, _breakable(content, finding.location))
-                    for finding in self._findings["quality-scanner"]
-                    if finding.suppression is None)
-        if len(rows) == 1:
-            content.add("The quality scanner found no open TBD or TBC.")
-        else:
-            content.add_grid_table(rows, [15, 85], font_size=-2)
-
-    def _annex_quality_scanner_suppressions(self,
-                                            content: SphinxContent) -> None:
-        rows: list[tuple[str, ...]] = [("Marker", "Location", "Reason")]
-        rows.extend((finding.rule, _breakable(content, finding.location),
-                     content.escape(finding.suppression or ""))
-                    for finding in self._findings["quality-scanner"]
-                    if finding.suppression is not None)
-        if len(rows) == 1:
-            content.add("No finding of the quality scanner is suppressed.")
-        else:
-            content.add_grid_table(rows, [15, 40, 45], font_size=-2)
-
     def _annex_functions(self, content: SphinxContent) -> None:
         cyclomatic = self._thresholds["cyclomatic-complexity"]
         nesting = self._thresholds["nesting-level"]
@@ -826,3 +779,50 @@ directives.""")
             content.add_grid_table(rows, [80, 20])
         else:
             content.add("No file exceeds the threshold.")
+
+    def _get_static_analysis(self, ctx: ItemGetValueContext) -> str:
+        with self.section_content(ctx) as (content, _):
+            assert isinstance(content, SphinxContent)
+            for group in self._groups:
+                with content.section(group.item["name"],
+                                     label=group.results_label):
+                    content.add(group.item["text"])
+                    total = len(group.findings)
+                    disposed = total - len(group.open_findings())
+                    content.wrap(f"""The covered analyses reported
+{_count(total, "finding", "findings")}.
+{_count(disposed, "finding has", "findings have")} a disposition.
+Section :ref:`{group.findings_label}` lists each finding.""")
+                    counts = collections.Counter(
+                        disposed.finding.rule for disposed in group.findings)
+                    opened = collections.Counter(
+                        finding.rule for finding in group.open_findings())
+                    if counts:
+                        rows: list[tuple[str,
+                                         ...]] = [("Rule", "Findings", "Open")]
+                        rows.extend((content.code(rule), str(counts[rule]),
+                                     str(opened[rule]))
+                                    for rule in sorted(counts))
+                        content.add_grid_table(rows, [60, 20, 20])
+            return "\n".join(content)
+
+    def _get_annex_static_analysis(self, ctx: ItemGetValueContext) -> str:
+        with self.section_content(ctx) as (content, _):
+            assert isinstance(content, SphinxContent)
+            for group in self._groups:
+                with content.section(group.item["name"],
+                                     label=group.findings_label):
+                    rows: list[tuple[str, ...]] = [("Location", "Rule",
+                                                    "Message", "Disposition")]
+                    rows.extend((_location(content, disposed.finding),
+                                 content.escape(disposed.finding.rule),
+                                 content.escape(disposed.finding.message),
+                                 _disposition(content, disposed.disposition))
+                                for disposed in group.findings)
+                    if len(rows) == 1:
+                        content.add(
+                            "The covered analyses reported no finding.")
+                    else:
+                        content.add_grid_table(rows, [30, 18, 30, 22],
+                                               font_size=-2)
+            return "\n".join(content)

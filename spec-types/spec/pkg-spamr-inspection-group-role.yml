@@ -1,0 +1,25 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: spamr-inspection-group
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      It defines the SPAMR inspection group role of links.  The link target
+      shall be an inspection group.  The software product assurance milestone
+      report presents the findings of the analyses which the group covers, each
+      with its disposition, in the order of the links.
+    mandatory-attributes: all
+spec-name: SPAMR Inspection Group Link Role
+spec-type: pkg-spamr-inspection-group-role
+type: spec

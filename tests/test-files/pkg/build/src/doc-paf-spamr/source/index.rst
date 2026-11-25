@@ -24,17 +24,9 @@ ${.:/code-metrics}
 
 ${.:/user-documentation-completeness}
 
-${.:/cppcheck-results}
+${.:/static-analysis:1}
 
-${.:/clang-analyzer-results}
-
-${.:/annex-cppcheck-findings}
-
-${.:/annex-clang-analyzer-findings}
-
-${.:/annex-quality-scanner-findings}
-
-${.:/annex-quality-scanner-suppressions}
+${.:/annex-static-analysis:1}
 
 ${.:/annex-functions}
 

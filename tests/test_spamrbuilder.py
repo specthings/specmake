@@ -27,12 +27,13 @@
 # REUSE-IgnoreStart
 
 from pathlib import Path
+import re
 
 import pytest
 
 from specmake import SpamrBuilder
 import specmake.spamrbuilder
-from specmake.spamrbuilder import _METRICS, _load_code_metrics
+from specmake.spamrbuilder import _METRICS, _Group, _load_code_metrics
 
 from .util import build_document, get_document_text
 
@@ -76,6 +77,8 @@ def test_spamrbuilder(caplog, tmpdir, monkeypatch):
     | Comment frequency | 2 of 5 functions | 30 % | **NOK** |
     +-+-+-+-+
     | Requirement testability | 34.8 % (8 of 23 requirements) | 80 % | **NOK** |
+    +-+-+-+-+
+    | Static analysis disposition | 18.8 % (3 of 16 findings) | 100 % | **NOK** |
     +-+-+-+-+
     | SPR/NCR status | 3 open issues | n.a. | n.a. |
     +-+-+-+-+
@@ -137,12 +140,13 @@ The following requirements have no validation:
 
 - /testsuites/validation-refinement
 
-The quality scanner found an open TBD or TBC in 1 of 23 related requirements.
+The analysis Quality scanner found an open finding in 1 of 23 related
+requirements.
 
 - /rtems/req/action
 
-Section :ref:`AnnexTBDTBCFindings` lists each finding and each suppression of
-the quality scanner.
+Section :ref:`SpamrFindingsPkgSpamrGroupQualityScanner` lists each finding with
+its disposition.
 
 The package has 1 pre-qualified API function. 0 of them have a requirement with
 an associated validation.
@@ -213,50 +217,114 @@ threshold. The file
 :file:`build/src/spamr/metrixplusplus/metrixplusplus.csv` of the package
 contains the values of all regions.
 
-The quality scanner found an open TBD or TBC in 1 document file and in 2 items.
-Section :ref:`AnnexTBDTBCFindings` lists each finding and each suppression.
+The analysis Quality scanner found an open finding in 1 document file and in 2
+items. Section :ref:`SpamrFindingsPkgSpamrGroupQualityScanner` lists each
+finding with its disposition.
 
-The quality scanner scanned these documents:
+The analysis scanned these documents:
 
 - /pkg/source/doc-a
 
 - /pkg/source/doc-b
 
-The tool reported 7 findings. Section :ref:`AnnexCppcheckFindings` lists each
-finding.
+.. _SpamrResultsPkgSpamrGroupCppcheck:
+
+Cppcheck
+--------
+
+The members inspect the findings of Cppcheck.
+
+The covered analyses reported 7 findings. 1 finding has a disposition. Section
+:ref:`SpamrFindingsPkgSpamrGroupCppcheck` lists each finding.
 
 .. table::
     :class: longtable
-    :widths: 80,20
+    :widths: 60,20,20
 
-    +-+-+
-    | Rule | Findings |
-    +=+=+
-    | ``checkersReport`` | 1 |
-    +-+-+
-    | ``missingIncludeSystem`` | 1 |
-    +-+-+
-    | ``syntaxError`` | 1 |
-    +-+-+
-    | ``unusedFunction`` | 2 |
-    +-+-+
-    | ``variableScope`` | 2 |
-    +-+-+
+    +-+-+-+
+    | Rule | Findings | Open |
+    +=+=+=+
+    | ``checkersReport`` | 1 | 1 |
+    +-+-+-+
+    | ``missingIncludeSystem`` | 1 | 1 |
+    +-+-+-+
+    | ``syntaxError`` | 1 | 1 |
+    +-+-+-+
+    | ``unusedFunction`` | 2 | 2 |
+    +-+-+-+
+    | ``variableScope`` | 2 | 1 |
+    +-+-+-+
 
-The tool reported 2 findings. Section :ref:`AnnexClangFindings` lists each
-finding.
+.. _SpamrResultsPkgSpamrGroupClangAnalyzer:
+
+CLANG Static Analyzer
+---------------------
+
+The members inspect the findings of the CLANG Static Analyzer.
+
+The covered analyses reported 2 findings. 0 findings have a disposition.
+Section :ref:`SpamrFindingsPkgSpamrGroupClangAnalyzer` lists each finding.
 
 .. table::
     :class: longtable
-    :widths: 80,20
+    :widths: 60,20,20
 
-    +-+-+
-    | Rule | Findings |
-    +=+=+
-    | ``core.NullDereference`` | 1 |
-    +-+-+
-    | ``deadcode.DeadStores`` | 1 |
-    +-+-+
+    +-+-+-+
+    | Rule | Findings | Open |
+    +=+=+=+
+    | ``core.NullDereference`` | 1 | 1 |
+    +-+-+-+
+    | ``deadcode.DeadStores`` | 1 | 1 |
+    +-+-+-+
+
+.. _SpamrResultsPkgSpamrGroupNopinion:
+
+Errata checker
+--------------
+
+The members inspect the findings of the errata checker.
+
+The covered analyses reported 3 findings. 1 finding has a disposition. Section
+:ref:`SpamrFindingsPkgSpamrGroupNopinion` lists each finding.
+
+.. table::
+    :class: longtable
+    :widths: 60,20,20
+
+    +-+-+-+
+    | Rule | Findings | Open |
+    +=+=+=+
+    | ``TN-0009/back-to-back-store`` | 2 | 1 |
+    +-+-+-+
+    | ``TN-0011/atomic-not-aligned`` | 1 | 1 |
+    +-+-+-+
+
+.. _SpamrResultsPkgSpamrGroupQualityScanner:
+
+Quality scanner
+---------------
+
+The members inspect the open TBD and TBC markers.
+
+The covered analyses reported 4 findings. 1 finding has a disposition. Section
+:ref:`SpamrFindingsPkgSpamrGroupQualityScanner` lists each finding.
+
+.. table::
+    :class: longtable
+    :widths: 60,20,20
+
+    +-+-+-+
+    | Rule | Findings | Open |
+    +=+=+=+
+    | ``TBC`` | 2 | 1 |
+    +-+-+-+
+    | ``TBD`` | 2 | 2 |
+    +-+-+-+
+
+.. _SpamrFindingsPkgSpamrGroupCppcheck:
+
+Cppcheck
+--------
 
 .. raw:: latex
 
@@ -264,85 +332,106 @@ finding.
 
 .. table::
     :class: longtable
-    :widths: 24,38,38
+    :widths: 30,18,30,22
 
-    +-+-+-+
-    | Rule | Location | Message |
-    +=+=+=+
-    | variableScope | :file:`cpukit/a.c`:3 | The scope of the variable 'x' can be reduced. |
-    +-+-+-+
-    | syntaxError | :file:`/elsewhere/c.c`:7 | syntax error |
-    +-+-+-+
-    | variableScope | :file:`cpukit/b.c`:9 | The scope of the variable 'y' can be reduced. |
-    +-+-+-+
-    | checkersReport | \- | Active checkers: 160/592 |
-    +-+-+-+
-    | missingIncludeSystem | :file:`cpukit/b.c` | Include file: <stdio.h> not found. |
-    +-+-+-+
-    | unusedFunction | :file:`cpukit/driver#1.c`:1 | The function 'f' is never used. |
-    +-+-+-+
-    | unusedFunction | :file:`cpukit/dev ice.c`:2 | The function 'g' is never used. |
-    +-+-+-+
+    +-+-+-+-+
+    | Location | Rule | Message | Disposition |
+    +=+=+=+=+
+    | :file:`cpukit/a.c`:3 | variableScope | The scope of the variable 'x' can be reduced. | compliant (/pkg/spamr/inspection-cppcheck) |
+    +-+-+-+-+
+    | :file:`/elsewhere/c.c`:7 | syntaxError | syntax error | **open** |
+    +-+-+-+-+
+    | :file:`cpukit/b.c`:9 | variableScope | The scope of the variable 'y' can be reduced. | **open** |
+    +-+-+-+-+
+    | \- | checkersReport | Active checkers: 160/592 | **open** |
+    +-+-+-+-+
+    | :file:`cpukit/b.c` | missingIncludeSystem | Include file: <stdio.h> not found. | **open** |
+    +-+-+-+-+
+    | :file:`cpukit/driver#1.c`:1 | unusedFunction | The function 'f' is never used. | **open** |
+    +-+-+-+-+
+    | :file:`cpukit/dev ice.c`:2 | unusedFunction | The function 'g' is never used. | **open** |
+    +-+-+-+-+
 
 .. raw:: latex
 
     \end{footnotesize}
 
+.. _SpamrFindingsPkgSpamrGroupClangAnalyzer:
+
+CLANG Static Analyzer
+---------------------
+
 .. raw:: latex
 
     \begin{footnotesize}
 
 .. table::
     :class: longtable
-    :widths: 24,38,38
+    :widths: 30,18,30,22
 
-    +-+-+-+
-    | Rule | Location | Message |
-    +=+=+=+
-    | deadcode.DeadStores | :file:`cpukit/dev/iovprintf.c`:117 | Value stored to 'num' is never read |
-    +-+-+-+
-    | core.NullDereference | :file:`cpukit/score/src/heap.c`:42 | Dereference of null pointer |
-    +-+-+-+
+    +-+-+-+-+
+    | Location | Rule | Message | Disposition |
+    +=+=+=+=+
+    | :file:`cpukit/dev/iovprintf.c`:117 | deadcode.DeadStores | Value stored to 'num' is never read | **open** |
+    +-+-+-+-+
+    | :file:`cpukit/score/src/heap.c`:42 | core.NullDereference | Dereference of null pointer | **open** |
+    +-+-+-+-+
 
 .. raw:: latex
 
     \end{footnotesize}
 
+.. _SpamrFindingsPkgSpamrGroupNopinion:
+
+Errata checker
+--------------
+
 .. raw:: latex
 
     \begin{footnotesize}
 
 .. table::
     :class: longtable
-    :widths: 15,85
+    :widths: 30,18,30,22
 
-    +-+-+
-    | Marker | Location |
-    +=+=+
-    | TBD | /rtems/req/action:/text |
-    +-+-+
-    | TBC | /pkg/component:/name |
-    +-+-+
-    | TBD | /pkg/source/doc-a: source/a.rst:5 |
-    +-+-+
+    +-+-+-+-+
+    | Location | Rule | Message | Disposition |
+    +=+=+=+=+
+    | :file:`librtemscpu.a(m.o)` f | TN-0009/back-to-back-store | TN-0009 back-to-back-store | not applicable (/pkg/spamr/inspection-nopinion) |
+    +-+-+-+-+
+    | :file:`librtemscpu.a(n.o)` | TN-0011/atomic-not-aligned | TN-0011 atomic-not-aligned possible | **open** |
+    +-+-+-+-+
+    | :file:`app.exe` g | TN-0009/back-to-back-store | TN-0009 back-to-back-store | **open** |
+    +-+-+-+-+
 
 .. raw:: latex
 
     \end{footnotesize}
 
+.. _SpamrFindingsPkgSpamrGroupQualityScanner:
+
+Quality scanner
+---------------
+
 .. raw:: latex
 
     \begin{footnotesize}
 
 .. table::
     :class: longtable
-    :widths: 15,40,45
+    :widths: 30,18,30,22
 
-    +-+-+-+
-    | Marker | Location | Reason |
-    +=+=+=+
-    | TBC | /pkg/source/doc-a: source/a.rst:9 | The glossary term \*TBC\* names the marker. |
-    +-+-+-+
+    +-+-+-+-+
+    | Location | Rule | Message | Disposition |
+    +=+=+=+=+
+    | /rtems/req/action:/text | TBD | TBD found | **open** |
+    +-+-+-+-+
+    | /pkg/component:/name | TBC | TBC found | **open** |
+    +-+-+-+-+
+    | /pkg/source/doc-a: source/a.rst:5 | TBD | TBD found | **open** |
+    +-+-+-+-+
+    | /pkg/source/doc-a: source/a.rst:9 | TBC | TBC found | suppressed: The glossary term \*TBC\* names the marker. |
+    +-+-+-+-+
 
 .. raw:: latex
 
@@ -423,22 +512,35 @@ finding.
     assert "- RIDs open: 0" in text
 
     # Check the content without findings and thresholds
-    tools = ("clang-analyzer", "cppcheck", "quality-scanner")
-    spamr_builder.__dict__["_findings"] = dict((tool, []) for tool in tools)
+    group_item = director.item_cache["/pkg/spamr/group-cppcheck"]
+    monkeypatch.setattr(spamr_builder, "_group",
+                        lambda group: _Group(group, [], []))
+    spamr_builder.__dict__["_groups"] = [_Group(group_item, [], [])]
     thresholds = dict((key, None) for key in spamr_builder._thresholds)
     spamr_builder.__dict__["_thresholds"] = thresholds
     mapper = spamr_builder.mapper
     for name, text in (
-        ("annex-cppcheck-findings", "The tool reported no finding."),
-        ("annex-clang-analyzer-findings", "The tool reported no finding."),
-        ("annex-quality-scanner-findings",
-         "The quality scanner found no open TBD or TBC."),
-        ("annex-quality-scanner-suppressions",
-         "No finding of the quality scanner is suppressed."),
         ("annex-functions", "No function exceeds a threshold."),
         ("annex-files", "No file exceeds the threshold."),
     ):
         assert mapper.substitute(f"${{.:/{name}}}") == text
+    assert mapper.substitute("${.:/annex-static-analysis:1}") == """\
+.. _SpamrFindingsPkgSpamrGroupCppcheck:
+
+Cppcheck
+--------
+
+The covered analyses reported no finding."""
+    assert mapper.substitute("${.:/static-analysis:1}") == """\
+.. _SpamrResultsPkgSpamrGroupCppcheck:
+
+Cppcheck
+--------
+
+The members inspect the findings of Cppcheck.
+
+The covered analyses reported 0 findings. 0 findings have a disposition.
+Section :ref:`SpamrFindingsPkgSpamrGroupCppcheck` lists each finding."""
     spamr_builder.__dict__["_issues"] = []
     assert mapper.substitute("${.:/sprs-and-ncrws}") == "No RID is open."
     spamr_builder.__dict__["_requirements"] = []
@@ -447,12 +549,10 @@ finding.
     ) == """The package has 0 related requirements. 0 of them have an associated
 validation."""
     assert mapper.substitute("${.:/requirements-completeness}") == \
-        "The quality scanner found an open TBD or TBC in 0 of 0 related " \
-        "requirements.\n\nSection :ref:`AnnexTBDTBCFindings` lists each " \
-        "finding and each suppression of\nthe quality scanner."
-    assert mapper.substitute("${.:/cppcheck-results}") == """The tool \
-reported 0 findings. Section :ref:`AnnexCppcheckFindings` lists each
-finding."""
+        "The analysis Quality scanner found an open finding in 0 of 0 " \
+        "related\nrequirements.\n\nSection " \
+        ":ref:`SpamrFindingsPkgSpamrGroupQualityScanner` lists each finding " \
+        "with\nits disposition."
     requirement = spamr_builder.input("spec").item_cache["/rtems/req/func"]
     requirement.view["validated"] = True
     spamr_builder.__dict__["_requirements"] = [requirement]
@@ -469,11 +569,19 @@ finding."""
         "requirement\nwith an associated validation."
     assert "suppressed" not in mapper.substitute(
         "${.:/user-documentation-completeness}")
-    monkeypatch.setattr(specmake.spamrbuilder, "_load_scanned_documents",
-                        lambda _paths: [])
     assert "scanned these documents" not in mapper.substitute(
         "${.:/user-documentation-completeness}")
-    assert mapper.substitute("${.:/metrics-overview}").count("n.a.") == 34
+    overview = mapper.substitute("${.:/metrics-overview}")
+    assert overview.count("n.a.") == 36
+    assert re.search(
+        r"\| Static analysis disposition +\| 100\.0 % \(0 of 0 "
+        r"findings\) +\|", overview)
+
+    # Check that a metric needs a metric source
+    with pytest.raises(ValueError,
+                       match="^/defs/quality-model: the metric "
+                       "'milestone-tracking' has no metric source$"):
+        spamr_builder._metric_source("milestone-tracking")
 
     # Check that a metric with a threshold needs a verdict
     thresholds["requirement-clarity"] = 0
