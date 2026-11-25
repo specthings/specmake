@@ -399,6 +399,21 @@ def test_repository_filter_items_nested(tmpdir):
     assert workspace.cache["/replaced"]["term"] == "empty"
 
 
+@pytest.mark.parametrize("other_enabled", [False, True])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_repository_filter_items_shared_directory(tmpdir, monkeypatch,
+                                                  other_enabled, reverse):
+    workspace = _create_items_workspace(tmpdir, ["spec-pkg-wk/repo/fetch"])
+    workspace.cache["/repo-2"]["directory"] = f"file://{_ITEMS}"
+    if reverse:
+        workspace.cache.items_by_type["pkg/workspace/repository"].reverse()
+    monkeypatch.setattr(
+        type(workspace.cache["/repo-2"]), "enabled",
+        property(lambda item: other_enabled or item.uid != "/repo-2"))
+    assert _filter_items(workspace) == ["/private/dropped"]
+    assert workspace.cache["/replaced"]["term"] == "empty"
+
+
 def test_repository_filter_items_export(tmpdir, monkeypatch):
     workspace = _create_workspace(tmpdir, _SPEC)
     filtered = []

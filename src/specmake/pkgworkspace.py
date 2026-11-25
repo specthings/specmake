@@ -1194,7 +1194,8 @@ def _filter_items(workspace: WorkspaceContext) -> list[str]:
     items.
 
     The innermost repository directory which contains the file of an item
-    decides.  The repository filter items stay.
+    decides.  Where several repositories have this directory, a repository
+    with a filter decides.  The repository filter items stay.
     """
     item_filters: list[_ItemFilter] = []
     for item in workspace.cache.items_by_type.get("pkg/workspace/repository",
@@ -1203,8 +1204,10 @@ def _filter_items(workspace: WorkspaceContext) -> list[str]:
         assert isinstance(repository, WorkspaceRepository)
         with repository.scope():
             item_filters.append(repository.item_filter())
-    item_filters.sort(key=lambda item_filter: len(item_filter.prefix),
-                      reverse=True)
+    item_filters.sort(
+        key=lambda item_filter:
+        (len(item_filter.prefix), item_filter.repository_filter is not None),
+        reverse=True)
     for item_filter in item_filters:
         _prepare_content_filter(item_filter)
     cache = workspace.cache
