@@ -123,15 +123,21 @@ def test_inspection_check(caplog, tmpdir):
         {result["state"]
          for result in report["results"] if result["fails"]})
     assert failing == [
-        "lost", "stale", "undispositioned", "unjudged", "untracked"
+        "lost", "stale", "undispositioned", "unjudged", "unrelated",
+        "untracked"
     ]
+    # A member of a group which covers an analysis has to inspect a finding
+    # of it.
+    assert states[(f"{pre}finding-other-analysis", "findings")] == "unrelated"
+    assert states[(f"{pre}file-fixed", "findings")] == "unrelated"
+    assert (f"{pre}finding-ok", "findings") not in states
     strict = sorted({
         result["state"]
         for result in report["results"] if result["fails-strict"]
     })
     assert strict == [
         "lost", "not baselined", "stale", "undispositioned", "unjudged",
-        "untracked"
+        "unrelated", "untracked"
     ]
 
     details = {
@@ -251,6 +257,18 @@ Verdict
 """ in text
     assert """Supersedes
     2026-11-24 (not-applicable)""" in text
+    # An error box begins the section of an inspection which relates to no
+    # finding of the analyses which its group covers.
+    assert """Inspection /pkg/inspection/finding-other-analysis
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. error::
+
+    This inspection relates to no finding of the analyses which its group
+    covers.
+""" in text
+    assert "Inspection /pkg/inspection/finding-ok\n" \
+        "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nInspectors" in text
     assert "Issues\n    `Issue issue 42 <https://www.foo.org/bar?id=42>`__ " \
         "(closed)" in text
     assert """Inspectors
