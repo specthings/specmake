@@ -317,7 +317,9 @@ class _ItemClosureRule(ContentRule):
         for path, data in items.items():
             uid = self._item_uid(path)
             assert uid is not None
-            if data.get("enabled-by", True) is False:
+            # A proxy is never enabled.  Its enabled members provide it.
+            if data.get("enabled-by",
+                        True) is False and data.get("type") != "proxy":
                 self._dropped.add(uid)
                 self.dropped_paths.add(path)
             else:

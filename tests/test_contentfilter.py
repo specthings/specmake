@@ -318,6 +318,16 @@ def test_content_filter_item_closure():
     assert not content_filter.dropped_paths
 
 
+def test_content_filter_item_closure_proxy():
+    content_filter = _closure_filter()
+    proxy = b"enabled-by: false\nlinks: []\ntype: proxy\n"
+    files = {"spec/a.yml": _item("true", "b"), "spec/b.yml": proxy}
+    content_filter.prepare(_readers(files))
+    assert not content_filter.dropped_paths
+    assert content_filter.apply("spec/a.yml",
+                                files["spec/a.yml"]) == files["spec/a.yml"]
+
+
 def test_content_filter_item_closure_removed_link():
     content_filter = _closure_filter()
     files = {"spec/a.yml": _item("true", "b", "/other/c")}
