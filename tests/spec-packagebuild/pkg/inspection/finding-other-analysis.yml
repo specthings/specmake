@@ -10,6 +10,7 @@ links:
   scopes:
   - scope: finding
     file: cpukit/b.c
+    identifier: CPC-7VCNIL
     message: "The scope of the variable 'y' can be reduced."
     rule: variableScope
     tool: Cppcheck

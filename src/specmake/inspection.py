@@ -36,7 +36,7 @@ from specitems import Item, Link, Person, TextContent, data_digest, hash_file
 
 from .directorystate import DirectoryState
 from .pkgitems import BuildItemMapper
-from .sarif import Finding, FindingKey, load
+from .sarif import Finding, load
 
 #: The item data keys which the digest of an item scope does not cover.  A
 #: copyright year bump does not change an artefact, and the buildspace adds
@@ -159,21 +159,30 @@ def _scope_name(scope: dict) -> str:
         location = scope.get("logical-location")
         where = scope["file"] if location is None else \
             f"{scope['file']} {location}"
-        return f"finding {scope['tool']} {scope['rule']} {where}: " \
-            f"{scope['message']}"
+        return f"finding {scope['identifier']} {scope['tool']} " \
+            f"{scope['rule']} {where}: {scope['message']}"
     return "item"
 
 
-def finding_key(scope: dict) -> FindingKey:
-    """ Return the identity of the finding of the inspection scope. """
-    return (str(scope["tool"]), str(scope["rule"]), str(scope["file"]),
-            scope.get("logical-location"), str(scope["message"]))
+def finding_identifier(scope: dict) -> str:
+    """ Return the identifier of the finding of the inspection scope. """
+    return str(scope["identifier"])
 
 
-def _key_name(key: FindingKey) -> str:
-    tool, rule, file, location, message = key
-    where = file if location is None else f"{file} {location}"
-    return f"{tool} {rule} {where}: {message}"
+def _matches(scope: dict, finding: Finding) -> bool:
+    return finding.identifier == scope["identifier"] and (
+        finding.tool, finding.rule, finding.artifact.path,
+        finding.logical_location,
+        finding.message) == (scope["tool"], scope["rule"], scope["file"],
+                             scope.get("logical-location"), scope["message"])
+
+
+def _finding_name(finding: Finding) -> str:
+    location = finding.logical_location
+    where = finding.artifact.path if location is None else \
+        f"{finding.artifact.path} {location}"
+    return f"{finding.identifier} {finding.tool} {finding.rule} {where}: " \
+        f"{finding.message}"
 
 
 class _Context:
@@ -228,16 +237,17 @@ class _Context:
                         user: Item) -> str | None:
         """
         Return the digest of the identity of the finding, or None if the
-        target has no such finding.
+        target has no finding with the identifier, the tool, the rule, the
+        file, the logical location and the message of the scope.
 
         The count of the findings with the identity is no part of the digest.
         One inspection judges a finding in each variant of an analysis, and
         the count may differ between the variants.
         """
-        key = finding_key(scope)
-        if all(finding.key != key for finding in self.findings(target, user)):
-            return None
-        return data_digest({"finding": list(key)})
+        for finding in self.findings(target, user):
+            if _matches(scope, finding):
+                return data_digest({"finding": list(finding.key)})
+        return None
 
     def _file_digest(self, scope: dict,
                      target: Item) -> tuple[str | None, _Ranges | None]:
@@ -320,7 +330,7 @@ def _check_judgement(item: Item) -> Iterator[Result]:
                      "no issue tracks the non-compliance")
 
 
-def _inspected_finding_keys(group: Item) -> set[tuple[str, FindingKey]]:
+def _inspected_findings(group: Item) -> set[tuple[str, str]]:
     keys = set()
     for member in group.links_to_children("inspection-member"):
         inspection = member.item
@@ -329,7 +339,7 @@ def _inspected_finding_keys(group: Item) -> set[tuple[str, FindingKey]]:
         for link in inspection.links_to_parents("inspected"):
             for scope in link["scopes"]:
                 if scope["scope"] == "finding":
-                    keys.add((link.item.uid, finding_key(scope)))
+                    keys.add((link.item.uid, finding_identifier(scope)))
     return keys
 
 
@@ -338,16 +348,20 @@ def _check_group(group: Item, context: _Context) -> Iterator[Result]:
     Yield a result for each finding of a covered analysis which neither a
     member inspects nor its producer suppresses.
     """
-    inspected = _inspected_finding_keys(group)
+    inspected = _inspected_findings(group)
     for link in group.links_to_parents("inspection-covered-analysis"):
-        open_keys = set(finding.key
-                        for finding in context.findings(link.item, group)
-                        if finding.suppression is None)
-        for key in sorted(open_keys, key=_key_name):
-            if (link.item.uid, key) not in inspected:
-                yield Result(
-                    group.uid, State.UNDISPOSITIONED, _key_name(key),
-                    f"no member inspects this finding of {link.item.uid}")
+        open_findings = {
+            finding.identifier: finding
+            for finding in context.findings(link.item, group)
+            if finding.suppression is None
+        }
+        for finding in sorted(
+            (finding for identifier, finding in open_findings.items()
+             if (link.item.uid, identifier) not in inspected),
+                key=lambda finding: (finding.key[:5], finding.identifier)):
+            yield Result(
+                group.uid, State.UNDISPOSITIONED, _finding_name(finding),
+                f"no member inspects this finding of {link.item.uid}")
 
 
 def _items_of_type(items: Iterable[Item], item_type: str) -> list[Item]:

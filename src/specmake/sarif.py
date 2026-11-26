@@ -24,15 +24,25 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import base64
 from dataclasses import dataclass
+import hashlib
 import json
 import os
 from typing import Any, Iterable, Iterator
 import urllib.parse
 
 #: The identity of a finding: the tool, the rule, the path of the artifact,
-#: the logical location and the message.
-FindingKey = tuple[str, str, str, str | None, str]
+#: the logical location, the message, the text of the line and the ordinal of
+#: the text in the artifact.
+FindingKey = tuple[str, str, str, str | None, str, str | None, int]
+
+_IDENTIFIER_PREFIXES = {
+    "Cppcheck": "CPC",
+    "QualityScanner": "QSC",
+    "clang": "CSA",
+    "nopinion": "NOP"
+}
 
 
 @dataclass(frozen=True)
@@ -59,11 +69,16 @@ class Position:
     The location is the fully qualified name of the logical location, or the
     display of the artifact followed by the line or the name of the logical
     location.  The line is the start line of the region of the physical
-    location, if the result has one.
+    location, if the result has one.  The text is the line of the file of the
+    artifact with each run of white space replaced by one space, if a base
+    directory contains the file.  The ordinal is the count of the preceding
+    lines of the file with the same text.
     """
 
     location: str
     line: int | None = None
+    text: str | None = None
+    ordinal: int = 0
 
 
 @dataclass(frozen=True)
@@ -72,7 +87,8 @@ class Finding:
     This class represents one result of a SARIF log.
 
     The line of a finding is not part of its identity, since it moves when
-    unrelated code moves.
+    unrelated code moves.  The text of the line and its ordinal are part of
+    it.  The ordinal tells apart two findings on lines with the same text.
     """
 
     tool: str
@@ -97,7 +113,18 @@ class Finding:
     def key(self) -> FindingKey:
         """ Is the identity of the finding. """
         return (self.tool, self.rule, self.artifact.path,
-                self.logical_location, self.message)
+                self.logical_location, self.message, self.position.text,
+                self.position.ordinal)
+
+    @property
+    def identifier(self) -> str:
+        """
+        Is the identifier of the finding.  It is a prefix of the tool, a
+        hyphen, and six base32 digits of the digest of the identity.
+        """
+        prefix = _IDENTIFIER_PREFIXES.get(self.tool, self.tool[:3].upper())
+        digest = hashlib.sha256(json.dumps(self.key).encode("utf-8")).digest()
+        return f"{prefix}-{base64.b32encode(digest).decode('ascii')[:6]}"
 
 
 def relative_path(uri: str, bases: list[str]) -> str:
@@ -146,8 +173,51 @@ def _location_artifact(result: dict[str, Any], artifacts: list[dict[str, Any]],
     return Artifact(path, path, None, None), physical
 
 
-def _finding(tool: str, result: dict[str, Any],
-             artifacts: list[dict[str, Any]], bases: list[str]) -> Finding:
+_Lines = dict[str, list[str] | None]
+
+
+def source_file(artifact: Artifact, bases: list[str]) -> str | None:
+    """
+    Return the path of the file of a file artifact in the first base directory
+    which contains it, or None if the artifact is no such file.
+    """
+    if artifact.item or artifact.document or artifact.path == "-":
+        return None
+    for base in [""] if os.path.isabs(artifact.path) else bases:
+        path = os.path.join(base, artifact.path)
+        if os.path.isfile(path):
+            return path
+    return None
+
+
+def _source_lines(artifact: Artifact, bases: list[str],
+                  sources: _Lines) -> list[str] | None:
+    """
+    Return the lines of the file of a file artifact with each run of white
+    space replaced by one space, or None if it is no such file.
+    """
+    if artifact.path not in sources:
+        path = source_file(artifact, bases)
+        lines = None
+        if path is not None:
+            with open(path, "r", encoding="utf-8", errors="replace") as src:
+                lines = [" ".join(line.split()) for line in src]
+        sources[artifact.path] = lines
+    return sources[artifact.path]
+
+
+def _position(artifact: Artifact, location: str, line: int | None,
+              bases: list[str], sources: _Lines) -> Position:
+    lines = _source_lines(artifact, bases, sources)
+    if lines is None or line is None or not 0 < line <= len(lines):
+        return Position(location, line)
+    text = lines[line - 1]
+    return Position(location, line, text, lines[:line - 1].count(text))
+
+
+def _finding(tool: str, result: dict[str, Any], artifacts: list[dict[str,
+                                                                     Any]],
+             bases: list[str], sources: _Lines) -> Finding:
     artifact, physical = _location_artifact(result, artifacts, bases)
     logical_locations = (result.get("locations")
                          or [{}])[0].get("logicalLocations") or [{}]
@@ -165,9 +235,10 @@ def _finding(tool: str, result: dict[str, Any],
     suppressions = result.get("suppressions") or []
     suppression = suppressions[0].get("justification",
                                       "") if suppressions else None
-    return Finding(tool, result["ruleId"], artifact,
-                   qualified or name, result["message"]["text"],
-                   Position(location, line), suppression)
+    return Finding(tool, result["ruleId"], artifact, qualified or name,
+                   result["message"]["text"],
+                   _position(artifact, location, line, bases,
+                             sources), suppression)
 
 
 def load(paths: Iterable[str], bases: list[str]) -> Iterator[Finding]:
@@ -178,12 +249,19 @@ def load(paths: Iterable[str], bases: list[str]) -> Iterator[Finding]:
     The path of an artifact with a uid property is the UID of the item, or the
     UID and the path of a document.  The path of a nested artifact is the path
     of its parent followed by its own URI.  A file URI is relative to the
-    first base directory which contains it.
+    first base directory which contains it.  The text of the line of a finding
+    comes from the file in the first base directory which contains it.
 
     Args:
         paths: The paths of the SARIF files.
         bases: The base directories of file URIs.
+
+    Raises:
+        ValueError: Two findings with distinct identities have the same
+            identifier.
     """
+    sources: _Lines = {}
+    keys: dict[str, FindingKey] = {}
     for path in paths:
         with open(path, "r", encoding="utf-8") as src:
             sarif = json.load(src)
@@ -191,7 +269,22 @@ def load(paths: Iterable[str], bases: list[str]) -> Iterator[Finding]:
             tool = run["tool"]["driver"]["name"]
             artifacts = run.get("artifacts", [])
             for result in run.get("results", []):
-                yield _finding(tool, result, artifacts, bases)
+                finding = _finding(tool, result, artifacts, bases, sources)
+                check_identifier(keys, finding)
+                yield finding
+
+
+def check_identifier(keys: dict[str, FindingKey], finding: Finding) -> None:
+    """
+    Record the identity of the finding by its identifier.
+
+    Raises:
+        ValueError: The keys record another identity for the identifier.
+    """
+    key = keys.setdefault(finding.identifier, finding.key)
+    if key != finding.key:
+        raise ValueError(f"the findings {key} and {finding.key} have the "
+                         f"same identifier {finding.identifier}")
 
 
 def documents(paths: Iterable[str]) -> list[str]:

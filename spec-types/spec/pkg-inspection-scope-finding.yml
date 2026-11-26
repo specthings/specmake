@@ -24,6 +24,12 @@ spec-info:
           Interchange Format (SARIF) Version 2.1.0.  It shall be "-" if the
           finding has no location.
         spec-type: str
+      identifier:
+        description: |
+          It shall be the identifier of the finding.  The identifier is a
+          prefix of the tool, a hyphen, and six base32 digits of the digest of
+          the identity of the finding.
+        spec-type: str
       logical-location:
         description: |
           It shall be the fully qualified name of the logical location of the
@@ -47,14 +53,19 @@ spec-info:
         spec-type: str
     description: |
       This set of attributes specifies the inspected findings of a static
-      analyser with the same tool, rule, file, logical location and message.
-      A finding without a logical location has no logical location attribute.
-      The line of a finding is not part of its identity, since it moves when
-      unrelated code moves.  The digest covers the identity and not the count of the
-      findings, since one inspection judges the findings of each variant of an
-      analysis.
+      analyser with the same identifier, tool, rule, file, logical location
+      and message.  A finding without a logical location has no logical
+      location attribute.  The identity of a finding is its tool, rule, file,
+      logical location and message, the text of its line, and the count of
+      the preceding lines of the file with the same text.  The text of a line
+      is its content with each run of white space replaced by one space.  The
+      line of a finding is not part of its identity, since it moves when
+      unrelated code moves.  The digest covers the identity and not the count
+      of the findings, since one inspection judges the findings of each
+      variant of an analysis.
     mandatory-attributes:
     - file
+    - identifier
     - message
     - rule
     - tool

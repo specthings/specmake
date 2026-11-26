@@ -10,6 +10,7 @@ links:
   scopes:
   - scope: finding
     file: cpukit/a.c
+    identifier: CPC-OVRINA
     message: "The scope of the variable 'x' can be reduced."
     rule: variableScope
     tool: Cppcheck

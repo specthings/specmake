@@ -87,31 +87,37 @@ def test_inspection_check(caplog, tmpdir):
     assert states[(f"{pre}new-round", "file dir/a.txt")] == "valid"
     assert not any(uid == f"{pre}old-round" for uid, _ in states)
     assert states[(f"{pre}item-scope", "item")] == "not baselined"
-    gone = "Cppcheck variableScope cpukit/gone.c: The scope of the " \
+    gone = "CPC-2KHYYB Cppcheck variableScope cpukit/gone.c: The scope of the " \
         "variable 'z' can be reduced."
-    assert states[(f"{pre}finding-ok", "finding Cppcheck variableScope "
+    assert states[(f"{pre}finding-ok",
+                   "finding CPC-OVRINA Cppcheck variableScope "
                    "cpukit/a.c: The scope of the variable 'x' can be "
                    "reduced.")] == "not baselined"
     # A member which inspects the finding in another analysis does not
     # disposition the finding of the covered analysis.
-    assert states[(f"{pre}finding-other-analysis", "finding Cppcheck "
+    assert states[(f"{pre}finding-other-analysis",
+                   "finding CPC-7VCNIL Cppcheck "
                    "variableScope cpukit/b.c: The scope of the variable 'y' "
                    "can be reduced.")] == "absent"
     assert not any(uid == f"{pre}finding-old" for uid, _ in states)
     assert states[(f"{pre}finding-absent", f"finding {gone}")] == "absent"
-    undispositioned = sorted(scope for (uid, scope), state in states.items()
-                             if uid == f"{pre}group")
+    undispositioned = sorted(
+        (scope
+         for (uid, scope), state in states.items() if uid == f"{pre}group"),
+        key=lambda scope: scope.split(" ", 1)[1])
     # A member inspects the finding of a.c.  The member which inspects the
     # finding of b.c is superseded or inspects another analysis.
     assert undispositioned == [
-        "Cppcheck checkersReport -: Active checkers: 160/592",
-        "Cppcheck missingIncludeSystem cpukit/b.c: Include file: <stdio.h> "
-        "not found.", "Cppcheck syntaxError /elsewhere/c.c: syntax error",
-        "Cppcheck unusedFunction cpukit/dev ice.c: The function 'g' is "
-        "never used.", "Cppcheck unusedFunction cpukit/driver#1.c: The "
+        "CPC-GQY46Q Cppcheck checkersReport -: Active checkers: 160/592",
+        "CPC-BYHUSI Cppcheck missingIncludeSystem cpukit/b.c: Include file: <stdio.h> "
+        "not found.",
+        "CPC-AW4UEL Cppcheck syntaxError /elsewhere/c.c: syntax error",
+        "CPC-GZXWYB Cppcheck unusedFunction cpukit/dev ice.c: The function 'g' is "
+        "never used.",
+        "CPC-A3GPTL Cppcheck unusedFunction cpukit/driver#1.c: The "
         "function 'f' is never used.",
-        "Cppcheck variableScope cpukit/b.c: The scope of the variable 'y' "
-        "can be reduced."
+        "CPC-7VCNIL Cppcheck variableScope cpukit/b.c: The scope of the "
+        "variable 'y' can be reduced."
     ]
     failing = sorted(
         {result["state"]
@@ -187,7 +193,7 @@ def test_inspection_finding_identity(caplog, tmpdir):
     check.build()
     report = check.json_load()
     states = _states(report)
-    nopinion = "finding nopinion TN-0009/back-to-back-store " \
+    nopinion = "finding NOP-UDZIC6 nopinion TN-0009/back-to-back-store " \
         "librtemscpu.a/m.o f: TN-0009 back-to-back-store"
     assert states[("/pkg/spamr/inspection-nopinion",
                    nopinion)] == "not baselined"
@@ -197,7 +203,7 @@ def test_inspection_finding_identity(caplog, tmpdir):
     assert digest == data_digest({
         "finding": [
             "nopinion", "TN-0009/back-to-back-store", "librtemscpu.a/m.o", "f",
-            "TN-0009 back-to-back-store"
+            "TN-0009 back-to-back-store", None, 0
         ]
     })
     item = package.director.item_cache["/pkg/spamr/inspection-nopinion"]
@@ -206,12 +212,13 @@ def test_inspection_finding_identity(caplog, tmpdir):
     assert _states(check.json_load())[("/pkg/spamr/inspection-nopinion",
                                        nopinion)] == "valid"
     # A suppressed finding needs no inspection
-    scanner = sorted(scope for (uid, scope), state in states.items()
-                     if uid == "/pkg/spamr/group-quality-scanner")
+    scanner = sorted((scope for (uid, scope), state in states.items()
+                      if uid == "/pkg/spamr/group-quality-scanner"),
+                     key=lambda scope: scope.split(" ", 1)[1])
     assert scanner == [
-        "QualityScanner TBC /pkg/component /pkg/component:/name: TBC found",
-        "QualityScanner TBD /pkg/source/doc-a: source/a.rst: TBD found",
-        "QualityScanner TBD /rtems/req/action /rtems/req/action:/text: "
+        "QSC-52256U QualityScanner TBC /pkg/component /pkg/component:/name: TBC found",
+        "QSC-O5IZWM QualityScanner TBD /pkg/source/doc-a: source/a.rst: TBD found",
+        "QSC-N6LNMA QualityScanner TBD /rtems/req/action /rtems/req/action:/text: "
         "TBD found"
     ]
 
