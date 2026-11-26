@@ -52,14 +52,27 @@ class Artifact:
 
 
 @dataclass(frozen=True)
+class Position:
+    """
+    This class represents the position of a finding in its artifact.
+
+    The location is the fully qualified name of the logical location, or the
+    display of the artifact followed by the line or the name of the logical
+    location.  The line is the start line of the region of the physical
+    location, if the result has one.
+    """
+
+    location: str
+    line: int | None = None
+
+
+@dataclass(frozen=True)
 class Finding:
     """
     This class represents one result of a SARIF log.
 
     The line of a finding is not part of its identity, since it moves when
-    unrelated code moves.  The location is the fully qualified name of the
-    logical location, or the display of the artifact followed by the line or
-    the name of the logical location.
+    unrelated code moves.
     """
 
     tool: str
@@ -67,8 +80,18 @@ class Finding:
     artifact: Artifact
     logical_location: str | None
     message: str
-    location: str
+    position: Position
     suppression: str | None
+
+    @property
+    def location(self) -> str:
+        """ Is the location of the finding. """
+        return self.position.location
+
+    @property
+    def line(self) -> int | None:
+        """ Is the line of the finding. """
+        return self.position.line
 
     @property
     def key(self) -> FindingKey:
@@ -142,8 +165,9 @@ def _finding(tool: str, result: dict[str, Any],
     suppressions = result.get("suppressions") or []
     suppression = suppressions[0].get("justification",
                                       "") if suppressions else None
-    return Finding(tool, result["ruleId"], artifact, qualified or name,
-                   result["message"]["text"], location, suppression)
+    return Finding(tool, result["ruleId"], artifact,
+                   qualified or name, result["message"]["text"],
+                   Position(location, line), suppression)
 
 
 def load(paths: Iterable[str], bases: list[str]) -> Iterator[Finding]:

@@ -41,6 +41,10 @@ links:
   role: input
   uid: ../steps/rtems-item-cache
 - hash: null
+  name: link-hub
+  role: input
+  uid: ../steps/link-hub
+- hash: null
   name: test-aggregation
   role: input
   uid: ../steps/aggregate-test-results

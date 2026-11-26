@@ -1138,6 +1138,24 @@ items.""")
         """ Return the SDD link for the file path. """
         return self.get_sdd_link("file", path, mapper, item)
 
+    def get_file_line_sdd_link(self,
+                               path: str,
+                               line: int,
+                               mapper: BuildItemMapper,
+                               item: Optional[Item] = None) -> str:
+        """
+        Return the SDD link to the line of the source listing of the file path.
+
+        The SDD shall have the source browser of Doxygen enabled.
+        """
+        name_info, name = self._get_name_info(path, item)
+        elem_info = name_info[f"file/{name}"]
+        # Doxygen names the source listing after the file page and anchors
+        # each line with a five digit line number.
+        page = elem_info["link"].removesuffix(".html")
+        return mapper.format_link(f"{elem_info['name']}:{line}",
+                                  f"{page}_source.html#l{line:05}")
+
     def get_function_sdd_link(self,
                               name: str,
                               mapper: BuildItemMapper,
