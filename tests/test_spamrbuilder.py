@@ -33,14 +33,16 @@ import pytest
 
 from specmake import SpamrBuilder
 import specmake.spamrbuilder
+from specmake.sarif import Artifact, Finding, Position
 from specmake.spamrbuilder import _METRICS, _Group, _load_code_metrics
 
 from .util import build_document, get_document_text
 
 
 def test_spamrbuilder(caplog, tmpdir, monkeypatch):
-    package, text = build_document(caplog, tmpdir, "doc-paf-spamr",
-                                   ["aggregate-test-results", "paf-spamr"])
+    package, text = build_document(
+        caplog, tmpdir, "doc-paf-spamr",
+        ["aggregate-test-results", "link-hub", "paf-spamr"])
     spamr_builder = package.director["/pkg/deployment/doc-paf-spamr"]
     assert isinstance(spamr_builder, SpamrBuilder)
 
@@ -326,116 +328,100 @@ The covered analyses reported 4 findings. 1 finding has a disposition. Section
 Cppcheck
 --------
 
-.. raw:: latex
+:file:`cpukit/a.c`:3
+    :Rule: ``variableScope``
+    :Message: The scope of the variable 'x' can be reduced.
+    :Disposition: compliant (/pkg/spamr/inspection-cppcheck)
 
-    \begin{footnotesize}
+:file:`/elsewhere/c.c`:7
+    :Rule: ``syntaxError``
+    :Message: syntax error
+    :Disposition: **open**
 
-.. table::
-    :class: longtable
-    :widths: 30,18,30,22
+:file:`cpukit/b.c`:9
+    :Rule: ``variableScope``
+    :Message: The scope of the variable 'y' can be reduced.
+    :Disposition: **open**
 
-    +-+-+-+-+
-    | Location | Rule | Message | Disposition |
-    +=+=+=+=+
-    | :file:`cpukit/a.c`:3 | variableScope | The scope of the variable 'x' can be reduced. | compliant (/pkg/spamr/inspection-cppcheck) |
-    +-+-+-+-+
-    | :file:`/elsewhere/c.c`:7 | syntaxError | syntax error | **open** |
-    +-+-+-+-+
-    | :file:`cpukit/b.c`:9 | variableScope | The scope of the variable 'y' can be reduced. | **open** |
-    +-+-+-+-+
-    | \- | checkersReport | Active checkers: 160/592 | **open** |
-    +-+-+-+-+
-    | :file:`cpukit/b.c` | missingIncludeSystem | Include file: <stdio.h> not found. | **open** |
-    +-+-+-+-+
-    | :file:`cpukit/driver#1.c`:1 | unusedFunction | The function 'f' is never used. | **open** |
-    +-+-+-+-+
-    | :file:`cpukit/dev ice.c`:2 | unusedFunction | The function 'g' is never used. | **open** |
-    +-+-+-+-+
+\-
+    :Rule: ``checkersReport``
+    :Message: Active checkers: 160/592
+    :Disposition: **open**
 
-.. raw:: latex
+:file:`cpukit/b.c`
+    :Rule: ``missingIncludeSystem``
+    :Message: Include file: <stdio.h> not found.
+    :Disposition: **open**
 
-    \end{footnotesize}
+:file:`cpukit/driver#1.c`:1
+    :Rule: ``unusedFunction``
+    :Message: The function 'f' is never used.
+    :Disposition: **open**
+
+:file:`cpukit/dev ice.c`:2
+    :Rule: ``unusedFunction``
+    :Message: The function 'g' is never used.
+    :Disposition: **open**
 
 .. _SpamrFindingsPkgSpamrGroupClangAnalyzer:
 
 CLANG Static Analyzer
 ---------------------
 
-.. raw:: latex
+:file:`cpukit/dev/iovprintf.c`:117
+    :Rule: ``deadcode.DeadStores``
+    :Message: Value stored to 'num' is never read
+    :Disposition: **open**
 
-    \begin{footnotesize}
-
-.. table::
-    :class: longtable
-    :widths: 30,18,30,22
-
-    +-+-+-+-+
-    | Location | Rule | Message | Disposition |
-    +=+=+=+=+
-    | :file:`cpukit/dev/iovprintf.c`:117 | deadcode.DeadStores | Value stored to 'num' is never read | **open** |
-    +-+-+-+-+
-    | :file:`cpukit/score/src/heap.c`:42 | core.NullDereference | Dereference of null pointer | **open** |
-    +-+-+-+-+
-
-.. raw:: latex
-
-    \end{footnotesize}
+:file:`cpukit/score/src/heap.c`:42
+    :Rule: ``core.NullDereference``
+    :Message: Dereference of null pointer
+    :Disposition: **open**
 
 .. _SpamrFindingsPkgSpamrGroupNopinion:
 
 Errata checker
 --------------
 
-.. raw:: latex
+:file:`librtemscpu.a(m.o)` f
+    :Rule: ``TN-0009/back-to-back-store``
+    :Message: TN-0009 back-to-back-store
+    :Disposition: not applicable (/pkg/spamr/inspection-nopinion)
 
-    \begin{footnotesize}
+:file:`librtemscpu.a(n.o)`
+    :Rule: ``TN-0011/atomic-not-aligned``
+    :Message: TN-0011 atomic-not-aligned possible
+    :Disposition: **open**
 
-.. table::
-    :class: longtable
-    :widths: 30,18,30,22
-
-    +-+-+-+-+
-    | Location | Rule | Message | Disposition |
-    +=+=+=+=+
-    | :file:`librtemscpu.a(m.o)` f | TN-0009/back-to-back-store | TN-0009 back-to-back-store | not applicable (/pkg/spamr/inspection-nopinion) |
-    +-+-+-+-+
-    | :file:`librtemscpu.a(n.o)` | TN-0011/atomic-not-aligned | TN-0011 atomic-not-aligned possible | **open** |
-    +-+-+-+-+
-    | :file:`app.exe` g | TN-0009/back-to-back-store | TN-0009 back-to-back-store | **open** |
-    +-+-+-+-+
-
-.. raw:: latex
-
-    \end{footnotesize}
+:file:`app.exe` g
+    :Rule: ``TN-0009/back-to-back-store``
+    :Message: TN-0009 back-to-back-store
+    :Disposition: **open**
 
 .. _SpamrFindingsPkgSpamrGroupQualityScanner:
 
 Quality scanner
 ---------------
 
-.. raw:: latex
+/rtems/req/action:/text
+    :Rule: ``TBD``
+    :Message: TBD found
+    :Disposition: **open**
 
-    \begin{footnotesize}
+/pkg/component:/name
+    :Rule: ``TBC``
+    :Message: TBC found
+    :Disposition: **open**
 
-.. table::
-    :class: longtable
-    :widths: 30,18,30,22
+/pkg/source/doc-a: source/a.rst:5
+    :Rule: ``TBD``
+    :Message: TBD found
+    :Disposition: **open**
 
-    +-+-+-+-+
-    | Location | Rule | Message | Disposition |
-    +=+=+=+=+
-    | /rtems/req/action:/text | TBD | TBD found | **open** |
-    +-+-+-+-+
-    | /pkg/component:/name | TBC | TBC found | **open** |
-    +-+-+-+-+
-    | /pkg/source/doc-a: source/a.rst:5 | TBD | TBD found | **open** |
-    +-+-+-+-+
-    | /pkg/source/doc-a: source/a.rst:9 | TBC | TBC found | suppressed: The glossary term \*TBC\* names the marker. |
-    +-+-+-+-+
-
-.. raw:: latex
-
-    \end{footnotesize}
+/pkg/source/doc-a: source/a.rst:9
+    :Rule: ``TBC``
+    :Message: TBC found
+    :Disposition: suppressed: The glossary term \*TBC\* names the marker.
 
 :file:`cpukit/a.c`
 
@@ -510,6 +496,21 @@ Quality scanner
     text = get_document_text(tmpdir, index_rst)
     assert "No RID is open." in text
     assert "- RIDs open: 0" in text
+
+    # Check that the file of a location links to the SDD
+    finding = Finding("cppcheck", "variableScope",
+                      Artifact("a.c", "a.c", None, None), None, "m",
+                      Position("a.c:3"), None)
+    content = spamr_builder.mapper.create_content()
+    location = spamr_builder._location(content, finding)
+    assert location.replace(str(tmpdir), "") == \
+        "`a.c </pkg/doc-ddf-sdd/html/a_8c.html>`__:3"
+    finding = Finding("cppcheck", "variableScope",
+                      Artifact("a.c", "a.c", None, None), None, "m",
+                      Position("a.c:3", 3), None)
+    location = spamr_builder._location(content, finding)
+    assert location.replace(str(tmpdir), "") == \
+        "`a.c:3 </pkg/doc-ddf-sdd/html/a_8c_source.html#l00003>`__"
 
     # Check the content without findings and thresholds
     group_item = director.item_cache["/pkg/spamr/group-cppcheck"]

@@ -37,6 +37,7 @@ from specitems import Item, ItemGetValueContext, SphinxContent, TextContent
 from .directorystate import DirectoryState
 from .docbuilder import DocumentBuilder
 from .inspection import finding_key, is_superseded
+from .linkhub import LinkHub
 from .packagechanges import PackageChanges
 from .pkgitems import BuildItem, PackageBuildDirector
 from .rtems import RTEMSItemCache
@@ -196,21 +197,6 @@ def _inspections(group: Item) -> dict[tuple[str, tuple], Item]:
                     inspections[(inspected.item.uid,
                                  finding_key(scope))] = inspection
     return inspections
-
-
-def _location(content: SphinxContent, finding: Finding) -> str:
-    """
-    Return the location of the finding with the file of a file artifact in the
-    format of a path.
-    """
-    artifact = finding.artifact
-    if artifact.display == "-":
-        return _cell(content, finding.location)
-    if artifact.item or artifact.document or \
-            not finding.location.startswith(artifact.display):
-        return _breakable(content, finding.location)
-    rest = finding.location[len(artifact.display):]
-    return f"{content.path(artifact.display)}{content.escape(rest)}"
 
 
 def _disposition(content: TextContent, disposition: str | None) -> str:
@@ -806,23 +792,53 @@ Section :ref:`{group.findings_label}` lists each finding.""")
                         content.add_grid_table(rows, [60, 20, 20])
             return "\n".join(content)
 
+    def _location(self, content: SphinxContent, finding: Finding) -> str:
+        """
+        Return the location of the finding.  If the SDD documents the file of
+        a file artifact, then a location with a line links to the line in the
+        source listing of the SDD, otherwise the file links to the file in the
+        SDD.  The file of a file artifact which the SDD does not document has
+        the format of a path.
+        """
+        artifact = finding.artifact
+        if artifact.display == "-":
+            return _cell(content, finding.location)
+        if artifact.item or artifact.document or \
+                not finding.location.startswith(artifact.display):
+            return _breakable(content, finding.location)
+        rest = content.escape(finding.location[len(artifact.display):])
+        link_hub = self.input("link-hub")
+        assert isinstance(link_hub, LinkHub)
+        try:
+            if finding.line is not None and \
+                    finding.location == f"{artifact.display}:{finding.line}":
+                return link_hub.get_file_line_sdd_link(artifact.display,
+                                                       finding.line,
+                                                       self.mapper)
+            file = link_hub.get_file_sdd_link(artifact.display, self.mapper)
+        except KeyError:
+            file = content.path(artifact.display)
+        return f"{file}{rest}"
+
     def _get_annex_static_analysis(self, ctx: ItemGetValueContext) -> str:
         with self.section_content(ctx) as (content, _):
             assert isinstance(content, SphinxContent)
             for group in self._groups:
                 with content.section(group.item["name"],
                                      label=group.findings_label):
-                    rows: list[tuple[str, ...]] = [("Location", "Rule",
-                                                    "Message", "Disposition")]
-                    rows.extend((_location(content, disposed.finding),
-                                 content.escape(disposed.finding.rule),
-                                 content.escape(disposed.finding.message),
-                                 _disposition(content, disposed.disposition))
-                                for disposed in group.findings)
-                    if len(rows) == 1:
+                    if not group.findings:
                         content.add(
                             "The covered analyses reported no finding.")
-                    else:
-                        content.add_grid_table(rows, [30, 18, 30, 22],
-                                               font_size=-2)
+                    for disposed in group.findings:
+                        finding = disposed.finding
+                        rule = content.code(finding.rule)
+                        message = content.escape(finding.message)
+                        disposition = _disposition(content,
+                                                   disposed.disposition)
+                        content.add(self._location(content, finding))
+                        with content.indent():
+                            content.add([
+                                f":Rule: {rule}", f":Message: {message}",
+                                f":Disposition: {disposition}"
+                            ])
             return "\n".join(content)
