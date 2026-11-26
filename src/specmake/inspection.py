@@ -106,6 +106,7 @@ class Result:
     state: State
     scope: str
     detail: str
+    identifier: str | None = None
 
     def __str__(self) -> str:
         return f"{self.state.value.upper()} {self.uid} {self.scope}" \
@@ -165,6 +166,16 @@ def _scope_name(scope: dict) -> str:
         return f"finding {scope['identifier']} {scope['tool']} " \
             f"{scope['rule']} {where}: {scope['message']}"
     return "item"
+
+
+def finding_label(identifier: str) -> str:
+    """ Return the label of the section of the finding in the SPAMR. """
+    return f"SpamrFinding{identifier.replace('-', '')}"
+
+
+def inspection_label(item: Item) -> str:
+    """ Return the label of the section of the inspection. """
+    return f"Inspection{item.ident}"
 
 
 def finding_identifier(scope: dict) -> str:
@@ -384,7 +395,8 @@ def _check_group(group: Item, context: _Context) -> Iterator[Result]:
                 key=lambda finding: (finding.key[:5], finding.identifier)):
             yield Result(
                 group.uid, State.UNDISPOSITIONED, _finding_name(finding),
-                f"no member inspects this finding of {link.item.uid}")
+                f"no member inspects this finding of {link.item.uid}",
+                finding.identifier)
 
 
 def _items_of_type(items: Iterable[Item], item_type: str) -> list[Item]:
@@ -585,6 +597,7 @@ class InspectionCheck(DirectoryState):
             "results": [{
                 "detail": result.detail,
                 "fails": result.state.fails(),
+                "identifier": result.identifier,
                 "fails-strict": result.state.fails(strict=True),
                 "scope": result.scope,
                 "state": result.state.value,
@@ -631,9 +644,26 @@ def _history(item: Item) -> list[str]:
                       f"({_optional(item['verdict'])})")
 
 
+def _add_inspected_findings(content: TextContent, findings: list[str]) -> None:
+    """
+    Add a sentence which relates the inspection to the one finding, or a list
+    of the findings which a sentence introduces.
+    """
+    if not findings:
+        return
+    content.add("Inspected findings")
+    with content.indent():
+        if len(findings) == 1:
+            content.wrap(f"This inspection relates to {findings[0]}.")
+        else:
+            content.add_list(
+                findings, "This inspection relates to the following findings:")
+
+
 def _add_inspection(content: TextContent, mapper: BuildItemMapper, item: Item,
                     states: dict[tuple[str, str], dict]) -> None:
-    with content.section(f"Inspection {item.uid}"):
+    with content.section(f"Inspection {item.uid}",
+                         label=inspection_label(item)):
         if (item.uid, "findings") in states:
             with content.directive("error"):
                 content.wrap("This inspection relates to no finding of the "
@@ -654,17 +684,25 @@ def _add_inspection(content: TextContent, mapper: BuildItemMapper, item: Item,
         history = _history(item)
         if history:
             content.add_definition_item("Supersedes", ", ".join(history))
-        rows = [("Scope", "Artefact", "State")]
         judgement = states.get((item.uid, "judgement"))
         if judgement is not None:
-            rows.append(("judgement", "", judgement["state"]))
+            content.add_definition_item("Judgement", judgement["state"])
+        findings: list[str] = []
         for link in item.links_to_parents("inspected"):
             for scope in link["scopes"]:
                 name = _scope_name(scope)
-                rows.append((content.escape(name), link.item.uid,
-                             states[(item.uid, name)]["state"]))
-        if len(rows) > 1:
-            content.add_simple_table(rows)
+                state = states[(item.uid, name)]["state"]
+                if scope["scope"] == "finding":
+                    reference = content.reference(
+                        finding_label(scope["identifier"]),
+                        scope["identifier"])
+                    findings.append(reference if state ==
+                                    "valid" else f"{reference} ({state})")
+                else:
+                    content.add_definition_item(
+                        content.escape(name),
+                        f"{content.escape(link.item.uid)}: {state}")
+        _add_inspected_findings(content, findings)
 
 
 def render_group(content: TextContent, mapper: BuildItemMapper, group: Item,
@@ -687,6 +725,17 @@ def render_group(content: TextContent, mapper: BuildItemMapper, group: Item,
         for result in report["results"]
     }
     with content.section(group["name"], label_tail=group.ident):
+        undispositioned = [
+            result for result in report["results"]
+            if result["uid"] == group.uid
+        ]
+        if undispositioned:
+            with content.directive("error"):
+                content.add("These findings have no inspection:")
+                content.add_list(
+                    content.reference(finding_label(result["identifier"]),
+                                      result["identifier"])
+                    for result in undispositioned)
         content.add(group["text"])
         members = sorted(
             (link.item for link in group.links_to_children("inspection-member")
@@ -694,13 +743,3 @@ def render_group(content: TextContent, mapper: BuildItemMapper, group: Item,
             key=lambda item: item.uid)
         for member in members:
             _add_inspection(content, mapper, member, states)
-        undispositioned = [
-            result for result in report["results"]
-            if result["uid"] == group.uid
-        ]
-        if undispositioned:
-            content.add("These findings have no inspection:")
-            content.add_simple_table([("Finding", "Detail")] +
-                                     [(content.escape(result["scope"]),
-                                       result["detail"])
-                                      for result in undispositioned])

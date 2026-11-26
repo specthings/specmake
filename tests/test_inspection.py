@@ -30,11 +30,12 @@ import shutil
 
 import pytest
 
-from specitems import (CommonMarkContent, data_digest, hash_file_lines,
-                       load_data)
+from specitems import (CommonMarkContent, SphinxContent, data_digest,
+                       hash_file_lines, load_data)
 
 from specmake.cliupdateinspections import cliupdateinspections
-from specmake.inspection import State, baseline, item_digest, renew
+from specmake.inspection import (State, _add_inspected_findings, baseline,
+                                 item_digest, renew)
 
 import specmake.inspection
 import specmake.packagemanual
@@ -236,13 +237,21 @@ def test_inspection_group(caplog, tmpdir):
     package.director["/pkg/inspection/check"].build()
     doc = package.director["/pkg/deployment/doc"]
     text = doc.substitute("${.:/inspection-group:1:/pkg/inspection/group}")
+    # The error box of the findings without an inspection begins the
+    # section.
     assert text.startswith(""".. _PkgInspectionGroup:
 
 Static analysis
 ---------------
 
-The members inspect the findings of the static analysis.
+.. error::
+
+    These findings have no inspection:
+
+    - :ref:`CPC-GQY46Q <SpamrFindingCPCGQY46Q>`
 """)
+    assert "SpamrFindingCPC7VCNIL>`\n\nThe members inspect the findings of " \
+        "the static analysis.\n" in text
     assert """Inspection /pkg/inspection/finding-ok
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -276,10 +285,23 @@ Verdict
 
 Date
     not recorded""" in text
-    assert "    judgement                             unjudged\n" in text
-    assert "file dir/gone.txt /pkg/source/test-files absent" in text
-    assert "These findings have no inspection:" in text
-    assert "Cppcheck syntaxError /elsewhere/c.c: syntax error" in text
+    assert "Judgement\n    unjudged\n" in text
+    assert "file dir/gone.txt\n    /pkg/source/test-files: absent\n" in text
+    # The section of an inspection has a label, which a disposition in the
+    # SPAMR references.
+    assert ".. _InspectionPkgInspectionFindingOk:\n\nInspection " \
+        "/pkg/inspection/finding-ok\n" in text
+    # A finding scope references the section of the finding in the SPAMR.
+    # The definition list of the inspection relates the inspection to the
+    # inspected finding with the state of the check unless it is valid.
+    assert "Inspected findings\n    This inspection relates to " \
+        ":ref:`CPC-OVRINA <SpamrFindingCPCOVRINA>` (not\n    baselined).\n" \
+        in text
+    # An error box lists the findings without an inspection by their
+    # identifiers, each a reference to the section of the finding.
+    assert "    - :ref:`CPC-GQY46Q <SpamrFindingCPCGQY46Q>`\n\n" \
+        "    - :ref:`CPC-BYHUSI <SpamrFindingCPCBYHUSI>`\n" in text
+    assert ".. table::" not in text
     # A round without scopes and without a judgement result has no table.
     text = doc.substitute(
         "${.:/inspection-group:1:/pkg/inspection/group-history}")
@@ -516,3 +538,16 @@ def test_cliupdateinspections_errors(tmpdir):
     with pytest.raises(SystemExit,
                        match=f"{uid}: the report has no inspection {uid}"):
         _run(tmp_path, uid, str(report_file))
+
+
+def test_inspected_findings():
+    content = SphinxContent(context="CC-BY-SA-4.0")
+    _add_inspected_findings(content, [])
+    assert not list(content)
+    _add_inspected_findings(content, ["A", "B"])
+    assert "\n".join(content) == """Inspected findings
+    This inspection relates to the following findings:
+
+    - A
+
+    - B"""

@@ -36,7 +36,8 @@ from specitems import Item, ItemGetValueContext, SphinxContent, TextContent
 
 from .directorystate import DirectoryState
 from .docbuilder import DocumentBuilder
-from .inspection import finding_identifier, is_superseded
+from .inspection import (finding_identifier, finding_label, inspection_label,
+                         is_superseded)
 from .linkhub import LinkHub
 from .packagechanges import PackageChanges
 from .pkgitems import BuildItem, PackageBuildDirector
@@ -154,6 +155,7 @@ class _Disposed:
 
     finding: Finding
     disposition: str | None
+    inspection: Item | None = None
 
 
 @dataclass(frozen=True)
@@ -200,8 +202,15 @@ def _inspections(group: Item) -> dict[tuple[str, str], Item]:
     return inspections
 
 
-def _disposition(content: TextContent, disposition: str | None) -> str:
-    return "**open**" if disposition is None else content.escape(disposition)
+def _disposition(content: TextContent, disposed: _Disposed) -> str:
+    if disposed.disposition is None:
+        return "**open**"
+    if disposed.inspection is None:
+        return content.escape(disposed.disposition)
+    inspection = disposed.inspection
+    verdict = content.escape(inspection["verdict"].replace("-", " "))
+    reference = content.reference(inspection_label(inspection), inspection.uid)
+    return f"{verdict} ({reference})"
 
 
 def _count(count: int, singular: str, plural: str) -> str:
@@ -344,7 +353,7 @@ class SpamrBuilder(DocumentBuilder):
                     disposition = f"suppressed: {finding.suppression}"
                 else:
                     disposition = None
-                findings.append(_Disposed(finding, disposition))
+                findings.append(_Disposed(finding, disposition, inspection))
         return _Group(group, findings, all_paths)
 
     @functools.cached_property
@@ -887,8 +896,7 @@ Section :ref:`{group.findings_label}` lists each finding.""")
         title = f"{identifier}: {finding.rule}"
         if not (artifact.item or artifact.document or artifact.path == "-"):
             title = f"{title} in {os.path.basename(artifact.display)}"
-        with content.section(
-                title, label=f"SpamrFinding{identifier.replace('-', '')}"):
+        with content.section(title, label=finding_label(identifier)):
             content.add_definition_item("Location",
                                         self._location(content, finding))
             content.add_definition_item("Rule", content.code(finding.rule))
@@ -897,5 +905,5 @@ Section :ref:`{group.findings_label}` lists each finding.""")
             self._code_excerpt(content, finding)
             content.add_definition_item(
                 "Reports", _count(len(disposed_list), "report", "reports"))
-            content.add_definition_item(
-                "Disposition", _disposition(content, disposed.disposition))
+            content.add_definition_item("Disposition",
+                                        _disposition(content, disposed))
