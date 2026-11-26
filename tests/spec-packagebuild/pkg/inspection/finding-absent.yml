@@ -10,6 +10,7 @@ links:
   scopes:
   - scope: finding
     file: cpukit/gone.c
+    identifier: CPC-2KHYYB
     message: "The scope of the variable 'z' can be reduced."
     rule: variableScope
     tool: Cppcheck

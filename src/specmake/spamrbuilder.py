@@ -36,7 +36,7 @@ from specitems import Item, ItemGetValueContext, SphinxContent, TextContent
 
 from .directorystate import DirectoryState
 from .docbuilder import DocumentBuilder
-from .inspection import finding_key, is_superseded
+from .inspection import finding_identifier, is_superseded
 from .linkhub import LinkHub
 from .packagechanges import PackageChanges
 from .pkgitems import BuildItem, PackageBuildDirector
@@ -181,12 +181,12 @@ class _Group:
         ]
 
 
-def _inspections(group: Item) -> dict[tuple[str, tuple], Item]:
+def _inspections(group: Item) -> dict[tuple[str, str], Item]:
     """
     Return the current judged inspections of the group by the analysis and the
     identity of the inspected finding.
     """
-    inspections: dict[tuple[str, tuple], Item] = {}
+    inspections: dict[tuple[str, str], Item] = {}
     for link in group.links_to_children("inspection-member"):
         inspection = link.item
         if is_superseded(inspection) or inspection["verdict"] is None:
@@ -195,7 +195,7 @@ def _inspections(group: Item) -> dict[tuple[str, tuple], Item]:
             for scope in inspected["scopes"]:
                 if scope["scope"] == "finding":
                     inspections[(inspected.item.uid,
-                                 finding_key(scope))] = inspection
+                                 finding_identifier(scope))] = inspection
     return inspections
 
 
@@ -329,7 +329,8 @@ class SpamrBuilder(DocumentBuilder):
             paths = _files(self.director[analysis.uid], ".sarif")
             all_paths.extend(paths)
             for finding in load(paths, self._source_directories):
-                inspection = inspections.get((analysis.uid, finding.key))
+                inspection = inspections.get(
+                    (analysis.uid, finding.identifier))
                 if inspection is not None:
                     verdict = inspection["verdict"].replace("-", " ")
                     disposition: str | None = f"{verdict} ({inspection.uid})"

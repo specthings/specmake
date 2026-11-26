@@ -10,6 +10,7 @@ links:
   scopes:
   - scope: finding
     file: librtemscpu.a/m.o
+    identifier: NOP-UDZIC6
     logical-location: f
     message: TN-0009 back-to-back-store
     rule: TN-0009/back-to-back-store

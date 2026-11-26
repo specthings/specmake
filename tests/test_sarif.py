@@ -26,7 +26,10 @@
 
 from pathlib import Path
 
-from specmake.sarif import Finding, load, relative_path
+import pytest
+
+from specmake.sarif import (Artifact, Finding, Position, check_identifier,
+                            load, relative_path, source_file)
 
 _SPAMR = Path(__file__).parent / "test-files" / "pkg" / "build" / "src" / \
     "spamr"
@@ -42,7 +45,7 @@ def test_source_findings():
     clang = findings[0]
     assert clang.key == ("clang", "deadcode.DeadStores",
                          "cpukit/dev/iovprintf.c", None,
-                         "Value stored to 'num' is never read")
+                         "Value stored to 'num' is never read", None, 0)
     assert clang.location == "cpukit/dev/iovprintf.c:117"
     assert clang.suppression is None
     assert clang.artifact.item is None and clang.artifact.document is None
@@ -56,7 +59,7 @@ def test_scanner_findings():
     findings = _load("quality-scanner/tbd-tbc-in-documentation-sources.sarif")
     item = findings[0]
     assert item.key == ("QualityScanner", "TBD", "/rtems/req/action",
-                        "/rtems/req/action:/text", "TBD found")
+                        "/rtems/req/action:/text", "TBD found", None, 0)
     assert item.location == "/rtems/req/action:/text"
     assert item.artifact.item == "/rtems/req/action"
     documents = [finding for finding in findings if finding.artifact.document]
@@ -72,7 +75,7 @@ def test_binary_findings():
     # A nested artifact names its parent
     assert member.key == ("nopinion", "TN-0009/back-to-back-store",
                           "librtemscpu.a/m.o", "f",
-                          "TN-0009 back-to-back-store")
+                          "TN-0009 back-to-back-store", None, 0)
     assert member.location == "librtemscpu.a(m.o) f"
     assert anonymous.logical_location is None
     assert anonymous.location == "librtemscpu.a(n.o)"
@@ -100,3 +103,74 @@ def test_relative_path():
     assert relative_path("file:///opt/rtems/a%20b.c", ["/opt/rtems"]) == \
         "a b.c"
     assert relative_path("/opt/x/a.c", ["/opt/rtems"]) == "/opt/x/a.c"
+
+
+def _sarif(path: Path, source: Path, lines: list[int]) -> None:
+    results = ",".join(
+        '{"ruleId":"r","message":{"text":"m"},"locations":[{'
+        f'"physicalLocation":{{"artifactLocation":{{"uri":"file://{source}"}},'
+        f'"region":{{"startLine":{line}}}}}}}]}}' for line in lines)
+    path.write_text(
+        f'{{"runs":[{{"tool":{{"driver":{{"name":"clang"}}}},'
+        f'"results":[{results}]}}]}}',
+        encoding="utf-8")
+
+
+def test_identity(tmpdir):
+    base = Path(tmpdir) / "src"
+    base.mkdir()
+    source = base / "a.c"
+    source.write_text("int x;\n  f(  x );\nint y;\nf(x);\n", encoding="utf-8")
+    log = Path(tmpdir) / "a.sarif"
+    _sarif(log, source, [2, 4, 9])
+    first, second, outside = load([str(log)], ["/nil", str(base)])
+    assert first.artifact.path == "a.c"
+    # The text of a line has each run of white space replaced by one space
+    assert first.position.text == "f( x );"
+    assert second.position.text == "f(x);"
+    assert first.position.ordinal == second.position.ordinal == 0
+    assert first.identifier.startswith("CSA-")
+    assert len(first.identifier) == 10
+    # A line outside of the file has no text
+    assert outside.position.text is None
+    # The second line with the same text has the next ordinal
+    source.write_text("f(x);\nf(x);\n", encoding="utf-8")
+    _sarif(log, source, [1, 2])
+    first, second = load([str(log)], [str(base)])
+    assert first.position.text == second.position.text == "f(x);"
+    assert (first.position.ordinal, second.position.ordinal) == (0, 1)
+    assert first.identifier != second.identifier
+    # A moved line keeps its identifier
+    identifier = second.identifier
+    source.write_text("int z;\nf(x);\n\nf(x);\n", encoding="utf-8")
+    _sarif(log, source, [4])
+    (moved, ) = load([str(log)], [str(base)])
+    assert moved.line == 4 and moved.identifier == identifier
+    # An unknown tool has the first three letters of its name as prefix
+    assert Finding("abcd", "r", Artifact("-", "-", None, None), None, "m",
+                   Position("-"), None).identifier.startswith("ABC-")
+
+
+def test_source_file(tmpdir):
+    base = Path(tmpdir)
+    (base / "a.c").write_text("", encoding="utf-8")
+    assert source_file(Artifact("a.c", "a.c", None, None),
+                       [str(base)]) == str(base / "a.c")
+    assert source_file(Artifact(str(base / "a.c"), "a.c", None, None),
+                       []) == str(base / "a.c")
+    assert source_file(Artifact("b.c", "b.c", None, None), [str(base)]) is None
+    assert source_file(Artifact("/u", "/u", "/u", None), [str(base)]) is None
+
+
+def test_identifier_collision(monkeypatch):
+    # Two findings with distinct identities and the same identifier are an
+    # error, since the report would merge them.
+    monkeypatch.setattr(Finding, "identifier", property(lambda self: "X-1"))
+    with pytest.raises(ValueError, match=" have the same identifier X-1$"):
+        _load("cppcheck/cppcheck.sarif")
+    first = Finding("t", "r", Artifact("a", "a", None, None), None, "m",
+                    Position("a"), None)
+    keys = {}
+    check_identifier(keys, first)
+    check_identifier(keys, first)
+    assert keys == {"X-1": first.key}
