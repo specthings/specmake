@@ -17,7 +17,9 @@ spec-info:
       file:
         description: |
           It shall be the path of the artifact of the finding.  A file is
-          relative to the source directories of the inspection check.  The path
+          relative to the source directories of the inspection check.  The
+          path of a relative URI with a base identifier without a URI starts
+          with the base identifier and a slash.  The path
           of a nested artifact is the path of its parent, a slash and the URI
           of the nested artifact.  A nested artifact has a parent index as
           specified by section 3.24.3 of the Static Analysis Results

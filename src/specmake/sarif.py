@@ -141,7 +141,30 @@ def relative_path(uri: str, bases: list[str]) -> str:
     return path
 
 
-def _artifact(artifacts: list[dict[str, Any]], index: int,
+_BaseIds = dict[str, Any]
+
+
+def _file_path(location: dict[str, Any], base_ids: _BaseIds,
+               bases: list[str]) -> str:
+    """
+    Return the path of the file of the artifact location.
+
+    A URI relative to a base ID with a URI is relative to that URI.  The path
+    of a relative URI with another base ID starts with the base ID, so equal
+    URIs of distinct bases have distinct paths.
+    """
+    uri = location["uri"]
+    base_id = location.get("uriBaseId")
+    if base_id is not None and not urllib.parse.urlparse(uri).scheme and \
+            not uri.startswith("/"):
+        base_uri = base_ids.get(base_id, {}).get("uri")
+        if base_uri is None:
+            return f"{base_id}/{urllib.parse.unquote(uri)}"
+        uri = urllib.parse.urljoin(base_uri, uri)
+    return relative_path(uri, bases)
+
+
+def _artifact(artifacts: list[dict[str, Any]], index: int, base_ids: _BaseIds,
               bases: list[str]) -> Artifact:
     artifact = artifacts[index]
     properties = artifact.get("properties", {})
@@ -151,25 +174,26 @@ def _artifact(artifacts: list[dict[str, Any]], index: int,
             document = f"{uid}: {properties['path']}"
             return Artifact(document, document, None, document)
         return Artifact(uid, uid, uid, None)
-    uri = artifact["location"]["uri"]
     if "parentIndex" in artifact:
-        parent = _artifact(artifacts, artifact["parentIndex"], bases)
-        name = urllib.parse.unquote(uri)
+        parent = _artifact(artifacts, artifact["parentIndex"], base_ids, bases)
+        name = urllib.parse.unquote(artifact["location"]["uri"])
         return Artifact(f"{parent.path}/{name}", f"{parent.display}({name})",
                         None, None)
-    path = relative_path(uri, bases)
+    path = _file_path(artifact["location"], base_ids, bases)
     return Artifact(path, path, None, None)
 
 
 def _location_artifact(result: dict[str, Any], artifacts: list[dict[str, Any]],
+                       base_ids: _BaseIds,
                        bases: list[str]) -> tuple[Artifact, dict[str, Any]]:
     locations = result.get("locations") or [{}]
     physical = locations[0].get("physicalLocation", {})
     location = physical.get("artifactLocation", {})
     if "index" in location:
-        return _artifact(artifacts, location["index"], bases), physical
-    uri = location.get("uri")
-    path = "-" if uri is None else relative_path(uri, bases)
+        return _artifact(artifacts, location["index"], base_ids,
+                         bases), physical
+    path = "-" if "uri" not in location else _file_path(
+        location, base_ids, bases)
     return Artifact(path, path, None, None), physical
 
 
@@ -215,10 +239,11 @@ def _position(artifact: Artifact, location: str, line: int | None,
     return Position(location, line, text, lines[:line - 1].count(text))
 
 
-def _finding(tool: str, result: dict[str, Any], artifacts: list[dict[str,
-                                                                     Any]],
+def _finding(tool: str, result: dict[str, Any], run: dict[str, Any],
              bases: list[str], sources: _Lines) -> Finding:
-    artifact, physical = _location_artifact(result, artifacts, bases)
+    artifact, physical = _location_artifact(result, run.get("artifacts", []),
+                                            run.get("originalUriBaseIds", {}),
+                                            bases)
     logical_locations = (result.get("locations")
                          or [{}])[0].get("logicalLocations") or [{}]
     qualified = logical_locations[0].get("fullyQualifiedName")
@@ -267,9 +292,8 @@ def load(paths: Iterable[str], bases: list[str]) -> Iterator[Finding]:
             sarif = json.load(src)
         for run in sarif["runs"]:
             tool = run["tool"]["driver"]["name"]
-            artifacts = run.get("artifacts", [])
             for result in run.get("results", []):
-                finding = _finding(tool, result, artifacts, bases, sources)
+                finding = _finding(tool, result, run, bases, sources)
                 check_identifier(keys, finding)
                 yield finding
 

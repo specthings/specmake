@@ -74,14 +74,45 @@ def test_binary_findings():
     member, anonymous, top = _load("nopinion/nopinion.sarif")
     # A nested artifact names its parent
     assert member.key == ("nopinion", "TN-0009/back-to-back-store",
-                          "librtemscpu.a/m.o", "f",
+                          "LIBDIR/librtemscpu.a/m.o", "f",
                           "TN-0009 back-to-back-store", None, 0)
-    assert member.location == "librtemscpu.a(m.o) f"
+    assert member.location == "LIBDIR/librtemscpu.a(m.o) f"
     assert anonymous.logical_location is None
-    assert anonymous.location == "librtemscpu.a(n.o)"
-    # A relative URI with a base id stays relative
-    assert top.artifact.path == "app.exe"
-    assert top.location == "app.exe g"
+    assert anonymous.location == "LIBDIR/librtemscpu.a(n.o)"
+    # A relative URI with a base ID without a URI starts with the base ID
+    assert top.artifact.path == "LIBDIR/app.exe"
+    assert top.location == "LIBDIR/app.exe g"
+
+
+def test_base_ids(tmpdir):
+    path = Path(tmpdir) / "bases.sarif"
+    path.write_text(
+        '{"runs":[{"tool":{"driver":{"name":"t"}},"originalUriBaseIds":{'
+        '"A":{},"B":{},"ROOT":{"uri":"file:///opt/rtems/"}},"artifacts":['
+        '{"location":{"uri":"lib.a","uriBaseId":"A"}},'
+        '{"location":{"uri":"m.o"},"parentIndex":0},'
+        '{"location":{"uri":"lib.a","uriBaseId":"B"}},'
+        '{"location":{"uri":"m.o"},"parentIndex":2}],"results":['
+        '{"ruleId":"r","message":{"text":"m"},"locations":[{'
+        '"physicalLocation":{"artifactLocation":{"index":1}}}]},'
+        '{"ruleId":"r","message":{"text":"m"},"locations":[{'
+        '"physicalLocation":{"artifactLocation":{"index":3}}}]},'
+        '{"ruleId":"r","message":{"text":"m"},"locations":[{'
+        '"physicalLocation":{"artifactLocation":{"uri":"cpukit/a.c",'
+        '"uriBaseId":"ROOT"}}}]},'
+        '{"ruleId":"r","message":{"text":"m"},"locations":[{'
+        '"physicalLocation":{"artifactLocation":{"uri":"/x/a.c",'
+        '"uriBaseId":"A"}}}]}]}]}',
+        encoding="utf-8")
+    first, second, rooted, absolute = load([str(path)], ["/opt/rtems"])
+    # Equal members of distinct bases are distinct findings
+    assert first.artifact.path == "A/lib.a/m.o"
+    assert second.artifact.path == "B/lib.a/m.o"
+    assert first.identifier != second.identifier
+    # A base ID with a URI resolves the relative URI
+    assert rooted.artifact.path == "cpukit/a.c"
+    # An absolute URI ignores the base ID
+    assert absolute.artifact.path == "/x/a.c"
 
 
 def test_finding_without_location(tmpdir):

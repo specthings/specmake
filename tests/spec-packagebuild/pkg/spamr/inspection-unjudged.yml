@@ -9,8 +9,8 @@ links:
   uid: nopinion
   scopes:
   - scope: finding
-    file: librtemscpu.a/n.o
-    identifier: NOP-SDZPNS
+    file: LIBDIR/librtemscpu.a/n.o
+    identifier: NOP-TLSLEN
     message: TN-0011 atomic-not-aligned possible
     rule: TN-0011/atomic-not-aligned
     tool: nopinion
