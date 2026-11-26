@@ -328,8 +328,8 @@ The covered analyses reported 4 findings. 1 finding has a disposition. Section
 
 .. _SpamrFindingsPkgSpamrGroupCppcheck:
 
-Cppcheck
---------
+Findings of Cppcheck
+--------------------
 
 .. _SpamrFindingCPCGQY46Q:
 
@@ -473,8 +473,8 @@ Disposition
 
 .. _SpamrFindingsPkgSpamrGroupClangAnalyzer:
 
-CLANG Static Analyzer
----------------------
+Findings of the Clang Static Analyzer
+-------------------------------------
 
 .. _SpamrFindingCSAETJGPL:
 
@@ -518,8 +518,8 @@ Disposition
 
 .. _SpamrFindingsPkgSpamrGroupNopinion:
 
-Errata checker
---------------
+Findings of the errata checker
+------------------------------
 
 .. _SpamrFindingNOPJTB64K:
 
@@ -583,8 +583,8 @@ Disposition
 
 .. _SpamrFindingsPkgSpamrGroupQualityScanner:
 
-Quality scanner
----------------
+Findings of the quality scanner
+-------------------------------
 
 .. _SpamrFindingQSC52256U:
 
@@ -771,8 +771,8 @@ Disposition
     assert mapper.substitute("${.:/annex-static-analysis:1}") == """\
 .. _SpamrFindingsPkgSpamrGroupCppcheck:
 
-Cppcheck
---------
+Findings of Cppcheck
+--------------------
 
 The covered analyses reported no finding."""
     assert mapper.substitute("${.:/static-analysis:1}") == """\

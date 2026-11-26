@@ -80,13 +80,17 @@ links:
   name: metrixplusplus
   role: input
   uid: ../spamr/metrixplusplus
-- role: spamr-inspection-group
+- analysis: Cppcheck
+  role: spamr-inspection-group
   uid: ../spamr/group-cppcheck
-- role: spamr-inspection-group
+- analysis: the Clang Static Analyzer
+  role: spamr-inspection-group
   uid: ../spamr/group-clang-analyzer
-- role: spamr-inspection-group
+- analysis: the errata checker
+  role: spamr-inspection-group
   uid: ../spamr/group-nopinion
-- role: spamr-inspection-group
+- analysis: the quality scanner
+  role: spamr-inspection-group
   uid: ../spamr/group-quality-scanner
 - hash: null
   name: source
