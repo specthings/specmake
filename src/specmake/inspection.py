@@ -64,6 +64,7 @@ class State(enum.Enum):
     UNDISPOSITIONED = "undispositioned"
     UNJUDGED = "unjudged"
     UNTRACKED = "untracked"
+    UNRELATED = "unrelated"
 
     def fails(self, strict: bool = False) -> bool:
         """
@@ -80,14 +81,16 @@ class State(enum.Enum):
 #: the evidence of a compliant or not applicable inspection which no longer
 #: exists.  An undispositioned finding defeats the purpose of a group.  An
 #: unjudged inspection records digests without a judgement.  An untracked
-#: inspection found a defect which no issue tracks.  All of them fail.
+#: inspection found a defect which no issue tracks.  An unrelated inspection
+#: is a member of a group which covers analyses, but it inspects no finding of
+#: them.  All of them fail.
 #:
 #: An absent scope is the inspected content of a non-compliant inspection, or
 #: a finding, which no longer exists.  This is the outcome of a corrected
 #: defect, so it does not fail.
 _FAILING_STATES = frozenset([
     State.STALE, State.LOST, State.UNDISPOSITIONED, State.UNJUDGED,
-    State.UNTRACKED
+    State.UNTRACKED, State.UNRELATED
 ])
 
 #: The release gate also fails a scope which is not baselined or not checked,
@@ -330,6 +333,26 @@ def _check_judgement(item: Item) -> Iterator[Result]:
                      "no issue tracks the non-compliance")
 
 
+def _check_relation(item: Item) -> Iterator[Result]:
+    """
+    Yield a result if the inspection is a member of a group which covers
+    analyses and inspects no finding of them.
+    """
+    covered = {
+        link.item.uid
+        for group in item.parents("inspection-member")
+        for link in group.links_to_parents("inspection-covered-analysis")
+    }
+    if covered and not any(scope["scope"] == "finding"
+                           for link in item.links_to_parents("inspected")
+                           if link.item.uid in covered
+                           for scope in link["scopes"]):
+        yield Result(
+            item.uid, State.UNRELATED, "findings",
+            "the inspection relates to no finding of the analyses which "
+            "its group covers")
+
+
 def _inspected_findings(group: Item) -> set[tuple[str, str]]:
     keys = set()
     for member in group.links_to_children("inspection-member"):
@@ -384,6 +407,7 @@ def check(items: Iterable[Item], state_of: StateOf,
         if is_superseded(item):
             continue
         results.extend(_check_judgement(item))
+        results.extend(_check_relation(item))
         for link in item.links_to_parents("inspected"):
             for scope in link["scopes"]:
                 results.append(_check_scope(item, scope, link.item, context))
@@ -610,6 +634,10 @@ def _history(item: Item) -> list[str]:
 def _add_inspection(content: TextContent, mapper: BuildItemMapper, item: Item,
                     states: dict[tuple[str, str], dict]) -> None:
     with content.section(f"Inspection {item.uid}"):
+        if (item.uid, "findings") in states:
+            with content.directive("error"):
+                content.wrap("This inspection relates to no finding of the "
+                             "analyses which its group covers.")
         inspectors = ", ".join(_get_inspectors(item))
         content.add_definition_item("Inspectors", inspectors or "not recorded")
         content.add_definition_item("Date", _optional(item["date"]))
