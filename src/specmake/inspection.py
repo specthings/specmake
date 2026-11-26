@@ -517,10 +517,10 @@ def renew(data: dict, uid: str, report: dict) -> dict:
         "copyrights": data["copyrights"],
         "date": None,
         "enabled-by": data["enabled-by"],
-        "findings": None,
         "links": links,
         "method": None,
         "pkg-type": "inspection",
+        "rationale": None,
         "type": "pkg",
         "verdict": None,
     }
@@ -617,7 +617,7 @@ def _add_inspection(content: TextContent, mapper: BuildItemMapper, item: Item,
             "Verdict",
             _optional(item["verdict"]).replace("-", " "))
         content.add_definition_item("Method", _optional(item["method"]))
-        content.add_definition_item("Findings", _optional(item["findings"]))
+        content.add_definition_item("Rationale", _optional(item["rationale"]))
         issues = [
             _issue(mapper, link) for link in item.links_to_parents("issue")
         ]

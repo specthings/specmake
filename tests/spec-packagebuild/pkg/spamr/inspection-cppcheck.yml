@@ -3,7 +3,6 @@ copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
 date: '2026-11-25'
 enabled-by: paf-spamr
-findings: null
 links:
 - role: inspected
   uid: cppcheck
@@ -23,5 +22,6 @@ links:
   uid: /person/p0001
 method: Inspection of the finding.
 pkg-type: inspection
+rationale: null
 type: pkg
 verdict: compliant
