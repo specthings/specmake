@@ -13,7 +13,14 @@ spec-description: null
 spec-example: null
 spec-info:
   dict:
-    attributes: {}
+    attributes:
+      analysis:
+        description: |
+          It shall be the name of the analysis which the group covers with
+          its article, for example *the Clang Static Analyzer*.  The annex of
+          the findings presents the findings of the group in a section with
+          the title *Findings of* followed by this name.
+        spec-type: str
     description: |
       It defines the SPAMR inspection group role of links.  The link target
       shall be an inspection group.  The software product assurance milestone

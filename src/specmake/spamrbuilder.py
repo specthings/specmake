@@ -857,8 +857,13 @@ Section :ref:`{group.findings_label}` lists each finding.""")
     def _get_annex_static_analysis(self, ctx: ItemGetValueContext) -> str:
         with self.section_content(ctx) as (content, _):
             assert isinstance(content, SphinxContent)
+            analyses = {
+                link.item.uid: link["analysis"]
+                for link in self.item.links_to_parents(
+                    "spamr-inspection-group")
+            }
             for group in self._groups:
-                with content.section(group.item["name"],
+                with content.section(f"Findings of {analyses[group.item.uid]}",
                                      label=group.findings_label):
                     if not group.findings:
                         content.add(
