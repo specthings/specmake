@@ -521,13 +521,13 @@ Disposition
 Errata checker
 --------------
 
-.. _SpamrFindingNOPMCMUJO:
+.. _SpamrFindingNOPJTB64K:
 
-NOP-MCMUJO: TN-0009/back-to-back-store in app.exe
+NOP-JTB64K: TN-0009/back-to-back-store in app.exe
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Location
-    :file:`app.exe` g
+    :file:`LIBDIR/app.exe` g
 
 Rule
     ``TN-0009/back-to-back-store``
@@ -541,13 +541,13 @@ Reports
 Disposition
     **open**
 
-.. _SpamrFindingNOPUDZIC6:
+.. _SpamrFindingNOP5U2JQX:
 
-NOP-UDZIC6: TN-0009/back-to-back-store in librtemscpu.a(m.o)
+NOP-5U2JQX: TN-0009/back-to-back-store in librtemscpu.a(m.o)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Location
-    :file:`librtemscpu.a(m.o)` f
+    :file:`LIBDIR/librtemscpu.a(m.o)` f
 
 Rule
     ``TN-0009/back-to-back-store``
@@ -561,13 +561,13 @@ Reports
 Disposition
     not applicable (/pkg/spamr/inspection-nopinion)
 
-.. _SpamrFindingNOPSDZPNS:
+.. _SpamrFindingNOPTLSLEN:
 
-NOP-SDZPNS: TN-0011/atomic-not-aligned in librtemscpu.a(n.o)
+NOP-TLSLEN: TN-0011/atomic-not-aligned in librtemscpu.a(n.o)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Location
-    :file:`librtemscpu.a(n.o)`
+    :file:`LIBDIR/librtemscpu.a(n.o)`
 
 Rule
     ``TN-0011/atomic-not-aligned``

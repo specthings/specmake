@@ -193,8 +193,8 @@ def test_inspection_finding_identity(caplog, tmpdir):
     check.build()
     report = check.json_load()
     states = _states(report)
-    nopinion = "finding NOP-UDZIC6 nopinion TN-0009/back-to-back-store " \
-        "librtemscpu.a/m.o f: TN-0009 back-to-back-store"
+    nopinion = "finding NOP-5U2JQX nopinion TN-0009/back-to-back-store " \
+        "LIBDIR/librtemscpu.a/m.o f: TN-0009 back-to-back-store"
     assert states[("/pkg/spamr/inspection-nopinion",
                    nopinion)] == "not baselined"
     # The digest covers the identity of the finding and not its count
@@ -202,8 +202,9 @@ def test_inspection_finding_identity(caplog, tmpdir):
         "scopes"][0]["digest"]
     assert digest == data_digest({
         "finding": [
-            "nopinion", "TN-0009/back-to-back-store", "librtemscpu.a/m.o", "f",
-            "TN-0009 back-to-back-store", None, 0
+            "nopinion", "TN-0009/back-to-back-store",
+            "LIBDIR/librtemscpu.a/m.o", "f", "TN-0009 back-to-back-store",
+            None, 0
         ]
     })
     item = package.director.item_cache["/pkg/spamr/inspection-nopinion"]

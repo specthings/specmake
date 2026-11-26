@@ -9,8 +9,8 @@ links:
   uid: nopinion
   scopes:
   - scope: finding
-    file: librtemscpu.a/m.o
-    identifier: NOP-UDZIC6
+    file: LIBDIR/librtemscpu.a/m.o
+    identifier: NOP-5U2JQX
     logical-location: f
     message: TN-0009 back-to-back-store
     rule: TN-0009/back-to-back-store
