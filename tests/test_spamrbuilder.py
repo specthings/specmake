@@ -389,7 +389,8 @@ Reports
     1 report
 
 Disposition
-    compliant (/pkg/spamr/inspection-cppcheck)
+    compliant (:ref:`/pkg/spamr/inspection-cppcheck
+    <InspectionPkgSpamrInspectionCppcheck>`)
 
 .. _SpamrFindingCPCBYHUSI:
 
@@ -559,7 +560,8 @@ Reports
     1 report
 
 Disposition
-    not applicable (/pkg/spamr/inspection-nopinion)
+    not applicable (:ref:`/pkg/spamr/inspection-nopinion
+    <InspectionPkgSpamrInspectionNopinion>`)
 
 .. _SpamrFindingNOPTLSLEN:
 
