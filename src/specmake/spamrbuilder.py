@@ -41,7 +41,8 @@ from .linkhub import LinkHub
 from .packagechanges import PackageChanges
 from .pkgitems import BuildItem, PackageBuildDirector
 from .rtems import RTEMSItemCache
-from .sarif import Finding, documents, load, relative_path
+from .sarif import (Finding, FindingKey, check_identifier, documents, load,
+                    relative_path, source_file)
 
 # The metrics of the quality model which the report checks, in the order of
 # the quality model table of the software product assurance plan.
@@ -219,6 +220,11 @@ def _breakable(content: SphinxContent, text: str) -> str:
     for char in "/-_.":
         text = text.replace(char, f"{char}\u200b")
     return text
+
+
+def _finding_order(pair: tuple[str, list[_Disposed]]) -> tuple[str, int, str]:
+    finding = pair[1][0].finding
+    return (finding.artifact.path, finding.line or 0, pair[0])
 
 
 def _bold_if(text: str, condition: bool) -> str:
@@ -821,6 +827,33 @@ Section :ref:`{group.findings_label}` lists each finding.""")
             file = content.path(artifact.display)
         return f"{file}{rest}"
 
+    def _code_excerpt(self, content: SphinxContent, finding: Finding) -> None:
+        """
+        Add the reported line of the finding and the two lines before and after
+        it, if the finding has a line in a file of the source directories.
+        """
+        path = source_file(finding.artifact, self._source_directories)
+        if path is None or finding.line is None:
+            return
+        with open(path, "r", encoding="utf-8", errors="replace") as src:
+            lines = src.read().splitlines()
+        if not 0 < finding.line <= len(lines):
+            return
+        first = max(1, finding.line - 2)
+        code = lines[first - 1:finding.line + 2]
+        language = "c" if os.path.splitext(path)[1] in (".c", ".h",
+                                                        ".inc") else "none"
+        content.add("Code")
+        with content.indent(), content.latex_font_size("footnotesize"):
+            with content.directive("code-block",
+                                   value=language,
+                                   options=[
+                                       ":linenos:", f":lineno-start: {first}",
+                                       ":emphasize-lines: "
+                                       f"{finding.line - first + 1}"
+                                   ]):
+                content.append(code)
+
     def _get_annex_static_analysis(self, ctx: ItemGetValueContext) -> str:
         with self.section_content(ctx) as (content, _):
             assert isinstance(content, SphinxContent)
@@ -830,16 +863,34 @@ Section :ref:`{group.findings_label}` lists each finding.""")
                     if not group.findings:
                         content.add(
                             "The covered analyses reported no finding.")
+                    reports: dict[str, list[_Disposed]] = {}
+                    keys: dict[str, FindingKey] = {}
                     for disposed in group.findings:
-                        finding = disposed.finding
-                        rule = content.code(finding.rule)
-                        message = content.escape(finding.message)
-                        disposition = _disposition(content,
-                                                   disposed.disposition)
-                        content.add(self._location(content, finding))
-                        with content.indent():
-                            content.add([
-                                f":Rule: {rule}", f":Message: {message}",
-                                f":Disposition: {disposition}"
-                            ])
+                        check_identifier(keys, disposed.finding)
+                        reports.setdefault(disposed.finding.identifier,
+                                           []).append(disposed)
+                    for identifier, disposed_list in sorted(
+                            reports.items(), key=_finding_order):
+                        self._add_finding(content, identifier, disposed_list)
             return "\n".join(content)
+
+    def _add_finding(self, content: SphinxContent, identifier: str,
+                     disposed_list: list[_Disposed]) -> None:
+        disposed = disposed_list[0]
+        finding = disposed.finding
+        artifact = finding.artifact
+        title = f"{identifier}: {finding.rule}"
+        if not (artifact.item or artifact.document or artifact.path == "-"):
+            title = f"{title} in {os.path.basename(artifact.display)}"
+        with content.section(
+                title, label=f"SpamrFinding{identifier.replace('-', '')}"):
+            content.add_definition_item("Location",
+                                        self._location(content, finding))
+            content.add_definition_item("Rule", content.code(finding.rule))
+            content.add_definition_item("Message",
+                                        content.escape(finding.message))
+            self._code_excerpt(content, finding)
+            content.add_definition_item(
+                "Reports", _count(len(disposed_list), "report", "reports"))
+            content.add_definition_item(
+                "Disposition", _disposition(content, disposed.disposition))
