@@ -3,7 +3,6 @@ copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
 date: null
 enabled-by: paf-spamr
-findings: null
 links:
 - role: inspected
   uid: nopinion
@@ -19,5 +18,6 @@ links:
   uid: group-nopinion
 method: null
 pkg-type: inspection
+rationale: null
 type: pkg
 verdict: null

@@ -3,7 +3,6 @@ copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
 enabled-by: inspection
 date: '2021-11-26'
-findings: null
 links:
 - role: inspection-member
   uid: group-history
@@ -14,5 +13,6 @@ links:
 method: |
   Review without scopes.
 pkg-type: inspection
+rationale: null
 type: pkg
 verdict: compliant

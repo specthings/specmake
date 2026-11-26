@@ -3,7 +3,6 @@ copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
 enabled-by: inspection
 date: '2026-11-24'
-findings: The file has a defect.
 links:
 - role: inspected
   uid: ../source/test-files
@@ -22,5 +21,6 @@ links:
   uid: /person/p0001
 method: Inspection of the artefact.
 pkg-type: inspection
+rationale: The file has a defect.
 type: pkg
 verdict: non-compliant

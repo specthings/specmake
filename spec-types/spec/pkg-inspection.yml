@@ -19,14 +19,15 @@ spec-info:
           If the value is present, then it shall be the date of the inspection,
           otherwise the inspection is not judged.
         spec-type: pkg-inspection-date
-      findings:
-        description: |
-          If the value is present, then it shall state what the inspectors found.
-        spec-type: optional-str
       method:
         description: |
           If the value is present, then it shall state what the inspectors did,
           otherwise the inspection is not judged.
+        spec-type: optional-str
+      rationale:
+        description: |
+          If the value is present, then it shall state why the inspectors
+          reached the verdict.
         spec-type: optional-str
       verdict:
         description: |

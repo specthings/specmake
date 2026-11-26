@@ -419,7 +419,7 @@ def test_renew():
     assert new["date"] is None
     assert new["verdict"] is None
     assert new["method"] is None
-    assert new["findings"] is None
+    assert new["rationale"] is None
     assert "inspectors" not in new
     assert new["pkg-type"] == "inspection"
     assert new["links"] == [{
