@@ -29,7 +29,10 @@
 from pathlib import Path
 import re
 
+from pathlib import Path
+
 import pytest
+from specitems import SphinxContent
 
 from specmake import SpamrBuilder
 import specmake.spamrbuilder
@@ -328,100 +331,340 @@ The covered analyses reported 4 findings. 1 finding has a disposition. Section
 Cppcheck
 --------
 
-:file:`cpukit/a.c`:3
-    :Rule: ``variableScope``
-    :Message: The scope of the variable 'x' can be reduced.
-    :Disposition: compliant (/pkg/spamr/inspection-cppcheck)
+.. _SpamrFindingCPCGQY46Q:
 
-:file:`/elsewhere/c.c`:7
-    :Rule: ``syntaxError``
-    :Message: syntax error
-    :Disposition: **open**
+CPC-GQY46Q: checkersReport
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:file:`cpukit/b.c`:9
-    :Rule: ``variableScope``
-    :Message: The scope of the variable 'y' can be reduced.
-    :Disposition: **open**
+Location
+    \-
 
-\-
-    :Rule: ``checkersReport``
-    :Message: Active checkers: 160/592
-    :Disposition: **open**
+Rule
+    ``checkersReport``
 
-:file:`cpukit/b.c`
-    :Rule: ``missingIncludeSystem``
-    :Message: Include file: <stdio.h> not found.
-    :Disposition: **open**
+Message
+    Active checkers: 160/592
 
-:file:`cpukit/driver#1.c`:1
-    :Rule: ``unusedFunction``
-    :Message: The function 'f' is never used.
-    :Disposition: **open**
+Reports
+    1 report
 
-:file:`cpukit/dev ice.c`:2
-    :Rule: ``unusedFunction``
-    :Message: The function 'g' is never used.
-    :Disposition: **open**
+Disposition
+    **open**
+
+.. _SpamrFindingCPCAW4UEL:
+
+CPC-AW4UEL: syntaxError in c.c
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Location
+    :file:`/elsewhere/c.c`:7
+
+Rule
+    ``syntaxError``
+
+Message
+    syntax error
+
+Reports
+    1 report
+
+Disposition
+    **open**
+
+.. _SpamrFindingCPCOVRINA:
+
+CPC-OVRINA: variableScope in a.c
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Location
+    :file:`cpukit/a.c`:3
+
+Rule
+    ``variableScope``
+
+Message
+    The scope of the variable 'x' can be reduced.
+
+Reports
+    1 report
+
+Disposition
+    compliant (/pkg/spamr/inspection-cppcheck)
+
+.. _SpamrFindingCPCBYHUSI:
+
+CPC-BYHUSI: missingIncludeSystem in b.c
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Location
+    :file:`cpukit/b.c`
+
+Rule
+    ``missingIncludeSystem``
+
+Message
+    Include file: <stdio.h> not found.
+
+Reports
+    1 report
+
+Disposition
+    **open**
+
+.. _SpamrFindingCPC7VCNIL:
+
+CPC-7VCNIL: variableScope in b.c
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Location
+    :file:`cpukit/b.c`:9
+
+Rule
+    ``variableScope``
+
+Message
+    The scope of the variable 'y' can be reduced.
+
+Reports
+    1 report
+
+Disposition
+    **open**
+
+.. _SpamrFindingCPCGZXWYB:
+
+CPC-GZXWYB: unusedFunction in dev ice.c
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Location
+    :file:`cpukit/dev ice.c`:2
+
+Rule
+    ``unusedFunction``
+
+Message
+    The function 'g' is never used.
+
+Reports
+    1 report
+
+Disposition
+    **open**
+
+.. _SpamrFindingCPCA3GPTL:
+
+CPC-A3GPTL: unusedFunction in driver#1.c
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Location
+    :file:`cpukit/driver#1.c`:1
+
+Rule
+    ``unusedFunction``
+
+Message
+    The function 'f' is never used.
+
+Reports
+    1 report
+
+Disposition
+    **open**
 
 .. _SpamrFindingsPkgSpamrGroupClangAnalyzer:
 
 CLANG Static Analyzer
 ---------------------
 
-:file:`cpukit/dev/iovprintf.c`:117
-    :Rule: ``deadcode.DeadStores``
-    :Message: Value stored to 'num' is never read
-    :Disposition: **open**
+.. _SpamrFindingCSAETJGPL:
 
-:file:`cpukit/score/src/heap.c`:42
-    :Rule: ``core.NullDereference``
-    :Message: Dereference of null pointer
-    :Disposition: **open**
+CSA-ETJGPL: deadcode.DeadStores in iovprintf.c
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Location
+    :file:`cpukit/dev/iovprintf.c`:117
+
+Rule
+    ``deadcode.DeadStores``
+
+Message
+    Value stored to 'num' is never read
+
+Reports
+    1 report
+
+Disposition
+    **open**
+
+.. _SpamrFindingCSATXAZTL:
+
+CSA-TXAZTL: core.NullDereference in heap.c
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Location
+    :file:`cpukit/score/src/heap.c`:42
+
+Rule
+    ``core.NullDereference``
+
+Message
+    Dereference of null pointer
+
+Reports
+    1 report
+
+Disposition
+    **open**
 
 .. _SpamrFindingsPkgSpamrGroupNopinion:
 
 Errata checker
 --------------
 
-:file:`librtemscpu.a(m.o)` f
-    :Rule: ``TN-0009/back-to-back-store``
-    :Message: TN-0009 back-to-back-store
-    :Disposition: not applicable (/pkg/spamr/inspection-nopinion)
+.. _SpamrFindingNOPMCMUJO:
 
-:file:`librtemscpu.a(n.o)`
-    :Rule: ``TN-0011/atomic-not-aligned``
-    :Message: TN-0011 atomic-not-aligned possible
-    :Disposition: **open**
+NOP-MCMUJO: TN-0009/back-to-back-store in app.exe
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:file:`app.exe` g
-    :Rule: ``TN-0009/back-to-back-store``
-    :Message: TN-0009 back-to-back-store
-    :Disposition: **open**
+Location
+    :file:`app.exe` g
+
+Rule
+    ``TN-0009/back-to-back-store``
+
+Message
+    TN-0009 back-to-back-store
+
+Reports
+    1 report
+
+Disposition
+    **open**
+
+.. _SpamrFindingNOPUDZIC6:
+
+NOP-UDZIC6: TN-0009/back-to-back-store in librtemscpu.a(m.o)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Location
+    :file:`librtemscpu.a(m.o)` f
+
+Rule
+    ``TN-0009/back-to-back-store``
+
+Message
+    TN-0009 back-to-back-store
+
+Reports
+    1 report
+
+Disposition
+    not applicable (/pkg/spamr/inspection-nopinion)
+
+.. _SpamrFindingNOPSDZPNS:
+
+NOP-SDZPNS: TN-0011/atomic-not-aligned in librtemscpu.a(n.o)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Location
+    :file:`librtemscpu.a(n.o)`
+
+Rule
+    ``TN-0011/atomic-not-aligned``
+
+Message
+    TN-0011 atomic-not-aligned possible
+
+Reports
+    1 report
+
+Disposition
+    **open**
 
 .. _SpamrFindingsPkgSpamrGroupQualityScanner:
 
 Quality scanner
 ---------------
 
-/rtems/req/action:/text
-    :Rule: ``TBD``
-    :Message: TBD found
-    :Disposition: **open**
+.. _SpamrFindingQSC52256U:
 
-/pkg/component:/name
-    :Rule: ``TBC``
-    :Message: TBC found
-    :Disposition: **open**
+QSC-52256U: TBC
+^^^^^^^^^^^^^^^
 
-/pkg/source/doc-a: source/a.rst:5
-    :Rule: ``TBD``
-    :Message: TBD found
-    :Disposition: **open**
+Location
+    /pkg/component:/name
 
-/pkg/source/doc-a: source/a.rst:9
-    :Rule: ``TBC``
-    :Message: TBC found
-    :Disposition: suppressed: The glossary term \*TBC\* names the marker.
+Rule
+    ``TBC``
+
+Message
+    TBC found
+
+Reports
+    1 report
+
+Disposition
+    **open**
+
+.. _SpamrFindingQSCO5IZWM:
+
+QSC-O5IZWM: TBD
+^^^^^^^^^^^^^^^
+
+Location
+    /pkg/source/doc-a: source/a.rst:5
+
+Rule
+    ``TBD``
+
+Message
+    TBD found
+
+Reports
+    1 report
+
+Disposition
+    **open**
+
+.. _SpamrFindingQSC3B57TE:
+
+QSC-3B57TE: TBC
+^^^^^^^^^^^^^^^
+
+Location
+    /pkg/source/doc-a: source/a.rst:9
+
+Rule
+    ``TBC``
+
+Message
+    TBC found
+
+Reports
+    1 report
+
+Disposition
+    suppressed: The glossary term \*TBC\* names the marker.
+
+.. _SpamrFindingQSCN6LNMA:
+
+QSC-N6LNMA: TBD
+^^^^^^^^^^^^^^^
+
+Location
+    /rtems/req/action:/text
+
+Rule
+    ``TBD``
+
+Message
+    TBD found
+
+Reports
+    1 report
+
+Disposition
+    **open**
 
 :file:`cpukit/a.c`
 
@@ -577,6 +820,46 @@ validation."""
     assert re.search(
         r"\| Static analysis disposition +\| 100\.0 % \(0 of 0 "
         r"findings\) +\|", overview)
+
+    # The code excerpt shows the reported line and two lines around it
+    sources = Path(tmpdir) / "excerpt"
+    sources.mkdir()
+    (sources / "a.c").write_text("    int a;\nint b;\nint c;\nint d;\n",
+                                 encoding="utf-8")
+    (sources / "a.S").write_text("nop\n", encoding="utf-8")
+    spamr_builder.__dict__["_source_directories"] = [str(sources)]
+
+    def _excerpt(path: str, line: int | None) -> str:
+        content = spamr_builder.mapper.create_content()
+        assert isinstance(content, SphinxContent)
+        finding = Finding("clang", "r", Artifact(path, path, None, None), None,
+                          "m", Position(path, line), None)
+        spamr_builder._code_excerpt(content, finding)
+        return "\n".join(content).replace("\u200b", "")
+
+    assert _excerpt("a.c", 2) == """Code
+    .. raw:: latex
+
+        \\begin{footnotesize}
+
+    .. code-block:: c
+        :linenos:
+        :lineno-start: 1
+        :emphasize-lines: 2
+
+            int a;
+        int b;
+        int c;
+        int d;
+
+    .. raw:: latex
+
+        \\end{footnotesize}"""
+    assert ":emphasize-lines: 1" in _excerpt("a.S", 1)
+    assert "code-block:: none" in _excerpt("a.S", 1)
+    assert _excerpt("a.c", 9) == ""
+    assert _excerpt("a.c", None) == ""
+    assert _excerpt("b.c", 1) == ""
 
     # Check that a metric needs a metric source
     with pytest.raises(ValueError,
