@@ -195,13 +195,7 @@
             "text": "TBC found"
           },
           "ruleId": "TBC",
-          "ruleIndex": 1,
-          "suppressions": [
-            {
-              "justification": "The glossary term *TBC* names the marker.",
-              "kind": "external"
-            }
-          ]
+          "ruleIndex": 1
         }
       ],
       "tool": {

@@ -97,7 +97,6 @@ class Finding:
     logical_location: str | None
     message: str
     position: Position
-    suppression: str | None
 
     @property
     def location(self) -> str:
@@ -257,13 +256,9 @@ def _finding(tool: str, result: dict[str, Any], run: dict[str, Any],
         location = f"{artifact.display} {name}"
     else:
         location = artifact.display
-    suppressions = result.get("suppressions") or []
-    suppression = suppressions[0].get("justification",
-                                      "") if suppressions else None
     return Finding(tool, result["ruleId"], artifact, qualified or name,
                    result["message"]["text"],
-                   _position(artifact, location, line, bases,
-                             sources), suppression)
+                   _position(artifact, location, line, bases, sources))
 
 
 def load(paths: Iterable[str], bases: list[str]) -> Iterator[Finding]:

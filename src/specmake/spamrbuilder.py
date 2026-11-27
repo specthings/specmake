@@ -151,11 +151,13 @@ def _load_code_metrics(path: str, bases: list[str]) -> _CodeMetrics:
 
 @dataclass(frozen=True)
 class _Disposed:
-    """ This class represents a finding of an analysis and its disposition. """
+    """
+    This class represents a finding of an analysis and the judged inspection
+    which disposes it, if one exists.
+    """
 
     finding: Finding
-    disposition: str | None
-    inspection: Item | None = None
+    inspection: Item | None
 
 
 @dataclass(frozen=True)
@@ -180,7 +182,7 @@ class _Group:
         """ Return the findings without a disposition. """
         return [
             disposed.finding for disposed in self.findings
-            if disposed.disposition is None
+            if disposed.inspection is None
         ]
 
 
@@ -203,11 +205,9 @@ def _inspections(group: Item) -> dict[tuple[str, str], Item]:
 
 
 def _disposition(content: TextContent, disposed: _Disposed) -> str:
-    if disposed.disposition is None:
-        return "**open**"
-    if disposed.inspection is None:
-        return content.escape(disposed.disposition)
     inspection = disposed.inspection
+    if inspection is None:
+        return "**open**"
     verdict = content.escape(inspection["verdict"].replace("-", " "))
     reference = content.reference(inspection_label(inspection), inspection.uid)
     return f"{verdict} ({reference})"
@@ -333,8 +333,7 @@ class SpamrBuilder(DocumentBuilder):
         Return the findings of the analyses which the group covers, each with
         its disposition.
 
-        A judged inspection of the group or a suppression of the producer is
-        the disposition of a finding.
+        A judged inspection of the group is the disposition of a finding.
         """
         inspections = _inspections(group)
         findings: list[_Disposed] = []
@@ -344,16 +343,10 @@ class SpamrBuilder(DocumentBuilder):
             paths = _files(self.director[analysis.uid], ".sarif")
             all_paths.extend(paths)
             for finding in load(paths, self._source_directories):
-                inspection = inspections.get(
-                    (analysis.uid, finding.identifier))
-                if inspection is not None:
-                    verdict = inspection["verdict"].replace("-", " ")
-                    disposition: str | None = f"{verdict} ({inspection.uid})"
-                elif finding.suppression is not None:
-                    disposition = f"suppressed: {finding.suppression}"
-                else:
-                    disposition = None
-                findings.append(_Disposed(finding, disposition, inspection))
+                findings.append(
+                    _Disposed(
+                        finding,
+                        inspections.get((analysis.uid, finding.identifier))))
         return _Group(group, findings, all_paths)
 
     @functools.cached_property

@@ -397,15 +397,14 @@ def _inspected_findings(group: Item) -> set[tuple[str, str]]:
 
 def _check_group(group: Item, context: _Context) -> Iterator[Result]:
     """
-    Yield a result for each finding of a covered analysis which neither a
-    member inspects nor its producer suppresses.
+    Yield a result for each finding of a covered analysis which no member
+    inspects.
     """
     inspected = _inspected_findings(group)
     for link in group.links_to_parents("inspection-covered-analysis"):
         open_findings = {
             finding.identifier: finding
             for finding in context.findings(link.item, group)
-            if finding.suppression is None
         }
         for finding in sorted(
             (finding for identifier, finding in open_findings.items()

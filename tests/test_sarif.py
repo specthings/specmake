@@ -47,7 +47,6 @@ def test_source_findings():
                          "cpukit/dev/iovprintf.c", None,
                          "Value stored to 'num' is never read", None, 0)
     assert clang.location == "cpukit/dev/iovprintf.c:117"
-    assert clang.suppression is None
     assert clang.artifact.item is None and clang.artifact.document is None
     # A path outside of the base directories stays absolute
     cppcheck = [finding for finding in findings if finding.tool == "Cppcheck"]
@@ -65,9 +64,6 @@ def test_scanner_findings():
     documents = [finding for finding in findings if finding.artifact.document]
     assert documents[0].artifact.path == "/pkg/source/doc-a: source/a.rst"
     assert documents[0].location.startswith("/pkg/source/doc-a: source/a.rst:")
-    suppressed = [finding for finding in findings if finding.suppression]
-    assert suppressed[0].suppression == \
-        "The glossary term *TBC* names the marker."
 
 
 def test_binary_findings():
@@ -120,14 +116,11 @@ def test_finding_without_location(tmpdir):
     path.write_text(
         '{"runs":[{"tool":{"driver":{"name":"t"}},"results":[{"ruleId":"r",'
         '"message":{"text":"m"}},{"ruleId":"s","message":{"text":"n"},'
-        '"locations":[{"physicalLocation":{"artifactLocation":{}}}],'
-        '"suppressions":[{"kind":"inSource"}]}]}]}',
+        '"locations":[{"physicalLocation":{"artifactLocation":{}}}]}]}]}',
         encoding="utf-8")
     first, second = load([str(path)], [])
     assert first.artifact.path == "-" and first.location == "-"
     assert second.artifact.path == "-"
-    # A suppression without a justification has an empty justification
-    assert second.suppression == ""
 
 
 def test_relative_path():
@@ -179,7 +172,7 @@ def test_identity(tmpdir):
     assert moved.line == 4 and moved.identifier == identifier
     # An unknown tool has the first three letters of its name as prefix
     assert Finding("abcd", "r", Artifact("-", "-", None, None), None, "m",
-                   Position("-"), None).identifier.startswith("ABC-")
+                   Position("-")).identifier.startswith("ABC-")
 
 
 def test_source_file(tmpdir):
@@ -200,7 +193,7 @@ def test_identifier_collision(monkeypatch):
     with pytest.raises(ValueError, match=" have the same identifier X-1$"):
         _load("cppcheck/cppcheck.sarif")
     first = Finding("t", "r", Artifact("a", "a", None, None), None, "m",
-                    Position("a"), None)
+                    Position("a"))
     keys = {}
     check_identifier(keys, first)
     check_identifier(keys, first)
