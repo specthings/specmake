@@ -917,6 +917,21 @@ class SphinxBuilder(DirectoryState):
                          empty=kwargs.get("empty"))
         return content.join()
 
+    def format_citation_group_member(self, member: Link) -> str:
+        """
+        Format a link to the section of the citation group member with the
+        citation of its document.
+        """
+        mapper = self.mapper
+        document = member.item
+        title = self.substitute(_normal_title(document), document)
+        path = mapper.substitute(document["directory"], document)
+        path = f"{path}{member.data.get('path', '')}"
+        link = mapper.format_link(f"{title}, {member['name']}",
+                                  f"{path}#{member['label'].lower()}")
+        cite = self.substitute(f"${{{document.uid}:/cite}}")
+        return f"{link} {cite}"
+
     def _get_inspection_group(self, ctx: ItemGetValueContext) -> str:
         with self.section_content(ctx) as (content, uid):
             assert uid

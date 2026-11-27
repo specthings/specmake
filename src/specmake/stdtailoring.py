@@ -32,8 +32,7 @@ from typing import Any, Iterator
 from specitems import (Item, ItemGetValueContext, Link, TextContent,
                        TextMapper, get_citation_group_members, list_terms)
 
-from .sphinxbuilder import (SphinxBuilder, DocumentBuilderValueProvider,
-                            _normal_title)
+from .sphinxbuilder import SphinxBuilder, DocumentBuilderValueProvider
 from .pkgitems import BuildItem, BuildItemFactory, export_data
 
 
@@ -122,18 +121,6 @@ def _trace_members(statement: Item) -> dict[str, list[Link]]:
     return by_kind
 
 
-def _format_member(builder: SphinxBuilder, member: Link) -> str:
-    mapper = builder.mapper
-    document = member.item
-    title = builder.substitute(_normal_title(document), document)
-    path = mapper.substitute(document["directory"], document)
-    path = f"{path}{member.data.get('path', '')}"
-    link = mapper.format_link(f"{title}, {member['name']}",
-                              f"{path}#{member['label'].lower()}")
-    cite = builder.substitute(f"${{{document.uid}:/cite}}")
-    return f"{link} {cite}"
-
-
 def _check_statement(statement: Item, clause: Item, status: str,
                      by_kind: dict[str, list[Link]]) -> None:
     # The tailoring of a clause of an annex is always traced
@@ -161,8 +148,10 @@ def _add_trace(content: TextContent, builder: SphinxBuilder,
         if members:
             content.add_definition_item(
                 kind.capitalize(),
-                list_terms([_format_member(builder, link)
-                            for link in members]))
+                list_terms([
+                    builder.format_citation_group_member(link)
+                    for link in members
+                ]))
 
 
 def _add_topic(content: TextContent, builder: SphinxBuilder, clause: Item,
