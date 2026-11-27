@@ -27,7 +27,7 @@
 import importlib.metadata
 import os
 import re
-from typing import Any, Iterator, Optional
+from typing import Any, Iterator
 import urllib.parse
 
 from specitems import Item
@@ -63,35 +63,6 @@ _GENERATED_ATTRIBUTES = frozenset(("build-description", ))
 # the directory of the document input, which the UID of the input names.
 _SPEC_BASE = "SPEC"
 
-# A suppression key is the UID of the item or document input, the attribute
-# path for an item, the file path relative to the document input, and the line
-# number in the document file.
-_Key = tuple[str, Optional[str], Optional[str], Optional[int]]
-
-
-def _key_order(key: _Key) -> tuple[str, str, str, int]:
-    return (key[0], key[1] or "", key[2] or "", key[3] or 0)
-
-
-def _describe(key: _Key) -> str:
-    if key[1] is None:
-        return (f"line {key[3]} of the document file '{key[2]}' of "
-                f"'{key[0]}'")
-    return f"attribute '{key[1]}' of the item '{key[0]}'"
-
-
-def _suppressions(uid: str, entries: list[dict[str, Any]]) -> dict[_Key, str]:
-    suppressions: dict[_Key, str] = {}
-    for entry in entries:
-        key = (entry["uid"], entry["attribute"], entry["path"], entry["line"])
-        if key in suppressions:
-            raise ValueError(
-                f"{uid}: more than one suppression for {_describe(key)}; "
-                "remove all but one of these entries in the attribute "
-                "'suppressions' of this item or of its template")
-        suppressions[key] = entry["justification"]
-    return suppressions
-
 
 def _attribute_values(value: Any, path: str) -> Iterator[tuple[str, str]]:
     if isinstance(value, str):
@@ -106,9 +77,7 @@ def _attribute_values(value: Any, path: str) -> Iterator[tuple[str, str]]:
 
 class _Results:
 
-    def __init__(self, suppressions: dict[_Key, str]) -> None:
-        self.suppressions = suppressions
-        self.used: set[_Key] = set()
+    def __init__(self) -> None:
         self.artifacts: list[dict[str, Any]] = []
         self.results: list[dict[str, Any]] = []
         self.base_ids: dict[str, Any] = {
@@ -142,11 +111,7 @@ class _Results:
             }
         }
 
-    def unused(self) -> list[_Key]:
-        """ Return the sorted keys of the unused suppressions. """
-        return sorted(set(self.suppressions) - self.used, key=_key_order)
-
-    def add(self, word: str, location: dict[str, Any], key: _Key) -> None:
+    def add(self, word: str, location: dict[str, Any]) -> None:
         """ Add the result of an occurrence at the location. """
         result: dict[str, Any] = {
             "level": "note",
@@ -157,13 +122,6 @@ class _Results:
             "ruleId": word,
             "ruleIndex": _RULE_INDEX[word]
         }
-        justification = self.suppressions.get(key, None)
-        if justification is not None:
-            self.used.add(key)
-            result["suppressions"] = [{
-                "justification": justification,
-                "kind": "external"
-            }]
         self.results.append(result)
 
     def scan_item(self, item: Item) -> None:
@@ -200,7 +158,7 @@ class _Results:
                                 "line-in-value": line_number,
                                 "text": line
                             }
-                        }, (item.uid, attribute, None, None))
+                        })
 
     def scan_document_file(self, uid: str, path: str,
                            relative_path: str) -> None:
@@ -239,7 +197,26 @@ class _Results:
                                     "startLine": line_number
                                 }
                             }
-                        }, (uid, None, relative_path, line_number))
+                        })
+
+
+def _ignored(scanner: Item) -> set[str]:
+    """
+    Return the UIDs of the items which the scanner does not scan.
+
+    The scanner does not scan itself, the items which it ignores, and the
+    members of an ignored inspection group.
+    """
+    ignored = {scanner.uid}
+    pending = list(scanner.parents("quality-scanner-ignore"))
+    while pending:
+        item = pending.pop()
+        if item.uid not in ignored:
+            ignored.add(item.uid)
+            pending.extend(
+                link.item
+                for link in item.links_to_children("inspection-member"))
+    return ignored
 
 
 class QualityScanner(DirectoryState):
@@ -251,9 +228,10 @@ class QualityScanner(DirectoryState):
         return True
 
     def run(self) -> None:
-        results = _Results(_suppressions(self.uid, self["suppressions"]))
+        results = _Results()
+        ignored = _ignored(self.item)
         for item in sorted(self.item.cache.values()):
-            if item.uid != self.uid and item.enabled:
+            if item.uid not in ignored and item.enabled:
                 results.scan_item(item)
         for _, document in self.input_links("document"):
             assert isinstance(document, DirectoryState)
@@ -263,14 +241,6 @@ class QualityScanner(DirectoryState):
                     results.scan_document_file(
                         document.uid, path,
                         os.path.relpath(path, document.directory))
-        unused = results.unused()
-        if unused:
-            places = "".join(f"\n- {_describe(key)}" for key in unused)
-            raise ValueError(
-                f"{self.uid}: each of these suppressions matches no TBD or "
-                "TBC; update the line number or remove the entry in the "
-                "attribute 'suppressions' of this item or of its template:"
-                f"{places}")
         self.json_dump({
             "$schema":
             _SCHEMA,

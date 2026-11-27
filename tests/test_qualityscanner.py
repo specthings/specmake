@@ -28,8 +28,6 @@ import importlib.metadata
 import json
 from pathlib import Path
 
-import pytest
-
 from .util import create_package, get_and_clear_log
 
 
@@ -38,9 +36,7 @@ def _summary(run: dict, result: dict) -> tuple:
     artifact_location = location["physicalLocation"]["artifactLocation"]
     artifact = run["artifacts"][artifact_location["index"]]
     assert artifact["location"]["uri"] == artifact_location["uri"]
-    justifications = [
-        entry["justification"] for entry in result.get("suppressions", [])
-    ]
+    assert "suppressions" not in result
     if artifact["properties"]["kind"] == "item":
         properties = location["properties"]
         assert location["logicalLocations"] == [{
@@ -50,8 +46,7 @@ def _summary(run: dict, result: dict) -> tuple:
         }]
         return (artifact["properties"]["uid"], properties["attribute"],
                 result["ruleId"], properties["line-in-value"],
-                properties["column-in-value"], properties["text"],
-                justifications)
+                properties["column-in-value"], properties["text"])
     region = location["physicalLocation"]["region"]
     assert region["endColumn"] == region["startColumn"] + 3
     assert region["snippet"]["text"] == result["ruleId"]
@@ -61,7 +56,7 @@ def _summary(run: dict, result: dict) -> tuple:
     assert context["endColumn"] == len(context["snippet"]["text"]) + 1
     return (artifact["properties"]["uid"], artifact["properties"]["path"],
             result["ruleId"], region["startLine"], region["startColumn"],
-            context["snippet"]["text"], justifications)
+            context["snippet"]["text"])
 
 
 def test_qualityscanner(caplog, tmpdir):
@@ -126,7 +121,11 @@ def test_qualityscanner(caplog, tmpdir):
     assert sorted(run["originalUriBaseIds"]) == [
         "/pkg/source/quality-scanner-document", "SPEC"
     ]
+    # The scanner ignores itself, the linked group and its members.  An item
+    # which two links reach is ignored once.
     assert "/pkg/deployment/quality-scanner" not in item_uids
+    assert "/pkg/quality-scanner/ignored-group" not in item_uids
+    assert "/pkg/quality-scanner/ignored-member" not in item_uids
     assert len(item_uids) == len(set(item_uids))
 
     for result in run["results"]:
@@ -134,69 +133,22 @@ def test_qualityscanner(caplog, tmpdir):
         assert result["message"]["text"] == f"{result['ruleId']} found"
         assert driver["rules"][result["ruleIndex"]]["id"] == result["ruleId"]
     assert [_summary(run, result) for result in run["results"]] == [
-        ("/glossary/tbd", "/term", "TBD", 1, 1, "TBD",
-         ["The glossary defines the term."]),
+        ("/glossary/tbd", "/term", "TBD", 1, 1, "TBD"),
         ("/pkg/source/quality-scanner-document", "source/chapter.rst", "TBD",
-         4, 14, "The value is TBD and TBC, but not TBDX, XTBC or tbd.", []),
+         4, 14, "The value is TBD and TBC, but not TBDX, XTBC or tbd."),
         ("/pkg/source/quality-scanner-document", "source/chapter.rst", "TBC",
-         4, 22, "The value is TBD and TBC, but not TBDX, XTBC or tbd.", []),
+         4, 22, "The value is TBD and TBC, but not TBDX, XTBC or tbd."),
         ("/pkg/source/quality-scanner-document", "source/chapter.rst", "TBD",
-         5, 7, "It is TBD.", ["The line explains the words."]),
+         5, 7, "It is TBD."),
         ("/pkg/source/quality-scanner-document", "source/chapter.rst", "TBC",
          6, 1,
-         "TBC is here, but TBD_LIMIT and _TBD_ are no markers, unlike TBD",
-         []),
+         "TBC is here, but TBD_LIMIT and _TBD_ are no markers, unlike TBD"),
         ("/pkg/source/quality-scanner-document", "source/chapter.rst", "TBD",
          6, 61,
-         "TBC is here, but TBD_LIMIT and _TBD_ are no markers, unlike TBD",
-         []),
+         "TBC is here, but TBD_LIMIT and _TBD_ are no markers, unlike TBD"),
     ]
 
     # The scanner runs in each build, since no input tracks all items
     director.build_package()
     log = get_and_clear_log(caplog)
     assert "/pkg/deployment/quality-scanner: build is necessary" in log
-
-
-def _build_with_suppression(caplog, tmpdir, entry: dict) -> str:
-    package = create_package(caplog, Path(tmpdir), Path("spec-packagebuild"),
-                             ["quality-scanner"])
-    director = package.director
-    scanner = director.item_cache["/pkg/deployment/quality-scanner"]
-    scanner["suppressions"].append(entry)
-    with pytest.raises(ValueError) as error:
-        director.build_package()
-    return str(error.value)
-
-
-def test_qualityscanner_unused_suppression(caplog, tmpdir):
-    message = _build_with_suppression(
-        caplog, tmpdir, {
-            "attribute": None,
-            "justification": "The line moved.",
-            "line": 7,
-            "path": "source/chapter.rst",
-            "uid": "/pkg/source/quality-scanner-document"
-        })
-    assert message == (
-        "/pkg/deployment/quality-scanner: each of these suppressions matches "
-        "no TBD or TBC; update the line number or remove the entry in the "
-        "attribute 'suppressions' of this item or of its template:\n"
-        "- line 7 of the document file 'source/chapter.rst' of "
-        "'/pkg/source/quality-scanner-document'")
-
-
-def test_qualityscanner_duplicate_suppression(caplog, tmpdir):
-    message = _build_with_suppression(
-        caplog, tmpdir, {
-            "attribute": "/term",
-            "justification": "A second entry.",
-            "line": None,
-            "path": None,
-            "uid": "/glossary/tbd"
-        })
-    assert message == (
-        "/pkg/deployment/quality-scanner: more than one suppression for "
-        "attribute '/term' of the item '/glossary/tbd'; remove all but one of "
-        "these entries in the attribute 'suppressions' of this item or of its "
-        "template")

@@ -1,0 +1,9 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: quality-scanner
+links: []
+name: Dispositions of the TBD markers
+pkg-type: inspection-group
+text: The members inspect the TBD markers.
+type: pkg

@@ -1,0 +1,13 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+date: null
+enabled-by: quality-scanner
+links:
+- role: inspection-member
+  uid: ignored-group
+pkg-type: inspection
+rationale: null
+subject: The TBD marker of the glossary.
+type: pkg
+verdict: null
