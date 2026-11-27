@@ -81,6 +81,16 @@ links:
 - citation-group-key: the-doc-only
   role: citation-group-member
   uid: ../component
+- label: MethodInterview
+  name: Interview
+  path: /method.html
+  role: citation-group-member
+  uid: ../citation-group/interview
+- label: MethodReview
+  name: Review
+  path: /method.html
+  role: citation-group-member
+  uid: ../citation-group/review
 - citation-group-key: the-doc-extra
   label: LinkLabel
   name: LinkName

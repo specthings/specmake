@@ -16,8 +16,8 @@ links:
     hash: null
 - role: inspection-member
   uid: group-nopinion
-method: null
 pkg-type: inspection
 rationale: null
+subject: null
 type: pkg
 verdict: null

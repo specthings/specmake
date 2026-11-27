@@ -938,7 +938,7 @@ class SphinxBuilder(DirectoryState):
             check = self.input("inspection-check")
             assert isinstance(check, DirectoryState)
             render_group(content, self.mapper, self.item.cache[uid],
-                         check.json_load())
+                         check.json_load(), self.format_citation_group_member)
             return "\n".join(content)
 
     def _get_ref(self, ctx: ItemGetValueContext) -> str:

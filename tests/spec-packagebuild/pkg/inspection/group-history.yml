@@ -2,7 +2,9 @@ SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
 enabled-by: inspection
-links: []
+links:
+- role: inspection-method
+  uid: ../citation-group/review
 name: History
 pkg-type: inspection-group
 text: The group has a historical member.

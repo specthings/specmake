@@ -1,0 +1,24 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: inspection-method
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      It defines the inspection method role of links.  The link source shall
+      be an inspection or an inspection group.  The link target shall be a
+      citation group.  Its members define the method.
+    mandatory-attributes: all
+spec-name: Inspection Method Link Role
+spec-type: pkg-inspection-method-role
+type: spec

@@ -19,8 +19,8 @@ links:
   uid: group-nopinion
 - role: inspector
   uid: /person/p0001
-method: Inspection of the instruction sequence.
 pkg-type: inspection
 rationale: null
+subject: Inspection of the instruction sequence.
 type: pkg
 verdict: not-applicable

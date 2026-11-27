@@ -10,9 +10,9 @@ links:
   uid: /person/p0001
 - role: inspector
   uid: /person/p0002
-method: |
-  Review without scopes.
 pkg-type: inspection
 rationale: null
+subject: |
+  Review without scopes.
 type: pkg
 verdict: compliant

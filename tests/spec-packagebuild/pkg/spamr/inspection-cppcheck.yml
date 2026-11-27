@@ -20,8 +20,8 @@ links:
   uid: group-cppcheck
 - role: inspector
   uid: /person/p0001
-method: Inspection of the finding.
 pkg-type: inspection
 rationale: null
+subject: Inspection of the finding.
 type: pkg
 verdict: compliant

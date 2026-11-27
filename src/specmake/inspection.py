@@ -32,7 +32,8 @@ import logging
 import os
 from typing import Any, Callable, Iterable, Iterator
 
-from specitems import Item, Link, Person, TextContent, data_digest, hash_file
+from specitems import (Item, Link, Person, TextContent, data_digest,
+                       get_citation_group_members, hash_file, list_terms)
 
 from .directorystate import DirectoryState
 from .pkgitems import BuildItemMapper
@@ -330,11 +331,28 @@ def _get_inspectors(item: Item) -> list[str]:
     ]
 
 
+def get_methods(item: Item) -> list[Item]:
+    """
+    Get the citation groups of the methods which the inspection applies.
+
+    The inspection applies the methods of its groups, of the groups of these
+    groups, and its own.
+    """
+    methods: list[Item] = []
+    for group in item.parents("inspection-member"):
+        methods.extend(get_methods(group))
+    methods.extend(item.parents("inspection-method"))
+    return list(dict.fromkeys(methods))
+
+
 def _check_judgement(item: Item) -> Iterator[Result]:
-    missing = [
-        key for key in ("date", "inspectors", "method", "verdict")
-        if not (_get_inspectors(item) if key == "inspectors" else item[key])
-    ]
+    judgement = {
+        "date": item["date"],
+        "inspectors": _get_inspectors(item),
+        "method": get_methods(item),
+        "verdict": item["verdict"]
+    }
+    missing = [key for key, value in judgement.items() if not value]
     if missing:
         yield Result(item.uid, State.UNJUDGED, "judgement",
                      f"no {', '.join(missing)} is recorded")
@@ -554,9 +572,9 @@ def renew(data: dict, uid: str, report: dict) -> dict:
         "date": None,
         "enabled-by": data["enabled-by"],
         "links": links,
-        "method": None,
         "pkg-type": "inspection",
         "rationale": None,
+        "subject": data["subject"],
         "type": "pkg",
         "verdict": None,
     }
@@ -660,8 +678,16 @@ def _add_inspected_findings(content: TextContent, findings: list[str]) -> None:
                 findings, "This inspection relates to the following findings:")
 
 
+def _methods(item: Item, format_member: Callable[[Link], str]) -> str:
+    return list_terms([
+        format_member(member) for method in get_methods(item)
+        for member in get_citation_group_members(method)
+    ]) or "not recorded"
+
+
 def _add_inspection(content: TextContent, mapper: BuildItemMapper, item: Item,
-                    states: dict[tuple[str, str], dict]) -> None:
+                    states: dict[tuple[str, str], dict],
+                    format_member: Callable[[Link], str]) -> None:
     with content.section(f"Inspection {item.uid}",
                          label=inspection_label(item)):
         if (item.uid, "findings") in states:
@@ -674,7 +700,9 @@ def _add_inspection(content: TextContent, mapper: BuildItemMapper, item: Item,
         content.add_definition_item(
             "Verdict",
             _optional(item["verdict"]).replace("-", " "))
-        content.add_definition_item("Method", _optional(item["method"]))
+        content.add_definition_item("Method", _methods(item, format_member))
+        if item["subject"] is not None:
+            content.add_definition_item("Subject", item["subject"].strip())
         content.add_definition_item("Rationale", _optional(item["rationale"]))
         issues = [
             _issue(mapper, link) for link in item.links_to_parents("issue")
@@ -706,7 +734,7 @@ def _add_inspection(content: TextContent, mapper: BuildItemMapper, item: Item,
 
 
 def render_group(content: TextContent, mapper: BuildItemMapper, group: Item,
-                 report: dict) -> None:
+                 report: dict, format_member: Callable[[Link], str]) -> None:
     """
     Render the inspection group with the states of the check report.
 
@@ -719,6 +747,8 @@ def render_group(content: TextContent, mapper: BuildItemMapper, group: Item,
         mapper: The mapper of the document.
         group: The inspection group item.
         report: The report of the inspection check.
+        format_member: Formats a link to the section of a member of the
+            citation group of a method.
     """
     states = {
         (result["uid"], result["scope"]): result
@@ -742,4 +772,4 @@ def render_group(content: TextContent, mapper: BuildItemMapper, group: Item,
              if not is_superseded(link.item)),
             key=lambda item: item.uid)
         for member in members:
-            _add_inspection(content, mapper, member, states)
+            _add_inspection(content, mapper, member, states, format_member)
