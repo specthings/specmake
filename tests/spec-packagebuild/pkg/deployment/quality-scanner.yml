@@ -26,16 +26,9 @@ links:
   name: document
   role: input
   uid: ../source/quality-scanner-disabled
+- role: quality-scanner-ignore
+  uid: ../quality-scanner/ignored-group
+- role: quality-scanner-ignore
+  uid: ../quality-scanner/ignored-member
 pkg-type: directory-state
-suppressions:
-- attribute: null
-  justification: The line explains the words.
-  line: 5
-  path: source/chapter.rst
-  uid: /pkg/source/quality-scanner-document
-- attribute: /term
-  justification: The glossary defines the term.
-  line: null
-  path: null
-  uid: /glossary/tbd
 type: pkg

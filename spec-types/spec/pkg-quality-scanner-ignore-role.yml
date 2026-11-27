@@ -1,0 +1,26 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: quality-scanner-ignore
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      It defines the quality scanner ignore role of links.  The link source
+      shall be a quality scanner.  The scanner does not scan the link target.
+      If the link target is an inspection group, then the scanner does not
+      scan its members either.  An inspection of a marker names the marker in
+      its scopes.  The link keeps the scanner from finding it there again.
+    mandatory-attributes: all
+spec-name: Quality Scanner Ignore Link Role
+spec-type: pkg-quality-scanner-ignore-role
+type: spec

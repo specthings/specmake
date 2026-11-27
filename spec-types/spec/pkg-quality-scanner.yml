@@ -29,13 +29,10 @@ spec-description: |
 spec-example: null
 spec-info:
   dict:
-    attributes:
-      suppressions:
-        description: |
-          It shall be the list of suppressions for occurrences which are no open item.
-        spec-type: pkg-quality-scanner-suppression-list
+    attributes: {}
     description: |
-      This set of attributes specifies a quality scanner.
+      This set of attributes specifies a quality scanner.  The scanner does not
+      scan the items which it links with the quality scanner ignore role.
     mandatory-attributes: all
 spec-name: Quality Scanner Item Type
 spec-type: pkg-quality-scanner
