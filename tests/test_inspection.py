@@ -230,12 +230,13 @@ def test_inspection_finding_identity(caplog, tmpdir):
     check.build()
     assert _states(check.json_load())[("/pkg/spamr/inspection-nopinion",
                                        nopinion)] == "valid"
-    # A suppressed finding needs no inspection
+    # Each finding of a covered analysis needs an inspection
     scanner = sorted((scope for (uid, scope), state in states.items()
                       if uid == "/pkg/spamr/group-quality-scanner"),
                      key=lambda scope: scope.split(" ", 1)[1])
     assert scanner == [
         "QSC-52256U QualityScanner TBC /pkg/component /pkg/component:/name: TBC found",
+        "QSC-3B57TE QualityScanner TBC /pkg/source/doc-a: source/a.rst: TBC found",
         "QSC-O5IZWM QualityScanner TBD /pkg/source/doc-a: source/a.rst: TBD found",
         "QSC-N6LNMA QualityScanner TBD /rtems/req/action /rtems/req/action:/text: "
         "TBD found"

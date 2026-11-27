@@ -83,7 +83,7 @@ def test_spamrbuilder(caplog, tmpdir, monkeypatch):
     +-+-+-+-+
     | Requirement testability | 34.8 % (8 of 23 requirements) | 80 % | **NOK** |
     +-+-+-+-+
-    | Static analysis disposition | 18.8 % (3 of 16 findings) | 100 % | **NOK** |
+    | Static analysis disposition | 12.5 % (2 of 16 findings) | 100 % | **NOK** |
     +-+-+-+-+
     | SPR/NCR status | 3 open issues | n.a. | n.a. |
     +-+-+-+-+
@@ -311,8 +311,8 @@ Quality scanner
 
 The members inspect the open TBD and TBC markers.
 
-The covered analyses reported 4 findings. 1 finding has a disposition. Section
-:ref:`SpamrFindingsPkgSpamrGroupQualityScanner` lists each finding.
+The covered analyses reported 4 findings. 0 findings have a disposition.
+Section :ref:`SpamrFindingsPkgSpamrGroupQualityScanner` lists each finding.
 
 .. table::
     :class: longtable
@@ -321,7 +321,7 @@ The covered analyses reported 4 findings. 1 finding has a disposition. Section
     +-+-+-+
     | Rule | Findings | Open |
     +=+=+=+
-    | ``TBC`` | 2 | 1 |
+    | ``TBC`` | 2 | 2 |
     +-+-+-+
     | ``TBD`` | 2 | 2 |
     +-+-+-+
@@ -646,7 +646,7 @@ Reports
     1 report
 
 Disposition
-    suppressed: The glossary term \*TBC\* names the marker.
+    **open**
 
 .. _SpamrFindingQSCN6LNMA:
 
@@ -745,14 +745,14 @@ Disposition
     # Check that the file of a location links to the SDD
     finding = Finding("cppcheck", "variableScope",
                       Artifact("a.c", "a.c", None, None), None, "m",
-                      Position("a.c:3"), None)
+                      Position("a.c:3"))
     content = spamr_builder.mapper.create_content()
     location = spamr_builder._location(content, finding)
     assert location.replace(str(tmpdir), "") == \
         "`a.c </pkg/doc-ddf-sdd/html/a_8c.html>`__:3"
     finding = Finding("cppcheck", "variableScope",
                       Artifact("a.c", "a.c", None, None), None, "m",
-                      Position("a.c:3", 3), None)
+                      Position("a.c:3", 3))
     location = spamr_builder._location(content, finding)
     assert location.replace(str(tmpdir), "") == \
         "`a.c:3 </pkg/doc-ddf-sdd/html/a_8c_source.html#l00003>`__"
@@ -835,7 +835,7 @@ validation."""
         content = spamr_builder.mapper.create_content()
         assert isinstance(content, SphinxContent)
         finding = Finding("clang", "r", Artifact(path, path, None, None), None,
-                          "m", Position(path, line), None)
+                          "m", Position(path, line))
         spamr_builder._code_excerpt(content, finding)
         return "\n".join(content).replace("\u200b", "")
 
