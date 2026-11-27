@@ -19,15 +19,15 @@ spec-info:
           If the value is present, then it shall be the date of the inspection,
           otherwise the inspection is not judged.
         spec-type: pkg-inspection-date
-      method:
-        description: |
-          If the value is present, then it shall state what the inspectors did,
-          otherwise the inspection is not judged.
-        spec-type: optional-str
       rationale:
         description: |
           If the value is present, then it shall state why the inspectors
           reached the verdict.
+        spec-type: optional-str
+      subject:
+        description: |
+          If the value is present, then it shall state the inspected object,
+          the criteria and the sample of the inspection.
         spec-type: optional-str
       verdict:
         description: |
@@ -38,7 +38,8 @@ spec-info:
       This set of attributes specifies one inspection of one or more artefacts.
       An inspection item is one inspection round.  A repeated inspection is a
       new item which supersedes this one.  An inspection without inspector
-      links is not judged.
+      links is not judged.  The inspection applies the methods which it and
+      its groups link.  An inspection without a method is not judged.
     mandatory-attributes: all
 spec-name: Inspection Item Type
 spec-type: pkg-inspection

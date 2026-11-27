@@ -25,7 +25,8 @@ spec-info:
     description: |
       This set of attributes specifies a group of inspections.  A group may be
       a member of another group and may declare an analysis whose findings
-      shall all be inspected.
+      shall all be inspected.  The members of a group apply the methods which
+      the group links.
     mandatory-attributes: all
 spec-name: Inspection Group Item Type
 spec-type: pkg-inspection-group

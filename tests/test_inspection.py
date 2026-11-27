@@ -132,6 +132,17 @@ def test_inspection_check(caplog, tmpdir):
     assert states[(f"{pre}finding-other-analysis", "findings")] == "unrelated"
     assert states[(f"{pre}file-fixed", "findings")] == "unrelated"
     assert (f"{pre}finding-ok", "findings") not in states
+    # An inspection applies the methods which it and its groups link.  An
+    # inspection without a method is not judged.
+    details = {
+        (result["uid"], result["scope"]): result["detail"]
+        for result in report["results"]
+    }
+    assert details[(f"{pre}no-method", "judgement")] == \
+        "no method is recorded"
+    assert details[(f"{pre}unjudged", "judgement")] == \
+        "no date, inspectors, verdict is recorded"
+    assert (f"{pre}finding-ok", "judgement") not in states
     strict = sorted({
         result["state"]
         for result in report["results"] if result["fails-strict"]
@@ -263,6 +274,14 @@ Date
 
 Verdict
     not applicable
+
+Method
+    `The Title, Review <pkg/doc/method.html#methodreview>`__
+    :cite:`PkgDeploymentDoc` and `The Title, Interview
+    <pkg/doc/method.html#methodinterview>`__ :cite:`PkgDeploymentDoc`
+
+Subject
+    Inspection of the artefact.
 """ in text
     assert """Supersedes
     2026-11-24 (not-applicable)""" in text
@@ -305,7 +324,7 @@ Date
     # A round without scopes and without a judgement result has no table.
     text = doc.substitute(
         "${.:/inspection-group:1:/pkg/inspection/group-history}")
-    assert "Review without scopes." in text
+    assert "Subject\n    Review without scopes.\n" in text
     # The affiliation follows the date 2021-11-26 of the inspection.
     assert """Inspectors
     Erika Mustermann (Old Company), Reviewer A""" in text
@@ -458,7 +477,7 @@ def test_renew():
     new = renew(data, "/i", report)
     assert new["date"] is None
     assert new["verdict"] is None
-    assert new["method"] is None
+    assert new["subject"] == "Inspection of the artefact."
     assert new["rationale"] is None
     assert "inspectors" not in new
     assert new["pkg-type"] == "inspection"

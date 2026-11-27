@@ -16,8 +16,10 @@ links:
     hash: eilvq1Nks0zj4EdtVb8pG9QaoIXl7PKpaIPlk6oYNv7SL3JCr0jVSvGPVcjR3vE-yTFMkmZmoLpj92Y1AAkFZQ==
 - role: inspector
   uid: /person/p0001
-method: Inspection of the artefact.
+- role: inspection-method
+  uid: ../citation-group/review
 pkg-type: inspection
 rationale: null
+subject: Inspection of the artefact.
 type: pkg
 verdict: compliant

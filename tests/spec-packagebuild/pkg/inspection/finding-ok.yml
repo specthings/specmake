@@ -16,12 +16,16 @@ links:
     hash: null
 - role: inspection-member
   uid: group
+- role: inspection-method
+  uid: ../citation-group/review
+- role: inspection-method
+  uid: ../citation-group/interview
 - role: inspection-supersedes
   uid: finding-old
 - role: inspector
   uid: /person/p0001
-method: Inspection of the artefact.
 pkg-type: inspection
 rationale: null
+subject: Inspection of the artefact.
 type: pkg
 verdict: not-applicable

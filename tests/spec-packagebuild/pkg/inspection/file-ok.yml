@@ -24,8 +24,10 @@ links:
     hash: null
 - role: inspector
   uid: /person/p0001
-method: Inspection of the artefact.
+- role: inspection-method
+  uid: ../citation-group/review
 pkg-type: inspection
 rationale: null
+subject: Inspection of the artefact.
 type: pkg
 verdict: compliant

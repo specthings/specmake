@@ -19,8 +19,8 @@ links:
   uid: ../issue/issue
 - role: inspector
   uid: /person/p0001
-method: Inspection of the artefact.
 pkg-type: inspection
 rationale: The file has a defect.
+subject: Inspection of the artefact.
 type: pkg
 verdict: non-compliant
