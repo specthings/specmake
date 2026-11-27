@@ -517,9 +517,10 @@ def test_stdtailoring_trace_errors(caplog, tmpdir):
     check("a tailoring status of Ye needs a justification")
     soc.data["supplier-status"] = "Y"
 
-    # The text of a traced tailoring does not cite a group
-    statement.data["text"] = "${/pkg/component:/cite-group:doc-output}"
-    check("shall not use a citation group")
+    # The text of a traced tailoring may cite a group
+    statement.data["text"] = "See ${/pkg/component:/cite-group:doc-output}.\n"
+    cited = builder.substitute("${/pkg/component:/cite-group:doc-output}")
+    assert f"See {cited}." in builder.substitute("${.:/standard-tailoring}")
     statement.data["text"] = "Yes.\n"
 
     # A citation group item restricts the kinds of its members

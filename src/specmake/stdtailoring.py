@@ -136,9 +136,6 @@ def _check_statement(statement: Item, clause: Item, status: str,
     if by_kind["method"] and not any(by_kind[kind] for kind in _PLAN_KINDS):
         raise ValueError(f"{uid}: a method needs a process, an assurance, "
                          "or a control")
-    if "cite-group" in statement["text"]:
-        raise ValueError(f"{uid}: the text of a traced tailoring shall not "
-                         "use a citation group")
 
 
 def _add_trace(content: TextContent, builder: SphinxBuilder,
