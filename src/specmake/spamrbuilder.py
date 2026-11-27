@@ -29,10 +29,12 @@ import collections
 from dataclasses import dataclass
 import csv
 import functools
+import hashlib
 import os
 from typing import Callable, NamedTuple, Optional
 
-from specitems import Item, ItemGetValueContext, SphinxContent, TextContent
+from specitems import (Item, ItemGetValueContext, SphinxContent, TextContent,
+                       base64_to_hex_text, hash_file, list_terms)
 
 from .directorystate import DirectoryState
 from .docbuilder import DocumentBuilder
@@ -158,6 +160,12 @@ class _Disposed:
 
     finding: Finding
     inspection: Item | None
+    path: str
+
+
+def _sarif_label(path: str) -> str:
+    digest = hashlib.sha256(path.encode("utf-8")).hexdigest()[:16]
+    return f"SpamrSarif{digest}"
 
 
 @dataclass(frozen=True)
@@ -342,11 +350,13 @@ class SpamrBuilder(DocumentBuilder):
             analysis = link.item
             paths = _files(self.director[analysis.uid], ".sarif")
             all_paths.extend(paths)
-            for finding in load(paths, self._source_directories):
-                findings.append(
-                    _Disposed(
-                        finding,
-                        inspections.get((analysis.uid, finding.identifier))))
+            for path in paths:
+                for finding in load([path], self._source_directories):
+                    findings.append(
+                        _Disposed(
+                            finding,
+                            inspections.get(
+                                (analysis.uid, finding.identifier)), path))
         return _Group(group, findings, all_paths)
 
     @functools.cached_property
@@ -870,6 +880,7 @@ Section :ref:`{group.findings_label}` lists each finding.""")
                     if not group.findings:
                         content.add(
                             "The covered analyses reported no finding.")
+                    self._add_sarif_files(content, group)
                     reports: dict[str, list[_Disposed]] = {}
                     keys: dict[str, FindingKey] = {}
                     for disposed in group.findings:
@@ -880,6 +891,38 @@ Section :ref:`{group.findings_label}` lists each finding.""")
                             reports.items(), key=_finding_order):
                         self._add_finding(content, identifier, disposed_list)
             return "\n".join(content)
+
+    def _relative_path(self, path: str) -> str:
+        return os.path.relpath(
+            path,
+            self.mapper.substitute("${/pkg/component:/deployment-directory}"))
+
+    def _add_sarif_files(self, content: SphinxContent, group: _Group) -> None:
+        """
+        Add the SARIF files of the group which contain findings with their
+        digests, and the count of the other SARIF files.
+        """
+        used = {disposed.path for disposed in group.findings}
+        if used:
+            content.add(
+                "These SARIF files of the covered analyses contain the "
+                "findings:")
+            for path in sorted(used):
+                relative = self._relative_path(path)
+                digest = base64_to_hex_text(hash_file(path))
+                content.add(f"""- .. _{_sarif_label(relative)}:
+
+  {content.path(relative)} with an SHA512 digest of {digest}""")
+        others = [path for path in group.paths if path not in used]
+        if others:
+            directories = list_terms(
+                sorted({
+                    content.path(self._relative_path(os.path.dirname(path)))
+                    for path in others
+                }))
+            content.wrap(f"""The covered analyses produced
+{_count(len(others), "further SARIF file", "further SARIF files")} without a
+finding in {directories}.""")
 
     def _add_finding(self, content: SphinxContent, identifier: str,
                      disposed_list: list[_Disposed]) -> None:
@@ -898,5 +941,11 @@ Section :ref:`{group.findings_label}` lists each finding.""")
             self._code_excerpt(content, finding)
             content.add_definition_item(
                 "Reports", _count(len(disposed_list), "report", "reports"))
+            content.add_definition_item(
+                "SARIF files", ", ".join(
+                    content.reference(_sarif_label(self._relative_path(path)),
+                                      os.path.basename(path)) for path in
+                    sorted({disposed.path
+                            for disposed in disposed_list})))
             content.add_definition_item("Disposition",
                                         _disposition(content, disposed))
