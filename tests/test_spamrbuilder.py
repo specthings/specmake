@@ -331,6 +331,12 @@ Section :ref:`SpamrFindingsPkgSpamrGroupQualityScanner` lists each finding.
 Findings of Cppcheck
 --------------------
 
+These SARIF files of the covered analyses contain the findings:
+
+- .. _SpamrSarifd608daa58a2a88d9:
+
+  :file:`build/src/spamr/cppcheck/cppcheck.sarif` with an SHA512 digest of 5301b9bf50b585ca34636dab78a4301af0e6cb8c7168834a2ee5d4826b29f14d2e0c47b1d6cf83b438598dc1be1840951b045734c45a3634bd56b03e28112021
+
 .. _SpamrFindingCPCGQY46Q:
 
 CPC-GQY46Q: checkersReport
@@ -347,6 +353,9 @@ Message
 
 Reports
     1 report
+
+SARIF files
+    :ref:`cppcheck.sarif <SpamrSarifd608daa58a2a88d9>`
 
 Disposition
     **open**
@@ -368,6 +377,9 @@ Message
 Reports
     1 report
 
+SARIF files
+    :ref:`cppcheck.sarif <SpamrSarifd608daa58a2a88d9>`
+
 Disposition
     **open**
 
@@ -387,6 +399,9 @@ Message
 
 Reports
     1 report
+
+SARIF files
+    :ref:`cppcheck.sarif <SpamrSarifd608daa58a2a88d9>`
 
 Disposition
     compliant (:ref:`/pkg/spamr/inspection-cppcheck
@@ -409,6 +424,9 @@ Message
 Reports
     1 report
 
+SARIF files
+    :ref:`cppcheck.sarif <SpamrSarifd608daa58a2a88d9>`
+
 Disposition
     **open**
 
@@ -428,6 +446,9 @@ Message
 
 Reports
     1 report
+
+SARIF files
+    :ref:`cppcheck.sarif <SpamrSarifd608daa58a2a88d9>`
 
 Disposition
     **open**
@@ -449,6 +470,9 @@ Message
 Reports
     1 report
 
+SARIF files
+    :ref:`cppcheck.sarif <SpamrSarifd608daa58a2a88d9>`
+
 Disposition
     **open**
 
@@ -469,6 +493,9 @@ Message
 Reports
     1 report
 
+SARIF files
+    :ref:`cppcheck.sarif <SpamrSarifd608daa58a2a88d9>`
+
 Disposition
     **open**
 
@@ -476,6 +503,15 @@ Disposition
 
 Findings of the Clang Static Analyzer
 -------------------------------------
+
+These SARIF files of the covered analyses contain the findings:
+
+- .. _SpamrSarifd006670b3a7e0c23:
+
+  :file:`build/src/spamr/clang-analyzer/2026-10-13-100000-1-1/report-a.sarif` with an SHA512 digest of f7d3cbe5b6414a1a2e5e665e940ce223cf48dbb583afbe0340818a0832e3fb73d8526e5692a5231eaf55f2a2d80172477dd1b83bfcc3a4b26a4e857b2c2af0d7
+
+The covered analyses produced 1 further SARIF file without a finding in
+:file:`build/src/spamr/clang-analyzer/2026-10-13-100000-1-1`.
 
 .. _SpamrFindingCSAETJGPL:
 
@@ -493,6 +529,9 @@ Message
 
 Reports
     1 report
+
+SARIF files
+    :ref:`report-a.sarif <SpamrSarifd006670b3a7e0c23>`
 
 Disposition
     **open**
@@ -514,6 +553,9 @@ Message
 Reports
     1 report
 
+SARIF files
+    :ref:`report-a.sarif <SpamrSarifd006670b3a7e0c23>`
+
 Disposition
     **open**
 
@@ -521,6 +563,12 @@ Disposition
 
 Findings of the errata checker
 ------------------------------
+
+These SARIF files of the covered analyses contain the findings:
+
+- .. _SpamrSarif3fd0a09846236369:
+
+  :file:`build/src/spamr/nopinion/nopinion.sarif` with an SHA512 digest of a4f1fd9c764af9c3d407c2f972dbe69e32416e1d2e85bf2e07780bde49881d358678cd307157813509a95402fbfa8a3552fdb801a91be3aa355e781d95357649
 
 .. _SpamrFindingNOPJTB64K:
 
@@ -538,6 +586,9 @@ Message
 
 Reports
     1 report
+
+SARIF files
+    :ref:`nopinion.sarif <SpamrSarif3fd0a09846236369>`
 
 Disposition
     **open**
@@ -558,6 +609,9 @@ Message
 
 Reports
     1 report
+
+SARIF files
+    :ref:`nopinion.sarif <SpamrSarif3fd0a09846236369>`
 
 Disposition
     not applicable (:ref:`/pkg/spamr/inspection-nopinion
@@ -580,6 +634,9 @@ Message
 Reports
     1 report
 
+SARIF files
+    :ref:`nopinion.sarif <SpamrSarif3fd0a09846236369>`
+
 Disposition
     **open**
 
@@ -587,6 +644,12 @@ Disposition
 
 Findings of the quality scanner
 -------------------------------
+
+These SARIF files of the covered analyses contain the findings:
+
+- .. _SpamrSarif6dd20c2a6c490026:
+
+  :file:`build/src/spamr/quality-scanner/tbd-tbc-in-documentation-sources.sarif` with an SHA512 digest of f38617c7980fcff327b1453c8ee3187248b161be2fd5426c8e79af7e944130e8719d8483ca2269793c94efb29e19af93e556b99c7dd364f113436293f705ca94
 
 .. _SpamrFindingQSC52256U:
 
@@ -604,6 +667,9 @@ Message
 
 Reports
     1 report
+
+SARIF files
+    :ref:`tbd-tbc-in-documentation-sources.sarif <SpamrSarif6dd20c2a6c490026>`
 
 Disposition
     **open**
@@ -625,6 +691,9 @@ Message
 Reports
     1 report
 
+SARIF files
+    :ref:`tbd-tbc-in-documentation-sources.sarif <SpamrSarif6dd20c2a6c490026>`
+
 Disposition
     **open**
 
@@ -645,6 +714,9 @@ Message
 Reports
     1 report
 
+SARIF files
+    :ref:`tbd-tbc-in-documentation-sources.sarif <SpamrSarif6dd20c2a6c490026>`
+
 Disposition
     **open**
 
@@ -664,6 +736,9 @@ Message
 
 Reports
     1 report
+
+SARIF files
+    :ref:`tbd-tbc-in-documentation-sources.sarif <SpamrSarif6dd20c2a6c490026>`
 
 Disposition
     **open**
