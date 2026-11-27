@@ -262,8 +262,10 @@ Static analysis
 
     - :ref:`CPC-GQY46Q <SpamrFindingCPCGQY46Q>`
 """)
-    assert "SpamrFindingCPC7VCNIL>`\n\nThe members inspect the findings of " \
-        "the static analysis.\n" in text
+    # The group text, the subject and the rationale are substituted in the
+    # context of their item.
+    assert "SpamrFindingCPC7VCNIL>`\n\nThe members of Static analysis " \
+        "inspect the findings.\n" in text
     assert """Inspection /pkg/inspection/finding-ok
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -282,7 +284,10 @@ Method
     <pkg/doc/method.html#methodinterview>`__ :cite:`PkgDeploymentDoc`
 
 Subject
-    Inspection of the artefact.
+    Inspection of the artefact of 2026-11-24.
+
+Rationale
+    The artefact of 2026-11-24 needs no change.
 """ in text
     assert """Supersedes
     2026-11-24 (not-applicable)""" in text
