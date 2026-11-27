@@ -701,8 +701,10 @@ def _add_inspection(content: TextContent, mapper: BuildItemMapper, item: Item,
             _optional(item["verdict"]).replace("-", " "))
         content.add_definition_item("Method", _methods(item, format_member))
         if item["subject"] is not None:
-            content.add_definition_item("Subject", item["subject"].strip())
-        content.add_definition_item("Rationale", _optional(item["rationale"]))
+            content.add_definition_item(
+                "Subject", mapper.substitute(item["subject"].strip(), item))
+        content.add_definition_item(
+            "Rationale", mapper.substitute(_optional(item["rationale"]), item))
         issues = [
             _issue(mapper, link) for link in item.links_to_parents("issue")
         ]
@@ -765,7 +767,7 @@ def render_group(content: TextContent, mapper: BuildItemMapper, group: Item,
                     content.reference(finding_label(result["identifier"]),
                                       result["identifier"])
                     for result in undispositioned)
-        content.add(group["text"])
+        content.add(mapper.substitute(group["text"], group))
         members = sorted(
             (link.item for link in group.links_to_children("inspection-member")
              if not is_superseded(link.item)),

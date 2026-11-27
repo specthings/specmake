@@ -9,5 +9,5 @@ links:
   uid: ../spamr/cppcheck
 name: Static analysis
 pkg-type: inspection-group
-text: The members inspect the findings of the static analysis.
+text: The members of ${.:/name} inspect the findings.
 type: pkg

@@ -25,7 +25,7 @@ links:
 - role: inspector
   uid: /person/p0001
 pkg-type: inspection
-rationale: null
-subject: Inspection of the artefact.
+rationale: The artefact of ${.:/date} needs no change.
+subject: Inspection of the artefact of ${.:/date}.
 type: pkg
 verdict: not-applicable
