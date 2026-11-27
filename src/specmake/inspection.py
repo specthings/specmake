@@ -677,6 +677,20 @@ def _add_inspected_findings(content: TextContent, findings: list[str]) -> None:
                 findings, "This inspection relates to the following findings:")
 
 
+def _finding_term(content: TextContent, identifier: str, state: str) -> str:
+    """
+    Return the term of the inspected finding with its state unless it is
+    valid.  The SPAMR has a section only for a finding which an analysis
+    reports, so an absent or a lost finding gets no reference.
+    """
+    if state in (State.ABSENT.value, State.LOST.value):
+        return f"{content.escape(identifier)} ({state})"
+    reference = content.reference(finding_label(identifier), identifier)
+    if state == State.VALID.value:
+        return reference
+    return f"{reference} ({state})"
+
+
 def _methods(item: Item, format_member: Callable[[Link], str]) -> str:
     return list_terms([
         format_member(member) for method in get_methods(item)
@@ -722,11 +736,8 @@ def _add_inspection(content: TextContent, mapper: BuildItemMapper, item: Item,
                 name = _scope_name(scope)
                 state = states[(item.uid, name)]["state"]
                 if scope["scope"] == "finding":
-                    reference = content.reference(
-                        finding_label(scope["identifier"]),
-                        scope["identifier"])
-                    findings.append(reference if state ==
-                                    "valid" else f"{reference} ({state})")
+                    findings.append(
+                        _finding_term(content, scope["identifier"], state))
                 else:
                     content.add_definition_item(
                         content.escape(name),

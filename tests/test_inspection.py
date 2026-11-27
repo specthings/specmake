@@ -34,8 +34,8 @@ from specitems import (CommonMarkContent, SphinxContent, data_digest,
                        hash_file_lines, load_data)
 
 from specmake.cliupdateinspections import cliupdateinspections
-from specmake.inspection import (State, _add_inspected_findings, baseline,
-                                 item_digest, renew)
+from specmake.inspection import (State, _add_inspected_findings, _finding_term,
+                                 baseline, item_digest, renew)
 
 import specmake.inspection
 import specmake.packagemanual
@@ -322,6 +322,9 @@ Date
     assert "Inspected findings\n    This inspection relates to " \
         ":ref:`CPC-OVRINA <SpamrFindingCPCOVRINA>` (not\n    baselined).\n" \
         in text
+    # An absent finding has no section in the SPAMR, so the inspection names
+    # it by its identifier without a reference.
+    assert "This inspection relates to CPC-7VCNIL (absent).\n" in text
     # An error box lists the findings without an inspection by their
     # identifiers, each a reference to the section of the finding.
     assert "    - :ref:`CPC-GQY46Q <SpamrFindingCPCGQY46Q>`\n\n" \
@@ -576,3 +579,15 @@ def test_inspected_findings():
     - A
 
     - B"""
+
+
+def test_finding_term():
+    content = SphinxContent(context="CC-BY-SA-4.0")
+    # A reported finding references its section in the SPAMR.
+    assert _finding_term(content, "CPC-A", "valid") == \
+        ":ref:`CPC-A <SpamrFindingCPCA>`"
+    assert _finding_term(content, "CPC-A", "stale") == \
+        ":ref:`CPC-A <SpamrFindingCPCA>` (stale)"
+    # The SPAMR has no section of a finding which no analysis reports.
+    assert _finding_term(content, "CPC-A", "absent") == "CPC-A (absent)"
+    assert _finding_term(content, "CPC-A", "lost") == "CPC-A (lost)"
